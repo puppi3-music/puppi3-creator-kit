@@ -1,0 +1,14 @@
+# Temporal starts once its login on the cloud's Postgres works (the postgres-logins Job makes it)
+- op: add
+  path: /spec/template/spec/initContainers/-
+  value:
+    name: wait-for-login
+    image: postgres:17-alpine
+    command: [sh, -c, 'until psql -h postiz-temporal-postgres -U temporal -d postgres -qtAc "SELECT 1" >/dev/null 2>&1; do echo "waiting for the temporal login"; sleep 3; done']
+    env:
+      - name: PGPASSWORD
+        valueFrom:
+          secretKeyRef: {name: postiz, key: TEMPORAL_DB_PASSWORD}
+    resources:
+      requests: {cpu: 10m, memory: 16Mi}
+      limits: {memory: 64Mi}

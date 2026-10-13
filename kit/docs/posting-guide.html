@@ -1,0 +1,1083 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cellipse cx="32" cy="36" rx="18" ry="17" fill="%23E0EDF8" stroke="%231A6FB0" stroke-width="3"/%3E%3Cellipse cx="13" cy="33" rx="6.5" ry="13" transform="rotate%2822 13 33%29" fill="%231A6FB0"/%3E%3Cellipse cx="51" cy="33" rx="6.5" ry="13" transform="rotate%28-22 51 33%29" fill="%231A6FB0"/%3E%3Ccircle cx="25" cy="34" r="2.8" fill="%2314202B"/%3E%3Ccircle cx="39" cy="34" r="2.8" fill="%2314202B"/%3E%3Ccircle cx="26" cy="33" r="0.9" fill="%23fff"/%3E%3Ccircle cx="40" cy="33" r="0.9" fill="%23fff"/%3E%3Cellipse cx="32" cy="44" rx="8" ry="6" fill="%23fff"/%3E%3Cellipse cx="32" cy="41.2" rx="3.6" ry="2.6" fill="%2314202B"/%3E%3Cpath d="M30 47.5q2 5 4 0z" fill="%23F07C98"/%3E%3Cpath d="M32 43.6v2.6M27.6 46q4.4 2.8 4.4 0q0 2.8 4.4 0" fill="none" stroke="%2314202B" stroke-width="1.6" stroke-linecap="round"/%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Creator Kit Posting Guide</title>
+<meta name="description" content="How to publish a post on a Puppi3's Creator Kit site and get it onto Bluesky, Threads, Instagram and TikTok.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#F4F6F8; --surface:#FFFFFF; --sunken:#E9EDF1; --ink:#14202B; --muted:#52606E; --rule:#D5DDE5;
+  --accent:#1A6FB0; --accent-soft:#E0EDF8;
+  --auto:#0B7F80; --auto-soft:#DDF3F2;
+  --you:#9A5B00; --you-soft:#FBEFD9;
+  --skip:#66717D; --skip-soft:#EAEDF0;
+  --code-bg:#17212B; --code-ink:#E4EAF0;
+  --display:"Unbounded", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0E141A; --surface:#151E26; --sunken:#1C2731; --ink:#E3EAF0; --muted:#9EAEBC; --rule:#2A3845;
+    --accent:#5AB0F0; --accent-soft:#132A3D;
+    --auto:#3CC7C9; --auto-soft:#12302F;
+    --you:#F2B35A; --you-soft:#352812;
+    --skip:#9AA6B2; --skip-soft:#212B34;
+    --code-bg:#0A0F14; --code-ink:#E4EAF0;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E141A; --surface:#151E26; --sunken:#1C2731; --ink:#E3EAF0; --muted:#9EAEBC; --rule:#2A3845;
+  --accent:#5AB0F0; --accent-soft:#132A3D;
+  --auto:#3CC7C9; --auto-soft:#12302F;
+  --you:#F2B35A; --you-soft:#352812;
+  --skip:#9AA6B2; --skip-soft:#212B34;
+  --code-bg:#0A0F14; --code-ink:#E4EAF0;
+}
+header.top .mark{width:64px;height:64px}
+header.top .mark svg{display:block;width:100%;height:100%}
+.mark .a{fill:var(--accent)}.mark .face{fill:#E0EDF8;stroke:var(--accent);stroke-width:3}.mark .ink{fill:#14202B}.mark .shine{fill:#fff}.mark .tongue{fill:#F07C98}.mark .line{fill:none;stroke:#14202B;stroke-width:1.6;stroke-linecap:round}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;padding-inline:16px;padding-block:0 64px}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto}
+header.top{padding-block:40px 28px;border-bottom:1px solid var(--rule);display:grid;gap:14px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,5vw,44px);line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1 .dot{color:var(--accent)}
+.lede{font-size:19px;max-width:62ch;margin:0;color:var(--ink)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--muted)}
+.layout{display:grid;grid-template-columns:230px minmax(0,1fr);min-width:0;gap:48px;padding-top:32px}
+nav.toc{min-width:0;position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:14px}
+nav.toc p{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+nav.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:2px;counter-reset:toc}
+nav.toc a{display:block;padding:6px 10px;border-radius:6px;color:var(--ink);text-decoration:none}
+nav.toc a:hover{background:var(--sunken)}
+main{min-width:0;max-width:72ch}
+section{padding-block:8px 28px;border-bottom:1px solid var(--rule);margin-bottom:28px;scroll-margin-top:20px}
+section:last-of-type{border-bottom:0}
+h2{font-family:var(--display);font-weight:500;font-size:clamp(21px,3vw,26px);line-height:1.2;margin:8px 0 14px;text-wrap:balance}
+h3{font-size:18px;margin:26px 0 8px}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 16px;padding-left:22px}
+li{margin-bottom:6px}
+strong{font-weight:700}
+code,.tag{font-family:var(--mono);font-size:.86em}
+code{background:var(--sunken);padding:1px 6px;border-radius:5px;overflow-wrap:anywhere}
+.tag{display:inline-block;background:var(--accent-soft);color:var(--accent);padding:1px 8px;border-radius:999px;font-weight:600;white-space:nowrap}
+.note{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;margin:0 0 18px}
+.note.warn{border-color:var(--you);background:var(--you-soft)}
+.note b.label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.note.warn b.label{color:var(--you)}
+.note p:last-child,.note ul:last-child{margin-bottom:0}
+
+/* Flow diagram */
+.flow{display:grid;grid-template-columns:auto 28px auto 28px minmax(0,1fr);align-items:center;gap:0;margin:8px 0 22px;overflow-x:auto;padding-bottom:4px}
+.node{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:10px 14px;font-size:14px;line-height:1.35}
+.node b{display:block;font-size:15px}
+.node small{color:var(--muted)}
+.arrow{height:2px;background:var(--rule);position:relative}
+.arrow::after{content:"";position:absolute;right:-1px;top:-4px;border-left:7px solid var(--rule);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.outs{display:grid;gap:8px}
+.out{display:flex;align-items:center;gap:10px;border-radius:10px;padding:8px 12px;font-size:14px;border:1px solid transparent}
+.out.auto{background:var(--auto-soft);border-color:color-mix(in srgb,var(--auto) 35%,transparent)}
+.out.you{background:var(--you-soft);border-color:color-mix(in srgb,var(--you) 35%,transparent)}
+.pill{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.pill.auto{background:var(--auto);color:var(--bg)}
+.pill.you{background:var(--you);color:var(--bg)}
+.pill.skip{background:var(--skip);color:var(--bg)}
+@media (max-width:640px){
+  .flow{grid-template-columns:1fr;gap:6px}
+  .arrow{width:2px;height:18px;margin-left:24px}
+  .arrow::after{right:auto;left:-4px;top:auto;bottom:-1px;border-top:7px solid var(--rule);border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:0}
+}
+
+/* Steps */
+ol.steps{list-style:none;padding:0;counter-reset:s;display:grid;gap:10px}
+ol.steps>li{counter-increment:s;display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;margin:0}
+ol.steps>li::before{content:counter(s);font-family:var(--display);font-weight:700;font-size:15px;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;margin-top:1px}
+
+/* Tables */
+.tablewrap{overflow-x:auto;margin:0 0 18px;border:1px solid var(--rule);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--rule)}
+th{font-size:12px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--sunken);font-weight:600}
+tr:last-child td{border-bottom:0}
+td .pill{display:inline-block;margin-bottom:4px}
+
+/* Phone-notification mock */
+.phone{background:var(--surface);border:1px solid var(--rule);border-radius:16px;padding:14px 16px;margin:0 0 18px;max-width:460px;box-shadow:0 1px 0 var(--rule)}
+.phone .app{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.phone .t{font-weight:700;margin-bottom:6px}
+.phone pre{font-family:var(--body);white-space:pre-wrap;margin:0 0 10px;font-size:14px;line-height:1.5;color:var(--ink)}
+.phone .btns{display:flex;flex-wrap:wrap;gap:6px}
+.phone .btns span{font-size:13px;font-weight:700;border:1px solid var(--rule);border-radius:8px;padding:4px 10px;color:var(--accent)}
+.caption{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;font-size:14.5px;white-space:pre-wrap;margin:0 0 8px}
+.caption-label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+.faq dt{font-weight:700;margin-top:16px}
+.faq dd{margin:4px 0 0}
+dl.gloss{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:8px 18px}
+dl.gloss dt{font-weight:700}
+dl.gloss dd{margin:0;color:var(--ink)}
+footer{max-width:72ch;margin:24px 0 0 278px;font-size:14px;color:var(--muted)}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;gap:18px}
+  nav.toc{position:static}
+  nav.toc ol{display:flex;overflow-x:auto;gap:6px;padding-bottom:6px}
+  nav.toc a{white-space:nowrap;border:1px solid var(--rule);background:var(--surface)}
+  footer{margin-left:0}
+  dl.gloss{grid-template-columns:1fr;gap:2px}
+  dl.gloss dd{margin-bottom:10px}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+
+.sample{border-top:1px dashed var(--rule);padding-top:10px;margin-top:22px}
+.sample:first-of-type{border-top:0;margin-top:6px}
+.ghostbox{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;margin:0 0 12px}
+.gb-label{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.ghostbox dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 14px;margin:0;font-size:15px}
+.ghostbox dt{color:var(--muted)}
+.ghostbox dd{margin:0}
+.results{display:grid;gap:6px;margin:0 0 6px}
+.phones{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;align-items:start}
+.phones .phone{margin:0;max-width:none}
+.phone .attach{font-size:12px;color:var(--muted);margin-top:8px;font-family:var(--mono)}
+@media (max-width:520px){.ghostbox dl{grid-template-columns:1fr;gap:0}.ghostbox dd{margin-bottom:6px}}
+</style>
+
+<style>html{color-scheme:light}body{margin:0}img{max-width:100%}</style>
+<!-- shared styles: from docs/assets/docs.css, copied in by docs/build-docs.py -->
+<style>
+/* Shared by the docs pages, on top of each page's own styles, and copied into each page by
+   docs/build-docs.py (so every guide works as a single file): the top bar with search and theme
+   switch, the contents list that follows along, search highlights, back to top. Colours come from
+   each page's variables, so light and dark mode both work. Edit this file, not the copies. */
+
+:root{--bar-h:58px}
+
+/* Headings land below the sticky bar */
+section,h3{scroll-margin-top:calc(var(--bar-h) + 18px)}
+nav.toc{top:calc(env(safe-area-inset-top,0px) + var(--bar-h) + 18px);max-height:calc(100vh - var(--bar-h) - 36px);overflow-y:auto}
+
+/* ---------- top bar ---------- */
+.docbar{position:sticky;top:0;z-index:50;margin-inline:-16px;padding:0 16px;
+  background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);
+  border-bottom:1px solid var(--rule)}
+.docbar-in{max-width:1180px;margin:0 auto;min-height:var(--bar-h);display:flex;align-items:center;gap:14px}
+.docbar .brand{font-family:var(--display);font-weight:700;font-size:15px;color:var(--ink);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.docbar .brand span{color:var(--accent)}
+.docbar .home{display:inline-flex;align-items:center;gap:6px;flex:none;font-size:13px;color:var(--muted);text-decoration:none;
+  border:1px solid var(--rule);border-radius:8px;padding:6px 10px;white-space:nowrap}
+.docbar .home svg{width:14px;height:14px;fill:currentColor}
+.docbar .home:hover{color:var(--accent);border-color:var(--accent)}
+.docbar .grow{flex:1}
+.docbar .iconbtn{font:inherit;font-size:13px;background:var(--surface);color:var(--ink);border:1px solid var(--rule);border-radius:8px;padding:6px 10px;cursor:pointer;white-space:nowrap}
+.docbar .iconbtn:hover{border-color:var(--accent)}
+
+/* ---------- search ---------- */
+.search{position:relative;width:min(420px,100%)}
+.search input{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--surface);border:1px solid var(--rule);
+  border-radius:10px;padding:8px 44px 8px 36px;outline:none;-webkit-appearance:none;appearance:none}
+.search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.search input::placeholder{color:var(--muted)}
+.search .glass{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);pointer-events:none}
+.search kbd{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:11px;color:var(--muted);
+  border:1px solid var(--rule);border-bottom-width:2px;border-radius:5px;padding:0 6px;background:var(--sunken);pointer-events:none}
+.search input:focus + kbd,.search input:not(:placeholder-shown) + kbd{display:none}
+.results{position:absolute;top:calc(100% + 8px);right:0;width:min(640px,calc(100vw - 32px));max-height:min(70vh,560px);overflow-y:auto;
+  background:var(--surface);border:1px solid var(--rule);border-radius:12px;box-shadow:0 18px 50px rgba(10,12,30,.22);padding:6px;display:none;z-index:60}
+.results.open{display:block}
+.results .hint{padding:10px 12px;font-size:14px;color:var(--muted)}
+.results .hint b{color:var(--ink)}
+.result{display:block;padding:10px 12px;border-radius:8px;color:var(--ink);text-decoration:none;border:1px solid transparent}
+.result[aria-selected="true"],.result:hover{background:var(--sunken);border-color:var(--rule)}
+.result .where{display:block;margin-bottom:3px;font-size:14.5px;font-weight:700;line-height:1.35}
+.result .snip{font-size:13.5px;color:var(--muted);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.result mark,mark.hit{background:var(--you-soft);color:inherit;border-radius:3px;padding:0 1px;box-shadow:0 0 0 1px color-mix(in srgb,var(--you) 45%,transparent)}
+
+@media (max-width:820px){
+  /* phones: name and theme on one row, search across the full width below */
+  :root{--bar-h:106px}
+  .docbar-in{flex-wrap:wrap;gap:8px 10px;padding-block:8px}
+  .docbar .brand{flex:1}
+  .docbar .home{padding:7px 8px}
+  .docbar .home span{display:none}
+  .docbar .grow{display:none}
+  .search{order:3;flex:1 1 100%;width:100%}
+  .search kbd{display:none}
+  .results{position:fixed;left:16px;right:16px;top:calc(var(--bar-h) + 6px);width:auto}
+}
+
+/* ---------- contents list that follows along ---------- */
+nav.toc a[aria-current="true"]{background:var(--accent-soft);color:var(--accent);font-weight:700}
+nav.toc ul.sub{list-style:none;margin:2px 0 6px 10px;padding:0 0 0 8px;border-left:2px solid var(--rule);display:none}
+nav.toc li.open > ul.sub{display:block}
+nav.toc ul.sub a{padding:4px 8px;font-size:13px;color:var(--muted)}
+nav.toc ul.sub a:hover{color:var(--ink)}
+nav.toc ul.sub a[aria-current="true"]{background:none;color:var(--ink);font-weight:700}
+@media (max-width:900px){ nav.toc ul.sub{display:none !important} nav.toc{max-height:none} }
+
+/* where a search result or link lands */
+.flash{animation:flash 1.6s ease-out}
+@keyframes flash{0%{background:var(--you-soft);box-shadow:0 0 0 8px var(--you-soft)}100%{background:transparent;box-shadow:0 0 0 8px transparent}}
+
+/* ---------- tables ---------- */
+/* Names in the first column break only when they can't fit a whole line: the pages' code{overflow-wrap:anywhere}
+   lets a table squeeze its first column to a letter or two per line, and that column holds the names. */
+td:first-child code{overflow-wrap:break-word;word-break:normal}
+/* the first column (names) only as wide as its longest name, the rest goes to the text */
+td:first-child{font-weight:600;width:1%;min-width:13rem}
+td:first-child code,td:first-child em{font-weight:normal}
+td{line-height:1.55}
+tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--sunken) 35%,transparent)}
+/* Lines between columns; a cell shared by several columns (colspan) runs across them and starts
+   with a tag naming the columns it covers */
+:is(td,th)+:is(td,th){border-left:1px solid var(--rule)}
+td[colspan][data-label]::before{content:attr(data-label);display:inline-block;margin-right:8px;padding:0 7px;
+  border:1px solid var(--rule);border-radius:999px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--muted);vertical-align:1px;line-height:1.6}
+/* Phones: each row becomes a card, every cell under its column name (data-label, set by docs.js) */
+@media (max-width:640px){
+  .tablewrap table,.tablewrap tbody,.tablewrap tr,.tablewrap td{display:block;width:auto}
+  .tablewrap thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .tablewrap tr{border-bottom:1px solid var(--rule);padding:6px 0}
+  .tablewrap tr:last-child{border-bottom:0}
+  .tablewrap td{border:0;padding:4px 14px;min-width:0}
+  .tablewrap td[data-label]:not(:first-child)::before{content:attr(data-label);display:block;font-family:var(--mono);font-size:11px;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+  .tablewrap :is(td,th){border-left:0}
+  .tablewrap td[colspan][data-label]::before{border:0;border-radius:0;padding:0;margin-right:0;letter-spacing:.08em}
+  .tablewrap tbody tr:nth-child(even) td{background:none}
+  .tablewrap tbody tr:nth-child(even){background:color-mix(in srgb,var(--sunken) 35%,transparent)}
+}
+
+/* ---------- small reading aids ---------- */
+tbody tr:hover td{background:color-mix(in srgb,var(--sunken) 60%,transparent)}
+h2 .anchor,h3 .anchor{opacity:0;margin-left:8px;font-size:.8em;color:var(--muted);text-decoration:none}
+h2:hover .anchor,h3:hover .anchor,.anchor:focus{opacity:1}
+.totop{position:fixed;right:18px;bottom:18px;z-index:40;font:inherit;font-size:13px;font-weight:700;background:var(--ink);color:var(--bg);
+  border:0;border-radius:999px;padding:9px 14px;cursor:pointer;box-shadow:0 8px 24px rgba(10,12,30,.25);opacity:0;pointer-events:none;transition:opacity .2s}
+.totop.show{opacity:1;pointer-events:auto}
+
+@media (prefers-reduced-motion:reduce){.flash{animation:none}.totop{transition:none}}
+@media print{.docbar,.totop{display:none}nav.toc{position:static;max-height:none}}
+
+/* ---------- the guide's puppy (the site mascot, drawn inline in each page's header) ---------- */
+header.top .pup{width:150px}
+header.top .pup svg{display:block;width:100%;height:auto}
+.pup .bg,.pup .cut{fill:var(--accent-soft)}
+.pup .tail{transform-box:fill-box;transform-origin:0% 100%}
+.pup:hover .tail{animation:pup-wag .35s ease-in-out infinite alternate}
+.pup .float{animation:pup-float 3.2s ease-in infinite;opacity:0}
+.pup .float.d1{animation-delay:1.05s}.pup .float.d2{animation-delay:2.1s}
+.pup .spin{transform-box:fill-box;transform-origin:50% 50%;animation:pup-spin 9s linear infinite}
+@keyframes pup-wag{from{transform:rotate(-12deg)}to{transform:rotate(14deg)}}
+@keyframes pup-float{0%{transform:translateY(10px);opacity:0}20%{opacity:1}100%{transform:translateY(-34px);opacity:0}}
+@keyframes pup-spin{to{transform:rotate(360deg)}}
+@media (min-width:821px){
+  /* wide screens: puppy to the right of the title, intro and meta */
+  header.top:has(.pup){grid-template-columns:minmax(0,1fr) auto;column-gap:32px}
+  header.top > *{grid-column:1}
+  header.top .pup{grid-column:2;grid-row:1 / span 4;align-self:center;width:210px}
+}
+@media (prefers-reduced-motion:reduce){.pup:hover .tail,.pup .spin{animation:none}.pup .float{animation:none;opacity:1}}
+</style>
+<!-- /shared styles -->
+</head>
+<body>
+
+<div class="wrap">
+<header class="top">
+  <div class="mark"><svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+    <ellipse class="face" cx="32" cy="36" rx="18" ry="17"/>
+    <ellipse class="a" cx="13" cy="33" rx="6.5" ry="13" transform="rotate(22 13 33)"/><ellipse class="a" cx="51" cy="33" rx="6.5" ry="13" transform="rotate(-22 51 33)"/>
+    <circle class="ink" cx="25" cy="34" r="2.8"/><circle class="ink" cx="39" cy="34" r="2.8"/><circle class="shine" cx="26" cy="33" r=".9"/><circle class="shine" cx="40" cy="33" r=".9"/>
+    <ellipse class="shine" cx="32" cy="44" rx="8" ry="6"/><ellipse class="ink" cx="32" cy="41.2" rx="3.6" ry="2.6"/>
+    <path class="tongue" d="M30 47.5q2 5 4 0z"/><path class="line" d="M32 43.6v2.6M27.6 46q4.4 2.8 4.4 0q0 2.8 4.4 0"/>
+  </svg></div>
+  
+  <div class="eyebrow">Puppi3's Creator Kit · posting</div>
+  <h1>Posting Guide<span class="dot">.</span></h1>
+  <p class="lede">You write one post on your Ghost site. This guide shows how it reaches Bluesky, Threads, Instagram and TikTok, and what you need to do for each.</p>
+  <div class="meta"><span>For: anyone who publishes on the site</span><span>No technical knowledge needed</span><span>Setting it up: the <a href="setup-guide.html#finish-social">Setup guide</a></span></div>
+</header>
+
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <p>On this page</p>
+  <ol>
+    <li><a href="#overview">How it works</a></li>
+    <li><a href="#quickstart">Quick start</a></li>
+    <li><a href="#writing">Writing a post</a></li>
+    <li><a href="#tags">Tags</a></li>
+    <li><a href="#where">What goes where</a></li>
+    <li><a href="#samples">Samples</a></li>
+    <li><a href="#notifications">Your notifications</a></li>
+    <li><a href="#finishing">Finishing IG &amp; TikTok</a></li>
+    <li><a href="#postiz">Using Postiz</a></li>
+    <li><a href="#habits">Good habits</a></li>
+    <li><a href="#faq">Something went wrong?</a></li>
+    <li><a href="#glossary">Glossary</a></li>
+  </ol>
+</nav>
+
+<main>
+<section id="overview">
+  <h2>How it works</h2>
+  <p>When you publish a post on example.com, it's shared out automatically. Bluesky and Threads get posted for you. Instagram and TikTok are left for you to finish, because those are the apps where you add music and tag the artists.</p>
+  <div class="note"><b class="label">About this guide</b><p>It describes the kit's settings as they come. Whoever runs the site can change which networks get posts, what posts by itself and the tags' names (in <code>site.env</code>), so ask them if something here doesn't match. <code>example.com</code> stands for your site's address.</p></div>
+  <div class="flow" role="img" aria-label="Ghost post goes to the bridge, which posts to Bluesky and Threads automatically and prepares drafts plus a phone notification for Instagram and TikTok.">
+    <div class="node"><b>Ghost</b><small>you publish a post</small></div>
+    <div class="arrow" aria-hidden="true"></div>
+    <div class="node"><b>Postiz + bridge</b><small>prepares each platform</small></div>
+    <div class="arrow" aria-hidden="true"></div>
+    <div class="outs">
+      <div class="out auto"><span class="pill auto">Auto</span><span><b>Bluesky, Threads</b>: usually posted within a minute</span></div>
+      <div class="out you"><span class="pill you">You finish</span><span><b>Instagram, TikTok</b>: a draft plus a phone notification with everything ready</span></div>
+    </div>
+  </div>
+  <p>There are three tools involved. You only ever need to open the first one to start a post:</p>
+  <ul>
+    <li><strong>Ghost</strong> (<code>example.com/ghost</code>): where you write posts.</li>
+    <li><strong>Postiz</strong> (<code>postiz.example.com</code>): the social media calendar. It holds the drafts and the posts that went out.</li>
+    
+    <li><strong>ntfy</strong>: the phone app that sends you the "finish this post" notifications. Subscribe to the site's topic on its ntfy server: whoever set up the site has both (a long random topic, so nobody else can read it).</li>
+  </ul>
+</section>
+
+<section id="quickstart">
+  <h2>Quick start</h2>
+  <ol class="steps">
+    <li><div><strong>Write the post in Ghost.</strong> Write it the way you want it to appear on social, hashtags at the end. Add a feature image, and an audio or video card if you want sound.</div></li>
+    <li><div><strong>Add tags if you need them.</strong> For example <span class="tag">#bigdrop</span> for a major release, or <span class="tag">#nosocial</span> to keep a post off social media. See <a href="#tags">Tags</a>.</div></li>
+    <li><div><strong>Publish.</strong> Set Post access to <em>Public</em>, then publish. Bluesky and Threads are posted automatically.</div></li>
+    <li><div><strong>Finish Instagram and TikTok from your phone.</strong> You'll get one notification for each. Save the attached image or video, tap <em>Copy caption</em>, and post it in the app with your music and @tags.</div></li>
+  </ol>
+</section>
+
+<section id="writing">
+  <h2>Writing a post in Ghost</h2>
+  <h3 id="writing-your-post-text">Your post text</h3>
+  <p>The social posts use <strong>the text you write in the post</strong>, as you wrote it: paragraphs, line breaks, emojis and hashtags. A few things to know:</p>
+  <ul>
+    <li><strong>No titles.</strong> None of these platforms show titles, so the post title isn't included.</li>
+    <li><strong>Formatting:</strong> bulleted lists keep their • bullets, numbered lists keep their numbers, and quotes get “quotation marks”. Bold, italics and headings come out as plain text: none of these platforms has text styling.</li>
+    <li><strong>Links in your text:</strong> on Bluesky and Threads, where links can be tapped, the address goes after the link text, e.g. "Out now on SoundCloud (https://soundcloud.com/…)". Links to example.com get tagged like the post link. On Instagram and TikTok only the link text shows. The link that becomes the 🎧 Listen line isn't repeated in your text. If adding the addresses would push the post over Bluesky's or Threads' limit (dropping hashtags or shortening your text), they're left out and only the link text shows. The Social preview shows which way each post went.</li>
+    <li><strong>Hashtags go last.</strong> Put them in their own paragraph at the end of the post, and they stay at the end of the social posts too, after the links.</li>
+    <li><strong>Cards are left out:</strong> images, video, audio, the SoundCloud player and its caption, and bookmark cards. Their links still count (see below).</li>
+    <li><strong>Long posts get fitted.</strong> Bluesky allows about 300 characters and Threads 500. If a post is too long, hashtags are dropped first, then your text is shortened with "…". Instagram and TikTok have plenty of room.</li>
+    <li><strong>Want a shorter social text?</strong> Write it in the post's <strong>Excerpt</strong> field (post settings) and add the <span class="tag">#useexcerpt</span> tag. The social posts then use the Excerpt instead of your post text. The hashtags from the end of your post are still added. Without the tag, the Excerpt is only used when the post has no text of its own, for example a post that's just a video.</li>
+  </ul>
+
+  <h3 id="writing-feature-image">Feature image</h3>
+  <p>The feature image goes out with the post on every platform. JPG, PNG, WebP and GIF all work: the bridge turns them into whatever each app accepts, and scales big photos down. Photos Postiz can't take as they are (AVIF, BMP, TIFF, iPhone HEIC) are turned into JPEGs first. Square or 4:5 portrait images work best on Instagram. When you post it yourself, the app lets you crop. With <span class="tag">#autopost</span>, very wide banners get rejected by Instagram.</p>
+
+  <h3 id="writing-several-photos-a-gallery">Several photos: a gallery</h3>
+  <p>Add a <strong>gallery card</strong> to share several photos. They go out after the feature image, in the gallery's order, up to 10 photos in all (a photo that's both the feature image and in the gallery counts once):</p>
+  <ul>
+    <li><strong>Bluesky:</strong> the first 4, as a grid (Bluesky's limit).</li>
+    <li><strong>Threads, Instagram:</strong> a carousel you swipe through.</li>
+    <li><strong>TikTok:</strong> a photo post.</li>
+  </ul>
+  <p>Only gallery cards count: single image cards in the text stay on the website. A post with a video or audio card shares that instead of the photos. For Instagram and TikTok, the notification has the first photo attached and an <strong>All N photos</strong> button: it opens a page with every photo in order, already cropped the way the app needs it, and <strong>Share all</strong> hands them all to the app in one go (see <a href="#finishing">Finishing Instagram and TikTok posts</a>). Use <a href="#writing-checking-the-social-posts-before-you-publish">Social preview</a> to check what each channel gets.</p>
+
+  <h3 id="writing-adding-sound-audio-or-video">Adding sound: audio or video</h3>
+  <p>If you want the post to have sound, add one of these to the post body. The post then goes out as a video instead of an image.</p>
+  <ul>
+    <li><strong>Audio card</strong> (type <code>/audio</code>): upload an MP3, M4A or WAV. Instagram and TikTok can't post an audio file on its own, so the system makes a short vertical <strong>video</strong> from it: your feature image with a moving waveform, playing your audio. That video is what gets posted, and it's what's attached to your notifications.
+      <ul>
+        <li>Audio of <strong>90 seconds or less</strong> is used in full, so uploading a short clip is the easiest way.</li>
+        <li>For longer audio, a 30-second clip is used, starting 1 minute in. Use the <span class="tag">#clip 12:30</span> tag to choose a different part.</li>
+      </ul>
+    </li>
+    <li><strong>Video card</strong> (type <code>/video</code>): upload an <strong>MP4</strong>. It's shared with its own sound. Ghost refuses MKV (common for OBS recordings) and MOV (iPhone). It does accept WebM, but only MP4s get shared. So convert anything that isn't MP4 first. See below.</li>
+  </ul>
+
+  <h3 id="writing-converting-a-video-to-mp4">Converting a video to MP4</h3>
+  <p>Use whichever of these is easiest:</p>
+  <ul>
+    <li><strong>HandBrake</strong> (free, for Mac and Windows, at handbrake.fr):
+      <ol>
+        <li>Open HandBrake and drag your video in.</li>
+        <li>Under <em>Preset</em>, pick <strong>General → Fast 1080p30</strong>.</li>
+        <li>Check that <em>Format</em> says <strong>MP4</strong>, then click <strong>Start</strong>.</li>
+      </ol>
+    </li>
+    <li><strong>On your phone:</strong> open the video in CapCut or InShot and export it. They save as MP4. This is also the easiest way to trim a long recording into a short clip.</li>
+    <li><strong>OBS recordings:</strong> in OBS, choose <em>File → Remux Recordings</em>, pick the MKV and click <em>Remux</em>. You get an MP4 in seconds, with no quality loss.</li>
+  </ul>
+  <div class="note warn"><b class="label">Keep uploads small</b><p>Uploads to Ghost over <strong>100 MB fail</strong>. Don't upload a whole 2-hour set; upload a short clip and link the full set on SoundCloud.</p></div>
+
+  <h3 id="writing-linking-your-set">Linking your set: YouTube, SoundCloud or Mixcloud</h3>
+  <p>If the post contains a link to YouTube, SoundCloud or Mixcloud, the social posts mention it. On Bluesky and Threads you get a <strong>🎧 Listen:</strong> line with the tappable link. On Instagram and TikTok, where links can't be tapped, you get "🎧 Full set on YouTube + the full post: link in bio". The link can be anywhere in the post: a YouTube video embedded in the post, a caption under the SoundCloud player, a bookmark card, or normal text. YouTube comes first: if the post links to YouTube and SoundCloud, the YouTube link is used, then SoundCloud, then Mixcloud. With several links to the same site, the first is used. To use a different link (Bandcamp, a second YouTube video, anything) or none at all, pick it on the <a href="#writing-checking-the-social-posts-before-you-publish">Social preview</a>.</p>
+  <p><strong>Links carry a tag.</strong> The link to your post is a short link with a letter for the network: <code>example.com/b/&lt;the post's slug&gt;</code> on Bluesky, <code>/t/</code> on Threads, <code>/i/</code> for the Instagram link sticker, <code>/k/</code> on TikTok. It takes people straight to the post and tells the site's stats which network each visitor and new member came from (apps often hide it). Leave it on when you edit a caption. For the same reason, use the short links in your bios: <code>example.com/ig</code>, <code>/bsky</code>, <code>/th</code>, <code>/tk</code>, <code>/dis</code> for Discord and <code>/yt</code> for YouTube (they're tagged as bio links). The bridge doesn't post to Discord or YouTube, so when you share a post there yourself, use <code>example.com/d/&lt;the post's slug&gt;</code> on Discord or <code>example.com/y/&lt;the post's slug&gt;</code> on YouTube (in a video's description, a pinned comment or a community post; or <code>/d</code>, <code>/y</code> alone for the home page) and it's counted as a Discord or YouTube post. To group posts into a campaign, add an internal tag like <span class="tag">#campaign-summer-launch</span> (see below); its links are then longer.</p>
+  <p>A caption under the SoundCloud player works well. The link can be the URL itself, or words you've linked:</p>
+  <ul>
+    <li><strong>Pasting the URL:</strong> Ghost normally turns a pasted SoundCloud URL into a link automatically. You'll see it change colour or get underlined.</li>
+    <li><strong>Linking your own words:</strong> for example "grab the full set on SoundCloud". Select the words, press <strong>Cmd/Ctrl + K</strong> and paste the URL.</li>
+  </ul>
+  <p>The only thing that doesn't work is a URL that stays as <em>plain text</em>, with no link colour. If that happens, select it and press <strong>Cmd/Ctrl + K</strong> to make it a link.</p>
+  <div class="note"><b class="label">Tip: newsletters</b><p>The SoundCloud player doesn't show up in the email newsletter. Add a linked caption under it, like "Recorded live at the Cochrane session: grab the full set on SoundCloud". That makes the set reachable from the newsletter too, and the social posts pick up the same link.</p></div>
+
+  <h3 id="writing-who-can-see-the-post">Who can see the post</h3>
+  <p>Only posts with <strong>Post access: Public</strong> are shared. Members-only and paid posts are skipped, so paywalled content isn't advertised.</p>
+  <h3 id="writing-checking-the-social-posts-before-you-publish">Checking the social posts before you publish</h3>
+  <p>In the editor, click <strong>Preview</strong>, then the <strong>Social preview</strong> button in the bottom corner of the page. (If nothing opens, open the preview in its own tab first, then click the button.) It only works in a browser where you're signed in to Ghost Admin; anyone else you send the preview link to sees the draft but not its social preview, and can't change it. A new tab shows each channel's post as it would go out if you published now:</p>
+  <ul>
+    <li>the caption on Bluesky, Threads, Instagram and TikTok, with the image, video or audio clip it would use;</li>
+    <li>the Instagram Story too, for posts tagged <span class="tag">#story</span>, or <span class="tag">#bigdrop</span> (the link-sticker Story you add by hand, with the sticker drawn where it goes);</li>
+    <li>which posts go out by themselves, and which come to you to finish in the app;</li>
+    <li>the character count, and anything that stops a channel (for example "Instagram needs a video or image");</li>
+    <li>the notifications you'd get on your phone.</li>
+  </ul>
+  <p>Each mock-up is laid out like the app (icons included, though they're only pictures), so you can see how the text, links, hashtags and media will sit. Play any video, step through a carousel with the ‹ › arrows (or swipe or scroll), and click a photo to open it full size.</p>
+  <p><strong>Lining up photos for Instagram:</strong> Instagram shows every photo of a post in the first photo's shape (between square-ish 4:5 and wide 1.91:1), so the others get cropped. On the Instagram card, drag a photo to choose which part shows; double-click puts it back in the middle. It's saved straight away, and when you publish, the photos are cropped exactly like that for Instagram (the Postiz draft and the photo in your notification too). The other platforms get the whole photos.</p>
+  <p><strong>Choosing the Listen link:</strong> the <strong>🎧 Listen link</strong> menu above the cards shows which link the posts will use. <em>Automatic</em> is the one found in the post (YouTube first, see <a href="#writing-linking-your-set">Linking your set</a>). You can pick any other link in the post, <em>None</em> for no Listen line, or <em>Another address…</em> and type any web address (press Enter or click away to save). The page reloads with every card, and the #bigdrop link sticker, using it. Pick <em>Automatic</em> to go back.</p>
+  <p><strong>Different text for one channel:</strong> tick <strong>Modify text for Bluesky</strong> (or Threads, Instagram, TikTok) on that channel's card. A box opens with your post text; change it there. It saves as you type and the mock-up updates. When you publish, that channel gets your own text instead of the post text. The post link (or on Instagram and TikTok, the "link in bio" line) is still added after it, unless your text already has it. Untick it to go back to the post text. Until you actually change the text, nothing is saved, so that channel keeps following the post: later edits in Ghost still reach it. It's handy for Bluesky's 300 characters.</p>
+  <p>Nothing is posted. It shows the post as last saved, so after changing something, wait for Ghost to say <em>Saved</em> and refresh the tab. A post with an audio card takes a few seconds, while the clip is made.</p>
+</section>
+
+<section id="tags">
+  <h2>Tags</h2>
+  <p>These are <strong>internal tags</strong>: they start with <code>#</code>, and readers never see them. Add them in the post settings under <em>Tags</em>. Type the tag and press Enter. Capital letters don't matter.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Tag</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag">#nosocial</span></td><td>Keeps the post off social media completely.</td></tr>
+      <tr><td><span class="tag">#bigdrop</span></td><td>For major releases. A notification of its own reminds you to post an Instagram Story with a <strong>link sticker</strong>, with the photo or video for it and the link to use.</td></tr>
+      <tr><td><span class="tag">#story</span></td><td>Makes the Instagram version a <strong>Story</strong> instead of a feed post.</td></tr>
+      <tr><td><span class="tag">#autopost</span></td><td>Posts to Instagram and TikTok automatically too, with no drafts or notifications. Use it when you don't need to add music or tags. TikTok needs a video or audio card for this; an image-only TikTok post needs extra setup and will otherwise fail.</td></tr>
+      <tr><td><span class="tag">#useexcerpt</span></td><td>Uses the post's <strong>Excerpt</strong> as the social text instead of your post text, for a short hook while the full write-up stays on the site. Hashtags from the end of your post are still added.</td></tr>
+      <tr><td><span class="tag">#campaign-summer-launch</span></td><td>Groups the post under a <strong>campaign</strong> (here "summer-launch") in the Growth dashboard's Campaigns table. Its links on Bluesky, Threads and the Instagram link sticker become the longer form ending in <code>&amp;utm_campaign=summer-launch</code>. Use the same name on every post of a campaign (letters, digits and dashes). Bio links are not affected.</td></tr>
+      <tr><td><span class="tag">#manualpost</span></td><td>The opposite of #autopost. You only need it if the default has been changed to automatic.</td></tr>
+      <tr><td><span class="tag">#clip 12:30</span><br><span class="tag">#clip 12:30-13:15</span></td><td>Chooses the part of a long audio card to use: a start time (30 seconds from there), or an exact range of up to 90 seconds.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="where">
+  <h2>What goes where</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>The post has…</th><th>Bluesky &amp; Threads</th><th>Instagram &amp; TikTok</th></tr></thead>
+    <tbody>
+      <tr><td>A feature image only</td><td><span class="pill auto">Auto</span><br>Image post</td><td><span class="pill you">You finish</span><br>Draft + notification (you add music)</td></tr>
+      <tr><td>A gallery card (with or without a feature image)</td><td><span class="pill auto">Auto</span><br>Several photos: a grid of up to 4 on Bluesky, a carousel on Threads</td><td><span class="pill you">You finish</span><br>Draft + notification for a carousel (Instagram) or photo post (TikTok), with the first photo attached</td></tr>
+      <tr><td>An audio card</td><td><span class="pill auto">Auto</span><br>A short video the system makes: your feature image with your audio playing</td><td><span class="pill you">You finish</span><br>Draft + notification, with that same video attached. It already has your audio, so you don't need to add music.</td></tr>
+      <tr><td>A video card (MP4)</td><td><span class="pill auto">Auto</span><br>Your video, with its own sound</td><td><span class="pill you">You finish</span><br>Draft + notification, with your video attached. It has its own sound, so music is optional.</td></tr>
+      <tr><td>Tag <span class="tag">#autopost</span></td><td><span class="pill auto">Auto</span></td><td><span class="pill auto">Auto</span><br>Instagram posts right away. TikTok videos land in your TikTok inbox for you to publish; image-only TikTok posts need extra setup.</td></tr>
+      <tr><td>Tag <span class="tag">#nosocial</span>, or not Public</td><td><span class="pill skip">Skipped</span></td><td><span class="pill skip">Skipped</span></td></tr>
+    </tbody>
+  </table></div>
+  <p>Each post is shared <strong>once</strong>. If you update, unpublish or republish a post in Ghost later, it won't be posted again.</p>
+</section>
+
+<section id="samples">
+  <h2>Samples</h2>
+  <p>Four typical posts, and exactly what each one produces. The captions and notifications below come from running these posts through the real system. <span>All four are made-up examples.</span> "/" in the post text marks a new paragraph.</p>
+<article class="sample" id="sample-everyday"><h3 id="samples-an-everyday-post-image-only">An everyday post: image only</h3><p>A quick gig thank-you with a photo. No sound and no special tags, so Instagram and TikTok come to you to finish, where you add music and tag people.</p>
+<div class="ghostbox"><div class="gb-label">In Ghost</div><dl><dt>Title</dt><dd>Thank you, Cochrane!</dd><dt>Post text</dt><dd>What a night. Packed floor, a sweaty booth and a crowd that went off for every drop. Thank you, Cochrane 🙏  /  #DJ #DJLife #Cochrane</dd><dt>Feature image</dt><dd>crowd.jpg</dd><dt>Cards</dt><dd>none</dd><dt>Tags</dt><dd>none</dd></dl></div>
+<div class="results"><div class="out auto"><span class="pill auto">Auto</span><span>Bluesky, Threads: image post</span></div><div class="out you"><span class="pill you">You finish</span><span>Instagram, TikTok: draft + notification</span></div></div>
+<p class="caption-label">Bluesky and Threads get (Bluesky's shown: on Threads the link starts <code>example.com/t/</code>)</p><div class="caption">What a night. Packed floor, a sweaty booth and a crowd that went off for every drop. Thank you, Cochrane 🙏
+
+https://example.com/b/thank-you-cochrane
+
+#DJ #DJLife #Cochrane</div>
+<p class="caption-label">Your notifications</p><div class="phones"><div class="phone"><div class="app">ntfy · postiz</div><div class="t">📸 Instagram: post &quot;Thank you, Cochrane!&quot;</div><pre>Post it as a feed post in the Instagram app:
+1. Save the attached image: tap ⋯ → Save file and it lands in your Download album.
+2. Add your @tags and music.
+3. Paste the caption (tap &quot;Copy caption&quot;) and post.
+
+An Instagram draft is in Postiz too (tagged &quot;Post in app&quot;) - keep it as your record, or post it from Postiz if it needs nothing.
+
+Caption:
+What a night. Packed floor, a sweaty booth and a crowd that went off for every drop. Thank you, Cochrane 🙏
+
+Full post: link in bio 🔗
+
+#DJ #DJLife #Cochrane</pre><div class="btns"><span>Copy caption</span><span>Open Instagram</span><span>Open Postiz</span></div><div class="attach">Attached: crowd.jpg</div></div><div class="phone"><div class="app">ntfy · postiz</div><div class="t">🎵 TikTok: post &quot;Thank you, Cochrane!&quot;</div><pre>Post it as a photo post in the TikTok app:
+1. Save the attached image: tap ⋯ → Save file and it lands in your Download album.
+2. Add your @tags and music.
+3. Paste the caption (tap &quot;Copy caption&quot;) and post.
+
+A TikTok draft is in Postiz too (tagged &quot;Post in app&quot;) - keep it as your record, or post it from Postiz if it needs nothing.
+
+Caption:
+What a night. Packed floor, a sweaty booth and a crowd that went off for every drop. Thank you, Cochrane 🙏
+
+Full post: link in bio 🔗
+
+#DJ #DJLife #Cochrane</pre><div class="btns"><span>Copy caption</span><span>Open TikTok</span><span>Open Postiz</span></div><div class="attach">Attached: crowd.jpg</div></div></div></article>
+<article class="sample" id="sample-bigdrop"><h3 id="samples-a-big-drop-new-set-with-a-soundcloud-link">A big drop: new set with a SoundCloud link</h3><p>The SoundCloud link sits in a caption under the player, so it becomes the Listen line (the caption text itself stays out of the social posts). #bigdrop adds a third notification: the link-Story reminder.</p>
+<div class="ghostbox"><div class="gb-label">In Ghost</div><dl><dt>Title</dt><dd>Hardcore Trance - A Journey</dd><dt>Post text</dt><dd>In this set, I discover something new. Something I find myself really connecting to. I present Hardcore Trance.</dd><dt>Feature image</dt><dd>your artwork (PNG)</dd><dt>Cards</dt><dd>SoundCloud player, with the caption &quot;Recorded live - grab the full set on SoundCloud&quot; linked to the set</dd><dt>Tags</dt><dd><span class="tag">#bigdrop</span> </dd></dl></div>
+<div class="results"><div class="out auto"><span class="pill auto">Auto</span><span>Bluesky, Threads: image + Listen link</span></div><div class="out you"><span class="pill you">You finish</span><span>Instagram, TikTok: draft + notification each, plus a link-Story notification</span></div></div>
+<p class="caption-label">Bluesky and Threads get (Bluesky's shown: on Threads the link starts <code>example.com/t/</code>)</p><div class="caption">In this set, I discover something new. Something I find myself really connecting to. I present Hardcore Trance.
+
+🎧 Listen: https://soundcloud.com/yourname/hardcore-trance-a-journey
+https://example.com/b/hardcore-trance-a-journey</div>
+<p class="caption-label">Your notifications</p><div class="phones"><div class="phone"><div class="app">ntfy · postiz</div><div class="t">🎧 Big drop: add the link Story for &quot;Hardcore Trance - A Journey&quot;</div><pre>Add a Story with a link sticker for &quot;Hardcore Trance - A Journey&quot;:
+1. Save the attached photo: tap ⋯ → Save file. It isn't cropped, so it fills the Story.
+2. In Instagram: + → Story, pick it, and add a Link sticker with the link (tap &quot;Copy sticker link&quot;).
+3. Post the Story.
+
+Sticker link:
+https://soundcloud.com/yourname/hardcore-trance-a-journey
+
+Post:
+https://example.com/hardcore-trance-a-journey/</pre><div class="btns"><span>Copy sticker link</span><span>Open Instagram</span><span>Open SoundCloud</span></div><div class="attach">Attached: your artwork, uncropped</div></div><div class="phone"><div class="app">ntfy · postiz</div><div class="t">📸 Instagram: post &quot;Hardcore Trance - A Journey&quot;</div><pre>Post it as a feed post in the Instagram app:
+1. Save the attached image: tap ⋯ → Save file and it lands in your Download album.
+2. Add your @tags and music.
+3. Paste the caption (tap &quot;Copy caption&quot;) and post.
+
+An Instagram draft is in Postiz too (tagged &quot;Post in app&quot;) - keep it as your record, or post it from Postiz if it needs nothing.
+
+Caption:
+In this set, I discover something new. Something I find myself really connecting to. I present Hardcore Trance.
+
+🎧 Full set on SoundCloud + the full post: link in bio 🔗</pre><div class="btns"><span>Copy caption</span><span>Open Instagram</span><span>Open Postiz</span></div><div class="attach">Attached: 3fdcbeb365af63ff3d38b10a5a4512458.png</div></div><div class="phone"><div class="app">ntfy · postiz</div><div class="t">🎵 TikTok: post &quot;Hardcore Trance - A Journey&quot;</div><pre>Post it as a photo post in the TikTok app:
+1. Save the attached image: tap ⋯ → Save file and it lands in your Download album.
+2. Add your @tags and music.
+3. Paste the caption (tap &quot;Copy caption&quot;) and post.
+
+A TikTok draft is in Postiz too (tagged &quot;Post in app&quot;) - keep it as your record, or post it from Postiz if it needs nothing.
+
+Caption:
+In this set, I discover something new. Something I find myself really connecting to. I present Hardcore Trance.
+
+🎧 Full set on SoundCloud + the full post: link in bio 🔗</pre><div class="btns"><span>Copy caption</span><span>Open TikTok</span><span>Open Postiz</span></div><div class="attach">Attached: 3fdcbeb365af63ff3d38b10a5a4512458.png</div></div></div></article>
+<article class="sample" id="sample-preview"><h3 id="samples-a-track-preview-with-an-audio-card">A track preview with an audio card</h3><p>A 40-second MP3 uploaded as an audio card. It is under 90 seconds, so the whole clip is used, and the system turns it into a video of your artwork with the audio playing.</p>
+<div class="ghostbox"><div class="gb-label">In Ghost</div><dl><dt>Title</dt><dd>Preview: the edit I close every set with</dd><dt>Post text</dt><dd>A 40-second taste of the edit that has been ending my sets lately. Full version soon 👀  /  #DJ #Techno #NewMusic</dd><dt>Feature image</dt><dd>cover artwork</dd><dt>Cards</dt><dd>audio card with a 40-second MP3</dd><dt>Tags</dt><dd>none</dd></dl></div>
+<div class="results"><div class="out auto"><span class="pill auto">Auto</span><span>Bluesky, Threads: the video</span></div><div class="out you"><span class="pill you">You finish</span><span>Instagram (Reel), TikTok: draft + notification, sound already included</span></div></div>
+<p class="caption-label">Bluesky and Threads get (Bluesky's shown: on Threads the link starts <code>example.com/t/</code>)</p><div class="caption">A 40-second taste of the edit that has been ending my sets lately. Full version soon 👀
+
+https://example.com/b/preview-the-edit-i-close-every-set-with
+
+#DJ #Techno #NewMusic</div>
+<p class="caption-label">Your notifications</p><div class="phones"><div class="phone"><div class="app">ntfy · postiz</div><div class="t">📸 Instagram: post &quot;Preview: the edit I close every set with&quot;</div><pre>Post it as a Reel in the Instagram app:
+1. Save the attached video (made from your artwork + the audio in the post): tap ⋯ → Save file and it lands in your Download album.
+2. Add your @tags - it already has sound.
+3. Paste the caption (tap &quot;Copy caption&quot;) and post.
+
+An Instagram draft is in Postiz too (tagged &quot;Post in app&quot;) - keep it as your record, or post it from Postiz if it needs nothing.
+
+Caption:
+A 40-second taste of the edit that has been ending my sets lately. Full version soon 👀
+
+Full post: link in bio 🔗
+
+#DJ #Techno #NewMusic</pre><div class="btns"><span>Copy caption</span><span>Open Instagram</span><span>Open Postiz</span></div><div class="attach">Attached: clip.mp4</div></div><div class="phone"><div class="app">ntfy · postiz</div><div class="t">🎵 TikTok: post &quot;Preview: the edit I close every set with&quot;</div><pre>Post it as a video in the TikTok app:
+1. Save the attached video (made from your artwork + the audio in the post): tap ⋯ → Save file and it lands in your Download album.
+2. Add your @tags - it already has sound.
+3. Paste the caption (tap &quot;Copy caption&quot;) and post.
+
+A TikTok draft is in Postiz too (tagged &quot;Post in app&quot;) - keep it as your record, or post it from Postiz if it needs nothing.
+
+Caption:
+A 40-second taste of the edit that has been ending my sets lately. Full version soon 👀
+
+Full post: link in bio 🔗
+
+#DJ #Techno #NewMusic</pre><div class="btns"><span>Copy caption</span><span>Open TikTok</span><span>Open Postiz</span></div><div class="attach">Attached: clip.mp4</div></div></div></article>
+<article class="sample" id="sample-vibe"><h3 id="samples-a-video-clip-from-the-booth">A video clip from the booth</h3><p><span>A clip</span>: an MP4 in a video card, with your text and hashtags. The post also has an Excerpt, but your own text is what gets used.</p>
+<div class="ghostbox"><div class="gb-label">In Ghost</div><dl><dt>Title</dt><dd>Vibe at La Récré (example title)</dd><dt>Post text</dt><dd>Caught a moment in the booth playing Charles D &amp; Tempr – &quot;Vibe&quot; at La Récré last weekend. Love this track so hard. It&#x27;s heavy and I love that synth lead. Goes so hard 🔥🔥🔥  /  #DJ #DJLife #DJMix #Techno #TechnoDJ #yourname</dd><dt>Feature image</dt><dd>booth.jpg</dd><dt>Cards</dt><dd>video card with an MP4</dd><dt>Tags</dt><dd>none</dd></dl></div>
+<div class="results"><div class="out auto"><span class="pill auto">Auto</span><span>Bluesky, Threads: the video</span></div><div class="out you"><span class="pill you">You finish</span><span>Instagram (Reel), TikTok: draft + notification, sound already included</span></div></div>
+<p class="caption-label">Bluesky and Threads get (Bluesky's shown: on Threads the link starts <code>example.com/t/</code>)</p><div class="caption">Caught a moment in the booth playing Charles D &amp; Tempr – &quot;Vibe&quot; at La Récré last weekend. Love this track so hard. It&#x27;s heavy and I love that synth lead. Goes so hard 🔥🔥🔥
+
+https://example.com/b/vibe-at-la-recre
+
+#DJ #DJLife #DJMix #Techno #TechnoDJ #yourname</div>
+<p class="caption-label">Your notifications</p><div class="phones"><div class="phone"><div class="app">ntfy · postiz</div><div class="t">📸 Instagram: post &quot;Vibe at La Récré&quot;</div><pre>Post it as a Reel in the Instagram app:
+1. Save the attached video: tap ⋯ → Save file and it lands in your Download album.
+2. Add your @tags - it already has sound.
+3. Paste the caption (tap &quot;Copy caption&quot;) and post.
+
+An Instagram draft is in Postiz too (tagged &quot;Post in app&quot;) - keep it as your record, or post it from Postiz if it needs nothing.
+
+Caption:
+Caught a moment in the booth playing Charles D &amp; Tempr – &quot;Vibe&quot; at La Récré last weekend. Love this track so hard. It&#x27;s heavy and I love that synth lead. Goes so hard 🔥🔥🔥
+
+Full post: link in bio 🔗
+
+#DJ #DJLife #DJMix #Techno #TechnoDJ #yourname</pre><div class="btns"><span>Copy caption</span><span>Open Instagram</span><span>Open Postiz</span></div><div class="attach">Attached: x.mp4</div></div><div class="phone"><div class="app">ntfy · postiz</div><div class="t">🎵 TikTok: post &quot;Vibe at La Récré&quot;</div><pre>Post it as a video in the TikTok app:
+1. Save the attached video: tap ⋯ → Save file and it lands in your Download album.
+2. Add your @tags - it already has sound.
+3. Paste the caption (tap &quot;Copy caption&quot;) and post.
+
+A TikTok draft is in Postiz too (tagged &quot;Post in app&quot;) - keep it as your record, or post it from Postiz if it needs nothing.
+
+Caption:
+Caught a moment in the booth playing Charles D &amp; Tempr – &quot;Vibe&quot; at La Récré last weekend. Love this track so hard. It&#x27;s heavy and I love that synth lead. Goes so hard 🔥🔥🔥
+
+Full post: link in bio 🔗
+
+#DJ #DJLife #DJMix #Techno #TechnoDJ #yourname</pre><div class="btns"><span>Copy caption</span><span>Open TikTok</span><span>Open Postiz</span></div><div class="attach">Attached: x.mp4</div></div></div></article>
+</section>
+
+<section id="notifications">
+  <h2>Your notifications</h2>
+  <p>Notifications arrive in the <strong>ntfy</strong> app. Tap one to open it in ntfy, where the attached image or video and the buttons are.</p>
+
+  <h3 id="notifications-instagram-finish-the-post">Instagram: finish the post</h3>
+  <div class="phone" aria-label="Example Instagram notification">
+    <div class="app">ntfy · postiz</div>
+    <div class="t">📸 Instagram: post "Hardcore Trance - A Journey"</div>
+<pre>Post it as a Reel in the Instagram app:
+1. Save the attached video (made from your artwork + the audio in the post): tap ⋯ → Save file and it lands in your Download album.
+2. Add your @tags - it already has sound.
+3. Paste the caption (tap "Copy caption") and post.
+
+An Instagram draft is in Postiz too (tagged "Post in app") - keep it as your record, or post it from Postiz if it needs nothing.
+
+Caption:
+In this set, I discover something new. …</pre>
+    <div class="btns"><span>Copy caption</span><span>Open Instagram</span><span>Open Postiz</span></div>
+  </div>
+  <p>This example is for a post with an audio card. It tells you whether to post a <strong>feed post</strong> (image only), a <strong>Reel</strong> (when the post has a video or an audio card) or a <strong>Story</strong> (with <span class="tag">#story</span>). When it says "it already has sound", the attached video already plays your audio or your video's soundtrack, so you only need to add @tags. With several photos, <em>Open Postiz</em> becomes <em>All N photos</em> (see <a href="#finishing">Finishing</a>). With <span class="tag">#story</span> and <span class="tag">#bigdrop</span> together, the Story is the link Story, so this notification gets a "Big drop: add a link sticker to it" line and <em>Copy sticker link</em> instead of a separate reminder.</p>
+
+  <h3 id="notifications-tiktok-finish-the-post">TikTok: finish the post</h3>
+  <p>Same idea, with a 🎵 and TikTok's own caption. Buttons: <em>Copy caption</em>, <em>Open TikTok</em>, <em>Open Postiz</em>.</p>
+
+  <h3 id="notifications-big-drop-reminder">Big-drop reminder</h3>
+  <p>Every <span class="tag">#bigdrop</span> post gets its own "🎧 Big drop: add the link Story" notification (as long as Instagram is connected in Postiz), sent first, before the Instagram and TikTok ones, whether Instagram was posted by hand or automatically. It has the Story's photo attached (the first one, uncropped so it fills the Story), or the video, and the buttons <em>Copy sticker link</em>, <em>Open Instagram</em> and <em>Open SoundCloud</em> (or <em>Open post</em> when there's no listen link). See <a href="#finishing-big-drop-the-link-story">Big drop: the link Story</a>. The one exception is <span class="tag">#story</span> + <span class="tag">#bigdrop</span>, covered by the Instagram notification above. Story notifications always come in first (the bridge waits a couple of seconds before sending the rest, so they reach your phone in that order): with <span class="tag">#story</span>, Instagram's arrives before TikTok's.</p>
+
+  <h3 id="notifications-taking-off">📈 Taking off</h3>
+  <p>"📈 Your YouTube video is taking off" (or SoundCloud track, Instagram post and so on) means an older post suddenly picked up: in the last 4 hours or so, or the last day, it gained at least 5% of what it had, and at least 3 times what it usually gets. It says how much it gained and what it usually gets, with buttons to its <em>Post dashboard</em> in Grafana and to the post itself. Nothing to do: it's a good moment to reshare it, pin it or post something like it. You get one per take-off; the Post dashboard shows how it goes.</p>
+
+  
+  
+  
+  
+
+  <h3 id="notifications-your-week">📊 Your week</h3>
+  <p>Every Monday at 9 in the morning <span>(the site's time zone)</span> you get "📊 Your week on example.com" with how the week before (Monday to Sunday) went, so you don't have to open Grafana to know:</p>
+  <ul>
+    <li>🌐 the site's visitors (and how that compares with the week before) and new members,</li>
+    <li>👥 followers gained or lost on each network,</li>
+    <li>📣 how many posts went out, and the best three by <em>vs your usual</em>,</li>
+    <li>📖 the three most-read pages,</li>
+    <li>🎧 your live shows, if you had any: how many, how long, and the most listeners at once.</li>
+  </ul>
+  <p>The <em>Open Grafana</em> button takes you to the Overview dashboard for more (the <a href="analytics-guide.html">Analytics Guide</a> explains it). Nothing to do: it's only a summary. A line is left out when its numbers couldn't be read that week. To get it on another day or time, or not at all, ask whoever looks after the server (it's one setting).</p>
+
+  <h3 id="notifications-warnings">⚠️ Warnings</h3>
+  <p>"⚠️ Postiz needs attention" means a post couldn't go out: a platform rejected it, or an account needs reconnecting. "⚠️ Postiz: … failed on …" means the post couldn't even be handed to Postiz. Tap either to open Postiz, then see <a href="#faq">Something went wrong?</a></p>
+</section>
+
+<section id="finishing">
+  <h2>Finishing Instagram and TikTok posts</h2>
+  <ol class="steps">
+    <li><div><strong>Save the attachment.</strong> Tap the notification to open it in ntfy. Tap <strong>⋯</strong> (top right of the message), then <strong>Save file</strong>. That puts it in your phone's <em>Downloads</em>. ntfy's own <em>Download</em> button only keeps it inside ntfy, and tapping the preview just zooms in.<br><strong>Several photos?</strong> Tap <strong>Copy caption</strong> first, then <strong>All N photos</strong>. On the page that opens, tap <strong>Share all N photos</strong> and pick Instagram (<em>Feed</em>) or TikTok: the app opens with all the photos, in order, so skip the next two steps' picking and go on to music and @tags. Rather keep them on the phone first? Tap <strong>Save photo 1 of N</strong> once per photo: each tap puts the next one in <em>Downloads</em>, in order (browsers only allow one download per tap), and a ✓ marks the ones saved. The page works for 14 days.</div></li>
+    <li><div><strong>Tap "Copy caption".</strong> The whole caption is now on your clipboard.</div></li>
+    <li><div><strong>Create the post in the app.</strong> On Instagram: <em>+ → Post</em> (or Reel, or Story). At the top of the photo grid, tap <em>Recents</em>, switch to <em>Download</em>, and pick the file. On TikTok: <em>+ → Upload</em>, then look in the Download folder the same way.</div></li>
+    <li><div><strong>Add music and @tags.</strong> If the attachment is a video (from a video card, or the one made from your audio card), it already has sound, so skip the music. Image posts need music, which you add from the app's music picker. Tag the artists using the app's @ search.</div></li>
+    <li><div><strong>Paste the caption and share.</strong></div></li>
+    <li><div><strong>Leave the draft in Postiz.</strong> It's tagged <strong>Post in app</strong>, so the calendar shows it went out by hand, and it stays as your record. Just don't click Post on it, or it would go out a second time. If you decided the post doesn't need music or tags, you can post the draft from Postiz instead of using the app.</div></li>
+  </ol>
+  <h3 id="finishing-big-drop-the-link-story">Big drop: the link Story</h3>
+  <p>Instagram Stories are the only place on Instagram where a link can be tapped. On <span class="tag">#bigdrop</span> posts:</p>
+  <ol>
+    <li>Open the "🎧 Big drop: add the link Story" notification and save its attachment (<strong>⋯ → Save file</strong>). It's the first photo uncropped, so it fills the Story, or the video.</li>
+    <li>Instagram: <em>+ → Story</em>, then pick it from the <em>Download</em> album.</li>
+    <li>Tap the sticker icon, then <strong>Link</strong>. Paste the link (tap <em>Copy sticker link</em> in the notification).</li>
+    <li>Tap <em>Customize sticker text</em> and write something like "🎧 Listen now", then share.</li>
+  </ol>
+</section>
+
+<section id="postiz">
+  <h2>Using Postiz</h2>
+  <p>Log in at <code>postiz.example.com</code>. The calendar shows every post: the ones that went out, the ones that failed, and drafts. If a day looks empty, expand it, because several posts can stack up.</p>
+  <ul>
+    <li><strong>Drafts</strong> never publish on their own. Open one to edit it or post it. Instagram and TikTok drafts carry the <strong>Post in app</strong> tag: those are the ones you finish on your phone.</li>
+    <li><strong>The "Post in app" tag has to exist once.</strong> If it's missing, create it: open any post in Postiz, add a tag named exactly <em>Post in app</em> and pick a colour. Until it exists, drafts just arrive without it.</li>
+    <li><strong>Resending a failed post:</strong> open it and click <em>Post now</em>. If that isn't offered, use <em>Duplicate Post</em> from the preview and post the copy.</li>
+    <li><strong>Reconnecting an account</strong> (for example after Instagram logs you out): click <em>Add Channel</em> and choose the same platform again. Postiz updates the existing channel, and your posts stay attached to it. Don't delete the channel.
+      <ul><li>For Instagram and Threads, log into both in your browser first, <span>as the account you post as</span>, then connect. It saves a lot of login headaches.</li></ul>
+    </li>
+    <li><strong>Posting something new directly from Postiz</strong> also works. Only posts that start in Ghost go through the automatic flow.</li>
+  </ul>
+</section>
+
+<section id="habits">
+  <h2>Good habits</h2>
+  <ul>
+    <li><strong>Pick music that represents you.</strong> A track from the set, or one clearly in your style. Avoid random trending songs.</li>
+    <li><strong>Use an Instagram Creator account,</strong> not Business. Creator accounts get the full music library.</li>
+    <li><strong>Keep your bio links current.</strong> On Instagram, add <code>example.com</code> and your SoundCloud profile under <em>Edit profile → Links</em>. The site's home page always shows the newest post, so "link in bio" keeps working. On TikTok, bio links need 1,000 followers or a Business account.</li>
+    <li><strong>Mind the copyright.</strong> Clips of mixes contain other artists' tracks, so Instagram and TikTok sometimes mute them. Short clips and your own edits get through more often. Music picked from the apps' own libraries is always allowed.</li>
+    <li><strong>Engage.</strong> Replying to comments and resharing when artists tag you does more for growth than posting more often.</li>
+  </ul>
+</section>
+
+<section id="faq">
+  <h2>Something went wrong?</h2>
+  <dl class="faq">
+    <dt>I published, but nothing went out anywhere.</dt>
+    <dd>Check that the post is <strong>Public</strong> and doesn't have <span class="tag">#nosocial</span>. Posts that were already shared once won't go out again. If none of that is it, ask whoever maintains the system to check the bridge logs.</dd>
+    <dt>Bluesky or Threads says posted, but I can't see it.</dt>
+    <dd>Give it a minute, then check your profile, not the home feed. If you got a ⚠️ notification, the post failed, so resend it from Postiz. If there's no warning and it still isn't there after 10 minutes, tell the maintainer: the part of Postiz that sends posts may need a restart.</dd>
+    <dt>I didn't get the Instagram or TikTok notification.</dt>
+    <dd>Check that you're subscribed to <span>the site's topic</span> in the ntfy app. Also check that Android allows ntfy notifications, isn't battery-restricting it, and that the topic isn't muted. The account also needs to be connected in Postiz, otherwise no notification is sent for it.</dd>
+    <dt>The notification doesn't mention a Postiz draft, or the draft isn't in the calendar.</dt>
+    <dd>Postiz couldn't save the draft, usually because that account needs reconnecting (see <a href="#postiz">Using Postiz</a>). The notification itself still has everything you need to post by hand.</dd>
+    <dt>My video wasn't used; the post went out with the image.</dt>
+    <dd>Only MP4 videos are used. Convert other formats to MP4 and upload them again in a video card.</dd>
+    <dt>I want to share an old post again.</dt>
+    <dd>Post it from Postiz, or ask the maintainer to clear it from the "already shared" list so that republishing in Ghost shares it again.</dd>
+  </dl>
+</section>
+
+<section id="glossary">
+  <h2>Glossary</h2>
+  <dl class="gloss">
+    <dt>Ghost</dt><dd>The website and newsletter system behind example.com.</dd>
+    <dt>Postiz</dt><dd>The social media scheduler. It connects to each platform and holds drafts and the post history.</dd>
+    <dt>The bridge</dt><dd>A small helper that notices new Ghost posts, prepares each platform's version and sends the notifications.</dd>
+    <dt>ntfy</dt><dd>The notification app on your phone (ntfy.sh, or the site's own ntfy server).</dd>
+    <dt>Draft</dt><dd>A post saved in Postiz that won't publish until you tell it to.</dd>
+    <dt>Internal tag</dt><dd>A Ghost tag starting with <code>#</code>. Readers never see it; it tells the system what to do.</dd>
+    <dt>Audio card / Video card</dt><dd>Blocks in the Ghost editor for uploading sound or video into a post.</dd>
+    <dt>Link sticker</dt><dd>A tappable link you add to an Instagram Story. It can only be added in the Instagram app.</dd>
+  </dl>
+</section>
+</main>
+</div>
+<footer>Posting Guide · Puppi3's Creator Kit 🐾</footer>
+</div>
+
+<!-- shared script: from docs/assets/docs.js, copied in by docs/build-docs.py -->
+<script>
+/* Shared by the docs pages, and copied into each one by docs/build-docs.py, so every guide is a
+   single file that works on its own (send just that file and search still works):
+   a top bar (a link to the front page, the guide's name, search, theme switch), search through this page, a contents list
+   that follows along, heading links, copy buttons and "back to top". Edit this file, not the
+   copies in the pages; the pre-commit hook rebuilds them. */
+(function () {
+  'use strict';
+
+  var store = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+  };
+  var esc = function (s) {
+    return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+  };
+  var el = function (tag, attrs, html) {
+    var n = document.createElement(tag);
+    for (var k in attrs || {}) n.setAttribute(k, attrs[k]);
+    if (html != null) n.innerHTML = html;
+    return n;
+  };
+
+  /* ---------- theme: auto / light / dark ---------- */
+  var THEMES = ['auto', 'light', 'dark'];
+  var THEME_LABEL = { auto: '◐ Auto', light: '☀ Light', dark: '☾ Dark' };
+  function applyTheme(t) {
+    if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    else document.documentElement.removeAttribute('data-theme');
+  }
+  var theme = store.get('docs-theme') || 'auto';
+  applyTheme(theme);
+
+  /* ---------- top bar ---------- */
+  var bar = el('div', { class: 'docbar' });
+  var inner = el('div', { class: 'docbar-in' });
+  var h1 = document.querySelector('h1');
+  var name = (h1 ? h1.textContent : document.title).replace(/\.\s*$/, '').trim();
+  // back to the front page, only when served (the docs site): a guide sent as a file has no index next to it
+  if (/^https?:$/.test(location.protocol)) {
+    inner.appendChild(el('a', { class: 'home', href: './', title: 'All the guides', 'aria-label': 'All guides' },
+      '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.5"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.5"/>' +
+      '<rect x="1.5" y="9" width="5.5" height="5.5" rx="1.5"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.5"/></svg><span>All guides</span>'));
+  }
+  inner.appendChild(el('a', { class: 'brand', href: '#', title: 'Back to the top' }, esc(name) + '<span>.</span>'));
+  inner.appendChild(el('div', { class: 'grow' }));
+  var search = el('div', { class: 'search' });
+  search.innerHTML =
+    '<svg class="glass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>' +
+    '<input type="search" placeholder="Search this guide" autocomplete="off" spellcheck="false" role="combobox" ' +
+    'aria-autocomplete="list" aria-expanded="false" aria-controls="doc-results" aria-label="Search this guide">' +
+    '<kbd>/</kbd><div class="results" id="doc-results" role="listbox" aria-label="Search results"></div>';
+  inner.appendChild(search);
+  var themeBtn = el('button', { class: 'iconbtn', type: 'button', title: 'Colour theme' }, THEME_LABEL[theme]);
+  themeBtn.addEventListener('click', function () {
+    theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
+    applyTheme(theme);
+    store.set('docs-theme', theme === 'auto' ? null : theme);
+    themeBtn.textContent = THEME_LABEL[theme];
+  });
+  inner.appendChild(themeBtn);
+  bar.appendChild(inner);
+  document.body.insertBefore(bar, document.body.firstChild);
+
+  /* ---------- this page in parts: each section's intro, then each h3's part ---------- */
+  // readable text: spaces between table cells, list items and blocks (textContent runs them together)
+  var BLOCK = /^(P|DIV|LI|TD|TH|TR|DT|DD|H\d|BLOCKQUOTE|PRE|BR|UL|OL|TABLE|FIGCAPTION|SECTION)$/;
+  function textOf(nodes) {
+    var parts = [];
+    var walk = function (n) {
+      if (n.nodeType === 3) { parts.push(n.nodeValue); return; }
+      if (n.nodeType !== 1 || /^(SCRIPT|STYLE|BUTTON|NAV)$/.test(n.nodeName) || (n.classList && n.classList.contains('anchor'))) return;
+      var block = BLOCK.test(n.nodeName);
+      if (block) parts.push(' ');
+      for (var c = n.firstChild; c; c = c.nextSibling) walk(c);
+      if (block) parts.push(' ');
+    };
+    nodes.forEach(walk);
+    return parts.join('').replace(/\s+/g, ' ').trim();
+  }
+  function headingText(h) { var c = h.cloneNode(true); c.querySelectorAll('.anchor').forEach(function (x) { x.remove(); }); return c.textContent.replace(/\s+/g, ' ').trim(); }
+  function pageEntries() {
+    var out = [];
+    document.querySelectorAll('main section[id]').forEach(function (sec) {
+      var h2 = sec.querySelector('h2'), title = h2 ? headingText(h2) : sec.id;
+      var chunk = { id: sec.id, h: title, nodes: [] };
+      out.push(chunk);
+      Array.prototype.forEach.call(sec.childNodes, function (n) {
+        if (n === h2) return;
+        if (n.nodeType === 1 && n.nodeName === 'H3' && n.id) {
+          chunk = { id: n.id, h: title + ' › ' + headingText(n), nodes: [] };
+          out.push(chunk);
+          return;
+        }
+        chunk.nodes.push(n);
+      });
+    });
+    return out.map(function (c) { var x = textOf(c.nodes); return { id: c.id, h: c.h, x: x, hl: c.h.toLowerCase(), xl: x.toLowerCase() }; });
+  }
+  var entries = null;
+  function allEntries() { return entries || (entries = pageEntries()); }
+
+  /* ---------- search ---------- */
+  var input = search.querySelector('input'), box = search.querySelector('.results');
+  var hits = [], active = -1;
+  function terms(q) { return q.toLowerCase().split(/\s+/).filter(function (t) { return t.length > 0; }); }
+  function count(hay, t) { var n = 0, i = hay.indexOf(t); while (i !== -1 && n < 6) { n++; i = hay.indexOf(t, i + t.length); } return n; }
+  var reEsc = function (t) { return t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); };
+  // highlight the words in plain text, escaping each piece (so words never match inside &amp; and the like)
+  function markup(text, ts) {
+    var re = new RegExp(ts.map(reEsc).join('|'), 'gi'), out = '', last = 0, m;
+    while ((m = re.exec(text))) {
+      out += esc(text.slice(last, m.index)) + '<mark>' + esc(m[0]) + '</mark>';
+      last = m.index + m[0].length;
+    }
+    return out + esc(text.slice(last));
+  }
+  function snippet(e, ts) {
+    var at = -1;
+    ts.forEach(function (t) { var i = e.xl.indexOf(t); if (i !== -1 && (at === -1 || i < at)) at = i; });
+    if (at === -1) return e.x.slice(0, 150) + (e.x.length > 150 ? '…' : '');
+    var start = Math.max(0, at - 60), end = Math.min(e.x.length, at + 120);
+    return (start > 0 ? '…' : '') + e.x.slice(start, end) + (end < e.x.length ? '…' : '');
+  }
+  function run(q) {
+    var ts = terms(q);
+    if (!ts.length) { close(); return; }
+    var list = allEntries(), scored = [];
+    list.forEach(function (e) {
+      var score = 0;
+      for (var i = 0; i < ts.length; i++) {
+        var t = ts[i], inH = e.hl.indexOf(t) !== -1, n = count(e.xl, t);
+        if (!inH && !n) return;                      // every word must appear
+        if (inH) score += 12 + (new RegExp('(^|[^a-z0-9])' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(e.hl) ? 6 : 0);
+        score += Math.min(n, 5);
+      }
+      scored.push({ e: e, s: score });
+    });
+    scored.sort(function (a, b) { return b.s - a.s; });
+    hits = scored.slice(0, 20).map(function (r) { return r.e; });
+    active = hits.length ? 0 : -1;
+    render(ts);
+  }
+  function hrefFor(e, ts) { return '?q=' + encodeURIComponent(ts.join(' ')) + '#' + encodeURIComponent(e.id); }
+  function render(ts) {
+    if (!hits.length) {
+      box.innerHTML = '<div class="hint">No matches for <b>' + esc(ts.join(' ')) + '</b>. Try fewer or different words.</div>';
+    } else {
+      box.innerHTML = hits.map(function (e, i) {
+        return '<a class="result" role="option" id="doc-hit-' + i + '" aria-selected="' + (i === active) + '" href="' + esc(hrefFor(e, ts)) + '" data-i="' + i + '">' +
+          '<span class="where">' + markup(e.h, ts) + '</span><span class="snip">' + markup(snippet(e, ts), ts) + '</span></a>';
+      }).join('') + '<div class="hint">↑ ↓ to choose · Enter to open · Esc to close</div>';
+    }
+    box.classList.add('open');
+    input.setAttribute('aria-expanded', 'true');
+    input.setAttribute('aria-activedescendant', active >= 0 ? 'doc-hit-' + active : '');
+  }
+  function close() { box.classList.remove('open'); input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); }
+  function move(d) {
+    if (!hits.length) return;
+    active = (active + d + hits.length) % hits.length;
+    box.querySelectorAll('.result').forEach(function (a, i) { a.setAttribute('aria-selected', String(i === active)); });
+    var cur = box.querySelector('#doc-hit-' + active);
+    if (cur) { cur.scrollIntoView({ block: 'nearest' }); input.setAttribute('aria-activedescendant', cur.id); }
+  }
+  function open(e, ts) {
+    close();
+    // keep the address in step where allowed (pages opened from disk may refuse), then land
+    try { history.replaceState(null, '', hrefFor(e, ts)); } catch (err) {}
+    land(e.id, ts); input.blur();
+  }
+  var timer;
+  input.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(function () { run(input.value); }, 60); });
+  input.addEventListener('focus', function () { if (input.value.trim()) run(input.value); });
+  input.addEventListener('keydown', function (ev) {
+    if (ev.key === 'ArrowDown') { ev.preventDefault(); move(1); }
+    else if (ev.key === 'ArrowUp') { ev.preventDefault(); move(-1); }
+    else if (ev.key === 'Enter') { ev.preventDefault(); if (active >= 0) open(hits[active], terms(input.value)); }
+    else if (ev.key === 'Escape') { if (box.classList.contains('open')) close(); else input.blur(); }
+  });
+  box.addEventListener('click', function (ev) {
+    var a = ev.target.closest('.result'); if (!a) return;
+    if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button === 1) return;   // new tab: let the link work
+    ev.preventDefault(); open(hits[+a.getAttribute('data-i')], terms(input.value));
+  });
+  document.addEventListener('click', function (ev) { if (!search.contains(ev.target)) close(); });
+  document.addEventListener('keydown', function (ev) {
+    var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.nodeName);
+    if ((ev.key === '/' && !typing) || ((ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === 'k')) {
+      ev.preventDefault(); input.focus(); input.select();
+    }
+  });
+
+  /* ---------- landing on a result: flash the heading and mark the words in its part ---------- */
+  function clearMarks() {
+    document.querySelectorAll('mark.hit').forEach(function (m) { m.replaceWith(document.createTextNode(m.textContent)); });
+    document.querySelectorAll('main section').forEach(function (s) { s.normalize(); });
+  }
+  function partOf(target) {
+    // the heading's part: an h3 up to the next h3; a section's intro up to its first h3
+    var nodes = [], sec = target.closest('section') || target;
+    var start = target.nodeName === 'SECTION' ? sec.firstChild : target.nextSibling;
+    for (var n = start; n; n = n.nextSibling) { if (n.nodeName === 'H3' && n !== target) break; nodes.push(n); }
+    return nodes;
+  }
+  function markIn(nodes, ts) {
+    if (!ts.length) return null;
+    var re = new RegExp(ts.map(function (t) { return t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|'), 'gi'), first = null;
+    nodes.forEach(function (root) {
+      var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode: function (n) { return n.parentNode.closest('button,script,style,mark,.anchor') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; }
+      }), texts = [];
+      if (root.nodeType === 3) texts.push(root); else while (walker.nextNode()) texts.push(walker.currentNode);
+      texts.forEach(function (tn) {
+        var s = tn.nodeValue; re.lastIndex = 0; if (!re.test(s)) return; re.lastIndex = 0;
+        var frag = document.createDocumentFragment(), last = 0, m;
+        while ((m = re.exec(s))) {
+          frag.appendChild(document.createTextNode(s.slice(last, m.index)));
+          var mk = el('mark', { class: 'hit' }); mk.textContent = m[0]; frag.appendChild(mk); if (!first) first = mk;
+          last = m.index + m[0].length;
+        }
+        frag.appendChild(document.createTextNode(s.slice(last)));
+        tn.parentNode.replaceChild(frag, tn);
+      });
+    });
+    return first;
+  }
+  function land(id, ts) {
+    var target = document.getElementById(id); if (!target) return;
+    clearMarks();
+    markIn(partOf(target), ts || []);
+    var h = target.nodeName === 'SECTION' ? target.querySelector('h2') || target : target;
+    h.scrollIntoView({ block: 'start' });
+    h.classList.remove('flash'); void h.offsetWidth; h.classList.add('flash');
+  }
+  var q0 = new URLSearchParams(location.search).get('q');
+  if (q0) input.value = q0;
+  if (location.hash.length > 1) {
+    var id0 = decodeURIComponent(location.hash.slice(1));
+    requestAnimationFrame(function () { land(id0, q0 ? terms(q0) : []); });
+  }
+
+  /* ---------- heading links (#) ---------- */
+  document.querySelectorAll('main section[id] > h2, main h3[id]').forEach(function (h) {
+    var id = h.nodeName === 'H2' ? h.parentNode.id : h.id;
+    var a = el('a', { class: 'anchor', href: '#' + id, 'aria-label': 'Link to this part' }, '#');
+    h.appendChild(a);
+  });
+
+  /* ---------- contents list that follows along, with the current section's sub-headings ---------- */
+  var toc = document.querySelector('nav.toc');
+  var tocLinks = {};
+  if (toc) {
+    toc.querySelectorAll('a[href^="#"]').forEach(function (a) {
+      var id = a.getAttribute('href').slice(1), sec = document.getElementById(id);
+      if (!sec) return;
+      tocLinks[id] = a;
+      var subs = sec.querySelectorAll('h3[id]');
+      if (!subs.length) return;
+      var ul = el('ul', { class: 'sub' });
+      subs.forEach(function (h) { var li = el('li'); li.appendChild(el('a', { href: '#' + h.id }, esc(headingText(h)))); ul.appendChild(li); });
+      a.parentNode.appendChild(ul);
+    });
+    var headings = Array.prototype.slice.call(document.querySelectorAll('main section[id], main h3[id]'));
+    var ticking = false;
+    var spy = function () {
+      ticking = false;
+      var line = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bar-h')) + 40 || 100, cur = null;
+      for (var i = 0; i < headings.length; i++) { if (headings[i].getBoundingClientRect().top <= line) cur = headings[i]; else break; }
+      var sec = cur ? (cur.nodeName === 'SECTION' ? cur : cur.closest('section')) : null;
+      toc.querySelectorAll('a[aria-current]').forEach(function (a) { a.removeAttribute('aria-current'); });
+      toc.querySelectorAll('li.open').forEach(function (li) { li.classList.remove('open'); });
+      if (!sec || !tocLinks[sec.id]) return;
+      tocLinks[sec.id].setAttribute('aria-current', 'true');
+      tocLinks[sec.id].parentNode.classList.add('open');
+      if (cur.nodeName === 'H3') { var s = toc.querySelector('ul.sub a[href="#' + cur.id + '"]'); if (s) s.setAttribute('aria-current', 'true'); }
+    };
+    addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(spy); } }, { passive: true });
+    addEventListener('resize', spy);
+    spy();
+  }
+
+  /* ---------- copy buttons on code blocks ---------- */
+  document.querySelectorAll('.code').forEach(function (codeBox) {
+    var pre = codeBox.querySelector('pre');
+    if (!pre || codeBox.querySelector('button')) return;
+    var b = el('button', { type: 'button', 'aria-label': 'Copy code' }, 'Copy');
+    b.addEventListener('click', function () {
+      var reset = function () { setTimeout(function () { b.textContent = 'Copy'; }, 1500); };
+      var select = function () {
+        var r = document.createRange(); r.selectNodeContents(pre);
+        var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; reset();
+      };
+      try { navigator.clipboard.writeText(pre.innerText).then(function () { b.textContent = 'Copied'; reset(); }, select); } catch (e) { select(); }
+    });
+    codeBox.appendChild(b);
+  });
+
+  /* ---------- column names on each cell, for the phone layout (docs.css) ---------- */
+  document.querySelectorAll('.tablewrap table').forEach(function (t) {
+    // long paths in the first column may wrap after a "/" (docs.css keeps them from breaking mid-name)
+    t.querySelectorAll('td:first-child code').forEach(function (c) {
+      if (c.children.length || c.textContent.length < 30 || c.textContent.indexOf('/') === -1) return;
+      c.innerHTML = esc(c.textContent).replace(/\//g, '/<wbr>');
+    });
+    var names = Array.prototype.map.call(t.querySelectorAll('thead th'), function (th) { return th.textContent.trim(); });
+    t.querySelectorAll('tbody tr').forEach(function (tr) {
+      var col = 0;
+      Array.prototype.forEach.call(tr.children, function (td) {
+        // a cell spanning columns is labelled with all of them ("Production & Staging")
+        var label = names.slice(col, col + td.colSpan).filter(Boolean).join(' & ');
+        if (label) td.setAttribute('data-label', label);
+        col += td.colSpan;
+      });
+    });
+  });
+
+  /* ---------- back to top ---------- */
+  var up = el('button', { class: 'totop', type: 'button', 'aria-label': 'Back to top' }, '↑ Top');
+  up.addEventListener('click', function () { scrollTo({ top: 0 }); });
+  bar.querySelector('.brand').addEventListener('click', function (ev) { ev.preventDefault(); scrollTo({ top: 0 }); });
+  document.body.appendChild(up);
+  addEventListener('scroll', function () { up.classList.toggle('show', scrollY > 700); }, { passive: true });
+})();
+</script>
+<!-- /shared script -->
+</body>
+</html>

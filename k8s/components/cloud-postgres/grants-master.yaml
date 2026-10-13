@@ -1,0 +1,20 @@
+# Grafana's read-only login on Postiz's Postgres (monitoring module): in the cloud the postiz login isn't a superuser
+# and may not make roles, so the grants Job signs in as the master (RDS's and Cloud SQL's may make roles, and it's in
+# role postiz, which owns the tables: the postgres-logins Job saw to that)
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: grafana-ro-postiz
+spec:
+  template:
+    spec:
+      containers:
+        - name: grants
+          env:
+            - name: PGUSER
+              value: null
+              valueFrom:
+                secretKeyRef: {name: cloud, key: POSTGRES_MASTER_USER}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef: {name: cloud, key: POSTGRES_MASTER_PASSWORD}

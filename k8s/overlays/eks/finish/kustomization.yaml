@@ -1,0 +1,30 @@
+# The eks overlay's part that reaches the modules' resources too: k8s/up.sh adds it after the modules' components
+# (an overlay's own patches see only its own resources). A patch whose target isn't there (a module that's off)
+# does nothing.
+# - gp3 (EBS, the cluster recipe's StorageClass) for every volume
+# - Traefik's and the stream source's LoadBalancers as an NLB (AWS Load Balancer Controller): instance targets with
+#   externalTrafficPolicy Local keep the visitor's address (cloudflare-only checks it), the DJ's too
+# - Postiz's and Temporal's Postgres on RDS (components/cloud-postgres/: the logins, the waits, Grafana's grants),
+#   their Services DNS aliases of POSTGRES_HOST (replacements.yaml)
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+components:
+  - ../../../components/cloud-postgres
+patches:
+  - target: {kind: PersistentVolumeClaim}
+    patch: '[{"op": "add", "path": "/spec/storageClassName", "value": "gp3"}]'
+  - target: {kind: StatefulSet}
+    patch: '[{"op": "add", "path": "/spec/volumeClaimTemplates/0/spec/storageClassName", "value": "gp3"}]'
+  - target: {kind: StatefulSet, name: tinybird-local}
+    patch: '[{"op": "add", "path": "/spec/volumeClaimTemplates/1/spec/storageClassName", "value": "gp3"}]'
+  - target: {kind: Service, name: "^(traefik|tinyice-source)$"}
+    path: nlb.yaml
+  - target: {kind: Service, name: "^(postiz-postgres|postiz-temporal-postgres)$"}
+    patch: |-
+      - op: replace
+        path: /spec
+        value:
+          type: ExternalName
+          externalName: rds-postgres.invalid
+          ports:
+            - {name: postgres, port: 5432}

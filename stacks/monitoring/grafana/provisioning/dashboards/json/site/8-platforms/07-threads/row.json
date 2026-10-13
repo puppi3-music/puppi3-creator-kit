@@ -1,0 +1,214 @@
+{
+  "kind": "RowsLayoutRow",
+  "spec": {
+    "title": "Threads",
+    "collapse": false,
+    "variables": [
+      {
+        "kind": "CustomVariable",
+        "spec": {
+          "name": "sort_threads",
+          "query": "Newest first : Posted,Doing best first : Score,Views : Views,Likes : Likes,Replies : Replies,Reposts : Reposts,Quotes : Quotes,Shares : Shares",
+          "current": {
+            "text": "Newest first",
+            "value": "Posted"
+          },
+          "options": [
+            {
+              "selected": true,
+              "text": "Newest first",
+              "value": "Posted"
+            },
+            {
+              "selected": false,
+              "text": "Doing best first",
+              "value": "Score"
+            },
+            {
+              "selected": false,
+              "text": "Views",
+              "value": "Views"
+            },
+            {
+              "selected": false,
+              "text": "Likes",
+              "value": "Likes"
+            },
+            {
+              "selected": false,
+              "text": "Replies",
+              "value": "Replies"
+            },
+            {
+              "selected": false,
+              "text": "Reposts",
+              "value": "Reposts"
+            },
+            {
+              "selected": false,
+              "text": "Quotes",
+              "value": "Quotes"
+            },
+            {
+              "selected": false,
+              "text": "Shares",
+              "value": "Shares"
+            }
+          ],
+          "multi": false,
+          "includeAll": false,
+          "label": "Sort by",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "description": "The order of the Threads posts table below: newest first, or the most of a number first (a header click still sorts it for you)",
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "CustomVariable",
+        "spec": {
+          "name": "show_threads",
+          "query": "All kept : all,Posted in the time range : range",
+          "current": {
+            "text": "All kept",
+            "value": "all"
+          },
+          "options": [
+            {
+              "selected": true,
+              "text": "All kept",
+              "value": "all"
+            },
+            {
+              "selected": false,
+              "text": "Posted in the time range",
+              "value": "range"
+            }
+          ],
+          "multi": false,
+          "includeAll": false,
+          "label": "Show",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "description": "Every Threads post the bridge has seen (deleted ones drop off), or only those posted in the time range picked at the top",
+          "allowCustomValue": false
+        }
+      }
+    ],
+    "layout": {
+      "kind": "GridLayout",
+      "spec": {
+        "items": [
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 0,
+              "width": 24,
+              "height": 2,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-9006"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 2,
+              "width": 9,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-60"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 9,
+              "y": 2,
+              "width": 9,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-66"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 18,
+              "y": 2,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-61"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 6,
+              "width": 12,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-67"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 12,
+              "y": 6,
+              "width": 12,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-62"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 14,
+              "width": 24,
+              "height": 10,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-63"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "conditionalRendering": {
+      "kind": "ConditionalRenderingGroup",
+      "spec": {
+        "visibility": "show",
+        "condition": "and",
+        "items": [
+          {
+            "kind": "ConditionalRenderingVariable",
+            "spec": {
+              "variable": "has_threads",
+              "operator": "equals",
+              "value": "yes"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

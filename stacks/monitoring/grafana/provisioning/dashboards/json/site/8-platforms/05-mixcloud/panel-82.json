@@ -1,0 +1,489 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 82,
+    "title": "Mixcloud plays & engagement ${chart}",
+    "description": "Per day (time ranges over 7 days): plays gained since the day before, from the bridge's own daily record (blank when that day wasn't recorded, or the total went down). The thin dashed line is each day's number, the bold one the 7-day average (of the days the bridge has among the 7 ending that day; it starts once 4 of them are there): the trend, through the day-to-day ups and downs. Violet lines are this network's posts: hover one to see what went out; a rise just after one is that post working. Hour by hour (when the time range is 7 days or less): what came in between the bridge's checks (about once an hour; a point after a gap covers the gap), no 7-day line. Kept for the last 90 days (ACCOUNT_CHECK_DAYS); further back, pick per day. Both follow the dashboard's time range. Engagement (blue) = favorites, comments and reposts added up, from the gains in your uploads' totals since the day before (reposts and comments from October 2026); hover for each, and for the engagement rate: the 7 days' engagement as a share of the 7 days' plays, comparable between networks. Engagement has its own scale, on the right (it's usually a small share of the plays): lines moving together = a steady rate; engagement rising faster = posts landing better, slower = more people seeing them but fewer joining in. Hour by hour has no rate.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "date",
+                      "text": "Date",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "newPlays",
+                      "text": "Plays",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "newPlays7",
+                      "text": "Plays, 7-day average",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "engagement",
+                      "text": "Engagement",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "engagement7",
+                      "text": "Engagement, 7-day average",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "rate7",
+                      "text": "Engagement rate, 7-day",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "newFavorites",
+                      "text": "Favorites",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "newComments",
+                      "text": "Comments",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "newReposts",
+                      "text": "Reposts",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "\"${chart}\" = \"hour by hour\" ? [] : daily",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/mixcloud.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          },
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "time",
+                      "text": "Time",
+                      "type": "timestamp_epoch"
+                    },
+                    {
+                      "selector": "newPlays",
+                      "text": "Plays",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "engagement",
+                      "text": "Engagement",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "newFavorites",
+                      "text": "Favorites",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "newComments",
+                      "text": "Comments",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "newReposts",
+                      "text": "Reposts",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "\"${chart}\" = \"hour by hour\" ? checks : []",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/account.json?network=mixcloud",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "B",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "convertFieldType",
+            "spec": {
+              "options": {
+                "conversions": [
+                  {
+                    "dateFormat": "YYYY-MM-DD",
+                    "destinationType": "time",
+                    "targetField": "Date",
+                    "timezone": "utc"
+                  }
+                ],
+                "fields": {}
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "organize",
+            "spec": {
+              "options": {
+                "excludeByName": {},
+                "indexByName": {
+                  "Date": 0,
+                  "Plays": 1,
+                  "Plays, 7-day average": 2,
+                  "Engagement": 3,
+                  "Engagement, 7-day average": 4,
+                  "Engagement rate, 7-day": 5,
+                  "Favorites": 6,
+                  "Comments": 7,
+                  "Reposts": 8
+                },
+                "renameByName": {}
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "timeseries",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 10,
+              "showPoints": "auto",
+              "spanNulls": false
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Plays"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "#5000FF"
+                  }
+                },
+                {
+                  "id": "custom.lineWidth",
+                  "value": 1
+                },
+                {
+                  "id": "custom.fillOpacity",
+                  "value": 0
+                },
+                {
+                  "id": "custom.lineStyle",
+                  "value": {
+                    "fill": "dash",
+                    "dash": [
+                      4,
+                      4
+                    ]
+                  }
+                },
+                {
+                  "id": "custom.axisPlacement",
+                  "value": "left"
+                },
+                {
+                  "id": "custom.axisLabel",
+                  "value": "Plays"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Plays, 7-day average"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "#5000FF"
+                  }
+                },
+                {
+                  "id": "custom.axisPlacement",
+                  "value": "left"
+                },
+                {
+                  "id": "custom.axisLabel",
+                  "value": "Plays"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Engagement"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "blue"
+                  }
+                },
+                {
+                  "id": "custom.lineWidth",
+                  "value": 1
+                },
+                {
+                  "id": "custom.fillOpacity",
+                  "value": 0
+                },
+                {
+                  "id": "custom.lineStyle",
+                  "value": {
+                    "fill": "dash",
+                    "dash": [
+                      4,
+                      4
+                    ]
+                  }
+                },
+                {
+                  "id": "custom.axisPlacement",
+                  "value": "right"
+                },
+                {
+                  "id": "custom.axisLabel",
+                  "value": "Engagement"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Engagement, 7-day average"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "blue"
+                  }
+                },
+                {
+                  "id": "custom.axisPlacement",
+                  "value": "right"
+                },
+                {
+                  "id": "custom.axisLabel",
+                  "value": "Engagement"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Engagement rate, 7-day"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "text"
+                  }
+                },
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "legend": true,
+                    "tooltip": false,
+                    "viz": true
+                  }
+                },
+                {
+                  "id": "unit",
+                  "value": "percent"
+                },
+                {
+                  "id": "decimals",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Favorites"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "yellow"
+                  }
+                },
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "legend": true,
+                    "tooltip": false,
+                    "viz": true
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Comments"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "blue"
+                  }
+                },
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "legend": true,
+                    "tooltip": false,
+                    "viz": true
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Reposts"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "text"
+                  }
+                },
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "legend": true,
+                    "tooltip": false,
+                    "viz": true
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byFrameRefID",
+                "options": "B"
+              },
+              "properties": [
+                {
+                  "id": "custom.lineInterpolation",
+                  "value": "linear"
+                },
+                {
+                  "id": "custom.lineWidth",
+                  "value": 2
+                },
+                {
+                  "id": "custom.lineStyle",
+                  "value": {
+                    "fill": "solid"
+                  }
+                },
+                {
+                  "id": "custom.fillOpacity",
+                  "value": 10
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

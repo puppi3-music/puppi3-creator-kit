@@ -1,0 +1,12 @@
+# gke's finish, after the stand-ins (so their volumes get standard-rwo too, as everything else), then each Cloud SQL
+# proxy (the pods gke's finish marked creator-kit/sidecar) swapped for a TCP forwarder to the stand-ins
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+components:
+  - ../../../components/k3d-standins
+  - ../../gke/finish
+patches:
+  - target: {kind: Deployment, annotationSelector: creator-kit/sidecar=cloud-sql-proxy}
+    path: forwarder.yaml
+  - target: {kind: Job, annotationSelector: creator-kit/sidecar=cloud-sql-proxy}
+    path: forwarder.yaml

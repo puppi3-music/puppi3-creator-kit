@@ -1,0 +1,67 @@
+# The whole stack. TinyIce handles source ingest, mounts, mp3 transcoding,
+# the listener-facing player page, and the admin UI — one container.
+
+services:
+  tinyice:
+    # Pinned by digest to what ran on 2026-10-11 (TinyIce 2.12.3); to upgrade, try the new one on staging first
+    image: ghcr.io/datanoisetv/tinyice@sha256:e3118dc25b293e4b71d6472e9c6c512a01914c5624848b3756049beefa5577a5
+    container_name: tinyice
+    restart: unless-stopped
+    user: 1000:1000
+    ports:
+      - 8222:8080
+    networks:
+      - proxy
+      - monitoring
+    volumes:
+      - ${DATA_DIR:?set it in the site's profile}/icecast/tinyice-data:/data
+      - ${DATA_DIR:?set it in the site's profile}/icecast/tinyice:/var/lib/tinyice
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.tinyice.rule=Host(`${LIVE_HOST:-live.${SITE_HOST:?set it in the site's profile}}`)
+      - traefik.http.routers.tinyice.entrypoints=https
+      - traefik.http.routers.tinyice.tls=true
+      - traefik.http.routers.tinyice.tls.certresolver=${TLS_RESOLVER:-cf}
+      # Listening, the player pages and stream input (the DJ software, also from outside home) stay public, through
+      # Cloudflare only (traefik/dynamic/cloudflare-only.yml).
+      - traefik.http.routers.tinyice.middlewares=cloudflare-only@file
+      - traefik.http.services.tinyice.loadbalancer.server.port=8080
+      # TinyIce's admin (sign-in, /admin, its API and API docs, metrics) is closed on LIVE_HOST
+      # (403 for everyone: visitors all arrive through Cloudflare, so "home only" can't be told apart there).
+      # Use it at http://tinyice.<LAN_DOMAIN> (home network only) instead.
+      - traefik.http.middlewares.tinyice-closed.ipallowlist.sourcerange=127.0.0.1/32
+      - traefik.http.routers.tinyice-admin.rule=Host(`${LIVE_HOST:-live.${SITE_HOST:?set it in the site's profile}}`) &&
+        (PathPrefix(`/admin`) || Path(`/login`) || Path(`/logout`) ||
+        PathPrefix(`/api`) || Path(`/metrics`))
+      - traefik.http.routers.tinyice-admin.priority=100
+      - traefik.http.routers.tinyice-admin.entrypoints=https
+      - traefik.http.routers.tinyice-admin.tls.certresolver=${TLS_RESOLVER:-cf}
+      - traefik.http.routers.tinyice-admin.middlewares=tinyice-closed
+      - traefik.http.routers.tinyice-admin.service=tinyice
+      - traefik.http.routers.tinyice-lan.rule=Host(`tinyice.${LAN_DOMAIN:-localhost}`)
+      - traefik.http.routers.tinyice-lan.entrypoints=web
+      - traefik.http.routers.tinyice-lan.middlewares=lan-only@file
+      - traefik.http.routers.tinyice-lan.service=tinyice
+      # TinyIce's status (Icecast's /status-json.xsl) on the site's own address, for the theme's LIVE NOW bar
+      # (the kit's theme: kit/theme/assets/kit/live-bar.js): same origin, so no CORS needed, and it doesn't open the
+      # stream, so checks don't count as listeners. A second site (e.g. a staging copy) runs its own TinyIce, with
+      # the same route on its own address.
+      - traefik.http.middlewares.live-status-path.replacepath.path=/status-json.xsl
+      - traefik.http.routers.live-status.rule=Host(`${SITE_HOST:?set it in the site's profile}`) &&
+        Path(`/live-status.json`)
+      - traefik.http.routers.live-status.priority=100
+      - traefik.http.routers.live-status.entrypoints=https
+      - traefik.http.routers.live-status.tls.certresolver=${TLS_RESOLVER:-cf}
+      - traefik.http.routers.live-status.middlewares=cloudflare-only@file,live-status-path
+      - traefik.http.routers.live-status.service=tinyice
+      - traefik.http.routers.tinyice.service=tinyice
+#      - traefik.http.middlewares.cors-puppi3.headers.accesscontrolalloworiginlist=https://${SITE_HOST}
+#      - traefik.http.middlewares.cors-puppi3.headers.accesscontrolallowmethods=GET
+#      - traefik.http.routers.tinyice.middlewares=cors-puppi3
+volumes:
+  tinyice-data: null
+networks:
+  proxy:
+    external: true
+  monitoring:
+    external: true

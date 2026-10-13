@@ -1,0 +1,21 @@
+# A throwaway Ghost on this Mac for trying the kit's theme (kit/theme/, mounted live): http://localhost:2398
+# (admin: /ghost, kit@example.com / kit-theme-test-1!). Only ever local; test.mjs refuses anything else.
+#   docker compose -f kit/theme-test/compose.yaml up -d && node kit/theme-test/test.mjs
+#   docker compose -f kit/theme-test/compose.yaml down -v      # and its data with it
+name: kit-theme-test
+services:
+  ghost:
+    image: ghost:6-alpine
+    ports:
+      - "127.0.0.1:2398:2368"
+    environment:
+      NODE_ENV: development
+      url: http://localhost:2398
+      database__client: sqlite3
+      database__connection__filename: /var/lib/ghost/content/data/ghost.db
+      security__staffDeviceVerification: "false"
+    volumes:
+      - ../theme:/var/lib/ghost/content/themes/kit
+      - ghost-data:/var/lib/ghost/content/data
+volumes:
+  ghost-data:

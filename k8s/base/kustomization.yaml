@@ -1,0 +1,23 @@
+# Always there: Traefik and Ghost. The site's values come from the site's own kustomization, which k8s/up.sh writes
+# (ConfigMap "site" from site.env and "ghost" with Ghost's few values, a Secret per secrets/<stack>.env), with an
+# overlay (where the databases and storage are) and a component per module in MODULES. Build with --load-restrictor LoadRestrictionsNone: Traefik's
+# dynamic files are the stacks' own (stacks/traefik/dynamic/), outside this folder.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: creator-kit
+resources:
+  - traefik.yaml
+  - ghost.yaml
+configMapGenerator:
+  # Traefik's file provider reads these: the same Go templates as on Compose, filled from Traefik's environment (the
+  # site's profile). Each module's component adds its own routes here (behavior: merge).
+  - name: traefik-dynamic
+    files:
+      - site.yml=../../stacks/traefik/dynamic/puppi3.yml
+      - cloudflare-only.yml=../../stacks/traefik/dynamic/cloudflare-only.yml
+      - real-ip.yml=../../stacks/traefik/dynamic/real-ip.yml
+      - page-hit-country.yml=../../stacks/traefik/dynamic/page-hit-country.yml
+      - traefik/lan-only.yml
+      - traefik/dashboard.yml

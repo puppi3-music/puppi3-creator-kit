@@ -1,0 +1,65 @@
+# Visitors' page hits (Traefik's /.ghost/analytics route, through page-hit-country) -> Tinybird, as the puppi3 stack's
+# traffic-analytics. Its salts (the daily visitor hashes) on a small volume, so one replica and Recreate.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traffic-analytics
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: traffic-analytics
+  template:
+    metadata:
+      labels:
+        app: traffic-analytics
+    spec:
+      containers:
+        - name: traffic-analytics
+          # the puppi3 stack's version (stacks/puppi3/compose.yaml: keep them in step)
+          image: ghost/traffic-analytics:1.0.336
+          # tb-setup's tokens (the pod waits for the Secret)
+          envFrom:
+            - secretRef:
+                name: tinybird-tokens
+          env:
+            - {name: NODE_ENV, value: production}
+            - {name: PROXY_TARGET, value: http://tinybird-local:7181/v0/events}
+            - {name: SALT_STORE_TYPE, value: file}
+            - {name: SALT_STORE_FILE_PATH, value: /data/salts.json}
+          ports:
+            - {name: http, containerPort: 3000}
+          readinessProbe:
+            tcpSocket: {port: http}
+            periodSeconds: 10
+          resources:
+            requests: {cpu: 50m, memory: 128Mi}
+            limits: {memory: 1Gi}      # Node sizes its heap from this: at 512Mi a start-up spike ran it out (~250 MB)
+          volumeMounts:
+            - {name: data, mountPath: /data}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: traffic-analytics
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: traffic-analytics
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traffic-analytics
+spec:
+  selector:
+    app: traffic-analytics
+  ports:
+    - {name: http, port: 3000, targetPort: http}

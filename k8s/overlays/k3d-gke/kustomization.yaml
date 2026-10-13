@@ -1,0 +1,8 @@
+# The gke overlay on this Mac's k3d cluster: its manifests as they are, plus the k3d stand-ins and a TCP forwarder in
+# place of each pod's Cloud SQL proxy (finish/, added after the modules) and the site's values from cloud.k3d here
+# instead of <site>/cloud-gke.env. k8s/test/test.sh --overlay k3d-gke tries it, and checks that its render differs
+# from gke's only by those.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../gke

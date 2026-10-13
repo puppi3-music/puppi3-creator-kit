@@ -1,0 +1,123 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 105,
+    "title": "Site: last 30 days",
+    "description": "Visitors and page views of the whole site over the last 30 days (unique visitors per day added up, as on Traffic), and new members (members now minus 30 days ago: the bridge's own daily record, blank until it has two days in a row). Not affected by the dashboard's time range.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "visitors30",
+                      "text": "Visitors (30 days)",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "pageviews30",
+                      "text": "Page views (30 days)",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "newMembers30",
+                      "text": "New members (30 days)",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "totals",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/ghost.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "organize",
+            "spec": {
+              "options": {
+                "excludeByName": {},
+                "indexByName": {
+                  "Visitors (30 days)": 0,
+                  "Page views (30 days)": 1,
+                  "New members (30 days)": 2
+                },
+                "renameByName": {}
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "stat",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "center",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "value_and_name",
+          "orientation": "vertical",
+          "wideLayout": false,
+          "text": {
+            "titleSize": 12
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "#E535C8"
+            },
+            "noValue": "\u2013"
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "kind": "RowsLayoutRow",
+  "spec": {
+    "title": "Dashboard links",
+    "collapse": false,
+    "hideHeader": true,
+    "layout": {
+      "kind": "GridLayout",
+      "spec": {
+        "items": [
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 0,
+              "width": 24,
+              "height": 2,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-9000"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

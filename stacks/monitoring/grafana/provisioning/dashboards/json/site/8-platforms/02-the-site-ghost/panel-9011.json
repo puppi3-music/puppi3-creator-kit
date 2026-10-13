@@ -1,0 +1,33 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 9011,
+    "title": "",
+    "description": "",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [],
+        "transformations": [],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "text",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "content": "The site itself, beside the networks: members and newsletter subscribers (Ghost's Admin API, kept per day by the bridge), visitors per day (Ghost's analytics), and every published post with its visitors, sign-ups and newsletter numbers. Read by the bridge ${every_ghost}; visitors need TINYBIRD_TOKEN in the postiz .env. Click a post for it up close, as with any social post. Where visitors and members come from is on [Growth](/d/puppi3-growth).",
+          "mode": "markdown"
+        },
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": []
+        }
+      }
+    },
+    "transparent": true
+  }
+}

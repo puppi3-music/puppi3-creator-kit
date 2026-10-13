@@ -1,0 +1,184 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 2,
+    "title": "On ${label} now",
+    "description": "The post's numbers as the bridge last collected them (every hour). YouTube's minutes watched and subscribers gained add up YouTube Analytics' days, 2-3 days behind.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "metric",
+                      "text": "metric",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "value",
+                      "text": "value",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "numbers",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/post.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "network",
+                        "value": "${network}"
+                      },
+                      {
+                        "key": "id",
+                        "value": "${post}"
+                      },
+                      {
+                        "key": "time",
+                        "value": "${time}"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          },
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "color",
+                      "text": "color",
+                      "type": "string"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "[$merge([{\"color\": \"${colour}\"}])]",
+                  "source": "inline",
+                  "type": "json",
+                  "data": "[{}]"
+                }
+              },
+              "refId": "Colour",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "rowsToFields",
+            "spec": {
+              "options": {
+                "mappings": [
+                  {
+                    "fieldName": "metric",
+                    "handlerKey": "field.name"
+                  },
+                  {
+                    "fieldName": "value",
+                    "handlerKey": "field.value"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "configFromData",
+            "spec": {
+              "options": {
+                "configRefId": "Colour",
+                "mappings": [
+                  {
+                    "fieldName": "color",
+                    "handlerKey": "color"
+                  }
+                ],
+                "applyTo": {
+                  "id": "numeric",
+                  "options": ""
+                }
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "stat",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "center",
+          "orientation": "vertical",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showPercentChange": false,
+          "textMode": "value_and_name",
+          "wideLayout": false
+        },
+        "fieldConfig": {
+          "defaults": {
+            "decimals": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "#B28CFF"
+            },
+            "noValue": "0"
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

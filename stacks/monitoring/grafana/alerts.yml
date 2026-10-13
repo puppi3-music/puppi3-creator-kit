@@ -1,0 +1,701 @@
+# The site's alert rules -> ntfy, with a placeholder (@SITE_HOST@ and the like) where a site's own value goes
+# (render.py's PLACEHOLDERS). Never read by Grafana as it is: render.py --profile kit makes a kit site's from it
+# (kit/kit.sh, k8s/up.sh), dropping the rules of switched-off modules and networks; puppi3.py makes puppi3's NAS one
+# (provisioning/alerting/puppi3.yml).
+# Each rule has the label project=puppi3 (the ID_PREFIX), which Overview's "Alerts firing now" panel filters on, and
+# names its contact point itself (notification_settings), so the Grafana's own notification policies are left alone.
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: puppi3 ntfy
+    receivers:
+      - uid: puppi3-ntfy
+        type: webhook
+        # ntfy's built-in Grafana template turns Grafana's JSON into a readable notification.
+        # Grafana reaches ntfy at the site's NTFY_URL.
+        settings:
+          url: @NTFY_URL@/@NTFY_TOPIC@?template=grafana
+          httpMethod: POST
+        disableResolveMessage: false
+
+groups:
+  # ---------- the site, the live stream, the NAS (Prometheus) ----------
+  - orgId: 1
+    name: puppi3 site
+    folder: @SITE_NAME@
+    interval: 1m
+    rules:
+      - uid: puppi3-site-down
+        title: @SITE_HOST@ is down
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: prometheus
+            model: { refId: A, expr: 'probe_success{instance="https://@SITE_HOST@"}', instant: true, range: false }
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: lt, params: [1] } }] }
+        for: 5m
+        noDataState: Alerting
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "The public check of https://@SITE_HOST@ (through Cloudflare) has failed for 5 minutes."
+          __dashboardUid__: puppi3-health
+          __panelId__: "101"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      - uid: puppi3-ghost-down
+        title: Ghost isn't answering
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: prometheus
+            model: { refId: A, expr: 'probe_success{instance="https://@SITE_HOST@/ghost/api/admin/site/"}', instant: true, range: false }
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: lt, params: [1] } }] }
+        for: 5m
+        noDataState: Alerting
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "Ghost's /ghost/api/admin/site/ has failed for 5 minutes: pages may still come from Cloudflare's cache, but nothing new loads."
+          __dashboardUid__: puppi3-health
+          __panelId__: "102"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      - uid: puppi3-live-down
+        title: Live stream server is down
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: prometheus
+            model: { refId: A, expr: 'probe_success{instance="https://@LIVE_HOST@"}', instant: true, range: false }
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: lt, params: [1] } }] }
+        for: 10m
+        noDataState: Alerting
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "https://@LIVE_HOST@ (TinyIce) has failed its public check for 10 minutes."
+          __dashboardUid__: puppi3-health
+          __panelId__: "111"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      - uid: puppi3-bridge-down
+        title: Postiz bridge is down
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: prometheus
+            model: { refId: A, expr: 'up{job="puppi3-pets"}', instant: true, range: false }
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: lt, params: [1] } }] }
+        for: 5m
+        noDataState: Alerting
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "Prometheus can't read postiz-ghost-bridge's /metrics: new posts won't go to social media and its notifications stop."
+          __dashboardUid__: puppi3-health
+          __panelId__: "114"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      - uid: puppi3-5xx
+        title: @SITE_HOST@ is serving errors
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 3600, to: 0 }
+            datasourceUid: prometheus
+            # share of 5xx over the last hour, only once there were at least 20 requests (else no data = OK)
+            model:
+              refId: A
+              instant: true
+              range: false
+              expr: >-
+                ((sum(increase(traefik_router_requests_total{router=~"puppi3-[a-z-]+@file|live-status@docker|puppi3-social-preview@docker",code=~"5.."}[1h])) or vector(0))
+                / sum(increase(traefik_router_requests_total{router=~"puppi3-[a-z-]+@file|live-status@docker|puppi3-social-preview@docker"}[1h])))
+                and on() sum(increase(traefik_router_requests_total{router=~"puppi3-[a-z-]+@file|live-status@docker|puppi3-social-preview@docker"}[1h])) > 20
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [0.05] } }] }
+        for: 15m
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "More than 5% of requests to @SITE_HOST@ ended in a 5xx error over the last hour."
+          __dashboardUid__: puppi3-health
+          __panelId__: "115"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      - uid: puppi3-tls
+        title: @SITE_HOST@'s certificate expires soon
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: prometheus
+            model: { refId: A, expr: '(probe_ssl_earliest_cert_expiry{instance="https://@SITE_HOST@"} - time()) / 86400', instant: true, range: false }
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: lt, params: [14] } }] }
+        for: 1h
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "The certificate visitors get for https://@SITE_HOST@ (Cloudflare's) expires in under 14 days."
+          __dashboardUid__: puppi3-health
+          __panelId__: "106"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      - uid: puppi3-disk
+        title: NAS disk @DISK_MOUNT@ is nearly full
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: prometheus
+            model:
+              refId: A
+              instant: true
+              range: false
+              expr: 'node_filesystem_avail_bytes{job="node",mountpoint="@DISK_MOUNT@"} / node_filesystem_size_bytes{job="node",mountpoint="@DISK_MOUNT@"}'
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: lt, params: [0.1] } }] }
+        for: 30m
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "Less than 10% free on @DISK_MOUNT@ (stacks, MySQL, Tinybird, deploy backups)."
+          __dashboardUid__: puppi3-health
+          __panelId__: "116"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      # Ghost's tracker posts each page view to /.ghost/analytics (puppi3.yml -> page-hit-country -> traffic-analytics).
+      # No successful page hit in 12 hours while Ghost served plenty of pages = the route, a plugin or
+      # traffic-analytics is broken and visitors aren't being counted. (Quiet hours: no data = OK.)
+      # 12 h, not 6: with a few dozen visitors a day, 6 h without one is normal (overnight). Ghost's 200s
+      # include images, CSS and bots, so the >100 guard only says Ghost was up and being asked for things.
+      - uid: puppi3-page-hits-stopped
+        title: Visitors aren't being counted
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 43200, to: 0 }
+            datasourceUid: prometheus
+            model:
+              refId: A
+              instant: true
+              range: false
+              expr: >-
+                (sum(increase(traefik_router_requests_total{router="puppi3-page-hits@file",code=~"2.."}[12h])) or vector(0))
+                and on() sum(increase(traefik_router_requests_total{router="puppi3-ghost@file",code="200"}[12h])) > 100
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: lt, params: [1] } }] }
+        for: 30m
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "No page hit has reached Ghost's analytics in 12 hours although Ghost answered over 100 requests: check the puppi3-page-hits route, the page-hit-country and real-ip plugins, and traffic-analytics."
+          __dashboardUid__: puppi3-traffic
+          __panelId__: "306"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      # The other half: page hits arrive but Tinybird has none since yesterday (tinybird-local or the
+      # forwarding from traffic-analytics is broken).
+      - uid: puppi3-tinybird-empty
+        title: Ghost's analytics have no page views since yesterday
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 86400, to: 0 }
+            datasourceUid: ghost-analytics
+            model:
+              refId: A
+              type: json
+              source: url
+              format: table
+              parser: backend
+              url: http://tinybird-local:7181/v0/pipes/api_kpis.json
+              url_options:
+                method: GET
+                data: ""
+                params:
+                  - { key: site_uuid, value: @GHOST_SITE_UUID@ }
+                  - { key: timezone, value: @SITE_TIMEZONE@ }
+                  - { key: date_from, value: "${__from:date:YYYY-MM-DD}" }
+                  - { key: date_to, value: "${__to:date:YYYY-MM-DD}" }
+              root_selector: "$sum([data.pageviews])"
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: lt, params: [1] } }] }
+        for: 2h
+        noDataState: Alerting
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "Tinybird counts no page views for yesterday and today: tinybird-local, tinybird-sync or traffic-analytics' forwarding may be broken (the Traffic dashboard will be empty)."
+          __dashboardUid__: puppi3-traffic
+          __panelId__: "306"
+        notification_settings: { receiver: puppi3 ntfy }
+
+  # ---------- newsletters (Ghost's database) ----------
+  - orgId: 1
+    name: puppi3 email
+    folder: @SITE_NAME@
+    interval: 5m
+    rules:
+      - uid: puppi3-spam-complaint
+        title: Someone marked a newsletter as spam
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 3600, to: 0 }
+            datasourceUid: ghost-mysql
+            model:
+              refId: A
+              format: table
+              editorMode: code
+              rawQuery: true
+              rawSql: >-
+                SELECT COUNT(*) AS complaints FROM email_spam_complaint_events WHERE created_at > UTC_TIMESTAMP() - INTERVAL 1 HOUR
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [0] } }] }
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "A member reported a newsletter as spam in the last hour (Ghost stops emailing them). A few of these hurt delivery for everyone: see Email health on the Members dashboard."
+          __dashboardUid__: puppi3-members
+          __panelId__: "212"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      - uid: puppi3-newsletter-failures
+        title: A newsletter failed for many members
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 3600, to: 0 }
+            datasourceUid: ghost-mysql
+            # failed share of newsletters sent in the last 2 days, only once at least 20 went out (else no data = OK)
+            model:
+              refId: A
+              format: table
+              editorMode: code
+              rawQuery: true
+              rawSql: >-
+                SELECT ROUND(100 * SUM(failed_count) / SUM(email_count), 1) AS failed_pct FROM emails
+                WHERE status = 'submitted' AND created_at > UTC_TIMESTAMP() - INTERVAL 2 DAY HAVING SUM(email_count) >= 20
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [5] } }] }
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "Over 5% of the newsletter emails sent in the last 2 days failed: see Delivery problems on the Members dashboard (and Mailgun)."
+          __dashboardUid__: puppi3-members
+          __panelId__: "215"
+        notification_settings: { receiver: puppi3 ntfy }
+
+  # ---------- social posting (Postiz's database, the bridge's stats files) ----------
+  - orgId: 1
+    name: puppi3 social
+    folder: @SITE_NAME@
+    interval: 5m
+    rules:
+      - uid: puppi3-post-failed
+        title: A social post failed
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 3600, to: 0 }
+            datasourceUid: postiz-pg
+            model:
+              refId: A
+              format: table
+              editorMode: code
+              rawQuery: true
+              rawSql: >-
+                SELECT count(*) AS failed FROM "Post" p WHERE p."deletedAt" IS NULL AND p."parentPostId" IS NULL
+                AND p.state = 'ERROR' AND p."publishDate" > now() - interval '1 hour'
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [0] } }] }
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "Postiz couldn't publish a post in the last hour: see Failed posts on the Social dashboard."
+          __dashboardUid__: puppi3-social
+          __panelId__: "3"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      - uid: puppi3-post-overdue
+        title: Social posts stuck in the queue
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: postiz-pg
+            model:
+              refId: A
+              format: table
+              editorMode: code
+              rawQuery: true
+              rawSql: >-
+                SELECT count(*) AS overdue FROM "Post" p WHERE p."deletedAt" IS NULL AND p."parentPostId" IS NULL
+                AND p.state = 'QUEUE' AND p."publishDate" < now() - interval '15 minutes'
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [0] } }] }
+        for: 15m
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "Posts are still queued in Postiz more than 30 minutes after their time (Temporal or a worker may be stuck)."
+          __dashboardUid__: puppi3-social
+          __panelId__: "4"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      - uid: puppi3-channel-attention
+        title: A Postiz channel needs reconnecting
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: postiz-pg
+            model:
+              refId: A
+              format: table
+              editorMode: code
+              rawQuery: true
+              rawSql: >-
+                SELECT count(*) AS channels FROM "Integration" i WHERE i."deletedAt" IS NULL
+                AND (i."refreshNeeded" OR i."inBetweenSteps" OR i.disabled)
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [0] } }] }
+        for: 30m
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "A social account in Postiz is disabled or needs reconnecting: posts to it will fail. See Channels on the Social dashboard."
+          __dashboardUid__: puppi3-social
+          __panelId__: "6"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      # The bridge rewrites each stats file every *_STATS_MINUTES (60 by default; stats.mjs's too), with a platform's errors
+      # inside it, so a file older than 3 hours means the polling stopped (or, for Instagram, Postiz's API is
+      # failing). Value = minutes since updatedAt.
+      - uid: puppi3-stats-instagram
+        title: Instagram numbers stopped updating
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: bridge-instagram
+            model:
+              refId: A
+              type: json
+              source: url
+              format: table
+              parser: backend
+              url: http://postiz-ghost-bridge:8080/instagram.json
+              url_options: { method: GET, data: "" }
+              root_selector: "$round(($millis() - $toMillis(updatedAt)) / 60000)"
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [180] } }] }
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "The bridge's instagram.json hasn't been updated for over 3 hours."
+          __dashboardUid__: puppi3-platforms
+          __panelId__: "24"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      - uid: puppi3-stats-youtube
+        title: YouTube numbers stopped updating
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: bridge-instagram
+            model:
+              refId: A
+              type: json
+              source: url
+              format: table
+              parser: backend
+              url: http://postiz-ghost-bridge:8080/youtube.json
+              url_options: { method: GET, data: "" }
+              root_selector: "$round(($millis() - $toMillis(updatedAt)) / 60000)"
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [180] } }] }
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "The bridge's youtube.json hasn't been updated for over 3 hours."
+          __dashboardUid__: puppi3-platforms
+          __panelId__: "31"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      - uid: puppi3-stats-soundcloud
+        title: SoundCloud numbers stopped updating
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: bridge-instagram
+            model:
+              refId: A
+              type: json
+              source: url
+              format: table
+              parser: backend
+              url: http://postiz-ghost-bridge:8080/soundcloud.json
+              url_options: { method: GET, data: "" }
+              root_selector: "$round(($millis() - $toMillis(updatedAt)) / 60000)"
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [180] } }] }
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "The bridge's soundcloud.json hasn't been updated for over 3 hours."
+          __dashboardUid__: puppi3-platforms
+          __panelId__: "41"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      - uid: puppi3-stats-bluesky
+        title: Bluesky numbers stopped updating
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: bridge-instagram
+            model:
+              refId: A
+              type: json
+              source: url
+              format: table
+              parser: backend
+              url: http://postiz-ghost-bridge:8080/bluesky.json
+              url_options: { method: GET, data: "" }
+              root_selector: "$round(($millis() - $toMillis(updatedAt)) / 60000)"
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [180] } }] }
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "The bridge's bluesky.json hasn't been updated for over 3 hours."
+          __dashboardUid__: puppi3-platforms
+          __panelId__: "51"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      - uid: puppi3-stats-threads
+        title: Threads numbers stopped updating
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: bridge-instagram
+            model:
+              refId: A
+              type: json
+              source: url
+              format: table
+              parser: backend
+              url: http://postiz-ghost-bridge:8080/threads.json
+              url_options: { method: GET, data: "" }
+              root_selector: "$round(($millis() - $toMillis(updatedAt)) / 60000)"
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [180] } }] }
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "The bridge's threads.json hasn't been updated for over 3 hours."
+          __dashboardUid__: puppi3-platforms
+          __panelId__: "61"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      - uid: puppi3-stats-tiktok
+        title: TikTok numbers stopped updating
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: bridge-instagram
+            model:
+              refId: A
+              type: json
+              source: url
+              format: table
+              parser: backend
+              url: http://postiz-ghost-bridge:8080/tiktok.json
+              url_options: { method: GET, data: "" }
+              root_selector: "$round(($millis() - $toMillis(updatedAt)) / 60000)"
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [180] } }] }
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "The bridge's tiktok.json hasn't been updated for over 3 hours."
+          __dashboardUid__: puppi3-platforms
+          __panelId__: "71"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      - uid: puppi3-stats-mixcloud
+        title: Mixcloud numbers stopped updating
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: bridge-instagram
+            model:
+              refId: A
+              type: json
+              source: url
+              format: table
+              parser: backend
+              url: http://postiz-ghost-bridge:8080/mixcloud.json
+              url_options: { method: GET, data: "" }
+              root_selector: "$round(($millis() - $toMillis(updatedAt)) / 60000)"
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [180] } }] }
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "The bridge's mixcloud.json hasn't been updated for over 3 hours."
+          __dashboardUid__: puppi3-platforms
+          __panelId__: "81"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      - uid: puppi3-stats-ghost
+        title: Ghost (site) numbers stopped updating
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: bridge-instagram
+            model:
+              refId: A
+              type: json
+              source: url
+              format: table
+              parser: backend
+              url: http://postiz-ghost-bridge:8080/ghost.json
+              url_options: { method: GET, data: "" }
+              root_selector: "$round(($millis() - $toMillis(updatedAt)) / 60000)"
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [180] } }] }
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "The bridge's ghost.json hasn't been updated for over 3 hours."
+          __dashboardUid__: puppi3-platforms
+          __panelId__: "101"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      - uid: puppi3-stats-cloudflare
+        title: Cloudflare numbers stopped updating
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: bridge-instagram
+            model:
+              refId: A
+              type: json
+              source: url
+              format: table
+              parser: backend
+              url: http://postiz-ghost-bridge:8080/cloudflare.json
+              url_options: { method: GET, data: "" }
+              root_selector: "$round(($millis() - $toMillis(updatedAt)) / 60000)"
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [180] } }] }
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "The bridge's cloudflare.json hasn't been updated for over 3 hours."
+          __dashboardUid__: puppi3-traffic
+          __panelId__: "331"
+        notification_settings: { receiver: puppi3 ntfy }
+
+      - uid: puppi3-stats-search
+        title: Search Console numbers stopped updating
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: bridge-instagram
+            model:
+              refId: A
+              type: json
+              source: url
+              format: table
+              parser: backend
+              url: http://postiz-ghost-bridge:8080/search.json
+              url_options: { method: GET, data: "" }
+              root_selector: "$round(($millis() - $toMillis(updatedAt)) / 60000)"
+          - refId: B
+            datasourceUid: __expr__
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [180] } }] }
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: { project: puppi3 }
+        annotations:
+          summary: "The bridge's search.json hasn't been updated for over 3 hours."
+          __dashboardUid__: puppi3-traffic
+          __panelId__: "321"
+        notification_settings: { receiver: puppi3 ntfy }

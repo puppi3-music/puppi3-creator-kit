@@ -1,0 +1,34 @@
+# Puppi3's Creator Kit: Ghost redirects for a kit site (Ghost Admin -> Settings -> Labs -> Redirects, or
+# scripts/ghost-admin.sh redirects kit/redirects.yaml). Ghost drops these comments when it takes the file.
+#
+# Tagged short links. Each one sends the visitor on with two tags that Ghost's analytics records and the kit's Grafana
+# (Growth) reads back:
+#   utm_source = the network:  bluesky, threads, instagram, tiktok, discord, youtube
+#   utm_medium = how the link was shared:
+#     bio     your profile's bio link on that network (/bsky, /ig, /th, /tk, /dis, /yt)
+#     social  a link inside a post: the kit's bridge writes /b/, /t/, /i/ (Instagram captions and the link-sticker
+#             Story link), /k/ links into what it posts; /d/ (Discord) and /y/ (YouTube) are for sharing by hand
+# Ghost merges the tags a link arrives with into the target's, and the target's win, so these keep their tags.
+# <path> must start with a letter, digit, - or _ ([\w-]), so /b//evil.com can't become an off-site //evil.com/
+# redirect. The bridge's SHORT_LINK_PREFIX must match the post-link letters here.
+302:
+  # Bio links (utm_medium=bio)
+  ^\/bsky\/?$: /?utm_source=bluesky&utm_medium=bio
+  ^\/ig\/?$: /?utm_source=instagram&utm_medium=bio
+  ^\/th\/?$: /?utm_source=threads&utm_medium=bio
+  ^\/tk\/?$: /?utm_source=tiktok&utm_medium=bio
+  ^\/dis\/?$: /?utm_source=discord&utm_medium=bio
+  ^\/yt\/?$: /?utm_source=youtube&utm_medium=bio
+  # Post links (utm_medium=social): /<letter>/<post path>, or just /<letter> for the home page
+  ^\/b\/?$: /?utm_source=bluesky&utm_medium=social
+  ^\/b\/([\w-].*?)\/?$: /$1/?utm_source=bluesky&utm_medium=social
+  ^\/t\/?$: /?utm_source=threads&utm_medium=social
+  ^\/t\/([\w-].*?)\/?$: /$1/?utm_source=threads&utm_medium=social
+  ^\/i\/?$: /?utm_source=instagram&utm_medium=social
+  ^\/i\/([\w-].*?)\/?$: /$1/?utm_source=instagram&utm_medium=social
+  ^\/k\/?$: /?utm_source=tiktok&utm_medium=social
+  ^\/k\/([\w-].*?)\/?$: /$1/?utm_source=tiktok&utm_medium=social
+  ^\/d\/?$: /?utm_source=discord&utm_medium=social
+  ^\/d\/([\w-].*?)\/?$: /$1/?utm_source=discord&utm_medium=social
+  ^\/y\/?$: /?utm_source=youtube&utm_medium=social
+  ^\/y\/([\w-].*?)\/?$: /$1/?utm_source=youtube&utm_medium=social

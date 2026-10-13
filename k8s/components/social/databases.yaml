@@ -1,0 +1,107 @@
+# Postiz's Postgres and Redis (the postiz stack's postiz-postgres and postiz-redis). The Services keep the stack's
+# names: they're in Postiz's DATABASE_URL and REDIS_URL and the bridge's POSTIZ_DB_HOST, which k8s/up.sh takes from
+# the stack as they are. The password is the site's POSTIZ_DB_PASSWORD (Secret "postiz", from secrets/postiz.env).
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postiz-postgres
+spec:
+  serviceName: postiz-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postiz-postgres
+  template:
+    metadata:
+      labels:
+        app: postiz-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
+          env:
+            - {name: POSTGRES_USER, value: postiz}
+            - {name: POSTGRES_DB, value: postiz}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: postiz, key: POSTIZ_DB_PASSWORD}
+            - {name: PGDATA, value: /var/lib/postgresql/data/pgdata}   # a folder Postgres makes (the volume's root has lost+found on some)
+          ports:
+            - {name: postgres, containerPort: 5432}
+          readinessProbe:
+            exec:
+              command: [pg_isready, -U, postiz, -d, postiz]
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests: {cpu: 50m, memory: 128Mi}
+            limits: {memory: 1Gi}
+          volumeMounts:
+            - {name: data, mountPath: /var/lib/postgresql/data}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postiz-postgres
+spec:
+  selector:
+    app: postiz-postgres
+  ports:
+    - {name: postgres, port: 5432, targetPort: postgres}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postiz-redis
+spec:
+  serviceName: postiz-redis
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postiz-redis
+  template:
+    metadata:
+      labels:
+        app: postiz-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7.2
+          ports:
+            - {name: redis, containerPort: 6379}
+          readinessProbe:
+            exec:
+              command: [sh, -c, 'redis-cli ping | grep -q PONG']
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests: {cpu: 20m, memory: 32Mi}
+            limits: {memory: 512Mi}
+          volumeMounts:
+            - {name: data, mountPath: /data}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postiz-redis
+spec:
+  selector:
+    app: postiz-redis
+  ports:
+    - {name: redis, port: 6379, targetPort: redis}

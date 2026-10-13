@@ -1,0 +1,2740 @@
+{
+  "id": null,
+  "uid": "puppi3-traffic",
+  "title": "puppi3 \u00b7 Traffic",
+  "description": "Visitors, pageviews, top pages, sources, locations and devices (Ghost analytics)",
+  "tags": [
+    "puppi3",
+    "ghost"
+  ],
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "liveNow": false,
+  "refresh": "5m",
+  "schemaVersion": 41,
+  "version": 1,
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "weekStart": "",
+  "links": [
+    {
+      "title": "Overview",
+      "type": "link",
+      "url": "/d/puppi3-overview",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Health",
+      "type": "link",
+      "url": "/d/puppi3-health",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Traffic",
+      "type": "link",
+      "url": "/d/puppi3-traffic",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Growth",
+      "type": "link",
+      "url": "/d/puppi3-growth",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Members & Newsletters",
+      "type": "link",
+      "url": "/d/puppi3-members",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Content & Engagement",
+      "type": "link",
+      "url": "/d/puppi3-content",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Social",
+      "type": "link",
+      "url": "/d/puppi3-social",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Platforms",
+      "type": "link",
+      "url": "/d/puppi3-platforms",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "name": "Ghost posts (pink lines)",
+        "enable": true,
+        "hide": false,
+        "iconColor": "#E535C8",
+        "datasource": {
+          "type": "mysql",
+          "uid": "ghost-mysql"
+        },
+        "target": {
+          "refId": "Anno",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT published_at AS time,\n       CONCAT('Published: ', title, '<br><a href=\"/d/puppi3-post?var-network=ghost&var-post=', id,\n              '&from=', CAST(UNIX_TIMESTAMP(published_at) * 1000 AS UNSIGNED), '&to=now\">This post up close \u203a</a>') AS text,\n       'ghost' AS tags\nFROM posts\nWHERE type = 'post' AND status = 'published' AND $__timeFilter(published_at)"
+        }
+      },
+      {
+        "name": "Social posts (violet lines)",
+        "enable": true,
+        "hide": false,
+        "iconColor": "#B28CFF",
+        "datasource": {
+          "type": "grafana-postgresql-datasource",
+          "uid": "postiz-pg"
+        },
+        "target": {
+          "refId": "Anno",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postiz-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT p.\"publishDate\" AS time,\n       initcap(replace(replace(i.\"providerIdentifier\", '-standalone', ''), '-', ' ')) || ': ' ||\n       left(regexp_replace(p.content, '<[^>]+>', '', 'g'), 100) ||\n       CASE WHEN i.\"providerIdentifier\" IN ('instagram', 'instagram-standalone', 'youtube', 'bluesky', 'threads', 'tiktok', 'tiktok-business')\n       THEN '<br><a href=\"/d/puppi3-post?var-network=' || replace(replace(i.\"providerIdentifier\", '-standalone', ''), '-business', '') ||\n       '&var-time=' || (extract(epoch FROM p.\"publishDate\") * 1000)::bigint ||\n       '&from=' || (extract(epoch FROM p.\"publishDate\") * 1000)::bigint || '&to=now\">This post up close \u203a</a>' ELSE '' END AS text,\n       'social,' || i.\"providerIdentifier\" AS tags\nFROM \"Post\" p JOIN \"Integration\" i ON i.id = p.\"integrationId\"\nWHERE p.\"deletedAt\" IS NULL AND p.\"parentPostId\" IS NULL AND p.state = 'PUBLISHED'\n  AND $__timeFilter(p.\"publishDate\")"
+        }
+      }
+    ]
+  },
+  "templating": {
+    "list": []
+  },
+  "panels": [
+    {
+      "id": 9000,
+      "type": "text",
+      "title": "",
+      "transparent": true,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 2
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**@SITE_HOST@**&nbsp;&nbsp;|&nbsp;&nbsp;[Overview](/d/puppi3-overview?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Health](/d/puppi3-health?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;**\u25b8 Traffic**&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Growth](/d/puppi3-growth?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Members & Newsletters](/d/puppi3-members?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Content & Engagement](/d/puppi3-content?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Social](/d/puppi3-social?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Platforms](/d/puppi3-platforms?${__url_time_range})&nbsp;&nbsp;|&nbsp;&nbsp;[Site \u2197](https://@SITE_HOST@)&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Ghost admin \u2197](https://@SITE_HOST@/ghost/)",
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        }
+      },
+      "pluginVersion": "13.0.2"
+    },
+    {
+      "id": 301,
+      "type": "stat",
+      "title": "Visitors right now",
+      "description": "Last 5 minutes",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "ghost-analytics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://tinybird-local:7181/v0/pipes/api_active_visitors.json",
+          "url_options": {
+            "method": "GET",
+            "data": "",
+            "params": [
+              {
+                "key": "site_uuid",
+                "value": "@GHOST_SITE_UUID@"
+              },
+              {
+                "key": "timezone",
+                "value": "@SITE_TIMEZONE@"
+              }
+            ]
+          },
+          "root_selector": "data",
+          "columns": [
+            {
+              "selector": "active_visitors",
+              "text": "Active",
+              "type": "number"
+            }
+          ],
+          "filters": [],
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "ghost-analytics"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 302,
+      "type": "stat",
+      "title": "Unique visitors",
+      "description": "Ghost counts a visitor as unique for one day: it uses no cookies, so it can't recognise someone the next day. This adds up each day's unique visitors over the selected range, the same number Ghost Admin shows as Unique visitors, so someone who visits on 3 days counts 3 times. For a range within one day Ghost reports hours instead, so a visitor who comes back hours later counts again.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "ghost-analytics"
+      },
+      "gridPos": {
+        "x": 4,
+        "y": 2,
+        "w": 5,
+        "h": 4
+      },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "timeseries",
+          "parser": "backend",
+          "url": "http://tinybird-local:7181/v0/pipes/api_kpis.json",
+          "url_options": {
+            "method": "GET",
+            "data": "",
+            "params": [
+              {
+                "key": "site_uuid",
+                "value": "@GHOST_SITE_UUID@"
+              },
+              {
+                "key": "timezone",
+                "value": "@SITE_TIMEZONE@"
+              },
+              {
+                "key": "date_from",
+                "value": "${__from:date:YYYY-MM-DD}"
+              },
+              {
+                "key": "date_to",
+                "value": "${__to:date:YYYY-MM-DD}"
+              }
+            ]
+          },
+          "root_selector": "data",
+          "columns": [
+            {
+              "selector": "date",
+              "text": "Date",
+              "type": "timestamp"
+            },
+            {
+              "selector": "visits",
+              "text": "Unique visitors",
+              "type": "number"
+            }
+          ],
+          "filters": [],
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "ghost-analytics"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "value",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 311,
+      "type": "stat",
+      "title": "Unique visitors per day",
+      "description": "Average unique visitors per day over the selected range: the total divided by the number of days, with days nobody visited counting as 0. The closest Ghost's analytics gets to \"how many people\". For a range shorter than a day, it's the total so far.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "ghost-analytics"
+      },
+      "gridPos": {
+        "x": 9,
+        "y": 2,
+        "w": 5,
+        "h": 4
+      },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://tinybird-local:7181/v0/pipes/api_kpis.json",
+          "url_options": {
+            "method": "GET",
+            "data": "",
+            "params": [
+              {
+                "key": "site_uuid",
+                "value": "@GHOST_SITE_UUID@"
+              },
+              {
+                "key": "timezone",
+                "value": "@SITE_TIMEZONE@"
+              },
+              {
+                "key": "date_from",
+                "value": "${__from:date:YYYY-MM-DD}"
+              },
+              {
+                "key": "date_to",
+                "value": "${__to:date:YYYY-MM-DD}"
+              }
+            ]
+          },
+          "root_selector": "data",
+          "columns": [
+            {
+              "selector": "visits",
+              "text": "visits",
+              "type": "number"
+            }
+          ],
+          "filters": [],
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "ghost-analytics"
+          },
+          "summarizeExpression": "sum(visits) / ((${__to:date:seconds} - ${__from:date:seconds}) > 86400 ? (${__to:date:seconds} - ${__from:date:seconds}) / 86400 : 1)",
+          "summarizeAlias": "per_day"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "decimals": 0,
+          "noValue": "0"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 303,
+      "type": "stat",
+      "title": "Pageviews",
+      "description": "Pages viewed in the selected range (Ghost's web analytics).",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "ghost-analytics"
+      },
+      "gridPos": {
+        "x": 14,
+        "y": 2,
+        "w": 5,
+        "h": 4
+      },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "timeseries",
+          "parser": "backend",
+          "url": "http://tinybird-local:7181/v0/pipes/api_kpis.json",
+          "url_options": {
+            "method": "GET",
+            "data": "",
+            "params": [
+              {
+                "key": "site_uuid",
+                "value": "@GHOST_SITE_UUID@"
+              },
+              {
+                "key": "timezone",
+                "value": "@SITE_TIMEZONE@"
+              },
+              {
+                "key": "date_from",
+                "value": "${__from:date:YYYY-MM-DD}"
+              },
+              {
+                "key": "date_to",
+                "value": "${__to:date:YYYY-MM-DD}"
+              }
+            ]
+          },
+          "root_selector": "data",
+          "columns": [
+            {
+              "selector": "date",
+              "text": "Date",
+              "type": "timestamp"
+            },
+            {
+              "selector": "pageviews",
+              "text": "Pageviews",
+              "type": "number"
+            }
+          ],
+          "filters": [],
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "ghost-analytics"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "textMode": "value",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 312,
+      "type": "stat",
+      "title": "Pages per visitor",
+      "description": "Pageviews divided by unique visitors over the selected range.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "ghost-analytics"
+      },
+      "gridPos": {
+        "x": 19,
+        "y": 2,
+        "w": 5,
+        "h": 4
+      },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://tinybird-local:7181/v0/pipes/api_kpis.json",
+          "url_options": {
+            "method": "GET",
+            "data": "",
+            "params": [
+              {
+                "key": "site_uuid",
+                "value": "@GHOST_SITE_UUID@"
+              },
+              {
+                "key": "timezone",
+                "value": "@SITE_TIMEZONE@"
+              },
+              {
+                "key": "date_from",
+                "value": "${__from:date:YYYY-MM-DD}"
+              },
+              {
+                "key": "date_to",
+                "value": "${__to:date:YYYY-MM-DD}"
+              }
+            ]
+          },
+          "root_selector": "data",
+          "columns": [
+            {
+              "selector": "visits",
+              "text": "visits",
+              "type": "number"
+            },
+            {
+              "selector": "pageviews",
+              "text": "pageviews",
+              "type": "number"
+            }
+          ],
+          "filters": [],
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "ghost-analytics"
+          },
+          "summarizeExpression": "sum(visits) > 0 ? sum(pageviews) / sum(visits) : 0",
+          "summarizeAlias": "pages_per_visitor"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "decimals": 1,
+          "noValue": "0"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 304,
+      "type": "stat",
+      "title": "Bounce rate",
+      "description": "Share of visits that saw only one page, over the selected range (each day weighted by its visits).",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "ghost-analytics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 12,
+        "h": 4
+      },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://tinybird-local:7181/v0/pipes/api_kpis.json",
+          "url_options": {
+            "method": "GET",
+            "data": "",
+            "params": [
+              {
+                "key": "site_uuid",
+                "value": "@GHOST_SITE_UUID@"
+              },
+              {
+                "key": "timezone",
+                "value": "@SITE_TIMEZONE@"
+              },
+              {
+                "key": "date_from",
+                "value": "${__from:date:YYYY-MM-DD}"
+              },
+              {
+                "key": "date_to",
+                "value": "${__to:date:YYYY-MM-DD}"
+              }
+            ]
+          },
+          "root_selector": "data",
+          "columns": [
+            {
+              "selector": "visits",
+              "text": "visits",
+              "type": "number"
+            },
+            {
+              "selector": "bounce_rate",
+              "text": "bounce_rate",
+              "type": "number"
+            }
+          ],
+          "filters": [],
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "ghost-analytics"
+          },
+          "computed_columns": [
+            {
+              "selector": "visits * bounce_rate",
+              "text": "bounced"
+            }
+          ],
+          "summarizeExpression": "sum(visits) > 0 ? sum(bounced) / sum(visits) : 0",
+          "summarizeAlias": "Bounce rate"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "decimals": 0,
+          "noValue": "0"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 305,
+      "type": "stat",
+      "title": "Avg visit length",
+      "description": "Average visit length over the selected range (each day weighted by its visits).",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "ghost-analytics"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 6,
+        "w": 12,
+        "h": 4
+      },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://tinybird-local:7181/v0/pipes/api_kpis.json",
+          "url_options": {
+            "method": "GET",
+            "data": "",
+            "params": [
+              {
+                "key": "site_uuid",
+                "value": "@GHOST_SITE_UUID@"
+              },
+              {
+                "key": "timezone",
+                "value": "@SITE_TIMEZONE@"
+              },
+              {
+                "key": "date_from",
+                "value": "${__from:date:YYYY-MM-DD}"
+              },
+              {
+                "key": "date_to",
+                "value": "${__to:date:YYYY-MM-DD}"
+              }
+            ]
+          },
+          "root_selector": "data",
+          "columns": [
+            {
+              "selector": "visits",
+              "text": "visits",
+              "type": "number"
+            },
+            {
+              "selector": "avg_session_sec",
+              "text": "avg_session_sec",
+              "type": "number"
+            }
+          ],
+          "filters": [],
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "ghost-analytics"
+          },
+          "computed_columns": [
+            {
+              "selector": "visits * avg_session_sec",
+              "text": "visit_secs"
+            }
+          ],
+          "summarizeExpression": "sum(visits) > 0 ? sum(visit_secs) / sum(visits) : 0",
+          "summarizeAlias": "Avg visit length"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "purple"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "s",
+          "decimals": 0,
+          "noValue": "0"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "auto",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 306,
+      "type": "timeseries",
+      "title": "Unique visitors & pageviews",
+      "description": "Daily totals (@TZ_NAME@ time). Pick a range of a few days or more; each bar is one day. Unique visitors are counted per day: Ghost can't recognise someone on a later day (no cookies). Dotted lines mark what you posted: pink = a Ghost post, violet = a social post (Postiz). Hover the triangle at the bottom of a line to see which; switch them off at the top of the dashboard.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "ghost-analytics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 10,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://tinybird-local:7181/v0/pipes/api_kpis.json",
+          "url_options": {
+            "method": "GET",
+            "data": "",
+            "params": [
+              {
+                "key": "site_uuid",
+                "value": "@GHOST_SITE_UUID@"
+              },
+              {
+                "key": "timezone",
+                "value": "@SITE_TIMEZONE@"
+              },
+              {
+                "key": "date_from",
+                "value": "${__from:date:YYYY-MM-DD}"
+              },
+              {
+                "key": "date_to",
+                "value": "${__to:date:YYYY-MM-DD}"
+              }
+            ]
+          },
+          "root_selector": "data",
+          "columns": [
+            {
+              "selector": "date",
+              "text": "Date",
+              "type": "string"
+            },
+            {
+              "selector": "visits",
+              "text": "Unique visitors",
+              "type": "number"
+            },
+            {
+              "selector": "pageviews",
+              "text": "Pageviews",
+              "type": "number"
+            }
+          ],
+          "filters": [],
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "ghost-analytics"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 60,
+            "showPoints": "never",
+            "drawStyle": "bars",
+            "barAlignment": 0
+          },
+          "min": 0,
+          "decimals": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Unique visitors"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pageviews"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "light-purple"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "fields": {},
+            "conversions": [
+              {
+                "targetField": "Date",
+                "destinationType": "time",
+                "dateFormat": "YYYY-MM-DD",
+                "timezone": "@SITE_TIMEZONE@"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 307,
+      "type": "table",
+      "title": "Top pages",
+      "description": "Most-viewed pages in the selected range (Ghost's web analytics).",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "ghost-analytics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 12,
+        "h": 10
+      },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://tinybird-local:7181/v0/pipes/api_top_pages.json",
+          "url_options": {
+            "method": "GET",
+            "data": "",
+            "params": [
+              {
+                "key": "site_uuid",
+                "value": "@GHOST_SITE_UUID@"
+              },
+              {
+                "key": "timezone",
+                "value": "@SITE_TIMEZONE@"
+              },
+              {
+                "key": "date_from",
+                "value": "${__from:date:YYYY-MM-DD}"
+              },
+              {
+                "key": "date_to",
+                "value": "${__to:date:YYYY-MM-DD}"
+              },
+              {
+                "key": "limit",
+                "value": "25"
+              }
+            ]
+          },
+          "root_selector": "data",
+          "columns": [
+            {
+              "selector": "pathname",
+              "text": "Page",
+              "type": "string"
+            },
+            {
+              "selector": "visits",
+              "text": "Visitors",
+              "type": "number"
+            }
+          ],
+          "filters": [],
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "ghost-analytics"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 308,
+      "type": "table",
+      "title": "Top sources",
+      "description": "Referring site of each visit (empty = direct) \"Facebook\" is mostly Instagram: Instagram often sends people through a Facebook address when they tap a link. \"Your own site\" is visits that started on @SITE_HOST@ itself (you, from Ghost Admin or previews, or someone still browsing past midnight), not a source to grow.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "ghost-analytics"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 18,
+        "w": 12,
+        "h": 10
+      },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://tinybird-local:7181/v0/pipes/api_top_sources.json",
+          "url_options": {
+            "method": "GET",
+            "data": "",
+            "params": [
+              {
+                "key": "site_uuid",
+                "value": "@GHOST_SITE_UUID@"
+              },
+              {
+                "key": "timezone",
+                "value": "@SITE_TIMEZONE@"
+              },
+              {
+                "key": "date_from",
+                "value": "${__from:date:YYYY-MM-DD}"
+              },
+              {
+                "key": "date_to",
+                "value": "${__to:date:YYYY-MM-DD}"
+              },
+              {
+                "key": "limit",
+                "value": "25"
+              }
+            ]
+          },
+          "root_selector": "data",
+          "columns": [
+            {
+              "selector": "source",
+              "text": "Source",
+              "type": "string"
+            },
+            {
+              "selector": "visits",
+              "text": "Visitors",
+              "type": "number"
+            }
+          ],
+          "filters": [],
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "ghost-analytics"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Source"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Facebook": {
+                        "text": "Facebook (mostly Instagram links)",
+                        "index": 0
+                      },
+                      "@SITE_HOST@": {
+                        "text": "Your own site",
+                        "index": 1
+                      },
+                      "ig": {
+                        "text": "Instagram (tag: ig, set by Instagram)",
+                        "index": 2
+                      },
+                      "instagram": {
+                        "text": "Instagram (tag: instagram)",
+                        "index": 3
+                      },
+                      "bluesky": {
+                        "text": "Bluesky (tag: bluesky)",
+                        "index": 4
+                      },
+                      "threads": {
+                        "text": "Threads (tag: threads)",
+                        "index": 5
+                      },
+                      "tiktok": {
+                        "text": "TikTok (tag: tiktok)",
+                        "index": 6
+                      },
+                      "facebook": {
+                        "text": "Facebook (tag: facebook)",
+                        "index": 7
+                      },
+                      "x": {
+                        "text": "X (tag: x)",
+                        "index": 8
+                      },
+                      "discord": {
+                        "text": "Discord (tag: discord)",
+                        "index": 9
+                      },
+                      "youtube": {
+                        "text": "YouTube (tag: youtube)",
+                        "index": 10
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "empty",
+                      "result": {
+                        "text": "Direct / unknown"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "Direct / unknown"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 309,
+      "type": "table",
+      "title": "Top locations",
+      "description": "Visitors by country (ISO code). Ghost's tracker guesses the country from the browser's time zone, never the IP. Since the page-hit-country plugin (Traefik), a time zone with no country (UTC: privacy browsers, scrapers) gets Cloudflare's country for the visitor's IP instead. Unknown = neither gave one (Tor, or visits from before the plugin).",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "ghost-analytics"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://tinybird-local:7181/v0/pipes/api_top_locations.json",
+          "url_options": {
+            "method": "GET",
+            "data": "",
+            "params": [
+              {
+                "key": "site_uuid",
+                "value": "@GHOST_SITE_UUID@"
+              },
+              {
+                "key": "timezone",
+                "value": "@SITE_TIMEZONE@"
+              },
+              {
+                "key": "date_from",
+                "value": "${__from:date:YYYY-MM-DD}"
+              },
+              {
+                "key": "date_to",
+                "value": "${__to:date:YYYY-MM-DD}"
+              },
+              {
+                "key": "limit",
+                "value": "15"
+              }
+            ]
+          },
+          "root_selector": "data",
+          "columns": [
+            {
+              "selector": "location",
+              "text": "Country",
+              "type": "string"
+            },
+            {
+              "selector": "visits",
+              "text": "Visitors",
+              "type": "number"
+            }
+          ],
+          "filters": [],
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "ghost-analytics"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Country"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "empty",
+                      "result": {
+                        "text": "Unknown"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "Unknown"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 310,
+      "type": "piechart",
+      "title": "Devices",
+      "description": "Visitors by device type in the selected range (Ghost's web analytics).",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "ghost-analytics"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 28,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://tinybird-local:7181/v0/pipes/api_top_devices.json",
+          "url_options": {
+            "method": "GET",
+            "data": "",
+            "params": [
+              {
+                "key": "site_uuid",
+                "value": "@GHOST_SITE_UUID@"
+              },
+              {
+                "key": "timezone",
+                "value": "@SITE_TIMEZONE@"
+              },
+              {
+                "key": "date_from",
+                "value": "${__from:date:YYYY-MM-DD}"
+              },
+              {
+                "key": "date_to",
+                "value": "${__to:date:YYYY-MM-DD}"
+              }
+            ]
+          },
+          "root_selector": "data",
+          "columns": [
+            {
+              "selector": "device",
+              "text": "Device",
+              "type": "string"
+            },
+            {
+              "selector": "visits",
+              "text": "Visitors",
+              "type": "number"
+            }
+          ],
+          "filters": [],
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "ghost-analytics"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "pieType": "donut",
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 9101,
+      "type": "row",
+      "title": "Google Search (Search Console)",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 36,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 320,
+      "type": "stat",
+      "title": "Google Search (last 28 days)",
+      "description": "From Google Search Console, read by the bridge (search.json): clicks from Google's results to the site, times the site showed in them, the share clicked, and its average place in the results (1 = top). Google fills in a day 2-3 days late. Not affected by the dashboard's time range.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 37,
+        "w": 16,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/search.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "totals",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "clicks28",
+              "text": "Clicks",
+              "type": "number"
+            },
+            {
+              "selector": "impressions28",
+              "text": "Impressions",
+              "type": "number"
+            },
+            {
+              "selector": "ctr28",
+              "text": "Click rate",
+              "type": "number"
+            },
+            {
+              "selector": "position28",
+              "text": "Average position",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#4285F4"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "noValue": "\u2013"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Click rate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Average position"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "justifyMode": "center",
+        "orientation": "vertical",
+        "wideLayout": false
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 321,
+      "type": "table",
+      "title": "Search Console numbers: status",
+      "description": "When the bridge last collected them, and what went wrong if anything (no SEARCH_CONSOLE_KEY, or the service account isn't a user of the property)",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 37,
+        "w": 8,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/search.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "$merge([{\"Updated\": updatedAt, \"Problems\": $count(errors) = 0 ? \"none\" : $join(errors, \"; \")}])",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "Updated",
+              "text": "Updated",
+              "type": "timestamp"
+            },
+            {
+              "selector": "Problems",
+              "text": "Problems",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "custom": {
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": true
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 322,
+      "type": "timeseries",
+      "title": "Google Search clicks & impressions per day",
+      "description": "Per day from Search Console (up to 16 months back, and kept by the bridge after that). The last 2-3 days aren't in yet. Follows the dashboard's time range.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 41,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/search.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "daily",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "date",
+              "text": "Date",
+              "type": "string"
+            },
+            {
+              "selector": "clicks",
+              "text": "Clicks",
+              "type": "number"
+            },
+            {
+              "selector": "impressions",
+              "text": "Impressions",
+              "type": "number"
+            },
+            {
+              "selector": "position",
+              "text": "Avg position",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "auto",
+            "spanNulls": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Clicks"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "bars"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 60
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#4285F4"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Impressions"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg position"
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": false,
+                  "tooltip": false
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "fields": {},
+            "conversions": [
+              {
+                "targetField": "Date",
+                "destinationType": "time",
+                "dateFormat": "YYYY-MM-DD",
+                "timezone": "utc"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 323,
+      "type": "table",
+      "title": "What people search for (last 28 days)",
+      "description": "The searches the site showed up for in Google, most clicked first (Google leaves out rare ones for privacy).",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 49,
+        "w": 12,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/search.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "queries",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "query",
+              "text": "Search",
+              "type": "string"
+            },
+            {
+              "selector": "clicks",
+              "text": "Clicks",
+              "type": "number"
+            },
+            {
+              "selector": "impressions",
+              "text": "Impressions",
+              "type": "number"
+            },
+            {
+              "selector": "ctr",
+              "text": "Click rate",
+              "type": "number"
+            },
+            {
+              "selector": "position",
+              "text": "Avg position",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "noValue": "\u2013"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Click rate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg position"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Clicks",
+            "desc": true
+          }
+        ]
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 324,
+      "type": "table",
+      "title": "Pages people find in Google (last 28 days)",
+      "description": "The site's pages in Google's results, most clicked first.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 49,
+        "w": 12,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/search.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "pages",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "page",
+              "text": "Page",
+              "type": "string"
+            },
+            {
+              "selector": "clicks",
+              "text": "Clicks",
+              "type": "number"
+            },
+            {
+              "selector": "impressions",
+              "text": "Impressions",
+              "type": "number"
+            },
+            {
+              "selector": "ctr",
+              "text": "Click rate",
+              "type": "number"
+            },
+            {
+              "selector": "position",
+              "text": "Avg position",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "noValue": "\u2013"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Click rate"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg position"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Page"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open",
+                    "url": "https://@SITE_HOST@${__value.raw}",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Clicks",
+            "desc": true
+          }
+        ]
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 9102,
+      "type": "row",
+      "title": "Everything Cloudflare answered (bots included)",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 60,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 330,
+      "type": "stat",
+      "title": "Cloudflare (last 30 days)",
+      "description": "Every request Cloudflare answered for @SITE_HOST@, read by the bridge (cloudflare.json): bots, feeds and cached pages included, so far more than the visitors above (Ghost's analytics count people in browsers). Page views here minus Ghost's pageviews is roughly the bots. Not affected by the dashboard's time range.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 61,
+        "w": 16,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/cloudflare.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "totals",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "requests30",
+              "text": "Requests",
+              "type": "number"
+            },
+            {
+              "selector": "pageViews30",
+              "text": "Page views, bots too",
+              "type": "number"
+            },
+            {
+              "selector": "cachedPct30",
+              "text": "Served from cache",
+              "type": "number"
+            },
+            {
+              "selector": "threats30",
+              "text": "Threats blocked",
+              "type": "number"
+            },
+            {
+              "selector": "bytes30",
+              "text": "Data sent",
+              "type": "number"
+            },
+            {
+              "selector": "errors5xx30",
+              "text": "5xx errors",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#F38020"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "noValue": "\u2013"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Served from cache"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Data sent"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "justifyMode": "center",
+        "orientation": "vertical",
+        "wideLayout": false
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 331,
+      "type": "table",
+      "title": "Cloudflare numbers: status",
+      "description": "When the bridge last collected them, and what went wrong if anything (no CLOUDFLARE_API_TOKEN / CLOUDFLARE_ZONE_ID, or the token lacks Zone > Analytics > Read)",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 61,
+        "w": 8,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/cloudflare.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "$merge([{\"Updated\": updatedAt, \"Problems\": $count(errors) = 0 ? \"none\" : $join(errors, \"; \")}])",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "Updated",
+              "text": "Updated",
+              "type": "timestamp"
+            },
+            {
+              "selector": "Problems",
+              "text": "Problems",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "custom": {
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": true
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 332,
+      "type": "timeseries",
+      "title": "Requests per day, as Cloudflare saw them",
+      "description": "Per day (UTC) from Cloudflare, kept by the bridge (400 days) from the day it began collecting (30 days back on its first run). Follows the dashboard's time range.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 65,
+        "w": 16,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/cloudflare.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "daily",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "date",
+              "text": "Date",
+              "type": "string"
+            },
+            {
+              "selector": "requests",
+              "text": "Requests",
+              "type": "number"
+            },
+            {
+              "selector": "cached",
+              "text": "From cache",
+              "type": "number"
+            },
+            {
+              "selector": "pageViews",
+              "text": "Page views, bots too",
+              "type": "number"
+            },
+            {
+              "selector": "uniques",
+              "text": "Unique IPs",
+              "type": "number"
+            },
+            {
+              "selector": "threats",
+              "text": "Threats",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "auto",
+            "spanNulls": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Threats"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Unique IPs"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Requests"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#F38020"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "From cache"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Page views, bots too"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "light-purple"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "fields": {},
+            "conversions": [
+              {
+                "targetField": "Date",
+                "destinationType": "time",
+                "dateFormat": "YYYY-MM-DD",
+                "timezone": "utc"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 333,
+      "type": "table",
+      "title": "Countries (last 30 days, all requests)",
+      "description": "Where requests came from, bots included (Cloudflare's country for each IP). Ghost's Top locations above counts people only.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 65,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/cloudflare.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "countries",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "country",
+              "text": "Country",
+              "type": "string"
+            },
+            {
+              "selector": "requests",
+              "text": "Requests",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "noValue": "\u2013",
+          "custom": {
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Requests"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "gauge",
+                  "mode": "basic"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    }
+  ]
+}

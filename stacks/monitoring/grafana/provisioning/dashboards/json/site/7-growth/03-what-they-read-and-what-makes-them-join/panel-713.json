@@ -1,0 +1,356 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 713,
+    "title": "Content: what people read, and what makes them join",
+    "description": "Each page's unique visitors in the time range, with the signups and comments it got in that range (a signup counts for the page the person joined on). Posts that bring members are the ones to make more of; pages without a title (like the homepage) aren't posts. Click a path for every social post about that page (the Page dashboard).",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "ghost-analytics"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "pathname",
+                      "text": "Path",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "visits",
+                      "text": "Visitors",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "data",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://tinybird-local:7181/v0/pipes/api_top_pages.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "site_uuid",
+                        "value": "@GHOST_SITE_UUID@"
+                      },
+                      {
+                        "key": "timezone",
+                        "value": "@SITE_TIMEZONE@"
+                      },
+                      {
+                        "key": "date_from",
+                        "value": "${__from:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "date_to",
+                        "value": "${__to:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "limit",
+                        "value": "200"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          },
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "mysql",
+                "version": "v0",
+                "datasource": {
+                  "name": "ghost-mysql"
+                },
+                "spec": {
+                  "editorMode": "code",
+                  "format": "table",
+                  "rawQuery": true,
+                  "rawSql": "SELECT CONCAT('/', p.slug, '/') AS Path, p.title AS Post, p.published_at AS Published,\n  (SELECT COUNT(*) FROM members_created_events m WHERE m.attribution_id = p.id AND $__timeFilter(m.created_at)) AS Signups,\n  (SELECT COUNT(*) FROM comments c WHERE c.post_id = p.id AND c.status = 'published' AND $__timeFilter(c.created_at)) AS Comments\nFROM posts p WHERE p.status = 'published'\nUNION ALL\n-- signups on pages that aren't posts (the homepage, tag pages...) are recorded by their URL\nSELECT attribution_url, NULL, NULL, COUNT(*), 0 FROM members_created_events\nWHERE (attribution_type IS NULL OR attribution_type NOT IN ('post', 'page')) AND attribution_url LIKE '/%'\n  AND $__timeFilter(created_at) GROUP BY attribution_url"
+                }
+              },
+              "refId": "B",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "joinByField",
+            "spec": {
+              "options": {
+                "byField": "Path",
+                "mode": "outer"
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "renameByRegex",
+            "spec": {
+              "options": {
+                "regex": "^(.*) A$",
+                "renamePattern": "$1"
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "filterByValue",
+            "spec": {
+              "options": {
+                "filters": [
+                  {
+                    "config": {
+                      "id": "isNull",
+                      "options": {}
+                    },
+                    "fieldName": "Visitors"
+                  },
+                  {
+                    "config": {
+                      "id": "regex",
+                      "options": {
+                        "value": "${hide_home:raw}"
+                      }
+                    },
+                    "fieldName": "Path"
+                  }
+                ],
+                "match": "any",
+                "type": "exclude"
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "calculateField",
+            "spec": {
+              "options": {
+                "alias": "Visitor \u2192 member",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Signups"
+                    }
+                  },
+                  "operator": "/",
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Visitors"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "replaceFields": false
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "organize",
+            "spec": {
+              "options": {
+                "indexByName": {
+                  "Comments": 6,
+                  "Path": 1,
+                  "Post": 0,
+                  "Published": 2,
+                  "Signups": 4,
+                  "Visitor \u2192 member": 5,
+                  "Visitors": 3
+                }
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "sortBy",
+            "spec": {
+              "options": {
+                "sort": [
+                  {
+                    "desc": true,
+                    "field": "Visitors"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "limit",
+            "spec": {
+              "options": {
+                "limitField": 30
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "table",
+      "version": "",
+      "spec": {
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": true,
+              "displayName": "Visitors"
+            }
+          ]
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "auto"
+              },
+              "filterable": true
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Visitor \u2192 member"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "percentunit"
+                },
+                {
+                  "id": "decimals",
+                  "value": 1
+                },
+                {
+                  "id": "mappings",
+                  "value": [
+                    {
+                      "options": {
+                        "match": "nan",
+                        "result": {
+                          "text": "0%"
+                        }
+                      },
+                      "type": "special"
+                    },
+                    {
+                      "options": {
+                        "match": "null",
+                        "result": {
+                          "text": "0%"
+                        }
+                      },
+                      "type": "special"
+                    }
+                  ]
+                },
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-text"
+                  }
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "continuous-RdYlGr"
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Visitors"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "mode": "basic",
+                    "type": "gauge",
+                    "valueDisplayMode": "text"
+                  }
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "fixedColor": "purple",
+                    "mode": "fixed"
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Published"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "dateTimeAsLocalNoDateIfToday"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Path"
+              },
+              "properties": [
+                {
+                  "id": "links",
+                  "value": [
+                    {
+                      "title": "Every post about this page (the Page dashboard)",
+                      "url": "/d/puppi3-page?var-page=${__data.fields.Path}&${__url_time_range}"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

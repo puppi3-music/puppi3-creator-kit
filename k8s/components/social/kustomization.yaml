@@ -1,0 +1,29 @@
+# Module social: Postiz and the Ghost -> social bridge, as the postiz stack runs them.
+# - postiz: the scheduler; databases.yaml: its Postgres and Redis; temporal.yaml: Temporal with its Postgres and
+#   Elasticsearch. Every Service keeps the stack's name, so the addresses in its environment work as they are.
+# - bridge.yaml: the bridge, its code in the kit's image (k8s/images/ghost-bridge/), its history on a volume.
+# - Postiz's and the bridge's settings: Secrets postiz-env and postiz-ghost-bridge-env, which k8s/up.sh renders from
+#   the stack's own environment lists (docker compose config, with the site's profile and secrets/postiz.env), so
+#   the defaults and the settings' notes stay in stacks/postiz/compose.yaml. up.sh changes only what differs here:
+#   the bridge's GHOST_API_URL (Service ghost), LIVE_STATS/LIVE_MOUNT from the live module, and LIVE_RELAYS (the
+#   relays' listeners counted too).
+# - social.yml: Traefik's routes, the stack's labels as a file, the same router names.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - postiz.yaml
+  - databases.yaml
+  - temporal.yaml
+  - bridge.yaml
+patches:
+  - path: traefik.yaml
+    target: {kind: Deployment, name: traefik}
+configMapGenerator:
+  - name: traefik-dynamic
+    behavior: merge
+    files:
+      - social.yml
+  # Temporal's dynamic config: the Compose kit's copy (the NAS keeps its own file)
+  - name: temporal-dynamicconfig
+    files:
+      - development-sql.yaml=../../../kit/postiz/dynamicconfig/development-sql.yaml

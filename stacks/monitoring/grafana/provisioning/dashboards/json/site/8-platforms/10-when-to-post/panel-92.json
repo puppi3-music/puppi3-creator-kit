@@ -1,0 +1,334 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 92,
+    "title": "When to post: what kind of post",
+    "description": "How each kind of post (Reel, Photo, Short, Mix, a Ghost post sent as a newsletter or not...) does against your average kind on that network, from the same model as the two tables above: it's what lets them not credit a time for the kind of post that happened to go out then. Each network's posts at least 3 days old, on its main number or the one picked in that network's dropdown above (Compared on), as it stood at day 3. 1.5\u00d7 = half again as much as the average kind, 0.5\u00d7 = half; green from 1.1\u00d7, red under 0.9\u00d7. Confidence as above: High plain, Medium a little faded, Low faded and striped (always for a single post); the tooltip (corner triangle) gives the posts, their plain median, the percentage, and how often shuffled kinds do as well. Only networks with two kinds or more are listed. From the bridge (timing.json).",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "Network",
+                      "text": "Network",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Metric",
+                      "text": "Compared on",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Kind",
+                      "text": "Kind",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Posts",
+                      "text": "Posts",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "vs average",
+                      "text": "vs average",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "vs average tip",
+                      "text": "vs average tip",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "vs average style",
+                      "text": "vs average style",
+                      "type": "string"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "$append([], kinds)",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/timing.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "ghost",
+                        "value": "${cmp_ghost}"
+                      },
+                      {
+                        "key": "instagram",
+                        "value": "${cmp_instagram}"
+                      },
+                      {
+                        "key": "tiktok",
+                        "value": "${cmp_tiktok}"
+                      },
+                      {
+                        "key": "threads",
+                        "value": "${cmp_threads}"
+                      },
+                      {
+                        "key": "bluesky",
+                        "value": "${cmp_bluesky}"
+                      },
+                      {
+                        "key": "youtube",
+                        "value": "${cmp_youtube}"
+                      },
+                      {
+                        "key": "soundcloud",
+                        "value": "${cmp_soundcloud}"
+                      },
+                      {
+                        "key": "mixcloud",
+                        "value": "${cmp_mixcloud}"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "sortBy",
+            "spec": {
+              "options": {
+                "sort": [
+                  {
+                    "field": "Network",
+                    "desc": false
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "organize",
+            "spec": {
+              "options": {
+                "indexByName": {
+                  "Network": 0,
+                  "Compared on": 1,
+                  "Kind": 2,
+                  "Posts": 3,
+                  "vs average": 4,
+                  "vs average tip": 5,
+                  "vs average style": 6
+                },
+                "excludeByName": {},
+                "renameByName": {}
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "table",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "cellHeight": "sm",
+          "showHeader": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "red"
+                },
+                {
+                  "value": 0.9,
+                  "color": "yellow"
+                },
+                {
+                  "value": 1.1,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "thresholds"
+            },
+            "noValue": "Not enough posts yet, or no network has two kinds of post yet",
+            "unit": "suffix:\u00d7",
+            "decimals": 2,
+            "custom": {
+              "align": "center",
+              "cellOptions": {
+                "type": "color-background",
+                "mode": "basic"
+              }
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Network"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "auto"
+                  }
+                },
+                {
+                  "id": "unit",
+                  "value": "none"
+                },
+                {
+                  "id": "decimals",
+                  "value": 0
+                },
+                {
+                  "id": "custom.align",
+                  "value": "left"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Compared on"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "auto"
+                  }
+                },
+                {
+                  "id": "unit",
+                  "value": "none"
+                },
+                {
+                  "id": "decimals",
+                  "value": 0
+                },
+                {
+                  "id": "custom.align",
+                  "value": "left"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Kind"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "auto"
+                  }
+                },
+                {
+                  "id": "unit",
+                  "value": "none"
+                },
+                {
+                  "id": "decimals",
+                  "value": 0
+                },
+                {
+                  "id": "custom.align",
+                  "value": "left"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Posts"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "auto"
+                  }
+                },
+                {
+                  "id": "unit",
+                  "value": "none"
+                },
+                {
+                  "id": "decimals",
+                  "value": 0
+                },
+                {
+                  "id": "custom.align",
+                  "value": "left"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "vs average"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "vs the average kind"
+                },
+                {
+                  "id": "custom.styleField",
+                  "value": "vs average style"
+                },
+                {
+                  "id": "custom.tooltip.field",
+                  "value": "vs average tip"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byRegexp",
+                "options": "/ (tip|style)$/"
+              },
+              "properties": [
+                {
+                  "id": "custom.hidden",
+                  "value": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

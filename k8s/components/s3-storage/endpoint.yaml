@@ -1,0 +1,11 @@
+# A bucket somewhere other than AWS's S3 (the in-cluster gateway, Cloud Storage's S3 API): ConfigMap "s3"'s
+# S3_ENDPOINT, the bucket as a path (<endpoint>/<bucket>/...: no bucket names in DNS)
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: storage__KitS3Storage__endpoint
+    valueFrom:
+      configMapKeyRef: {name: s3, key: S3_ENDPOINT}
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value: {name: storage__KitS3Storage__forcePathStyle, value: "true"}

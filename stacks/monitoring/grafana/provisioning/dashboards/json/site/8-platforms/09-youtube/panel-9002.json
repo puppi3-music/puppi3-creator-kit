@@ -1,0 +1,33 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 9002,
+    "title": "",
+    "description": "",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [],
+        "transformations": [],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "text",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "content": "The YouTube channel connected in Postiz, read from YouTube by the bridge ${every_youtube} (Data API for subscribers and videos, Analytics API for each day). YouTube fills in a day 2-3 days late.",
+          "mode": "markdown"
+        },
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": []
+        }
+      }
+    },
+    "transparent": true
+  }
+}

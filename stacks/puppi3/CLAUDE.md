@@ -1,0 +1,20 @@
+# stacks/puppi3/
+
+The site itself: Ghost and its database, and Ghost's own web analytics (the `analytics` module). The folder's name
+is the kit's, like `ID_PREFIX`'s default. In a kit site, Ghost's container is `<ID_PREFIX>-ghost` (`kit/profiles/puppi3.yaml`).
+
+- Ghost 6 (`config.production.json` mounted as a single file: `kit/setup.sh` writes it in the site's folder, with the
+  mail settings; it applies only when Ghost restarts), MySQL 8, and with `analytics`: traffic-analytics, tinybird-local
+  (pinned by digest, no host port), tinybird-sync and tb-setup (writes `tinybird/tokens.env`, then idles;
+  `TB_SETUP_EXIT=1` makes it exit instead, for Kubernetes' Job in `k8s/components/analytics/`).
+- Ghost and traffic-analytics are on the `proxy` network: Traefik (`dynamic/puppi3.yml`) and the bridge reach them by
+  name (`GHOST_UPSTREAM`, `traffic-analytics:3000`), the same on Compose and Kubernetes. Ghost reaches MySQL by its
+  container name (`GHOST_DB_HOST`), never a generic one like `db`, which another stack on `proxy` might answer to.
+- Restarting Ghost takes the site down for a moment: the theme, routes, redirects, code injection and theme settings
+  go through its Admin API instead (`scripts/ghost-admin.sh`).
+- Site values come from the instance profile (`instances/CLAUDE.md`): `SITE_HOST` (url, tracker endpoints) and
+  `DATA_DIR` (bind mounts), required.
+- `grafana-ro.sh`: Grafana's read-only MySQL login. `grafana_ro` has SELECT on only the tables in its `TABLES`, never
+  users, sessions, api_keys or settings (the monitoring module's `grants.sh` uses its `--sql`).
+  `stacks/monitoring/grafana/ro-tables.py --check` keeps the dashboards to that list. Restart Grafana after a grant
+  change: pooled connections keep their old rights until they reconnect.

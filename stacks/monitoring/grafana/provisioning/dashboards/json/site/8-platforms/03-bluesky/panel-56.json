@@ -1,0 +1,129 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 56,
+    "title": "Bluesky: posts (30 days)",
+    "description": "Posts made in the last 30 days and the likes, reposts and replies they've had. Not affected by the dashboard's time range.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "posts30",
+                      "text": "Posts (30 days)",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "likes30",
+                      "text": "Likes on them",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "reposts30",
+                      "text": "Reposts on them",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "replies30",
+                      "text": "Replies on them",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "totals",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/bluesky.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "organize",
+            "spec": {
+              "options": {
+                "excludeByName": {},
+                "indexByName": {
+                  "Posts (30 days)": 0,
+                  "Likes on them": 1,
+                  "Reposts on them": 2,
+                  "Replies on them": 3
+                },
+                "renameByName": {}
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "stat",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "center",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "value_and_name",
+          "orientation": "vertical",
+          "wideLayout": false,
+          "text": {
+            "titleSize": 12
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "#1185FE"
+            },
+            "noValue": "\u2013"
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

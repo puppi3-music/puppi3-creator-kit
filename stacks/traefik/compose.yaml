@@ -1,0 +1,87 @@
+services:
+  traefik:
+    image: traefik:v3.7.13   # pinned; to upgrade, read the release notes, change the tag, then stop and start the stack
+    restart: unless-stopped
+    container_name: traefik
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    command:
+      - --api.dashboard=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.file.directory=/dynamic
+      - --providers.file.watch=true
+      - --entrypoints.web.address=:80
+      - --entrypoints.https.address=:443
+      - --entrypoints.https.transport.respondingTimeouts.idleTimeout=3600
+      # The same 60 s cut on https: big video uploads to Ghost Admin (e.g. from the home network, straight to the
+      # server, skipping Cloudflare's 100 MB cap) need longer.
+      - --entrypoints.https.transport.respondingTimeouts.readTimeout=900
+      # Believe X-Forwarded-For & co. only from Cloudflare (same ranges as dynamic/cloudflare-only.yml and
+      # dynamic/real-ip.yml; keep all three in step), so the sites see the visitor's address instead of a
+      # Cloudflare server's. Cloudflare keeps a visitor's own X-Forwarded-For in front, so Ghost's routes also
+      # use real-ip, which replaces it with Cloudflare's CF-Connecting-IP.
+      - --entrypoints.https.forwardedHeaders.trustedIPs=173.245.48.0/20,103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,141.101.64.0/18,108.162.192.0/18,190.93.240.0/20,188.114.96.0/20,197.234.240.0/22,198.41.128.0/17,162.158.0.0/15,104.16.0.0/13,104.24.0.0/14,172.64.0.0/13,131.0.72.0/22,2400:cb00::/32,2606:4700::/32,2803:f800::/32,2405:b500::/32,2405:8100::/32,2a06:98c0::/29,2c0f:f248::/32
+      - --entrypoints.web.transport.respondingTimeouts.idleTimeout=3600
+      # Traefik v3 cuts any request still being read after 60 s, so big LAN uploads (ntfy attachments) died
+      # part way with nothing in the app's logs. 15 min, as on https.
+      - --entrypoints.web.transport.respondingTimeouts.readTimeout=900
+      - --certificatesresolvers.cf.acme.dnschallenge=true
+      - --certificatesresolvers.cf.acme.dnschallenge.provider=cloudflare
+      - --certificatesresolvers.cf.acme.email=${ACME_EMAIL:?set ACME_EMAIL in the stack .env}
+      - --certificatesresolvers.cf.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.cf.acme.dnschallenge.delaybeforecheck=60
+      # A resolver for sites without Cloudflare DNS (TLS challenge on :443); puppi3 uses cf (TLS_RESOLVER)
+      - --certificatesresolvers.le.acme.tlschallenge=true
+      - --certificatesresolvers.le.acme.email=${ACME_EMAIL:?set ACME_EMAIL in the stack .env}
+      - --certificatesresolvers.le.acme.storage=/letsencrypt/acme-le.json
+      - --entrypoints.metrics.address=:8082
+      - --metrics.prometheus=true
+      - --metrics.prometheus.entrypoint=metrics
+      - --metrics.prometheus.addrouterslabels=true
+      - --providers.docker.network=proxy
+      # Staging's red "STAGING" bar (dynamic/staging-bar.yml): a plugin in plugins-local/, loaded at startup,
+      # so a change to it needs a Traefik restart. Only staging's routers use it.
+      - --experimental.localPlugins.stagingbar.moduleName=creatorkit/stagingbar
+      # The visitor's real address for Ghost (dynamic/real-ip.yml): the same, a restart for plugin changes.
+      - --experimental.localPlugins.realip.moduleName=creatorkit/realip
+      # The country of a Ghost page hit from Cloudflare when the tracker's time zone guess gave none
+      # (dynamic/page-hit-country.yml): the same, a restart for plugin changes.
+      - --experimental.localPlugins.pagehitcountry.moduleName=creatorkit/pagehitcountry
+    ports:
+      - 80:80
+      - 443:443
+      - 28030:8080
+    environment:
+      - CLOUDFLARE_DNS_API_TOKEN=${CLOUDFLARE_DNS_API_TOKEN}
+      # The site's values for dynamic/*.yml, which are Go templates (instances/CLAUDE.md); empty = the templates'
+      # defaults (SITE_HOST has none: it must be set). Read at Traefik's start, so a change needs the stack recreated.
+      - SITE_HOST=${SITE_HOST:?set it in the site's profile}
+      - ID_PREFIX=${ID_PREFIX:-}
+      - MODULES=${MODULES:-}
+      - BEHIND_CLOUDFLARE=${BEHIND_CLOUDFLARE:-}
+      - TRUSTED_EXTRA=${TRUSTED_EXTRA:-}
+      - TLS_RESOLVER=${TLS_RESOLVER:-}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${DATA_DIR:?set it in the site's profile}/traefik/letsencrypt:/letsencrypt
+      - ${DATA_DIR:?set it in the site's profile}/traefik/dynamic:/dynamic
+      - ${DATA_DIR:?set it in the site's profile}/traefik/plugins-local:/plugins-local:ro
+    networks:
+      - proxy
+      - monitoring
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.traefik.rule=Host(`traefik.${LAN_DOMAIN:-localhost}`)
+      - traefik.http.routers.traefik.entrypoints=web
+      - traefik.http.routers.traefik.service=api@internal
+      # lan-only (dynamic/lan-only.yml): the home-network names (LAN_DOMAIN) answer the home network only.
+      # cloudflare-only (dynamic/cloudflare-only.yml) goes on every public website route instead.
+      - traefik.http.routers.traefik.middlewares=lan-only@file
+      # Routes for the server's other services can be more files in dynamic/; this stack only has the website's.
+
+networks:
+  proxy:
+    external: true
+  monitoring:
+    external: true

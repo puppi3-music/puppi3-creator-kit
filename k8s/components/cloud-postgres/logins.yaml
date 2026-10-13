@@ -1,0 +1,59 @@
+# The cloud's Postgres (RDS, Cloud SQL) has only its master login: this makes Postiz's and Temporal's logins and
+# databases (with the social module), as the postgres images do on first start in the cluster. On every up
+# (k8s/up.sh deletes finished Jobs first); it changes nothing that's already right. Postiz and Temporal wait until
+# their login works (postiz-wait.yaml, temporal-wait.yaml).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: postgres-logins
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: logins
+          image: postgres:17-alpine
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              case ",$MODULES," in *,social,*) ;; *) echo "no social module: nothing to make"; exit 0 ;; esac
+              until pg_isready -q; do echo "waiting for $PGHOST"; sleep 3; done
+              psql -v ON_ERROR_STOP=1 -q -v pz="$POSTIZ_DB_PASSWORD" -v tp="$TEMPORAL_DB_PASSWORD" <<'SQL'
+              SELECT 'CREATE ROLE postiz LOGIN' WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'postiz') \gexec
+              SELECT 'CREATE ROLE temporal LOGIN' WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'temporal') \gexec
+              ALTER ROLE postiz WITH LOGIN PASSWORD :'pz';
+              ALTER ROLE temporal WITH LOGIN CREATEDB PASSWORD :'tp';
+              -- the cloud's master isn't a superuser: to make a database another role owns it must be in that role
+              GRANT postiz TO CURRENT_USER;
+              GRANT temporal TO CURRENT_USER;
+              SELECT 'CREATE DATABASE postiz OWNER postiz' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'postiz') \gexec
+              -- Temporal's setup expects its first database there already (the postgres image makes one named after
+              -- the login); it makes the schemas
+              SELECT 'CREATE DATABASE temporal OWNER temporal' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'temporal') \gexec
+              SELECT 'CREATE DATABASE temporal_visibility OWNER temporal' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'temporal_visibility') \gexec
+              SQL
+              echo "Postiz's and Temporal's logins are ready"
+          env:
+            - name: MODULES
+              valueFrom:
+                configMapKeyRef: {name: site, key: MODULES}
+            - {name: PGHOST, value: postiz-postgres}
+            - {name: PGDATABASE, value: postgres}
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef: {name: cloud, key: POSTGRES_MASTER_USER, optional: true}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef: {name: cloud, key: POSTGRES_MASTER_PASSWORD, optional: true}
+            - name: POSTIZ_DB_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: postiz, key: POSTIZ_DB_PASSWORD, optional: true}
+            - name: TEMPORAL_DB_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: postiz, key: TEMPORAL_DB_PASSWORD, optional: true}
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 128Mi}

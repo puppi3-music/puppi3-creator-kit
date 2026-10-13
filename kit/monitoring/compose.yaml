@@ -1,0 +1,137 @@
+# The kit's monitoring module (MODULES has monitoring; kit/kit.sh adds --profile monitoring): Grafana with the site's
+# dashboards and alert rules (render.py --profile kit, which kit.sh runs into data/monitoring/grafana/rendered/), and
+# Prometheus with what it reads: Traefik, TinyIce, the bridge's counters, cAdvisor (containers), node-exporter (the
+# disk) and blackbox (the public checks). Kit-only (a host with its own Prometheus and Grafana leaves the
+# module off), so this isn't in stacks/. Relative paths are kit/monitoring/'s.
+services:
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: ${ID_PREFIX:?run through kit/kit.sh}-prometheus
+    profiles: [monitoring]
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=1y
+      - --storage.tsdb.retention.size=10GB
+    volumes:
+      # prometheus.yml: kit.sh writes it each run (the jobs for the site's modules); tinyice-password: setup.sh
+      - ${DATA_DIR}/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ${DATA_DIR}/monitoring/prometheus/tinyice-password:/etc/prometheus/tinyice-password:ro
+      - ${DATA_DIR}/monitoring/prometheus/data:/prometheus
+    networks: [default, monitoring]   # Traefik, TinyIce and the bridge are on monitoring
+
+  grafana:
+    image: grafana/grafana:13.2.3
+    container_name: ${ID_PREFIX}-grafana
+    profiles: [monitoring]
+    restart: unless-stopped
+    # Tinybird's admin token for the Ghost Analytics datasource (tb-setup writes it; kit.sh starts Grafana after)
+    env_file:
+      - path: ${DATA_DIR}/puppi3/tinybird/tokens.env
+        required: false
+    environment:
+      GF_INSTALL_PLUGINS: yesoreyeram-infinity-datasource
+      GF_SERVER_ROOT_URL: ${GRAFANA_URL:-}
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?secrets/monitoring.env (kit/setup.sh)}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/dashboards/1-overview.json
+      # read by the provisioning files below (Grafana fills in ${VAR} there)
+      SITE_NAME: ${SITE_NAME:-site}
+      GHOST_DB_HOST: ${ID_PREFIX}-db
+      GHOST_DB_NAME: ${database__connection__database:-ghost}
+      GRAFANA_RO_PASSWORD: ${GRAFANA_RO_PASSWORD:?secrets/monitoring.env (kit/setup.sh)}
+    volumes:
+      - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/kit.yml:ro
+      - ./grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/kit.yml:ro
+      - ${DATA_DIR}/monitoring/grafana/rendered/dashboards:/etc/grafana/dashboards:ro
+      - ${DATA_DIR}/monitoring/grafana/rendered/alerting:/etc/grafana/provisioning/alerting:ro
+      - ${DATA_DIR}/monitoring/grafana/data:/var/lib/grafana
+    networks: [default, monitoring, proxy]
+    labels:
+      - traefik.enable=true
+      # The public name (GRAFANA_HOST), Cloudflare only, behind Grafana's own sign-in
+      - traefik.http.routers.${ID_PREFIX}-grafana.rule=Host(`${GRAFANA_HOST:?set GRAFANA_HOST in site.env}`)
+      - traefik.http.routers.${ID_PREFIX}-grafana.entrypoints=https
+      - traefik.http.routers.${ID_PREFIX}-grafana.tls=true
+      - traefik.http.routers.${ID_PREFIX}-grafana.tls.certresolver=${TLS_RESOLVER:-le}
+      - traefik.http.routers.${ID_PREFIX}-grafana.middlewares=cloudflare-only@file
+      - traefik.http.routers.${ID_PREFIX}-grafana.service=${ID_PREFIX}-grafana
+      # ...and grafana.<LAN_DOMAIN> on the home network
+      - traefik.http.routers.${ID_PREFIX}-grafana-lan.rule=Host(`grafana.${LAN_DOMAIN:-localhost}`)
+      - traefik.http.routers.${ID_PREFIX}-grafana-lan.entrypoints=web
+      - traefik.http.routers.${ID_PREFIX}-grafana-lan.middlewares=lan-only@file
+      - traefik.http.routers.${ID_PREFIX}-grafana-lan.service=${ID_PREFIX}-grafana
+      - traefik.http.services.${ID_PREFIX}-grafana.loadbalancer.server.port=3000
+
+  # Grafana's read-only logins (grafana_ro), made again at every start: Ghost's MySQL gets SELECT on the tables
+  # stacks/puppi3/grafana-ro.sh lists, Postiz's Postgres on the four its panels read. They wait for Ghost's and
+  # Postiz's own tables, then exit.
+  grafana-ro-ghost:
+    image: mysql:8.0
+    profiles: [monitoring]
+    restart: "no"
+    entrypoint: [bash, /grants.sh, ghost]
+    environment:
+      DB_HOST: ${ID_PREFIX}-db
+      DB_USER: ${database__connection__user:-root}
+      DB_PASSWORD: ${database__connection__password:?secrets/puppi3.env}
+      DB_NAME: ${database__connection__database:-ghost}
+      RO_PASSWORD: ${GRAFANA_RO_PASSWORD}
+    volumes:
+      - ./grants.sh:/grants.sh:ro
+      - ../../stacks/puppi3/grafana-ro.sh:/grafana-ro.sh:ro
+  grafana-ro-postiz:
+    image: postgres:17-alpine
+    profiles: [monitoring]
+    restart: "no"
+    entrypoint: [sh, /grants.sh, postiz]
+    environment:
+      MODULES: ${MODULES:-}
+      PGHOST: postiz-postgres
+      PGUSER: postiz
+      PGPASSWORD: ${POSTIZ_DB_PASSWORD:-}
+      PGDATABASE: postiz
+      RO_PASSWORD: ${GRAFANA_RO_PASSWORD}
+    volumes:
+      - ./grants.sh:/grants.sh:ro
+
+  # Per-container CPU and memory (Health, Social's Postiz containers)
+  cadvisor:
+    image: ghcr.io/google/cadvisor:v0.53.0
+    profiles: [monitoring]
+    restart: unless-stopped
+    privileged: true
+    devices: [/dev/kmsg]
+    command:
+      - --docker_only=true
+      - --housekeeping_interval=15s
+      - --store_container_labels=false
+      - --whitelisted_container_labels=com.docker.compose.project,com.docker.compose.service
+    volumes:
+      - /:/rootfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro   # the socket itself: Docker Desktop has none in its /var/run
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+  # The host's disk (Health's "Disk free" and its alert: the root filesystem, DISK_MOUNT in site.env for another)
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:v1.9.1
+    profiles: [monitoring]
+    restart: unless-stopped
+    pid: host
+    command: [--path.rootfs=/host]
+    volumes:
+      - /:/host:ro
+  # The public checks (the site, Ghost's API, the live stream), from here out
+  blackbox:
+    image: quay.io/prometheus/blackbox-exporter:v0.27.0
+    profiles: [monitoring]
+    restart: unless-stopped
+
+networks:
+  proxy:
+    external: true
+  monitoring:
+    external: true

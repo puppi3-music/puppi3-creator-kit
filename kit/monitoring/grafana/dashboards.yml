@@ -1,0 +1,10 @@
+# The site's dashboards (render.py --profile kit, written by kit/kit.sh), in a folder named after the site; the
+# alert rules name the same folder.
+apiVersion: 1
+providers:
+  - name: site
+    folder: ${SITE_NAME}
+    type: file
+    allowUiUpdates: false
+    options:
+      path: /etc/grafana/dashboards

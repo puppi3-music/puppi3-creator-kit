@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="96" height="96" role="img" aria-label="The Creator Kit's puppy">
+  <ellipse cx="32" cy="36" rx="18" ry="17" fill="#E0EDF8" stroke="#1A6FB0" stroke-width="3"/>
+  <ellipse cx="13" cy="33" rx="6.5" ry="13" transform="rotate(22 13 33)" fill="#1A6FB0"/>
+  <ellipse cx="51" cy="33" rx="6.5" ry="13" transform="rotate(-22 51 33)" fill="#1A6FB0"/>
+  <circle cx="25" cy="34" r="2.8" fill="#14202B"/><circle cx="39" cy="34" r="2.8" fill="#14202B"/>
+  <circle cx="26" cy="33" r="0.9" fill="#fff"/><circle cx="40" cy="33" r="0.9" fill="#fff"/>
+  <ellipse cx="32" cy="44" rx="8" ry="6" fill="#fff"/>
+  <ellipse cx="32" cy="41.2" rx="3.6" ry="2.6" fill="#14202B"/>
+  <path d="M30 47.5q2 5 4 0z" fill="#F07C98"/>
+  <path d="M32 43.6v2.6M27.6 46q4.4 2.8 4.4 0q0 2.8 4.4 0" fill="none" stroke="#14202B" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,241 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 5,
+    "title": "Number by number vs your usual ${label} post",
+    "description": "Each number against the typical (median) other ${label} post at the same age: hours after it went up in its first 4 days, then days: 1.5\u00d7 = half again as much as usual. \"Typical\" needs 3 other posts whose numbers the bridge kept at that age, so on most networks it fills in as posts made after the history began get older; YouTube's history goes back to each upload, so it works from the start. Until then the table says why it\u2019s empty, and the chart beside it has no typical line.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "verdict",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/post.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "network",
+                        "value": "${network}"
+                      },
+                      {
+                        "key": "id",
+                        "value": "${post}"
+                      },
+                      {
+                        "key": "time",
+                        "value": "${time}"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "organize",
+            "spec": {
+              "options": {
+                "indexByName": {
+                  "metric": 0,
+                  "age": 1,
+                  "mine": 2,
+                  "typical": 3,
+                  "ratio": 4,
+                  "posts": 5,
+                  "note": 6
+                },
+                "excludeByName": {},
+                "renameByName": {
+                  "metric": "Number",
+                  "age": "At",
+                  "mine": "This post",
+                  "typical": "Typical post",
+                  "ratio": "vs typical",
+                  "posts": "Posts compared",
+                  "note": "Why it\u2019s empty"
+                }
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "table",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "cellHeight": "sm",
+          "showHeader": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "decimals": 0,
+            "noValue": "\u2013",
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "auto"
+              }
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "vs typical"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "suffix:\u00d7"
+                },
+                {
+                  "id": "decimals",
+                  "value": 1
+                },
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "mode": "basic",
+                    "type": "color-background"
+                  }
+                },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "red"
+                      },
+                      {
+                        "color": "yellow",
+                        "value": 0.75
+                      },
+                      {
+                        "color": "green",
+                        "value": 1.25
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "thresholds"
+                  }
+                },
+                {
+                  "id": "custom.width",
+                  "value": 85
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Why it\u2019s empty"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "auto",
+                    "wrapText": true
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Number"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 90
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "At"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 80
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "This post"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 85
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Typical post"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 95
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Posts compared"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 125
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

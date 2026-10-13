@@ -1,0 +1,129 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 45,
+    "title": "SoundCloud: all time",
+    "description": "Plays, likes, reposts and comments summed over all public tracks now. Not affected by the dashboard's time range.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "plays",
+                      "text": "Plays (all time)",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "likes",
+                      "text": "Likes (all time)",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "reposts",
+                      "text": "Reposts (all time)",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "comments",
+                      "text": "Comments (all time)",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "totals",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/soundcloud.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "organize",
+            "spec": {
+              "options": {
+                "excludeByName": {},
+                "indexByName": {
+                  "Plays (all time)": 0,
+                  "Likes (all time)": 1,
+                  "Reposts (all time)": 2,
+                  "Comments (all time)": 3
+                },
+                "renameByName": {}
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "stat",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "center",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "value_and_name",
+          "orientation": "vertical",
+          "wideLayout": false,
+          "text": {
+            "titleSize": 12
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "#FF5500"
+            },
+            "noValue": "\u2013"
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

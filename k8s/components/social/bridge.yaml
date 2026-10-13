@@ -1,0 +1,77 @@
+# The Ghost -> social bridge (the postiz stack's postiz-ghost-bridge), its code in the kit's image
+# (k8s/images/ghost-bridge/). Its settings are Secret postiz-ghost-bridge-env, which k8s/up.sh renders from the postiz
+# stack's own environment list for the site (so the defaults stay in one place). One replica: its history is a
+# SQLite file and JSON files on a ReadWriteOnce volume (single writer), Recreate, and 5 minutes to stop (it finishes
+# the post it's sharing first, as Compose's stop_grace_period).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postiz-ghost-bridge
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: postiz-ghost-bridge
+  template:
+    metadata:
+      labels:
+        app: postiz-ghost-bridge
+    spec:
+      terminationGracePeriodSeconds: 300
+      securityContext:
+        runAsUser: 1000     # the image's node user
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+      containers:
+        - name: bridge
+          image: creator-kit/ghost-bridge
+          envFrom:
+            - secretRef:
+                name: postiz-ghost-bridge-env
+          ports:
+            - {name: http, containerPort: 8080}
+          # Traefik routes to it only once ready, so asked often (Compose's healthcheck)
+          readinessProbe:
+            httpGet: {path: /health, port: http}
+            periodSeconds: 5
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet: {path: /health, port: http}
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 5
+          resources:
+            requests: {cpu: 50m, memory: 128Mi}
+            limits: {memory: 1Gi}      # ffmpeg's audiograms
+          volumeMounts:
+            - {name: data, mountPath: /data}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: postiz-ghost-bridge
+---
+# stats.db and its daily copies, the JSON stats files, posted.json
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postiz-ghost-bridge
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 2Gi
+---
+# Traefik (the webhook, the social previews, the theme's /.site/ routes in site.yml), Grafana and Prometheus reach it
+# by this name, as on Compose
+apiVersion: v1
+kind: Service
+metadata:
+  name: postiz-ghost-bridge
+spec:
+  selector:
+    app: postiz-ghost-bridge
+  ports:
+    - {name: http, port: 8080, targetPort: http}

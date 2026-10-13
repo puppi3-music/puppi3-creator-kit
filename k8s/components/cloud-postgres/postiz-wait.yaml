@@ -1,0 +1,12 @@
+# Postiz starts once its login on the cloud's Postgres works (the postgres-logins Job makes it); its URL is Postiz's own setting
+- op: add
+  path: /spec/template/spec/initContainers/-
+  value:
+    name: wait-for-login
+    image: postgres:17-alpine
+    command: [sh, -c, 'until psql "$DATABASE_URL" -qtAc "SELECT 1" >/dev/null 2>&1; do echo "waiting for the postiz login"; sleep 3; done']
+    envFrom:
+      - secretRef: {name: postiz-env}
+    resources:
+      requests: {cpu: 10m, memory: 16Mi}
+      limits: {memory: 64Mi}

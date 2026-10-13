@@ -1,0 +1,109 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 21,
+    "title": "Followers by gender",
+    "description": "Your Instagram followers by gender (as they told Instagram). From Instagram's audience numbers via the bridge, checked once a day (Instagram gives them only from 100 followers). Not affected by the dashboard's time range.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "name",
+                      "text": "Gender",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "people",
+                      "text": "Followers",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "$append([], audience.gender)",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/instagram.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "barchart",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "xField": "Gender",
+          "orientation": "horizontal",
+          "showValue": "always",
+          "barWidth": 0.8,
+          "groupWidth": 0.7,
+          "xTickLabelSpacing": 0,
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": false
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          },
+          "text": {
+            "valueSize": 13
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "#E1306C"
+            },
+            "min": 0,
+            "noValue": "Instagram shares this only from accounts with 100 followers",
+            "custom": {
+              "fillOpacity": 60,
+              "lineWidth": 1
+            }
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

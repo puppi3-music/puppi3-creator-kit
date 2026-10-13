@@ -1,0 +1,34 @@
+# Ghost and MySQL always; Ghost's own analytics (Tinybird) with the analytics profile.
+services:
+  ghost:
+    # no host port: only Traefik reaches it (a port here would skip Traefik, Cloudflare-only and a server's firewall)
+    ports: !reset []
+    # by the site's name (the NAS's is website-puppi3); Traefik and the bridge are told (profiles/traefik.yaml, postiz.yaml)
+    container_name: ${ID_PREFIX:-site}-ghost
+    # Ghost's image as it comes: it owns its content folder, then runs as its node user (the NAS runs it as 1002:1003)
+    user: !reset null
+    # tb-setup's tokens from the site's data folder (the stack reads ./tinybird/, the NAS's own folder)
+    env_file: !override
+      - path: ${DATA_DIR}/puppi3/tinybird/tokens.env
+        required: false
+    environment:
+      # the database by a name no other stack on proxy has (the NAS uses its container name, puppi3-db-1)
+      database__connection__host: ${ID_PREFIX:-site}-db
+    depends_on:
+      tb-setup:
+        condition: service_healthy
+        required: false   # Ghost starts without the analytics profile too
+  db:
+    container_name: ${ID_PREFIX:-site}-db
+  traffic-analytics:
+    profiles: [analytics]
+    ports: !reset []   # only through Traefik's page-hits route
+    env_file: !override
+      - path: ${DATA_DIR}/puppi3/tinybird/tokens.env
+        required: false
+  tinybird-local:
+    profiles: [analytics]
+  tinybird-sync:
+    profiles: [analytics]
+  tb-setup:
+    profiles: [analytics]

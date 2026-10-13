@@ -1,0 +1,523 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 25,
+    "title": "Instagram reach & engagement ${chart}",
+    "description": "Per day (time ranges over 7 days): Reach = accounts that saw anything of yours that day, from Instagram's insights (the last 30 days at each poll, kept). The thin dashed line is each day's number, the bold one the 7-day average (of the days the bridge has among the 7 ending that day; it starts once 4 of them are there): the trend, through the day-to-day ups and downs. Violet lines are this network's posts: hover one to see what went out; a rise just after one is that post working. Hour by hour (when the time range is 7 days or less): what came in between the bridge's checks (about once an hour; a point after a gap covers the gap), no 7-day line. Kept for the last 90 days (ACCOUNT_CHECK_DAYS); further back, pick per day. Both follow the dashboard's time range. Reach counts each account once a day, so an hour's point is the accounts reached for the first time that day. Needs POSTIZ_DB_PASSWORD. Engagement (blue) = likes, comments, shares and saves added up, from Instagram's account insights per day (needs POSTIZ_DB_PASSWORD; the last 30 days when the bridge starts, every day after); hover for each, and for the engagement rate: the 7 days' engagement as a share of the 7 days' reach, comparable between networks (about 3.2% of reach is typical on Instagram (Socialinsider, 2026)). Engagement has its own scale, on the right (it's usually a small share of the reach): lines moving together = a steady rate; engagement rising faster = posts landing better, slower = more people seeing them but fewer joining in. Hour by hour, engagement is what all your posts gained between checks (their likes and comments every check, shares and saves when a post's turn comes), since Instagram's per-day numbers come in late; it has no rate.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "date",
+                      "text": "Date",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "reach",
+                      "text": "Reach",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "reach7",
+                      "text": "Reach, 7-day average",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "engagement",
+                      "text": "Engagement",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "engagement7",
+                      "text": "Engagement, 7-day average",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "rate7",
+                      "text": "Engagement rate, 7-day",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "likes",
+                      "text": "Likes",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "comments",
+                      "text": "Comments",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "shares",
+                      "text": "Shares",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "saves",
+                      "text": "Saves",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "\"${chart}\" = \"hour by hour\" ? [] : daily",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/instagram.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          },
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "time",
+                      "text": "Time",
+                      "type": "timestamp_epoch"
+                    },
+                    {
+                      "selector": "reach",
+                      "text": "Reach",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "engagement",
+                      "text": "Engagement",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "newPostLikes",
+                      "text": "Likes",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "newPostComments",
+                      "text": "Comments",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "newPostShares",
+                      "text": "Shares",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "newPostSaves",
+                      "text": "Saves",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "\"${chart}\" = \"hour by hour\" ? checks : []",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/account.json?network=instagram",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "B",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "convertFieldType",
+            "spec": {
+              "options": {
+                "conversions": [
+                  {
+                    "dateFormat": "YYYY-MM-DD",
+                    "destinationType": "time",
+                    "targetField": "Date",
+                    "timezone": "utc"
+                  }
+                ],
+                "fields": {}
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "organize",
+            "spec": {
+              "options": {
+                "excludeByName": {},
+                "indexByName": {
+                  "Date": 0,
+                  "Reach": 1,
+                  "Reach, 7-day average": 2,
+                  "Engagement": 3,
+                  "Engagement, 7-day average": 4,
+                  "Engagement rate, 7-day": 5,
+                  "Likes": 6,
+                  "Comments": 7,
+                  "Shares": 8,
+                  "Saves": 9
+                },
+                "renameByName": {}
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "timeseries",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 10,
+              "showPoints": "auto",
+              "spanNulls": false
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Reach"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "#E1306C"
+                  }
+                },
+                {
+                  "id": "custom.lineWidth",
+                  "value": 1
+                },
+                {
+                  "id": "custom.fillOpacity",
+                  "value": 0
+                },
+                {
+                  "id": "custom.lineStyle",
+                  "value": {
+                    "fill": "dash",
+                    "dash": [
+                      4,
+                      4
+                    ]
+                  }
+                },
+                {
+                  "id": "custom.axisPlacement",
+                  "value": "left"
+                },
+                {
+                  "id": "custom.axisLabel",
+                  "value": "Reach"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Reach, 7-day average"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "#E1306C"
+                  }
+                },
+                {
+                  "id": "custom.axisPlacement",
+                  "value": "left"
+                },
+                {
+                  "id": "custom.axisLabel",
+                  "value": "Reach"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Engagement"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "blue"
+                  }
+                },
+                {
+                  "id": "custom.lineWidth",
+                  "value": 1
+                },
+                {
+                  "id": "custom.fillOpacity",
+                  "value": 0
+                },
+                {
+                  "id": "custom.lineStyle",
+                  "value": {
+                    "fill": "dash",
+                    "dash": [
+                      4,
+                      4
+                    ]
+                  }
+                },
+                {
+                  "id": "custom.axisPlacement",
+                  "value": "right"
+                },
+                {
+                  "id": "custom.axisLabel",
+                  "value": "Engagement"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Engagement, 7-day average"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "blue"
+                  }
+                },
+                {
+                  "id": "custom.axisPlacement",
+                  "value": "right"
+                },
+                {
+                  "id": "custom.axisLabel",
+                  "value": "Engagement"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Engagement rate, 7-day"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "text"
+                  }
+                },
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "legend": true,
+                    "tooltip": false,
+                    "viz": true
+                  }
+                },
+                {
+                  "id": "unit",
+                  "value": "percent"
+                },
+                {
+                  "id": "decimals",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Likes"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "yellow"
+                  }
+                },
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "legend": true,
+                    "tooltip": false,
+                    "viz": true
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Comments"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "blue"
+                  }
+                },
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "legend": true,
+                    "tooltip": false,
+                    "viz": true
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Shares"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "text"
+                  }
+                },
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "legend": true,
+                    "tooltip": false,
+                    "viz": true
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Saves"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "#B28CFF"
+                  }
+                },
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "legend": true,
+                    "tooltip": false,
+                    "viz": true
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byFrameRefID",
+                "options": "B"
+              },
+              "properties": [
+                {
+                  "id": "custom.lineInterpolation",
+                  "value": "linear"
+                },
+                {
+                  "id": "custom.lineWidth",
+                  "value": 2
+                },
+                {
+                  "id": "custom.lineStyle",
+                  "value": {
+                    "fill": "solid"
+                  }
+                },
+                {
+                  "id": "custom.fillOpacity",
+                  "value": 10
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

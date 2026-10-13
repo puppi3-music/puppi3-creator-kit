@@ -1,0 +1,31 @@
+# Grafana's routes, as kit/monitoring/compose.yaml's labels, but named grafana and grafana-lan: on Kubernetes every
+# router is @file, and Health's site routers are <ID_PREFIX>-*@file, so a <ID_PREFIX>-grafana router would count as
+# the site's traffic. A Go template on Traefik's environment (the site's profile).
+{{- $host := env "SITE_HOST" | default "example.com" }}
+{{- $grafana := env "GRAFANA_HOST" | default (printf "grafana.%s" $host) }}
+{{- $lan := env "LAN_DOMAIN" | default "localhost" }}
+{{- $resolver := env "TLS_RESOLVER" | default "cf" }}
+{{- $ep := env "ENTRYPOINT" | default "https" }}
+http:
+  routers:
+    # The public name, Cloudflare only, behind Grafana's own sign-in
+    grafana:
+      rule: "Host(`{{ $grafana }}`)"
+      entryPoints: [{{ $ep }}]
+      service: grafana
+      middlewares: [cloudflare-only]
+{{- if ne $resolver "none" }}
+      tls:{{ if eq $resolver "self" }} {}{{ else }}
+        certResolver: {{ $resolver }}{{ end }}
+{{- end }}
+    # ...and grafana.<LAN_DOMAIN> on the home network
+    grafana-lan:
+      rule: "Host(`grafana.{{ $lan }}`)"
+      entryPoints: [web]
+      service: grafana
+      middlewares: [lan-only]
+  services:
+    grafana:
+      loadBalancer:
+        servers:
+          - url: "http://grafana:3000"

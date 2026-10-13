@@ -1,0 +1,20 @@
+# The Cloud SQL proxy standing in: socat on the same ports (127.0.0.1:3306, and 5432 with a Postgres) to the stand-ins
+# that cloud.k3d names as the instances. Only the image and the script change; the env, the startup probe, the
+# user and the hosts file are gke's.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unused
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: cloud-sql-proxy
+          image: alpine/socat:1.8.1.3
+          args:
+            - |
+              fwd() { socat "TCP-LISTEN:$1,bind=127.0.0.1,fork,reuseaddr" "TCP:$2:$1" & }
+              fwd 3306 "$MYSQL_INSTANCE"
+              [ -z "$POSTGRES_INSTANCE" ] || fwd 5432 "$POSTGRES_INSTANCE"
+              trap 'exit 0' TERM
+              wait

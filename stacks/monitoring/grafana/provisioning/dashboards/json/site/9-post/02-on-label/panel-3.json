@@ -1,0 +1,175 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 3,
+    "title": "Gained per day on ${label}",
+    "description": "How much each number grew each day (UTC). Most networks only give a post's numbers as of now, so the bridge keeps them each day and this is the difference from the day before: it starts the day the bridge first saw the post (with this dashboard, the day it was deployed), and a missed day leaves a gap. The day it was posted counts everything up to then. YouTube's come per day from YouTube Analytics, back to the upload.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "gains",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/post.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "network",
+                        "value": "${network}"
+                      },
+                      {
+                        "key": "id",
+                        "value": "${post}"
+                      },
+                      {
+                        "key": "time",
+                        "value": "${time}"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          },
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "color",
+                      "text": "color",
+                      "type": "string"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "[$merge([{\"color\": \"${colour}\"}])]",
+                  "source": "inline",
+                  "type": "json",
+                  "data": "[{}]"
+                }
+              },
+              "refId": "Colour",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "convertFieldType",
+            "spec": {
+              "options": {
+                "conversions": [
+                  {
+                    "destinationType": "time",
+                    "targetField": "time"
+                  }
+                ],
+                "fields": {}
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "configFromData",
+            "spec": {
+              "options": {
+                "configRefId": "Colour",
+                "mappings": [
+                  {
+                    "fieldName": "color",
+                    "handlerKey": "color"
+                  }
+                ],
+                "applyTo": {
+                  "id": "byName",
+                  "options": "${main}"
+                }
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "timeseries",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "decimals": 0,
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "shades",
+              "fixedColor": "text"
+            },
+            "noValue": "\u2013",
+            "custom": {
+              "barAlignment": 0,
+              "drawStyle": "bars",
+              "fillOpacity": 60,
+              "lineWidth": 1,
+              "showPoints": "never",
+              "spanNulls": true
+            }
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,76 @@
+# The live stream's routes: the icecast stack's Traefik labels (stacks/icecast/compose.yaml) as a file, with the same
+# router names (Grafana's Health matches them), plus the mp3 (LIVE_MP3_MOUNT, ConfigMap "live") to the relays. A Go
+# template on Traefik's environment (the site's profile), as ../../../stacks/traefik/dynamic/puppi3.yml.
+{{- $host := env "SITE_HOST" | default "example.com" }}
+{{- $live := env "LIVE_HOST" | default (printf "live.%s" $host) }}
+{{- $lan := env "LAN_DOMAIN" | default "localhost" }}
+{{- $resolver := env "TLS_RESOLVER" | default "cf" }}
+{{- $ep := env "ENTRYPOINT" | default "https" }}
+{{- $mp3 := env "LIVE_MP3_MOUNT" | default "/stream-mp3" }}
+http:
+  routers:
+    # Listening and the player pages, through Cloudflare only
+    tinyice:
+      rule: "Host(`{{ $live }}`)"
+      entryPoints: [{{ $ep }}]
+      service: tinyice
+      middlewares: [cloudflare-only]
+{{- if ne $resolver "none" }}
+      tls:{{ if eq $resolver "self" }} {}{{ else }}
+        certResolver: {{ $resolver }}{{ end }}
+{{- end }}
+    # The listeners' mp3: the relays
+    tinyice-mp3:
+      rule: "Host(`{{ $live }}`) && Path(`{{ $mp3 }}`)"
+      entryPoints: [{{ $ep }}]
+      service: tinyice-relay
+      priority: 90
+      middlewares: [cloudflare-only]
+{{- if ne $resolver "none" }}
+      tls:{{ if eq $resolver "self" }} {}{{ else }}
+        certResolver: {{ $resolver }}{{ end }}
+{{- end }}
+    # TinyIce's admin, closed on the public name (everyone arrives through Cloudflare there)
+    tinyice-admin:
+      rule: "Host(`{{ $live }}`) && (PathPrefix(`/admin`) || Path(`/login`) || Path(`/logout`) || PathPrefix(`/api`) || Path(`/metrics`))"
+      entryPoints: [{{ $ep }}]
+      service: tinyice
+      priority: 100
+      middlewares: [tinyice-closed]
+{{- if ne $resolver "none" }}
+      tls:{{ if eq $resolver "self" }} {}{{ else }}
+        certResolver: {{ $resolver }}{{ end }}
+{{- end }}
+    # ...and open on the home network
+    tinyice-lan:
+      rule: "Host(`tinyice.{{ $lan }}`)"
+      entryPoints: [web]
+      service: tinyice
+      middlewares: [lan-only]
+    # TinyIce's status on the site's own address, for the theme's LIVE NOW bar (same origin; not a listener)
+    live-status:
+      rule: "Host(`{{ $host }}`) && Path(`/live-status.json`)"
+      entryPoints: [{{ $ep }}]
+      service: tinyice
+      priority: 100
+      middlewares: [cloudflare-only, live-status-path]
+{{- if ne $resolver "none" }}
+      tls:{{ if eq $resolver "self" }} {}{{ else }}
+        certResolver: {{ $resolver }}{{ end }}
+{{- end }}
+  middlewares:
+    tinyice-closed:
+      ipAllowList:
+        sourceRange: ["127.0.0.1/32"]
+    live-status-path:
+      replacePath:
+        path: /status-json.xsl
+  services:
+    tinyice:
+      loadBalancer:
+        servers:
+          - url: "http://tinyice:8080"
+    tinyice-relay:
+      loadBalancer:
+        servers:
+          - url: "http://tinyice-relay:8080"

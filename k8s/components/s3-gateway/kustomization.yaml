@@ -1,0 +1,20 @@
+# An S3 service in the cluster, for where there's no cloud bucket: versitygw (Versity's S3 gateway, Apache 2.0),
+# which keeps each object as a plain file on its volume (<bucket>/<key>, so a bucket is a folder). It stands in for
+# MinIO in the plan: MinIO no longer publishes images. The local overlay uses it for Ghost's files
+# (components/s3-storage/); the clouds' k3d twins will put it where S3 or Cloud Storage would be.
+# - ConfigMap "s3": the bucket's name and where it is, for s3-storage.
+# - Its one account is Secret "s3"'s keys (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY), which Ghost signs in with too;
+#   k8s/up.sh makes them for the site (data/k8s/s3.env) when the overlay has this component.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - gateway.yaml
+patches:
+  - path: ../s3-storage/endpoint.yaml
+    target: {kind: Deployment, name: ghost}
+configMapGenerator:
+  - name: s3
+    literals:
+      - S3_BUCKET=ghost-content
+      - S3_REGION=us-east-1
+      - S3_ENDPOINT=http://s3:7070

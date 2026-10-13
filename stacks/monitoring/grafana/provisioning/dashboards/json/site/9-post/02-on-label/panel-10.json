@@ -1,0 +1,150 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 10,
+    "title": "vs the industry average",
+    "description": "This post against the published average for ${label}, measured the same way the report does: Instagram 3.2% engagement (likes, comments, shares, saves) per person reached (Socialinsider, Aug 2026) and TikTok 3.85% per view (Socialinsider, Q2 2026; their figure also counts saves, which TikTok doesn't give us); YouTube music channels 1-3% likes and comments per view, Shorts 5-8%; newsletters 4% click rate (Mailchimp, media). About typical = within two thirds to one and a half times it (or inside the range). Those averages come mostly from big brand accounts, and small accounts often beat them, so your own posts (beside) are the better yardstick. Bluesky, Threads, SoundCloud, Mixcloud and Stories have no reliable published average.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "industryLabel",
+                      "text": "Industry",
+                      "type": "string"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "performance",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/post.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "network",
+                        "value": "${network}"
+                      },
+                      {
+                        "key": "id",
+                        "value": "${post}"
+                      },
+                      {
+                        "key": "time",
+                        "value": "${time}"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "stat",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "/^Industry$/"
+          },
+          "orientation": "auto",
+          "textMode": "value",
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "center",
+          "wideLayout": true,
+          "showPercentChange": false
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {
+                "type": "regex",
+                "options": {
+                  "pattern": "^Well above typical.*",
+                  "result": {
+                    "color": "green",
+                    "index": 0
+                  }
+                }
+              },
+              {
+                "type": "regex",
+                "options": {
+                  "pattern": "^Above typical.*",
+                  "result": {
+                    "color": "light-green",
+                    "index": 1
+                  }
+                }
+              },
+              {
+                "type": "regex",
+                "options": {
+                  "pattern": "^Below typical.*",
+                  "result": {
+                    "color": "light-orange",
+                    "index": 2
+                  }
+                }
+              },
+              {
+                "type": "regex",
+                "options": {
+                  "pattern": "^Well below typical.*",
+                  "result": {
+                    "color": "orange",
+                    "index": 3
+                  }
+                }
+              }
+            ],
+            "noValue": "No verdict: see The post above for why",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "transparent"
+                }
+              ]
+            },
+            "color": {
+              "mode": "thresholds"
+            }
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

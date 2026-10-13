@@ -1,0 +1,43 @@
+{
+  "kind": "RowsLayoutRow",
+  "spec": {
+    "title": "Networks not shown",
+    "collapse": false,
+    "hideHeader": true,
+    "layout": {
+      "kind": "AutoGridLayout",
+      "spec": {
+        "maxColumnCount": 1,
+        "columnWidthMode": "standard",
+        "rowHeightMode": "short",
+        "fillScreen": false,
+        "items": [
+          {
+            "kind": "AutoGridLayoutItem",
+            "spec": {
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-9010"
+              },
+              "conditionalRendering": {
+                "kind": "ConditionalRenderingGroup",
+                "spec": {
+                  "visibility": "show",
+                  "condition": "and",
+                  "items": [
+                    {
+                      "kind": "ConditionalRenderingData",
+                      "spec": {
+                        "value": true
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

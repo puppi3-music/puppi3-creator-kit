@@ -1,0 +1,33 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 9007,
+    "title": "",
+    "description": "",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [],
+        "transformations": [],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "text",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "content": "The TikTok channel in Postiz, read by the bridge ${every_tiktok}: account numbers through Postiz (which renews the channel's sign-in), each video's numbers straight from TikTok with that token (needs POSTIZ_DB_PASSWORD, so staging has none). TikTok gives no numbers per day, so followers and likes per day are the bridge's own record, from the day it began collecting.",
+          "mode": "markdown"
+        },
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": []
+        }
+      }
+    },
+    "transparent": true
+  }
+}

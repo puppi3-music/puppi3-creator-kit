@@ -1,0 +1,222 @@
+{
+  "kind": "RowsLayoutRow",
+  "spec": {
+    "title": "SoundCloud",
+    "collapse": false,
+    "variables": [
+      {
+        "kind": "CustomVariable",
+        "spec": {
+          "name": "sort_soundcloud",
+          "query": "Newest first : Posted,Doing best first : Score,Length : Length,Plays : Plays,Likes : Likes,Reposts : Reposts,Comments : Comments",
+          "current": {
+            "text": "Newest first",
+            "value": "Posted"
+          },
+          "options": [
+            {
+              "selected": true,
+              "text": "Newest first",
+              "value": "Posted"
+            },
+            {
+              "selected": false,
+              "text": "Doing best first",
+              "value": "Score"
+            },
+            {
+              "selected": false,
+              "text": "Length",
+              "value": "Length"
+            },
+            {
+              "selected": false,
+              "text": "Plays",
+              "value": "Plays"
+            },
+            {
+              "selected": false,
+              "text": "Likes",
+              "value": "Likes"
+            },
+            {
+              "selected": false,
+              "text": "Reposts",
+              "value": "Reposts"
+            },
+            {
+              "selected": false,
+              "text": "Comments",
+              "value": "Comments"
+            }
+          ],
+          "multi": false,
+          "includeAll": false,
+          "label": "Sort by",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "description": "The order of the SoundCloud tracks table below: newest first, or the most of a number first (a header click still sorts it for you)",
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "CustomVariable",
+        "spec": {
+          "name": "show_soundcloud",
+          "query": "All kept : all,Posted in the time range : range",
+          "current": {
+            "text": "All kept",
+            "value": "all"
+          },
+          "options": [
+            {
+              "selected": true,
+              "text": "All kept",
+              "value": "all"
+            },
+            {
+              "selected": false,
+              "text": "Posted in the time range",
+              "value": "range"
+            }
+          ],
+          "multi": false,
+          "includeAll": false,
+          "label": "Show",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "description": "Every SoundCloud post the bridge has seen (deleted ones drop off), or only those posted in the time range picked at the top",
+          "allowCustomValue": false
+        }
+      }
+    ],
+    "layout": {
+      "kind": "GridLayout",
+      "spec": {
+        "items": [
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 0,
+              "width": 24,
+              "height": 2,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-9003"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-40"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-45"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 12,
+              "y": 2,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-46"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 18,
+              "y": 2,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-41"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 6,
+              "width": 12,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-47"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 12,
+              "y": 6,
+              "width": 12,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-42"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 14,
+              "width": 24,
+              "height": 10,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-43"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "conditionalRendering": {
+      "kind": "ConditionalRenderingGroup",
+      "spec": {
+        "visibility": "show",
+        "condition": "and",
+        "items": [
+          {
+            "kind": "ConditionalRenderingVariable",
+            "spec": {
+              "variable": "has_soundcloud",
+              "operator": "equals",
+              "value": "yes"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

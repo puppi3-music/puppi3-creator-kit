@@ -1,0 +1,8 @@
+# Home network only, for the *.<LAN_DOMAIN> names (Traefik's dashboard, TinyIce's admin): private addresses only.
+# On a cluster the visitor's address survives only through a LoadBalancer with externalTrafficPolicy: Local (the
+# traefik Service); a site with its own ranges patches this file in its kustomization.
+http:
+  middlewares:
+    lan-only:
+      ipAllowList:
+        sourceRange: ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.1/32", "fc00::/7", "fe80::/10"]

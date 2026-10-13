@@ -1,0 +1,407 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 9010,
+    "title": "Networks not shown",
+    "description": "A network's section above is hidden while the bridge has no numbers for it (now or from earlier days): not set up, or set up but every try has failed so far. This lists them with the bridge's reason (what the section's status panel would say), and disappears when every network has numbers.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "Network",
+                      "text": "Network",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Why",
+                      "text": "Why",
+                      "type": "string"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "($count(totals.*[$type($) = \"number\"]) > 0 or $count(daily) > 0 or $count(posts) > 0 or $count(videos) > 0 or $count(tracks) > 0 or $count(uploads) > 0 or $count($keys(history)) > 0 or $count(followerHistory) > 0) ? [] : [$merge([{\"Network\": \"Ghost (the site)\", \"Why\": $count(errors) = 0 ? \"no numbers yet\" : $join(errors, \"; \")}])]",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/ghost.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "H",
+              "hidden": false
+            }
+          },
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "Network",
+                      "text": "Network",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Why",
+                      "text": "Why",
+                      "type": "string"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "($count(totals.*[$type($) = \"number\"]) > 0 or $count(daily) > 0 or $count(posts) > 0 or $count(videos) > 0 or $count(tracks) > 0 or $count(uploads) > 0 or $count($keys(history)) > 0 or $count(followerHistory) > 0) ? [] : [$merge([{\"Network\": \"Instagram\", \"Why\": $count(errors) = 0 ? \"no numbers yet\" : $join(errors, \"; \")}])]",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/instagram.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          },
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "Network",
+                      "text": "Network",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Why",
+                      "text": "Why",
+                      "type": "string"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "($count(totals.*[$type($) = \"number\"]) > 0 or $count(daily) > 0 or $count(posts) > 0 or $count(videos) > 0 or $count(tracks) > 0 or $count(uploads) > 0 or $count($keys(history)) > 0 or $count(followerHistory) > 0) ? [] : [$merge([{\"Network\": \"TikTok\", \"Why\": $count(errors) = 0 ? \"no numbers yet\" : $join(errors, \"; \")}])]",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/tiktok.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "B",
+              "hidden": false
+            }
+          },
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "Network",
+                      "text": "Network",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Why",
+                      "text": "Why",
+                      "type": "string"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "($count(totals.*[$type($) = \"number\"]) > 0 or $count(daily) > 0 or $count(posts) > 0 or $count(videos) > 0 or $count(tracks) > 0 or $count(uploads) > 0 or $count($keys(history)) > 0 or $count(followerHistory) > 0) ? [] : [$merge([{\"Network\": \"Threads\", \"Why\": $count(errors) = 0 ? \"no numbers yet\" : $join(errors, \"; \")}])]",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/threads.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "C",
+              "hidden": false
+            }
+          },
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "Network",
+                      "text": "Network",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Why",
+                      "text": "Why",
+                      "type": "string"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "($count(totals.*[$type($) = \"number\"]) > 0 or $count(daily) > 0 or $count(posts) > 0 or $count(videos) > 0 or $count(tracks) > 0 or $count(uploads) > 0 or $count($keys(history)) > 0 or $count(followerHistory) > 0) ? [] : [$merge([{\"Network\": \"Bluesky\", \"Why\": $count(errors) = 0 ? \"no numbers yet\" : $join(errors, \"; \")}])]",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/bluesky.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "D",
+              "hidden": false
+            }
+          },
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "Network",
+                      "text": "Network",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Why",
+                      "text": "Why",
+                      "type": "string"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "($count(totals.*[$type($) = \"number\"]) > 0 or $count(daily) > 0 or $count(posts) > 0 or $count(videos) > 0 or $count(tracks) > 0 or $count(uploads) > 0 or $count($keys(history)) > 0 or $count(followerHistory) > 0) ? [] : [$merge([{\"Network\": \"YouTube\", \"Why\": $count(errors) = 0 ? \"no numbers yet\" : $join(errors, \"; \")}])]",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/youtube.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "E",
+              "hidden": false
+            }
+          },
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "Network",
+                      "text": "Network",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Why",
+                      "text": "Why",
+                      "type": "string"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "($count(totals.*[$type($) = \"number\"]) > 0 or $count(daily) > 0 or $count(posts) > 0 or $count(videos) > 0 or $count(tracks) > 0 or $count(uploads) > 0 or $count($keys(history)) > 0 or $count(followerHistory) > 0) ? [] : [$merge([{\"Network\": \"SoundCloud\", \"Why\": $count(errors) = 0 ? \"no numbers yet\" : $join(errors, \"; \")}])]",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/soundcloud.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "F",
+              "hidden": false
+            }
+          },
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "Network",
+                      "text": "Network",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Why",
+                      "text": "Why",
+                      "type": "string"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "($count(totals.*[$type($) = \"number\"]) > 0 or $count(daily) > 0 or $count(posts) > 0 or $count(videos) > 0 or $count(tracks) > 0 or $count(uploads) > 0 or $count($keys(history)) > 0 or $count(followerHistory) > 0) ? [] : [$merge([{\"Network\": \"Mixcloud\", \"Why\": $count(errors) = 0 ? \"no numbers yet\" : $join(errors, \"; \")}])]",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/mixcloud.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "G",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "merge",
+            "spec": {
+              "options": {}
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "sortBy",
+            "spec": {
+              "options": {
+                "sort": [
+                  {
+                    "field": "Network",
+                    "desc": false
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "table",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "cellHeight": "sm",
+          "showHeader": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "cellOptions": {
+                "type": "auto",
+                "wrapText": true
+              }
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Network"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 140
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,422 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 91,
+    "title": "When to post: by time of day",
+    "description": "How posts made in each part of the day do against your average part of the day. Each network's posts at least 3 days old, each one's main number, or the one picked in that network's dropdown above (Compared on), as it stood when the post was 3 days old (from the numbers the bridge keeps per day; older posts' totals now are worked back to day 3 with the network's usual growth), so older posts don't win just by having had longer. One model per network weighs weekday, part of the day, account growth over time and the kind of post (Reel, Photo, Short, Mix, a Ghost post sent as a newsletter or not...) together, so a time isn't credited for when, what or how big the account was. 1.5\u00d7 = half again as much as an average part of the day, 0.5\u00d7 = half; green from 1.1\u00d7, red under 0.9\u00d7. Each cell is pulled toward 1\u00d7 by as much as the posts can't back it up (how much slots really differ is measured from all networks' posts), and a one-off hit counts for less. Confidence (how likely it really is above or below average): High (plain) and Medium (a little faded) need the cell to be surer than the surest cell gets in 95% / 80% of tables with the posts' times shuffled (at least 95% / 80%), so a table with many cells doesn't light one up by luck; Low (faded and striped; always for a single post). Each cell's tooltip (corner triangle) gives its posts, their plain median and the percentage; the Posts cell's tooltip says how many were measured at day 3. With the newest 25-50 posts per network these are hints, not rules. From the bridge (timing.json), in the site's time zone (SITE_TIMEZONE, @SITE_TIMEZONE@).",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "Network",
+                      "text": "Network",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Metric",
+                      "text": "Compared on",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Posts",
+                      "text": "Posts",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "Posts tip",
+                      "text": "Posts tip",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Night (0-6)",
+                      "text": "Night (0-6)",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "Night (0-6) tip",
+                      "text": "Night (0-6) tip",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Night (0-6) style",
+                      "text": "Night (0-6) style",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Morning (6-12)",
+                      "text": "Morning (6-12)",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "Morning (6-12) tip",
+                      "text": "Morning (6-12) tip",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Morning (6-12) style",
+                      "text": "Morning (6-12) style",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Afternoon (12-18)",
+                      "text": "Afternoon (12-18)",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "Afternoon (12-18) tip",
+                      "text": "Afternoon (12-18) tip",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Afternoon (12-18) style",
+                      "text": "Afternoon (12-18) style",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Evening (18-24)",
+                      "text": "Evening (18-24)",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "Evening (18-24) tip",
+                      "text": "Evening (18-24) tip",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Evening (18-24) style",
+                      "text": "Evening (18-24) style",
+                      "type": "string"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "$append([], dayparts)",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/timing.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "ghost",
+                        "value": "${cmp_ghost}"
+                      },
+                      {
+                        "key": "instagram",
+                        "value": "${cmp_instagram}"
+                      },
+                      {
+                        "key": "tiktok",
+                        "value": "${cmp_tiktok}"
+                      },
+                      {
+                        "key": "threads",
+                        "value": "${cmp_threads}"
+                      },
+                      {
+                        "key": "bluesky",
+                        "value": "${cmp_bluesky}"
+                      },
+                      {
+                        "key": "youtube",
+                        "value": "${cmp_youtube}"
+                      },
+                      {
+                        "key": "soundcloud",
+                        "value": "${cmp_soundcloud}"
+                      },
+                      {
+                        "key": "mixcloud",
+                        "value": "${cmp_mixcloud}"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "sortBy",
+            "spec": {
+              "options": {
+                "sort": [
+                  {
+                    "field": "Network",
+                    "desc": false
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "organize",
+            "spec": {
+              "options": {
+                "indexByName": {
+                  "Network": 0,
+                  "Compared on": 1,
+                  "Posts": 2,
+                  "Night (0-6)": 3,
+                  "Morning (6-12)": 4,
+                  "Afternoon (12-18)": 5,
+                  "Evening (18-24)": 6,
+                  "Night (0-6) tip": 7,
+                  "Night (0-6) style": 8,
+                  "Morning (6-12) tip": 9,
+                  "Morning (6-12) style": 10,
+                  "Afternoon (12-18) tip": 11,
+                  "Afternoon (12-18) style": 12,
+                  "Evening (18-24) tip": 13,
+                  "Evening (18-24) style": 14,
+                  "Posts tip": 15
+                },
+                "excludeByName": {},
+                "renameByName": {}
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "table",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "cellHeight": "sm",
+          "showHeader": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "red"
+                },
+                {
+                  "value": 0.9,
+                  "color": "yellow"
+                },
+                {
+                  "value": 1.1,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "thresholds"
+            },
+            "noValue": "Not enough posts yet: a network needs 3 posts at least 3 days old",
+            "unit": "suffix:\u00d7",
+            "decimals": 2,
+            "custom": {
+              "align": "center",
+              "cellOptions": {
+                "type": "color-background",
+                "mode": "basic"
+              }
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Network"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "auto"
+                  }
+                },
+                {
+                  "id": "unit",
+                  "value": "none"
+                },
+                {
+                  "id": "decimals",
+                  "value": 0
+                },
+                {
+                  "id": "custom.align",
+                  "value": "left"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Compared on"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "auto"
+                  }
+                },
+                {
+                  "id": "unit",
+                  "value": "none"
+                },
+                {
+                  "id": "decimals",
+                  "value": 0
+                },
+                {
+                  "id": "custom.align",
+                  "value": "left"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Posts"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "auto"
+                  }
+                },
+                {
+                  "id": "unit",
+                  "value": "none"
+                },
+                {
+                  "id": "decimals",
+                  "value": 0
+                },
+                {
+                  "id": "custom.align",
+                  "value": "left"
+                },
+                {
+                  "id": "custom.tooltip.field",
+                  "value": "Posts tip"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Night (0-6)"
+              },
+              "properties": [
+                {
+                  "id": "custom.styleField",
+                  "value": "Night (0-6) style"
+                },
+                {
+                  "id": "custom.tooltip.field",
+                  "value": "Night (0-6) tip"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Morning (6-12)"
+              },
+              "properties": [
+                {
+                  "id": "custom.styleField",
+                  "value": "Morning (6-12) style"
+                },
+                {
+                  "id": "custom.tooltip.field",
+                  "value": "Morning (6-12) tip"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Afternoon (12-18)"
+              },
+              "properties": [
+                {
+                  "id": "custom.styleField",
+                  "value": "Afternoon (12-18) style"
+                },
+                {
+                  "id": "custom.tooltip.field",
+                  "value": "Afternoon (12-18) tip"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Evening (18-24)"
+              },
+              "properties": [
+                {
+                  "id": "custom.styleField",
+                  "value": "Evening (18-24) style"
+                },
+                {
+                  "id": "custom.tooltip.field",
+                  "value": "Evening (18-24) tip"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byRegexp",
+                "options": "/^(Night|Morning|Afternoon|Evening) [(][0-9-]+[)]$/"
+              },
+              "properties": [
+                {
+                  "id": "noValue",
+                  "value": "\u2013"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byRegexp",
+                "options": "/ (tip|style)$/"
+              },
+              "properties": [
+                {
+                  "id": "custom.hidden",
+                  "value": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

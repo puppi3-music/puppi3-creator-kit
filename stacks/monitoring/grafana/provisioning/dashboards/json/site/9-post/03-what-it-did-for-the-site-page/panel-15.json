@@ -1,0 +1,166 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 15,
+    "title": "Visitors to the page per day",
+    "description": "Unique visitors who saw the page each day, from anywhere. The violet line is when the post went up. In the dashboard's time range, which starts when the post went up (opened from Platforms). Empty when no site page was found for the post (see the top).",
+    "links": [
+      {
+        "title": "Every post about this page (the Page dashboard)",
+        "url": "/d/puppi3-page?var-page=${page:percentencode}&${__url_time_range}"
+      }
+    ],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "ghost-analytics"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "date",
+                      "text": "Date",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "visits",
+                      "text": "Unique visitors",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "'${page}' = '' ? [] : $append([], data)",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://tinybird-local:7181/v0/pipes/api_kpis.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "site_uuid",
+                        "value": "@GHOST_SITE_UUID@"
+                      },
+                      {
+                        "key": "timezone",
+                        "value": "@SITE_TIMEZONE@"
+                      },
+                      {
+                        "key": "date_from",
+                        "value": "${__from:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "date_to",
+                        "value": "${__to:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "pathname",
+                        "value": "${page}"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "convertFieldType",
+            "spec": {
+              "options": {
+                "conversions": [
+                  {
+                    "dateFormat": "YYYY-MM-DD",
+                    "destinationType": "time",
+                    "targetField": "Date",
+                    "timezone": "@SITE_TIMEZONE@"
+                  }
+                ],
+                "fields": {}
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "timeseries",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "decimals": 0,
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "palette-classic"
+            },
+            "noValue": "\u2013",
+            "custom": {
+              "barAlignment": 0,
+              "drawStyle": "bars",
+              "fillOpacity": 60,
+              "lineWidth": 1,
+              "showPoints": "never",
+              "spanNulls": true
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byFrameRefID",
+                "options": "A"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "fixedColor": "purple",
+                    "mode": "fixed"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

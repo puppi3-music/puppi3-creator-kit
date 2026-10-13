@@ -1,0 +1,33 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 9008,
+    "title": "",
+    "description": "",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [],
+        "transformations": [],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "text",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "content": "The Mixcloud profile set in the postiz stack's settings, read by the bridge ${every_mixcloud} from Mixcloud's public API. Mixcloud gives no numbers per day, so the bridge records each day's totals itself: per-day charts start the day it began collecting. Mixcloud uploads also count in the top section (Published, per day, by network, Recently published).",
+          "mode": "markdown"
+        },
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": []
+        }
+      }
+    },
+    "transparent": true
+  }
+}

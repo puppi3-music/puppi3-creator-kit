@@ -1,0 +1,82 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 14,
+    "title": "\u2026of them from ${from}",
+    "description": "Of those, the ones who came from ${from} (Ghost's referrer or our link tag). In the dashboard's time range, which starts when the post went up (opened from Platforms). Empty when no site page was found for the post (see the top).",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "mysql",
+                "version": "v0",
+                "datasource": {
+                  "name": "ghost-mysql"
+                },
+                "spec": {
+                  "editorMode": "code",
+                  "format": "table",
+                  "rawQuery": true,
+                  "rawSql": "-- the page (and source names) arrive URL-encoded in a double-quoted literal, the one form Grafana can't let\n-- a quote or backslash out of, and are decoded here\nWITH v AS (SELECT REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(\"${page:percentencode}\", '%2F', '/'), '%3F', '?'), '%3D', '='), '%26', '&'), '%23', '#'), '%2B', '+'), '%3A', ':'), '%2C', ','), '%3B', ';'), '%40', '@'), '%20', ' '), '%5E', '^'), '%7C', '|'), '%24', '$'), '%5B', '['), '%5D', ']'), '%28', '('), '%29', ')'), '%21', '!'), '%2A', '*'), '%25', '%') AS page,\n                   REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(\"${sources:percentencode}\", '%2F', '/'), '%3F', '?'), '%3D', '='), '%26', '&'), '%23', '#'), '%2B', '+'), '%3A', ':'), '%2C', ','), '%3B', ';'), '%40', '@'), '%20', ' '), '%5E', '^'), '%7C', '|'), '%24', '$'), '%5B', '['), '%5D', ']'), '%28', '('), '%29', ')'), '%21', '!'), '%2A', '*'), '%25', '%') AS sources)\nSELECT COUNT(*) AS Members\nFROM members_created_events m, v\nWHERE (m.attribution_url = v.page\n  OR m.attribution_id IN (SELECT id FROM posts WHERE CONCAT('/', slug, '/') = v.page))\n  AND $__timeFilter(m.created_at)\n  AND (COALESCE(m.utm_source, '') REGEXP v.sources OR COALESCE(m.referrer_source, '') REGEXP v.sources)"
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "stat",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showPercentChange": false,
+          "textMode": "auto",
+          "wideLayout": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "decimals": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "green"
+            },
+            "noValue": "0"
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

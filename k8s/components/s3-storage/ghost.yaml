@@ -1,0 +1,67 @@
+# Ghost with the bucket for its images, media and files: Ghost's storage settings as environment (storage__...),
+# the adapter mounted beside Ghost's own (core/server/adapters/storage/), the keys (if any) from Secret "s3".
+# A JSON patch that appends (the base's env stays first: url uses $(SITE_HOST)).
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: S3_BUCKET
+    valueFrom:
+      configMapKeyRef: {name: s3, key: S3_BUCKET}
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: AWS_REGION
+    valueFrom:
+      configMapKeyRef: {name: s3, key: S3_REGION}
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value: {name: storage__active, value: KitS3Storage}
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value: {name: storage__media__adapter, value: KitS3Storage}
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value: {name: storage__media__staticFileURLPrefix, value: content/media}
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value: {name: storage__files__adapter, value: KitS3Storage}
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value: {name: storage__files__staticFileURLPrefix, value: content/files}
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value: {name: storage__KitS3Storage__staticFileURLPrefix, value: content/images}
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value: {name: storage__KitS3Storage__bucket, value: $(S3_BUCKET)}
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value: {name: storage__KitS3Storage__region, value: $(AWS_REGION)}
+# the addresses Ghost writes for new files: the site's own (stored as __GHOST_URL__/content/..., as on the NAS)
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value: {name: storage__KitS3Storage__cdnUrl, value: https://$(SITE_HOST)}
+# files over 50 MB go up in 10 MB parts
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value: {name: storage__KitS3Storage__multipartUploadThresholdBytes, value: "52428800"}
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value: {name: storage__KitS3Storage__multipartChunkSizeBytes, value: "10485760"}
+- op: add
+  path: /spec/template/spec/containers/0/envFrom/-
+  value:
+    secretRef: {name: s3, optional: true}
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: s3-adapter
+    mountPath: /var/lib/ghost/current/core/server/adapters/storage/KitS3Storage.js
+    subPath: KitS3Storage.js
+    readOnly: true
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: s3-adapter
+    configMap:
+      name: ghost-s3-adapter

@@ -1,0 +1,217 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 16,
+    "title": "Where the page's visitors came from",
+    "description": "Every source of the visits that saw the page; those from ${from} are counted in \"\u2026of them from ${from}\" above. In the dashboard's time range, which starts when the post went up (opened from Platforms). Empty when no site page was found for the post (see the top).",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "ghost-analytics"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "source",
+                      "text": "Source",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "visits",
+                      "text": "Visitors",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "'${page}' = '' ? [] : $append([], data)",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://tinybird-local:7181/v0/pipes/api_top_sources.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "site_uuid",
+                        "value": "@GHOST_SITE_UUID@"
+                      },
+                      {
+                        "key": "timezone",
+                        "value": "@SITE_TIMEZONE@"
+                      },
+                      {
+                        "key": "date_from",
+                        "value": "${__from:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "date_to",
+                        "value": "${__to:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "pathname",
+                        "value": "${page}"
+                      },
+                      {
+                        "key": "limit",
+                        "value": "100"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "table",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "cellHeight": "sm",
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": true,
+              "displayName": "Visitors"
+            }
+          ]
+        },
+        "fieldConfig": {
+          "defaults": {
+            "noValue": "\u2013",
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "auto"
+              }
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Source"
+              },
+              "properties": [
+                {
+                  "id": "mappings",
+                  "value": [
+                    {
+                      "options": {
+                        "Facebook": {
+                          "index": 0,
+                          "text": "Facebook (mostly Instagram links)"
+                        },
+                        "bluesky": {
+                          "index": 4,
+                          "text": "Bluesky (tag: bluesky)"
+                        },
+                        "discord": {
+                          "index": 7,
+                          "text": "Discord (tag: discord)"
+                        },
+                        "facebook": {
+                          "index": 8,
+                          "text": "Facebook (tag: facebook)"
+                        },
+                        "ig": {
+                          "index": 2,
+                          "text": "Instagram (tag: ig, set by Instagram)"
+                        },
+                        "instagram": {
+                          "index": 3,
+                          "text": "Instagram (tag: instagram)"
+                        },
+                        "@SITE_HOST@": {
+                          "index": 1,
+                          "text": "Your own site"
+                        },
+                        "threads": {
+                          "index": 5,
+                          "text": "Threads (tag: threads)"
+                        },
+                        "tiktok": {
+                          "index": 6,
+                          "text": "TikTok (tag: tiktok)"
+                        },
+                        "x": {
+                          "index": 9,
+                          "text": "X (tag: x)"
+                        },
+                        "youtube": {
+                          "index": 10,
+                          "text": "YouTube (tag: youtube)"
+                        }
+                      },
+                      "type": "value"
+                    },
+                    {
+                      "options": {
+                        "match": "empty",
+                        "result": {
+                          "text": "Direct / unknown"
+                        }
+                      },
+                      "type": "special"
+                    },
+                    {
+                      "options": {
+                        "match": "null",
+                        "result": {
+                          "text": "Direct / unknown"
+                        }
+                      },
+                      "type": "special"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Visitors"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "mode": "basic",
+                    "type": "gauge",
+                    "valueDisplayMode": "text"
+                  }
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "fixedColor": "purple",
+                    "mode": "fixed"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+displayName: Staging bar
+type: middleware
+import: creatorkit/stagingbar
+summary: Adds a piece of HTML (staging's red bar) to every HTML page, just before </head>.
+testData:
+  html: <style>body{border-top:4px solid red}</style>

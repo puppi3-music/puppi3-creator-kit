@@ -1,0 +1,8 @@
+# The eks overlay on this Mac's k3d cluster: its manifests as they are, plus the k3d stand-ins
+# (components/k3d-standins/, added with finish/) and the site's values from cloud.k3d here instead of
+# <site>/cloud-eks.env. k8s/test/test.sh --overlay k3d-eks tries it, and checks that its render differs from eks's
+# only by the stand-ins.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../eks

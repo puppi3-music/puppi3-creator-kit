@@ -1,0 +1,77 @@
+# Grafana's read-only logins (grafana_ro), made again on every up (k8s/up.sh deletes finished Jobs first), with the
+# Compose kit's kit/monitoring/grants.sh: Ghost's MySQL gets SELECT on the tables stacks/puppi3/grafana-ro.sh lists,
+# Postiz's Postgres on the four its panels read. Each waits for its tables (Ghost and Postiz make them at their first
+# start); the Postiz one does nothing without the social module (MODULES).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: grafana-ro-ghost
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: grants
+          image: mysql:8.0
+          command: [bash, /scripts/grants.sh, ghost]
+          env:
+            - {name: DB_HOST, value: mysql}
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef: {name: puppi3, key: database__connection__user}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: puppi3, key: database__connection__password}
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef: {name: puppi3, key: database__connection__database}
+            - name: RO_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: monitoring, key: GRAFANA_RO_PASSWORD}
+          resources:
+            requests: {cpu: 10m, memory: 64Mi}
+            limits: {memory: 256Mi}
+          volumeMounts:
+            - {name: scripts, mountPath: /scripts}
+            - {name: scripts, mountPath: /grafana-ro.sh, subPath: grafana-ro.sh}   # grants.sh runs it from there
+      volumes:
+        - name: scripts
+          configMap:
+            name: grafana-ro-scripts
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: grafana-ro-postiz
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: grants
+          image: postgres:17-alpine
+          command: [sh, /scripts/grants.sh, postiz]
+          env:
+            - name: MODULES
+              valueFrom:
+                configMapKeyRef: {name: site, key: MODULES}
+            - {name: PGHOST, value: postiz-postgres}
+            - {name: PGUSER, value: postiz}
+            - {name: PGDATABASE, value: postiz}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef: {name: postiz, key: POSTIZ_DB_PASSWORD, optional: true}
+            - name: RO_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: monitoring, key: GRAFANA_RO_PASSWORD}
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 128Mi}
+          volumeMounts:
+            - {name: scripts, mountPath: /scripts}
+      volumes:
+        - name: scripts
+          configMap:
+            name: grafana-ro-scripts

@@ -1,0 +1,57 @@
+# The Cloud SQL Auth Proxy beside the pod's own containers: a native sidecar (an init container that keeps running),
+# so it's listening before the pod's other init containers (Ghost's wait for MySQL) and its containers start, and a
+# Job still finishes when its container does. It listens on 127.0.0.1 only: MySQL on 3306, Postgres on 5432 when
+# the site has one (POSTGRES_INSTANCE: only the social module uses it). Nothing here reads ConfigMap "site": its name
+# changes with every profile change, and Ghost's pod would restart with it. The pod's hosts file sends the stack's own names
+# (mysql, postiz-postgres, postiz-temporal-postgres) there, so no setting in any module changes.
+# It signs in as the pod's ServiceAccount cloud-sql (Workload Identity). The k3d twin swaps its image and script for
+# a TCP forwarder to the stand-ins (overlays/k3d-gke/finish/forwarder.yaml), keeping everything else.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unused
+  annotations:
+    creator-kit/sidecar: cloud-sql-proxy
+spec:
+  template:
+    spec:
+      serviceAccountName: cloud-sql
+      hostAliases:
+        - ip: 127.0.0.1
+          hostnames: [mysql, postiz-postgres, postiz-temporal-postgres]
+      initContainers:
+        - name: cloud-sql-proxy
+          image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.26.0-alpine
+          restartPolicy: Always
+          command: [sh, -c]
+          args:
+            - |
+              set -- "$MYSQL_INSTANCE?port=3306"
+              [ -z "$POSTGRES_INSTANCE" ] || set -- "$@" "$POSTGRES_INSTANCE?port=5432"
+              exec /cloud-sql-proxy --structured-logs --exit-zero-on-sigterm $CLOUD_SQL_PROXY_FLAGS "$@"
+          env:
+            - name: MYSQL_INSTANCE
+              valueFrom:
+                configMapKeyRef: {name: cloud, key: MYSQL_INSTANCE}
+            - name: POSTGRES_INSTANCE
+              valueFrom:
+                configMapKeyRef: {name: cloud, key: POSTGRES_INSTANCE, optional: true}
+            - name: CLOUD_SQL_PROXY_FLAGS
+              valueFrom:
+                configMapKeyRef: {name: cloud, key: CLOUD_SQL_PROXY_FLAGS, optional: true}
+          # started = listening on every port it should
+          startupProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - 'nc -z 127.0.0.1 3306 && { [ -z "$POSTGRES_INSTANCE" ] || nc -z 127.0.0.1 5432; }'
+            periodSeconds: 2
+            failureThreshold: 90
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            allowPrivilegeEscalation: false
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 256Mi}

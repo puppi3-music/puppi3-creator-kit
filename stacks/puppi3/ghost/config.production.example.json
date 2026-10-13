@@ -1,0 +1,34 @@
+{
+  "url": "https://example.com",
+  "server": {
+    "port": 2368,
+    "host": "::"
+  },
+  "mail": {
+    "transport": "SMTP",
+    "from": "Your Site noreply@example.com",
+    "options": {
+      "host": "smtp.protonmail.ch",
+      "port": 587,
+      "secure": false,
+      "requireTLS": true,
+      "auth": {
+        "user": "<protonmail smtp username>",
+        "pass": "<protonmail smtp token>"
+      }
+    }
+  },
+  "logging": {
+    "transports": [
+      "file",
+      "stdout"
+    ]
+  },
+  "process": "systemd",
+  "security": {
+    "staffDeviceVerification": true
+  },
+  "paths": {
+    "contentPath": "/var/lib/ghost/content"
+  }
+}

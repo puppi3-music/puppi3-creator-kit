@@ -1,0 +1,256 @@
+{
+  "kind": "RowsLayoutRow",
+  "spec": {
+    "title": "What it did for the site: ${page:text}",
+    "collapse": false,
+    "variables": [
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "page",
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "label": "Site page",
+          "hide": "dontHide",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "description": "The site page this section looks at: the one the post links to (or the bridge's guess) first, then the post's other links, the home page and the newest Ghost posts, to pick another by hand",
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "infinityQuery": {
+                "columns": [
+                  {
+                    "selector": "title",
+                    "text": "__text",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "path",
+                    "text": "__value",
+                    "type": "string"
+                  }
+                ],
+                "datasource": {
+                  "type": "yesoreyeram-infinity-datasource",
+                  "uid": "bridge-instagram"
+                },
+                "filters": [],
+                "format": "table",
+                "parser": "backend",
+                "refId": "variable",
+                "root_selector": "$append([], pages)",
+                "source": "url",
+                "type": "json",
+                "url": "http://postiz-ghost-bridge:8080/post.json",
+                "url_options": {
+                  "data": "",
+                  "method": "GET",
+                  "params": [
+                    {
+                      "key": "network",
+                      "value": "${network}"
+                    },
+                    {
+                      "key": "id",
+                      "value": "${post}"
+                    },
+                    {
+                      "key": "time",
+                      "value": "${time}"
+                    }
+                  ]
+                }
+              },
+              "query": "",
+              "queryType": "infinity"
+            }
+          },
+          "regex": "",
+          "sort": "disabled",
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "sources",
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "label": "Sources",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "description": "A regex of the names Ghost's analytics give this network's visitors (hidden)",
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "infinityQuery": {
+                "columns": [
+                  {
+                    "selector": "sources",
+                    "text": "sources",
+                    "type": "string"
+                  }
+                ],
+                "datasource": {
+                  "type": "yesoreyeram-infinity-datasource",
+                  "uid": "bridge-instagram"
+                },
+                "filters": [],
+                "format": "table",
+                "parser": "backend",
+                "refId": "variable",
+                "root_selector": "",
+                "source": "url",
+                "type": "json",
+                "url": "http://postiz-ghost-bridge:8080/post.json",
+                "url_options": {
+                  "data": "",
+                  "method": "GET",
+                  "params": [
+                    {
+                      "key": "network",
+                      "value": "${network}"
+                    },
+                    {
+                      "key": "id",
+                      "value": "${post}"
+                    },
+                    {
+                      "key": "time",
+                      "value": "${time}"
+                    }
+                  ]
+                }
+              },
+              "query": "",
+              "queryType": "infinity"
+            }
+          },
+          "regex": "",
+          "sort": "disabled",
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": true
+        }
+      }
+    ],
+    "layout": {
+      "kind": "GridLayout",
+      "spec": {
+        "items": [
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-11"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-12"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 12,
+              "y": 0,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-13"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 18,
+              "y": 0,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-14"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 9,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-15"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 12,
+              "y": 4,
+              "width": 6,
+              "height": 9,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-16"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 18,
+              "y": 4,
+              "width": 6,
+              "height": 9,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-17"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

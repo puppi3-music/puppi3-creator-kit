@@ -1,0 +1,155 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 703,
+    "title": "Visitor \u2192 member",
+    "description": "New members divided by unique visitors: how much of your traffic turns into members. The best number to grow: more visitors only help if some of them join.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "ghost-analytics"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "visits",
+                      "text": "visits",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "data",
+                  "source": "url",
+                  "summarizeAlias": "visitors",
+                  "summarizeExpression": "sum(visits)",
+                  "type": "json",
+                  "url": "http://tinybird-local:7181/v0/pipes/api_kpis.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "site_uuid",
+                        "value": "@GHOST_SITE_UUID@"
+                      },
+                      {
+                        "key": "timezone",
+                        "value": "@SITE_TIMEZONE@"
+                      },
+                      {
+                        "key": "date_from",
+                        "value": "${__from:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "date_to",
+                        "value": "${__to:date:YYYY-MM-DD}"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "visitors",
+              "hidden": false
+            }
+          },
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "mysql",
+                "version": "v0",
+                "datasource": {
+                  "name": "ghost-mysql"
+                },
+                "spec": {
+                  "editorMode": "code",
+                  "format": "table",
+                  "rawQuery": true,
+                  "rawSql": "SELECT COUNT(*) AS members FROM members_created_events WHERE $__timeFilter(created_at)"
+                }
+              },
+              "refId": "members",
+              "hidden": false
+            }
+          },
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "__expr__",
+                "version": "v0",
+                "datasource": {
+                  "name": "__expr__"
+                },
+                "spec": {
+                  "expression": "$members / $visitors",
+                  "type": "math"
+                }
+              },
+              "refId": "rate",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "stat",
+      "version": "",
+      "spec": {
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "/^rate$/",
+            "values": false
+          },
+          "textMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "decimals": 2,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "green"
+            },
+            "noValue": "0"
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

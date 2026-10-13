@@ -1,0 +1,6 @@
+# Ghost's MySQL in the cluster (selfhosted, local). Without it Ghost's database__connection__host points elsewhere
+# (RDS, Cloud SQL: Phase D's overlays).
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - mysql.yaml

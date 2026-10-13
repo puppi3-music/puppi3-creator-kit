@@ -1,0 +1,123 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 11,
+    "title": "Visitors to the page",
+    "description": "Unique visitors who saw the page, from anywhere (Ghost's analytics, per day added up). In the dashboard's time range, which starts when the post went up (opened from Platforms). Empty when no site page was found for the post (see the top).",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "ghost-analytics"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "date",
+                      "text": "Date",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "visits",
+                      "text": "Unique visitors",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "'${page}' = '' ? [] : $append([], data)",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://tinybird-local:7181/v0/pipes/api_kpis.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "site_uuid",
+                        "value": "@GHOST_SITE_UUID@"
+                      },
+                      {
+                        "key": "timezone",
+                        "value": "@SITE_TIMEZONE@"
+                      },
+                      {
+                        "key": "date_from",
+                        "value": "${__from:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "date_to",
+                        "value": "${__to:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "pathname",
+                        "value": "${page}"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "stat",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "sum"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showPercentChange": false,
+          "textMode": "auto",
+          "wideLayout": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "decimals": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "purple"
+            },
+            "noValue": "0"
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

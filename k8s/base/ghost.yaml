@@ -1,0 +1,119 @@
+# Ghost: one process only (scheduler, caches, migrations), so one replica, Recreate, and it scales up, not out.
+# Its settings are environment variables (Ghost's config takes database__connection__host and the like); no
+# config.production.json, so the image's own stays (listen on ::, the content path). Its values are ConfigMap "ghost"
+# (k8s/up.sh: SITE_HOST and STAFF_DEVICE_VERIFICATION only), so other changes to site.env don't restart it.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ghost
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  # A first start may wait for tb-setup's tokens (analytics), then run every migration
+  progressDeadlineSeconds: 1800
+  selector:
+    matchLabels:
+      app: ghost
+  template:
+    metadata:
+      labels:
+        app: ghost
+    spec:
+      initContainers:
+        # MySQL first: Ghost exits when it can't reach it, and a crash loop only slows its start
+        - name: wait-for-db
+          image: busybox:1.37
+          command: [sh, -c, 'until nc -z -w 2 "$DB_HOST" 3306; do echo "waiting for $DB_HOST"; sleep 3; done']
+          env:
+            - name: DB_HOST
+              value: mysql
+          resources:
+            requests: {cpu: 10m, memory: 8Mi}
+            limits: {memory: 32Mi}
+      containers:
+        - name: ghost
+          image: ghost:6-alpine
+          # Mail (staff sign-in codes, members' links): Ghost's mail__* settings from the site's secrets/ghost-mail.env,
+          # if it has one (else Ghost's Direct mail, which rarely arrives). Modules append theirs (analytics: tb-setup's
+          # tokens; s3-storage: the bucket's keys).
+          envFrom:
+            - secretRef: {name: ghost-mail, optional: true}
+          env:
+            - name: SITE_HOST
+              valueFrom:
+                configMapKeyRef: {name: ghost, key: SITE_HOST}
+            - name: url
+              value: https://$(SITE_HOST)
+            # see https://ghost.org/docs/config/#configuration-options
+            - name: database__client
+              value: mysql
+            - name: database__connection__host
+              value: mysql
+            - name: database__connection__user
+              valueFrom:
+                secretKeyRef: {name: puppi3, key: database__connection__user}
+            - name: database__connection__password
+              valueFrom:
+                secretKeyRef: {name: puppi3, key: database__connection__password}
+            - name: database__connection__database
+              valueFrom:
+                secretKeyRef: {name: puppi3, key: database__connection__database}
+            # Ghost emails staff a code at each new sign-in; STAFF_DEVICE_VERIFICATION=false in site.env turns it off
+            - name: security__staffDeviceVerification
+              valueFrom:
+                configMapKeyRef: {name: ghost, key: STAFF_DEVICE_VERIFICATION, optional: true}
+          ports:
+            - {name: http, containerPort: 2368}
+          # Ghost answers its API only to https (X-Forwarded-Proto, as Traefik sends); else it redirects
+          startupProbe:
+            httpGet:
+              path: /ghost/api/admin/site/
+              port: http
+              httpHeaders: [{name: X-Forwarded-Proto, value: https}]
+            periodSeconds: 5
+            failureThreshold: 120   # a first start runs every migration
+          readinessProbe:
+            httpGet:
+              path: /ghost/api/admin/site/
+              port: http
+              httpHeaders: [{name: X-Forwarded-Proto, value: https}]
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /ghost/api/admin/site/
+              port: http
+              httpHeaders: [{name: X-Forwarded-Proto, value: https}]
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 5
+          resources:
+            requests: {cpu: 100m, memory: 384Mi}
+            limits: {memory: 1Gi}
+          volumeMounts:
+            - {name: content, mountPath: /var/lib/ghost/content}
+      volumes:
+        - name: content
+          persistentVolumeClaim:
+            claimName: ghost-content
+---
+# Themes, images, media, files, settings (with the s3-storage component, images, media and files go to a bucket)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ghost-content
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ghost
+spec:
+  selector:
+    app: ghost
+  ports:
+    - {name: http, port: 2368, targetPort: http}

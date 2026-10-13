@@ -1,0 +1,37 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 9000,
+    "title": "",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [],
+        "transformations": [],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "text",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "code": {
+            "language": "plaintext",
+            "showLineNumbers": false,
+            "showMiniMap": false
+          },
+          "content": "**@SITE_HOST@**&nbsp;&nbsp;|&nbsp;&nbsp;[Overview](/d/puppi3-overview)&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Health](/d/puppi3-health)&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Traffic](/d/puppi3-traffic)&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Growth](/d/puppi3-growth)&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Members & Newsletters](/d/puppi3-members)&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Content & Engagement](/d/puppi3-content)&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Social](/d/puppi3-social)&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Platforms](/d/puppi3-platforms)&nbsp;&nbsp;\u00b7&nbsp;&nbsp;**\u25b8 ${label} post**&nbsp;&nbsp;|&nbsp;&nbsp;[Site \u2197](https://@SITE_HOST@)&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Ghost admin \u2197](https://@SITE_HOST@/ghost/)",
+          "mode": "markdown"
+        },
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": []
+        }
+      }
+    },
+    "transparent": true
+  }
+}

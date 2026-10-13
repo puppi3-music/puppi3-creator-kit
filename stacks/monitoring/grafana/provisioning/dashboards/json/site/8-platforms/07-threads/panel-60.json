@@ -1,0 +1,129 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 60,
+    "title": "Threads: followers & reach",
+    "description": "Followers now and gained over the last 30 days (the bridge's own record); views over the last 30 days (Threads, through Postiz). Link clicks = taps on links in your posts (from Threads, with POSTIZ_DB_PASSWORD). Not affected by the dashboard's time range.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "followers",
+                      "text": "Followers",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "newFollowers30",
+                      "text": "New followers (30 days)",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "views30",
+                      "text": "Views (30 days)",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "linkClicks30",
+                      "text": "Link clicks (30 days)",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "totals",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/threads.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "organize",
+            "spec": {
+              "options": {
+                "excludeByName": {},
+                "indexByName": {
+                  "Followers": 0,
+                  "New followers (30 days)": 1,
+                  "Views (30 days)": 2,
+                  "Link clicks (30 days)": 3
+                },
+                "renameByName": {}
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "stat",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "center",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "value_and_name",
+          "orientation": "vertical",
+          "wideLayout": false,
+          "text": {
+            "titleSize": 12
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "#8f8f8f"
+            },
+            "noValue": "\u2013"
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+# Traefik gets Postiz's name (ConfigMap "social", which k8s/up.sh makes from secrets/postiz.env) for social.yml.
+# A JSON patch that appends to its envFrom (the site's profile stays first).
+- op: add
+  path: /spec/template/spec/containers/0/envFrom/-
+  value:
+    configMapRef:
+      name: social

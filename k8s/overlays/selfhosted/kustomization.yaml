@@ -1,0 +1,9 @@
+# Any cluster, everything in it: the databases in the cluster, data on the cluster's default storage class, Traefik
+# behind a LoadBalancer Service (or the cluster's equivalent). The images' registry is the site's (k8s/up.sh sets it
+# from k8s/build-images.sh's list).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+components:
+  - ../../components/mysql

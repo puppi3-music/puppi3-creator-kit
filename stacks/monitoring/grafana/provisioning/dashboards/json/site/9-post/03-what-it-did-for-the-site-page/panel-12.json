@@ -1,0 +1,162 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 12,
+    "title": "\u2026of them from ${from}",
+    "description": "Visits that saw the page and came from ${from}: its referrer, our link tags (utm_source) and, for Instagram, Facebook (Meta's link redirect); for a Ghost post, the links in its newsletter. In the dashboard's time range, which starts when the post went up (opened from Platforms). Empty when no site page was found for the post (see the top).",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "ghost-analytics"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "source",
+                      "text": "Source",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "visits",
+                      "text": "Visitors",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "'${page}' = '' ? [] : $append([], data)",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://tinybird-local:7181/v0/pipes/api_top_sources.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "site_uuid",
+                        "value": "@GHOST_SITE_UUID@"
+                      },
+                      {
+                        "key": "timezone",
+                        "value": "@SITE_TIMEZONE@"
+                      },
+                      {
+                        "key": "date_from",
+                        "value": "${__from:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "date_to",
+                        "value": "${__to:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "pathname",
+                        "value": "${page}"
+                      },
+                      {
+                        "key": "limit",
+                        "value": "100"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "filterByValue",
+            "spec": {
+              "options": {
+                "filters": [
+                  {
+                    "config": {
+                      "id": "regex",
+                      "options": {
+                        "value": "${sources:raw}"
+                      }
+                    },
+                    "fieldName": "Source"
+                  }
+                ],
+                "match": "any",
+                "type": "include"
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "filterFieldsByName",
+            "spec": {
+              "options": {
+                "include": {
+                  "names": [
+                    "Visitors"
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "stat",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "sum"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showPercentChange": false,
+          "textMode": "auto",
+          "wideLayout": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "decimals": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "purple"
+            },
+            "noValue": "0"
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

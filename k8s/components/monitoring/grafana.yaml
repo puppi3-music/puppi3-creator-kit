@@ -1,0 +1,112 @@
+# Grafana, as kit/monitoring/compose.yaml's: the Infinity plugin, the kit's datasources (their ${VAR} logins filled
+# in from the environment below, so no login is in a file), the site's dashboards in a folder named after the site,
+# and its alert rules (read only when Grafana starts: a changed rule is a new ConfigMap name, so a new pod). The
+# dashboards are a projected volume of one ConfigMap per dashboard, which k8s/up.sh fills in (a ConfigMap holds
+# 1 MiB at most; Platforms alone is ~280 KB). With analytics on, up.sh gives it tb-setup's tokens (Ghost Analytics'
+# bearer token), and it waits for them like Ghost.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate        # its SQLite database on a ReadWriteOnce volume
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      securityContext:
+        runAsUser: 472       # the image's grafana user
+        runAsGroup: 0
+        runAsNonRoot: true
+        fsGroup: 472
+      containers:
+        - name: grafana
+          image: grafana/grafana:13.2.3
+          env:
+            - {name: GF_INSTALL_PLUGINS, value: yesoreyeram-infinity-datasource}
+            - name: GF_SERVER_ROOT_URL
+              valueFrom:
+                configMapKeyRef: {name: site, key: GRAFANA_URL, optional: true}
+            - {name: GF_SECURITY_ADMIN_USER, value: admin}
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: monitoring, key: GRAFANA_ADMIN_PASSWORD}
+            - {name: GF_USERS_ALLOW_SIGN_UP, value: "false"}
+            - {name: GF_ANALYTICS_REPORTING_ENABLED, value: "false"}
+            - {name: GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH, value: /etc/grafana/dashboards/1-overview.json}
+            # read by the provisioning files (Grafana fills in ${VAR} there)
+            - name: SITE_NAME
+              valueFrom:
+                configMapKeyRef: {name: site, key: SITE_NAME, optional: true}
+            - {name: GHOST_DB_HOST, value: mysql}
+            - name: GHOST_DB_NAME
+              valueFrom:
+                secretKeyRef: {name: puppi3, key: database__connection__database}
+            - name: GRAFANA_RO_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: monitoring, key: GRAFANA_RO_PASSWORD}
+          envFrom: []     # k8s/up.sh appends tinybird-tokens with analytics on
+          ports:
+            - {name: http, containerPort: 3000}
+          # the first start downloads the Infinity plugin
+          startupProbe:
+            httpGet: {path: /api/health, port: http}
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet: {path: /api/health, port: http}
+            periodSeconds: 10
+          resources:
+            requests: {cpu: 50m, memory: 192Mi}
+            limits: {memory: 1Gi}
+          volumeMounts:
+            - {name: datasources, mountPath: /etc/grafana/provisioning/datasources}
+            - {name: dashboard-provider, mountPath: /etc/grafana/provisioning/dashboards}
+            - {name: alerting, mountPath: /etc/grafana/provisioning/alerting}
+            - {name: dashboards, mountPath: /etc/grafana/dashboards}
+            - {name: data, mountPath: /var/lib/grafana}
+      volumes:
+        - name: datasources
+          configMap:
+            name: grafana-provisioning
+            items: [{key: datasources.yml, path: kit.yml}]
+        - name: dashboard-provider
+          configMap:
+            name: grafana-provisioning
+            items: [{key: dashboards.yml, path: kit.yml}]
+        - name: alerting
+          configMap:
+            name: grafana-alerting      # k8s/up.sh: <ID_PREFIX>.yml
+        - name: dashboards
+          projected:
+            sources: []                 # k8s/up.sh: a grafana-dashboard-<name> ConfigMap per dashboard
+        - name: data
+          persistentVolumeClaim:
+            claimName: grafana
+---
+# Grafana's database (users, preferences, alert state) and its plugins
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+spec:
+  selector:
+    app: grafana
+  ports:
+    - {name: http, port: 3000, targetPort: http}

@@ -1,0 +1,6 @@
+displayName: Page hit country
+type: middleware
+import: creatorkit/pagehitcountry
+summary: Fills in the country of a Ghost page hit from CF-IPCountry when the tracker's time zone guess gave none.
+testData:
+  header: CF-IPCountry

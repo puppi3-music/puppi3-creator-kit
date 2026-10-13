@@ -1,0 +1,563 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 103,
+    "title": "Ghost posts",
+    "description": "Every published post: visitors and page views since it went up (unique visitors per day added up; days before Ghost's analytics started aren't counted), members who signed up on it (Ghost's attribution) and paid ones, and, when it went out as a newsletter, how many it was emailed to, opened it and clicked a link in it. Click a row for that post up close (the Post dashboard): visitors per day against your usual post, and where they came from. The Sort by and Show dropdowns at the top of the section pick the order and which posts. More like this / Less like this = the feedback buttons at the bottom of the newsletter email. vs your usual: this post against your other posts on this network, on what the network ranks posts by (hover for why); vs industry: against the published average for this network (hover for the numbers); Sort by \"Doing best first\".",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "time",
+                      "text": "Posted",
+                      "type": "timestamp_epoch"
+                    },
+                    {
+                      "selector": "title",
+                      "text": "Title",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "type",
+                      "text": "Type",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "visitors",
+                      "text": "Visitors",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "pageviews",
+                      "text": "Page views",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "signups",
+                      "text": "Sign-ups",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "paidConversions",
+                      "text": "Paid sign-ups",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "emailRecipients",
+                      "text": "Emailed to",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "opens",
+                      "text": "Opens",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "openRate",
+                      "text": "Open rate",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "emailClicks",
+                      "text": "Email clicks",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "positiveFeedback",
+                      "text": "More like this",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "negativeFeedback",
+                      "text": "Less like this",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "permalink",
+                      "text": "Link",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "ref",
+                      "text": "ref",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "posted_ms",
+                      "text": "posted_ms",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "perf_label",
+                      "text": "vs your usual",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "perf",
+                      "text": "Score",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "perf_tip",
+                      "text": "perf_tip",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "perf_industry_label",
+                      "text": "vs industry",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "perf_industry",
+                      "text": "industry_tip",
+                      "type": "string"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "$append([], posts[\"${show_ghost}\" = \"all\" or (time >= ${__from} and time <= ${__to})])",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/ghost.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "organize",
+            "spec": {
+              "options": {
+                "indexByName": {
+                  "Posted": 0,
+                  "Title": 1,
+                  "Type": 4,
+                  "Visitors": 5,
+                  "Page views": 6,
+                  "Sign-ups": 7,
+                  "Paid sign-ups": 8,
+                  "Emailed to": 9,
+                  "Opens": 10,
+                  "Open rate": 11,
+                  "Email clicks": 12,
+                  "More like this": 13,
+                  "Less like this": 14,
+                  "Link": 15,
+                  "ref": 16,
+                  "posted_ms": 17,
+                  "vs your usual": 2,
+                  "Score": 18,
+                  "perf_tip": 19,
+                  "vs industry": 3,
+                  "industry_tip": 20
+                },
+                "excludeByName": {},
+                "renameByName": {}
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "sortBy",
+            "spec": {
+              "options": {
+                "fields": {},
+                "sort": [
+                  {
+                    "field": "${sort_ghost}",
+                    "desc": true
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "table",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "cellHeight": "sm",
+          "showHeader": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "palette-classic"
+            },
+            "noValue": "\u2013",
+            "links": [
+              {
+                "title": "This post up close: its numbers per day and what it did for the site",
+                "url": "/d/puppi3-post?var-network=ghost&var-post=${__data.fields.ref}&from=${__data.fields.posted_ms}&to=now"
+              }
+            ],
+            "custom": {
+              "minWidth": 70
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Title"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 420
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Link"
+              },
+              "properties": [
+                {
+                  "id": "links",
+                  "value": [
+                    {
+                      "targetBlank": true,
+                      "title": "Open on the site",
+                      "url": "${__value.raw}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "ref"
+              },
+              "properties": [
+                {
+                  "id": "custom.hidden",
+                  "value": true
+                },
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "viz": true,
+                    "legend": false,
+                    "tooltip": false
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "posted_ms"
+              },
+              "properties": [
+                {
+                  "id": "custom.hidden",
+                  "value": true
+                },
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "viz": true,
+                    "legend": false,
+                    "tooltip": false
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Open rate"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "percent"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "vs your usual"
+              },
+              "properties": [
+                {
+                  "id": "mappings",
+                  "value": [
+                    {
+                      "type": "regex",
+                      "options": {
+                        "pattern": "^Doing great.*",
+                        "result": {
+                          "color": "green",
+                          "index": 0
+                        }
+                      }
+                    },
+                    {
+                      "type": "regex",
+                      "options": {
+                        "pattern": "^Above usual.*",
+                        "result": {
+                          "color": "light-green",
+                          "index": 1
+                        }
+                      }
+                    },
+                    {
+                      "type": "regex",
+                      "options": {
+                        "pattern": "^Below usual.*",
+                        "result": {
+                          "color": "light-orange",
+                          "index": 2
+                        }
+                      }
+                    },
+                    {
+                      "type": "regex",
+                      "options": {
+                        "pattern": "^Well below usual.*",
+                        "result": {
+                          "color": "orange",
+                          "index": 3
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "transparent"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-background",
+                    "mode": "basic"
+                  }
+                },
+                {
+                  "id": "custom.tooltip.field",
+                  "value": "perf_tip"
+                },
+                {
+                  "id": "custom.width",
+                  "value": 240
+                },
+                {
+                  "id": "description",
+                  "value": "Against your own posts on this network: what it ranks posts by (per person reached), counts at the same age. Hover the cell for why and the industry average."
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "thresholds"
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Score"
+              },
+              "properties": [
+                {
+                  "id": "custom.hidden",
+                  "value": true
+                },
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "viz": true,
+                    "legend": false,
+                    "tooltip": false
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "perf_tip"
+              },
+              "properties": [
+                {
+                  "id": "custom.hidden",
+                  "value": true
+                },
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "viz": true,
+                    "legend": false,
+                    "tooltip": false
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "vs industry"
+              },
+              "properties": [
+                {
+                  "id": "mappings",
+                  "value": [
+                    {
+                      "type": "regex",
+                      "options": {
+                        "pattern": "^Well above typical.*",
+                        "result": {
+                          "color": "green",
+                          "index": 0
+                        }
+                      }
+                    },
+                    {
+                      "type": "regex",
+                      "options": {
+                        "pattern": "^Above typical.*",
+                        "result": {
+                          "color": "light-green",
+                          "index": 1
+                        }
+                      }
+                    },
+                    {
+                      "type": "regex",
+                      "options": {
+                        "pattern": "^Below typical.*",
+                        "result": {
+                          "color": "light-orange",
+                          "index": 2
+                        }
+                      }
+                    },
+                    {
+                      "type": "regex",
+                      "options": {
+                        "pattern": "^Well below typical.*",
+                        "result": {
+                          "color": "orange",
+                          "index": 3
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "transparent"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-background",
+                    "mode": "basic"
+                  }
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "thresholds"
+                  }
+                },
+                {
+                  "id": "custom.tooltip.field",
+                  "value": "industry_tip"
+                },
+                {
+                  "id": "custom.width",
+                  "value": 240
+                },
+                {
+                  "id": "description",
+                  "value": "Against the published average for this network (Instagram per person reached, TikTok and YouTube per view, newsletters' click rate). Mostly big brand accounts, so a second opinion. Hover for the numbers."
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "industry_tip"
+              },
+              "properties": [
+                {
+                  "id": "custom.hidden",
+                  "value": true
+                },
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "viz": true,
+                    "legend": false,
+                    "tooltip": false
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

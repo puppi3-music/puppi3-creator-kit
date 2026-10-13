@@ -1,0 +1,26 @@
+# Postiz's and Temporal's Postgres as one managed Postgres in the cloud (RDS, Cloud SQL), for the cloud overlays'
+# finish/ (it reaches the social and monitoring modules' resources). How the pods reach it is the overlay's: EKS
+# aliases the stack's Service names, GKE gives each pod a Cloud SQL proxy.
+# - logins.yaml: Job postgres-logins makes Postiz's and Temporal's logins and databases from the master login
+#   (Secret "cloud": POSTGRES_MASTER_USER, POSTGRES_MASTER_PASSWORD, the site's secrets/cloud.env)
+# - the social module's two Postgres StatefulSets go (a patch whose target isn't there, social off, does nothing)
+# - Postiz and Temporal wait until their login works; Grafana's grants there sign in as the master (the cloud's
+#   postiz login isn't a superuser and may not make roles)
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - logins.yaml
+patches:
+  - target: {kind: StatefulSet, name: "^(postiz-postgres|postiz-temporal-postgres)$"}
+    patch: |-
+      $patch: delete
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: unused
+  - target: {kind: Deployment, name: postiz}
+    path: postiz-wait.yaml
+  - target: {kind: Deployment, name: postiz-temporal}
+    path: temporal-wait.yaml
+  - target: {kind: Job, name: grafana-ro-postiz}
+    path: grants-master.yaml

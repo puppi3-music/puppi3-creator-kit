@@ -1,0 +1,563 @@
+{
+  "apiVersion": "dashboard.grafana.app/v2",
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "puppi3-post"
+  },
+  "spec": {
+    "title": "puppi3 \u00b7 Post",
+    "description": "One social post up close: its numbers per day, and what it did for the site. Opened from a post in the Platforms dashboard's tables.",
+    "tags": [
+      "ghost",
+      "growth",
+      "puppi3"
+    ],
+    "editable": true,
+    "cursorSync": "Crosshair",
+    "liveNow": false,
+    "preload": false,
+    "timeSettings": {
+      "timezone": "browser",
+      "from": "now-30d",
+      "to": "now",
+      "autoRefresh": "5m",
+      "autoRefreshIntervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ],
+      "hideTimepicker": false,
+      "fiscalYearStartMonth": 0
+    },
+    "links": [
+      {
+        "title": "Overview",
+        "type": "link",
+        "url": "/d/puppi3-overview",
+        "icon": "dashboard",
+        "tooltip": "",
+        "tags": [],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": false,
+        "keepTime": false
+      },
+      {
+        "title": "Health",
+        "type": "link",
+        "url": "/d/puppi3-health",
+        "icon": "dashboard",
+        "tooltip": "",
+        "tags": [],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": false,
+        "keepTime": false
+      },
+      {
+        "title": "Traffic",
+        "type": "link",
+        "url": "/d/puppi3-traffic",
+        "icon": "dashboard",
+        "tooltip": "",
+        "tags": [],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": false,
+        "keepTime": false
+      },
+      {
+        "title": "Growth",
+        "type": "link",
+        "url": "/d/puppi3-growth",
+        "icon": "dashboard",
+        "tooltip": "",
+        "tags": [],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": false,
+        "keepTime": false
+      },
+      {
+        "title": "Members & Newsletters",
+        "type": "link",
+        "url": "/d/puppi3-members",
+        "icon": "dashboard",
+        "tooltip": "",
+        "tags": [],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": false,
+        "keepTime": false
+      },
+      {
+        "title": "Content & Engagement",
+        "type": "link",
+        "url": "/d/puppi3-content",
+        "icon": "dashboard",
+        "tooltip": "",
+        "tags": [],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": false,
+        "keepTime": false
+      },
+      {
+        "title": "Social",
+        "type": "link",
+        "url": "/d/puppi3-social",
+        "icon": "dashboard",
+        "tooltip": "",
+        "tags": [],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": false,
+        "keepTime": false
+      },
+      {
+        "title": "Platforms",
+        "type": "link",
+        "url": "/d/puppi3-platforms",
+        "icon": "dashboard",
+        "tooltip": "",
+        "tags": [],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": false,
+        "keepTime": false
+      }
+    ],
+    "variables": [
+      {
+        "kind": "TextVariable",
+        "spec": {
+          "name": "network",
+          "current": {
+            "text": "instagram",
+            "value": "instagram"
+          },
+          "query": "instagram",
+          "label": "Network",
+          "hide": "hideVariable",
+          "skipUrlSync": false,
+          "description": "instagram, youtube, soundcloud, bluesky, threads, tiktok or mixcloud (set by the link from Platforms)"
+        }
+      },
+      {
+        "kind": "TextVariable",
+        "spec": {
+          "name": "post",
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "query": "",
+          "label": "Post",
+          "hide": "hideVariable",
+          "skipUrlSync": false,
+          "description": "The post's ref in the bridge's files (set by the link from Platforms)"
+        }
+      },
+      {
+        "kind": "TextVariable",
+        "spec": {
+          "name": "time",
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "query": "",
+          "label": "Posted at",
+          "hide": "hideVariable",
+          "skipUrlSync": false,
+          "description": "Posting time in ms, for links that don't know the post's ref (Social's Postiz rows, the timeline markers): the bridge picks that network's post within 30 minutes of it"
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "label",
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "label": "Network name",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "description": "The network's name, for titles",
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "infinityQuery": {
+                "columns": [
+                  {
+                    "selector": "label",
+                    "text": "label",
+                    "type": "string"
+                  }
+                ],
+                "datasource": {
+                  "type": "yesoreyeram-infinity-datasource",
+                  "uid": "bridge-instagram"
+                },
+                "filters": [],
+                "format": "table",
+                "parser": "backend",
+                "refId": "variable",
+                "root_selector": "",
+                "source": "url",
+                "type": "json",
+                "url": "http://postiz-ghost-bridge:8080/post.json",
+                "url_options": {
+                  "data": "",
+                  "method": "GET",
+                  "params": [
+                    {
+                      "key": "network",
+                      "value": "${network}"
+                    },
+                    {
+                      "key": "id",
+                      "value": "${post}"
+                    },
+                    {
+                      "key": "time",
+                      "value": "${time}"
+                    }
+                  ]
+                }
+              },
+              "query": "",
+              "queryType": "infinity"
+            }
+          },
+          "regex": "",
+          "sort": "disabled",
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "colour",
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "label": "Network colour",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "description": "The network's colour on Platforms, for this post's numbers (filled in by stacks/monitoring/grafana/style.py from NETWORK_COLOURS)",
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "infinityQuery": {
+                "columns": [
+                  {
+                    "selector": "colour",
+                    "text": "colour",
+                    "type": "string"
+                  }
+                ],
+                "datasource": {
+                  "type": "yesoreyeram-infinity-datasource",
+                  "uid": "bridge-instagram"
+                },
+                "filters": [],
+                "format": "table",
+                "parser": "backend",
+                "refId": "variable",
+                "root_selector": "[$merge([{\"colour\": [$lookup($merge([{\"ghost\": \"#E535C8\", \"instagram\": \"#E1306C\", \"tiktok\": \"#FE2C55\", \"threads\": \"#8f8f8f\", \"bluesky\": \"#1185FE\", \"youtube\": \"#FF0000\", \"soundcloud\": \"#FF5500\", \"mixcloud\": \"#5000FF\"}]), network), \"#B28CFF\"][0]}])]",
+                "source": "url",
+                "type": "json",
+                "url": "http://postiz-ghost-bridge:8080/post.json",
+                "url_options": {
+                  "data": "",
+                  "method": "GET",
+                  "params": [
+                    {
+                      "key": "network",
+                      "value": "${network}"
+                    },
+                    {
+                      "key": "id",
+                      "value": "${post}"
+                    },
+                    {
+                      "key": "time",
+                      "value": "${time}"
+                    }
+                  ]
+                }
+              },
+              "query": "",
+              "queryType": "infinity"
+            }
+          },
+          "regex": "",
+          "sort": "disabled",
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "main",
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "label": "Main number",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "description": "The network's usual number (the first in Compare on, else the first it has): the one drawn in the network's colour on the per-day charts",
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "infinityQuery": {
+                "columns": [
+                  {
+                    "selector": "main",
+                    "text": "main",
+                    "type": "string"
+                  }
+                ],
+                "datasource": {
+                  "type": "yesoreyeram-infinity-datasource",
+                  "uid": "bridge-instagram"
+                },
+                "filters": [],
+                "format": "table",
+                "parser": "backend",
+                "refId": "variable",
+                "root_selector": "[$merge([{\"main\": [compareOptions[key != \"\"].label, numbers.metric, \"-\"][0]}])]",
+                "source": "url",
+                "type": "json",
+                "url": "http://postiz-ghost-bridge:8080/post.json",
+                "url_options": {
+                  "data": "",
+                  "method": "GET",
+                  "params": [
+                    {
+                      "key": "network",
+                      "value": "${network}"
+                    },
+                    {
+                      "key": "id",
+                      "value": "${post}"
+                    },
+                    {
+                      "key": "time",
+                      "value": "${time}"
+                    }
+                  ]
+                }
+              },
+              "query": "",
+              "queryType": "infinity"
+            }
+          },
+          "regex": "",
+          "sort": "disabled",
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "from",
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "label": "Visitors from",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "description": "Where the network's own visitors come from, for titles: the network's name, or for a Ghost post its newsletter",
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "infinityQuery": {
+                "columns": [
+                  {
+                    "selector": "from",
+                    "text": "from",
+                    "type": "string"
+                  }
+                ],
+                "datasource": {
+                  "type": "yesoreyeram-infinity-datasource",
+                  "uid": "bridge-instagram"
+                },
+                "filters": [],
+                "format": "table",
+                "parser": "backend",
+                "refId": "variable",
+                "root_selector": "",
+                "source": "url",
+                "type": "json",
+                "url": "http://postiz-ghost-bridge:8080/post.json",
+                "url_options": {
+                  "data": "",
+                  "method": "GET",
+                  "params": [
+                    {
+                      "key": "network",
+                      "value": "${network}"
+                    },
+                    {
+                      "key": "id",
+                      "value": "${post}"
+                    },
+                    {
+                      "key": "time",
+                      "value": "${time}"
+                    }
+                  ]
+                }
+              },
+              "query": "",
+              "queryType": "infinity"
+            }
+          },
+          "regex": "",
+          "sort": "disabled",
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": true
+        }
+      }
+    ],
+    "annotations": [
+      {
+        "kind": "AnnotationQuery",
+        "spec": {
+          "query": {
+            "kind": "DataQuery",
+            "group": "grafana",
+            "version": "v0",
+            "datasource": {
+              "name": "-- Grafana --"
+            },
+            "spec": {}
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "builtIn": true,
+          "legacyOptions": {
+            "type": "dashboard"
+          }
+        }
+      },
+      {
+        "kind": "AnnotationQuery",
+        "spec": {
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "columns": [
+                {
+                  "selector": "time",
+                  "text": "time",
+                  "type": "timestamp_epoch"
+                },
+                {
+                  "selector": "text",
+                  "text": "text",
+                  "type": "string"
+                },
+                {
+                  "selector": "tags",
+                  "text": "tags",
+                  "type": "string"
+                }
+              ],
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "bridge-instagram"
+              },
+              "filters": [],
+              "format": "table",
+              "parser": "backend",
+              "refId": "Anno",
+              "root_selector": "[$merge([{\"time\": time, \"text\": \"Posted on \" & label, \"tags\": network}])]",
+              "source": "url",
+              "type": "json",
+              "url": "http://postiz-ghost-bridge:8080/post.json",
+              "url_options": {
+                "data": "",
+                "method": "GET",
+                "params": [
+                  {
+                    "key": "network",
+                    "value": "${network}"
+                  },
+                  {
+                    "key": "id",
+                    "value": "${post}"
+                  },
+                  {
+                    "key": "time",
+                    "value": "${time}"
+                  }
+                ]
+              }
+            }
+          },
+          "enable": true,
+          "hide": false,
+          "iconColor": "#B28CFF",
+          "name": "The post (violet line)"
+        }
+      }
+    ]
+  }
+}

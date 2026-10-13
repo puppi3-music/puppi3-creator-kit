@@ -1,0 +1,2287 @@
+{
+  "id": null,
+  "uid": "puppi3-content",
+  "title": "puppi3 \u00b7 Content & Engagement",
+  "description": "Posts, per-post performance and comments",
+  "tags": [
+    "puppi3",
+    "ghost"
+  ],
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "liveNow": false,
+  "refresh": "5m",
+  "schemaVersion": 41,
+  "version": 1,
+  "time": {
+    "from": "now-90d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "weekStart": "",
+  "links": [
+    {
+      "title": "Overview",
+      "type": "link",
+      "url": "/d/puppi3-overview",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Health",
+      "type": "link",
+      "url": "/d/puppi3-health",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Traffic",
+      "type": "link",
+      "url": "/d/puppi3-traffic",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Growth",
+      "type": "link",
+      "url": "/d/puppi3-growth",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Members & Newsletters",
+      "type": "link",
+      "url": "/d/puppi3-members",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Content & Engagement",
+      "type": "link",
+      "url": "/d/puppi3-content",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Social",
+      "type": "link",
+      "url": "/d/puppi3-social",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Platforms",
+      "type": "link",
+      "url": "/d/puppi3-platforms",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "templating": {
+    "list": []
+  },
+  "panels": [
+    {
+      "id": 9000,
+      "type": "text",
+      "title": "",
+      "transparent": true,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 2
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**@SITE_HOST@**&nbsp;&nbsp;|&nbsp;&nbsp;[Overview](/d/puppi3-overview?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Health](/d/puppi3-health?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Traffic](/d/puppi3-traffic?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Growth](/d/puppi3-growth?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Members & Newsletters](/d/puppi3-members?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;**\u25b8 Content & Engagement**&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Social](/d/puppi3-social?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Platforms](/d/puppi3-platforms?${__url_time_range})&nbsp;&nbsp;|&nbsp;&nbsp;[Site \u2197](https://@SITE_HOST@)&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Ghost admin \u2197](https://@SITE_HOST@/ghost/)",
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        }
+      },
+      "pluginVersion": "13.0.2"
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Published posts",
+      "description": "Posts published on the site, all time (pages not counted).",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 2,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS posts FROM posts WHERE type = 'post' AND status = 'published'",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#E535C8"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 201,
+      "type": "stat",
+      "title": "Comments (all time)",
+      "description": "Published comments, all time.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 2,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS comments FROM comments WHERE status = 'published'",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 202,
+      "type": "stat",
+      "title": "Comments (selected range)",
+      "description": "Published comments made in the selected time range.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 2,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS comments FROM comments WHERE status = 'published' AND $__timeFilter(created_at)",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 204,
+      "type": "stat",
+      "title": "Signups from posts (selected range)",
+      "description": "Members whose signup Ghost attributed to a post",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 2,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS signups FROM members_created_events WHERE attribution_type = 'post' AND $__timeFilter(created_at)",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 205,
+      "type": "table",
+      "title": "Post performance",
+      "description": "The newest 50 posts. Visitors = people who opened the post on the site in the selected range (Ghost's web analytics); the other columns are all-time. Click a title to open the post, or for every social post about it (the Page dashboard).",
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Mixed --"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 24,
+        "h": 11
+      },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://tinybird-local:7181/v0/pipes/api_top_pages.json",
+          "url_options": {
+            "method": "GET",
+            "data": "",
+            "params": [
+              {
+                "key": "site_uuid",
+                "value": "@GHOST_SITE_UUID@"
+              },
+              {
+                "key": "timezone",
+                "value": "@SITE_TIMEZONE@"
+              },
+              {
+                "key": "date_from",
+                "value": "${__from:date:YYYY-MM-DD}"
+              },
+              {
+                "key": "date_to",
+                "value": "${__to:date:YYYY-MM-DD}"
+              },
+              {
+                "key": "limit",
+                "value": "1000"
+              }
+            ]
+          },
+          "root_selector": "data",
+          "columns": [
+            {
+              "selector": "pathname",
+              "text": "Path",
+              "type": "string"
+            },
+            {
+              "selector": "visits",
+              "text": "Visitors",
+              "type": "number"
+            }
+          ],
+          "filters": [],
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "ghost-analytics"
+          }
+        },
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  CONCAT('/', p.slug, '/') AS Path,\n  p.published_at AS Published,\n  p.title AS Post,\n  p.visibility AS Visibility,\n  (SELECT COUNT(*) FROM comments c WHERE c.post_id = p.id AND c.status = 'published') AS Comments,\n  (SELECT MAX(e.email_count)  FROM emails e WHERE e.post_id = p.id) AS `Emailed to`,\n  (SELECT MAX(e.opened_count) FROM emails e WHERE e.post_id = p.id) AS Opens,\n  (SELECT COUNT(*) FROM members_click_events mce JOIN redirects r ON r.id = mce.redirect_id WHERE r.post_id = p.id) AS `Link clicks`,\n  (SELECT COUNT(*) FROM members_created_events m WHERE m.attribution_type = 'post' AND m.attribution_id = p.id) AS Signups\nFROM posts p\nWHERE p.type = 'post' AND p.status = 'published'\nORDER BY p.published_at DESC\nLIMIT 50",
+          "refId": "B",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Path"
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": true,
+                  "tooltip": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Post"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open post",
+                    "url": "https://@SITE_HOST@${__data.fields.Path}",
+                    "targetBlank": true
+                  },
+                  {
+                    "title": "Every post about this page (the Page dashboard)",
+                    "url": "/d/puppi3-page?var-page=${__data.fields.Path}&${__url_time_range}"
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 380
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Visitors"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Visitors (range)"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "0"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Emailed to"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "\u2013"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Opens"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "\u2013"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": []
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "Path",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*) A$",
+            "renamePattern": "$1"
+          }
+        },
+        {
+          "id": "filterByValue",
+          "options": {
+            "type": "exclude",
+            "match": "any",
+            "filters": [
+              {
+                "fieldName": "Post",
+                "config": {
+                  "id": "isNull",
+                  "options": {}
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "Published": 0,
+              "Post": 1,
+              "Visibility": 2,
+              "Visitors": 3,
+              "Comments": 4,
+              "Emailed to": 5,
+              "Opens": 6,
+              "Link clicks": 7,
+              "Signups": 8,
+              "Path": 9
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Published",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Posts published per month (last 12 months)",
+      "description": "Months in @TZ_NAME@ time.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 17,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "-- months in @TZ_NAME@ time (Ghost stores UTC); its winter offset if MySQL has no time zone tables\nSELECT COALESCE(CONVERT_TZ(m, '@SITE_TIMEZONE@', '+00:00'), m + INTERVAL @TZ_HOURS@ HOUR) AS time, COUNT(*) AS posts\nFROM (SELECT CAST(DATE_FORMAT(COALESCE(CONVERT_TZ(published_at, '+00:00', '@SITE_TIMEZONE@'), published_at - INTERVAL @TZ_HOURS@ HOUR), '%Y-%m-01') AS DATETIME) AS m\n      FROM posts WHERE type = 'post' AND status = 'published' AND $__timeFilter(published_at)) x\nGROUP BY m ORDER BY 1",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60,
+            "lineWidth": 1,
+            "showPoints": "never"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#E535C8"
+          },
+          "min": 0,
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": false,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": [],
+      "timeFrom": "1y"
+    },
+    {
+      "id": 206,
+      "type": "timeseries",
+      "title": "Comments per day (last 90 days)",
+      "description": "Published comments each day in the selected range.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 17,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(created_at, '1d', 0), COUNT(*) AS comments\nFROM comments\nWHERE status = 'published' AND $__timeFilter(created_at)\nGROUP BY 1\nORDER BY 1",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60,
+            "lineWidth": 1,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": false,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": [],
+      "timeFrom": "90d"
+    },
+    {
+      "id": 208,
+      "type": "table",
+      "title": "Recent comments",
+      "description": "The newest published comments, with who wrote them and on which post.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 25,
+        "w": 14,
+        "h": 10
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  c.created_at AS Posted,\n  COALESCE(NULLIF(m.name, ''), 'Member') AS `By`,\n  p.title AS Post,\n  LEFT(REGEXP_REPLACE(c.html, '<[^>]+>', ''), 160) AS Comment\nFROM comments c\nJOIN posts p ON p.id = c.post_id\nLEFT JOIN members m ON m.id = c.member_id\nWHERE c.status = 'published'\nORDER BY c.created_at DESC\nLIMIT 25",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 307,
+      "type": "table",
+      "title": "Top pages",
+      "description": "Most-viewed pages in the selected range (Ghost's web analytics). Click a page for every social post about it (the Page dashboard).",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "ghost-analytics"
+      },
+      "gridPos": {
+        "x": 14,
+        "y": 25,
+        "w": 10,
+        "h": 10
+      },
+      "targets": [
+        {
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://tinybird-local:7181/v0/pipes/api_top_pages.json",
+          "url_options": {
+            "method": "GET",
+            "data": "",
+            "params": [
+              {
+                "key": "site_uuid",
+                "value": "@GHOST_SITE_UUID@"
+              },
+              {
+                "key": "timezone",
+                "value": "@SITE_TIMEZONE@"
+              },
+              {
+                "key": "date_from",
+                "value": "${__from:date:YYYY-MM-DD}"
+              },
+              {
+                "key": "date_to",
+                "value": "${__to:date:YYYY-MM-DD}"
+              },
+              {
+                "key": "limit",
+                "value": "25"
+              }
+            ]
+          },
+          "root_selector": "data",
+          "columns": [
+            {
+              "selector": "pathname",
+              "text": "Page",
+              "type": "string"
+            },
+            {
+              "selector": "visits",
+              "text": "Visitors",
+              "type": "number"
+            }
+          ],
+          "filters": [],
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "ghost-analytics"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Page"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Every post about this page (the Page dashboard)",
+                    "url": "/d/puppi3-page?var-page=${__data.fields.Page}&${__url_time_range}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 9101,
+      "type": "row",
+      "title": "Links people follow off the site",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 35,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 520,
+      "type": "stat",
+      "title": "Clicks to other sites (selected range)",
+      "description": "Links followed from the site to anywhere else. Counted by the theme when a visitor follows a link to another site (only the page and the link, nothing about them); players embedded in posts can't be seen, so plays inside them aren't counted. Per UTC day: a range counts every day it touches.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 36,
+        "w": 8,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/clicks.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "$sum([clicks[end > ${__from} and time <= ${__to}].clicks])",
+          "filters": [],
+          "columns": []
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "noValue": "\u2013"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "justifyMode": "center",
+        "orientation": "vertical",
+        "wideLayout": false
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 521,
+      "type": "stat",
+      "title": "Clicks to music (selected range)",
+      "description": "Links followed to YouTube, SoundCloud, Mixcloud, Bandcamp, Spotify, Apple Music or Beatport: people going to listen. Counted by the theme when a visitor follows a link to another site (only the page and the link, nothing about them); players embedded in posts can't be seen, so plays inside them aren't counted. Per UTC day: a range counts every day it touches.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 36,
+        "w": 8,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/clicks.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "$sum([clicks[end > ${__from} and time <= ${__to} and service in [\"YouTube\", \"YouTube Music\", \"SoundCloud\", \"Mixcloud\", \"Bandcamp\", \"Spotify\", \"Apple Music\", \"Beatport\"]].clicks])",
+          "filters": [],
+          "columns": []
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "noValue": "\u2013"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "justifyMode": "center",
+        "orientation": "vertical",
+        "wideLayout": false
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 522,
+      "type": "stat",
+      "title": "LIVE NOW bar plays (selected range)",
+      "description": "Times a visitor pressed play on the LIVE NOW bar (the bar's own reconnects don't count). Each show's plays are in Past shows below.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 36,
+        "w": 8,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/clicks.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "$sum([plays[end > ${__from} and time <= ${__to}].plays])",
+          "filters": [],
+          "columns": []
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#FF4FA3"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "noValue": "\u2013"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "justifyMode": "center",
+        "orientation": "vertical",
+        "wideLayout": false
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 523,
+      "type": "timeseries",
+      "title": "Clicks off the site & LIVE NOW plays per day",
+      "description": "Per UTC day. Counted by the theme when a visitor follows a link to another site (only the page and the link, nothing about them); players embedded in posts can't be seen, so plays inside them aren't counted. Per UTC day: a range counts every day it touches.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 40,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/clicks.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "perDay",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "date",
+              "text": "Date",
+              "type": "string"
+            },
+            {
+              "selector": "clicks",
+              "text": "Clicks to other sites",
+              "type": "number"
+            },
+            {
+              "selector": "plays",
+              "text": "LIVE NOW plays",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "auto",
+            "spanNulls": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Clicks to other sites"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "bars"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 60
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "LIVE NOW plays"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "bars"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 60
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF4FA3"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "fields": {},
+            "conversions": [
+              {
+                "targetField": "Date",
+                "destinationType": "time",
+                "dateFormat": "YYYY-MM-DD",
+                "timezone": "utc"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 524,
+      "type": "table",
+      "title": "Where they go",
+      "description": "Clicks to other sites by service (anything not listed is Other). Counted by the theme when a visitor follows a link to another site (only the page and the link, nothing about them); players embedded in posts can't be seen, so plays inside them aren't counted. Per UTC day: a range counts every day it touches.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 40,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/clicks.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "clicks",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "service",
+              "text": "Service",
+              "type": "string"
+            },
+            {
+              "selector": "clicks",
+              "text": "Clicks",
+              "type": "number"
+            },
+            {
+              "selector": "time",
+              "text": "time",
+              "type": "number"
+            },
+            {
+              "selector": "end",
+              "text": "end",
+              "type": "number"
+            }
+          ],
+          "filterExpression": "end > ${__from} && time <= ${__to}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "noValue": "No clicks yet"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Clicks"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "gauge",
+                  "mode": "basic"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": [
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "Service": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Clicks": {
+                "aggregations": [
+                  "sum"
+                ],
+                "operation": "aggregate"
+              }
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "Clicks (sum)": "Clicks"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Clicks",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 525,
+      "type": "table",
+      "title": "Which pages send people where",
+      "description": "Each page and the links followed from it, most clicked first. Counted by the theme when a visitor follows a link to another site (only the page and the link, nothing about them); players embedded in posts can't be seen, so plays inside them aren't counted. Per UTC day: a range counts every day it touches.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 48,
+        "w": 24,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/clicks.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "clicks",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "from",
+              "text": "Page",
+              "type": "string"
+            },
+            {
+              "selector": "service",
+              "text": "Service",
+              "type": "string"
+            },
+            {
+              "selector": "target",
+              "text": "Link",
+              "type": "string"
+            },
+            {
+              "selector": "clicks",
+              "text": "Clicks",
+              "type": "number"
+            },
+            {
+              "selector": "time",
+              "text": "time",
+              "type": "number"
+            },
+            {
+              "selector": "end",
+              "text": "end",
+              "type": "number"
+            }
+          ],
+          "filterExpression": "end > ${__from} && time <= ${__to}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "noValue": "No clicks yet"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Page"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open the page",
+                    "url": "https://@SITE_HOST@${__value.raw}",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Link"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open the link",
+                    "url": "https://${__value.raw}",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": [
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "Page": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Service": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Link": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Clicks": {
+                "aggregations": [
+                  "sum"
+                ],
+                "operation": "aggregate"
+              }
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "Clicks (sum)": "Clicks"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Clicks",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 9102,
+      "type": "row",
+      "title": "Live shows",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 58,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 530,
+      "type": "stat",
+      "title": "Live shows (selected range)",
+      "description": "Shows recorded by the bridge from TinyIce's status (live.json), every 30 s while /stream-ogg (@DJ_SOFTWARE@) is connected; a drop under 5 minutes doesn't end a show, and ones under 3 minutes aren't kept. Listener-hours = listeners \u00d7 time, all mounts together. Recording started when the bridge got stats.mjs.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 59,
+        "w": 16,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "shows",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/live.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "$count(shows[start >= ${__from} and start <= ${__to}])",
+          "filters": [],
+          "columns": []
+        },
+        {
+          "refId": "hours",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/live.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "$round($sum([shows[start >= ${__from} and start <= ${__to}].minutes]) / 60, 1)",
+          "filters": [],
+          "columns": []
+        },
+        {
+          "refId": "listenerHours",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/live.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "$round($sum([shows[start >= ${__from} and start <= ${__to}].listenerHours]), 1)",
+          "filters": [],
+          "columns": []
+        },
+        {
+          "refId": "peak",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/live.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "$max([0, shows[start >= ${__from} and start <= ${__to}].peakListeners])",
+          "filters": [],
+          "columns": []
+        },
+        {
+          "refId": "plays",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/live.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "$sum([shows[start >= ${__from} and start <= ${__to}].plays])",
+          "filters": [],
+          "columns": []
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#FF4FA3"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "noValue": "\u2013"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "shows"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Shows"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "hours"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Hours live"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "listenerHours"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Listener-hours"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "peak"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Most listeners at once"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "plays"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "LIVE NOW bar plays"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "justifyMode": "center",
+        "orientation": "vertical",
+        "wideLayout": false
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 531,
+      "type": "table",
+      "title": "Live shows: status",
+      "description": "On air now (and listeners, all mounts) as the bridge last read TinyIce, and what went wrong if anything",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 59,
+        "w": 8,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/live.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "$merge([{\"Updated\": updatedAt, \"Now\": status = \"live\" ? (\"On air, \" & $string(listenersNow) & \" listening\") : (status = \"off\" ? \"Off air\" : \"TinyIce unreadable\"), \"Problems\": $count(errors) = 0 ? \"none\" : $join(errors, \"; \")}])",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "Updated",
+              "text": "Updated",
+              "type": "timestamp"
+            },
+            {
+              "selector": "Now",
+              "text": "Now",
+              "type": "string"
+            },
+            {
+              "selector": "Problems",
+              "text": "Problems",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "custom": {
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": true
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 532,
+      "type": "timeseries",
+      "title": "Listeners per show",
+      "description": "Each show at its start time: the most listeners at once, and the average over the show.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 63,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/live.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "shows",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "start",
+              "text": "Time",
+              "type": "timestamp_epoch"
+            },
+            {
+              "selector": "peakListeners",
+              "text": "Most at once",
+              "type": "number"
+            },
+            {
+              "selector": "avgListeners",
+              "text": "Average",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60,
+            "lineWidth": 1,
+            "barAlignment": 0,
+            "showPoints": "never"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Most at once"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF4FA3"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Average"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "points"
+              },
+              {
+                "id": "custom.pointSize",
+                "value": 8
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 533,
+      "type": "table",
+      "title": "Past shows",
+      "description": "Each show in the range, newest first: length, listeners, LIVE NOW bar plays, the bar's listeners' pauses to buffer and reconnects (all of them together; the Health dashboard says why and on what; blank before Oct 2026), and the tracks TinyIce reported (minutes into the show, then artist \u2013 title).",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "bridge-instagram"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 71,
+        "w": 24,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/live.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "shows[start >= ${__from} and start <= ${__to}]",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "start",
+              "text": "Started",
+              "type": "timestamp_epoch"
+            },
+            {
+              "selector": "minutes",
+              "text": "Length",
+              "type": "number"
+            },
+            {
+              "selector": "peakListeners",
+              "text": "Most listeners",
+              "type": "number"
+            },
+            {
+              "selector": "avgListeners",
+              "text": "Average listeners",
+              "type": "number"
+            },
+            {
+              "selector": "listenerHours",
+              "text": "Listener-hours",
+              "type": "number"
+            },
+            {
+              "selector": "plays",
+              "text": "Bar plays",
+              "type": "number"
+            },
+            {
+              "selector": "stalls",
+              "text": "Pauses",
+              "type": "number"
+            },
+            {
+              "selector": "reconnects",
+              "text": "Reconnects",
+              "type": "number"
+            },
+            {
+              "selector": "tracks",
+              "text": "Tracks",
+              "type": "number"
+            },
+            {
+              "selector": "setlist",
+              "text": "Setlist",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "noValue": "No shows in this range"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Length"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "m"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Setlist"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 700
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Started",
+            "desc": true
+          }
+        ]
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    }
+  ]
+}

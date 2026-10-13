@@ -1,0 +1,9 @@
+# Traefik's dashboard on traefik.<LAN_DOMAIN>, home network only (on Compose it's a label on the traefik stack).
+{{- $lan := env "LAN_DOMAIN" | default "localhost" }}
+http:
+  routers:
+    traefik:
+      rule: "Host(`traefik.{{ $lan }}`)"
+      entryPoints: [web]
+      service: api@internal
+      middlewares: [lan-only]

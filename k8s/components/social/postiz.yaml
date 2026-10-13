@@ -1,0 +1,87 @@
+# Postiz (the postiz stack's): the social scheduler the bridge shares through. Its settings are Secret postiz-env,
+# which k8s/up.sh renders from the stack's own environment list for the site (its addresses are these Services'
+# names, as on Compose). Uploads (Instagram fetches them from https://<POSTIZ_DOMAIN>/uploads/) and its config on a
+# volume. One replica, Recreate. It starts once Postgres, Redis and Temporal answer (Compose's depends_on).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postiz
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: postiz
+  template:
+    metadata:
+      labels:
+        app: postiz
+    spec:
+      initContainers:
+        - name: wait
+          image: busybox:1.37
+          command: [sh, -c, 'for s in postiz-postgres:5432 postiz-redis:6379 postiz-temporal:7233; do
+            until nc -z -w 2 "${s%:*}" "${s#*:}"; do echo "waiting for $s"; sleep 2; done; done']
+          resources:
+            requests: {cpu: 10m, memory: 8Mi}
+            limits: {memory: 32Mi}
+      containers:
+        - name: postiz
+          # the postiz stack's pin (stacks/postiz/compose.yaml: keep them in step; the bridge's photo rules were
+          # checked against it)
+          image: ghcr.io/gitroomhq/postiz-app:v2.24.0
+          envFrom:
+            - secretRef:
+                name: postiz-env
+          ports:
+            - {name: http, containerPort: 5000}
+          # Compose's check: any answer under 500 (an httpGet would count its 4xx as down)
+          startupProbe:
+            exec:
+              command: [node, -e, "const r=require('http').get('http://localhost:5000/',res=>process.exit(res.statusCode<500?0:1));r.on('error',()=>process.exit(1));r.setTimeout(4000,()=>{r.destroy();process.exit(1)})"]
+            periodSeconds: 5
+            timeoutSeconds: 10
+            failureThreshold: 60
+          readinessProbe:
+            exec:
+              command: [node, -e, "const r=require('http').get('http://localhost:5000/',res=>process.exit(res.statusCode<500?0:1));r.on('error',()=>process.exit(1));r.setTimeout(4000,()=>{r.destroy();process.exit(1)})"]
+            periodSeconds: 30
+            timeoutSeconds: 10
+          livenessProbe:
+            exec:
+              command: [node, -e, "const r=require('http').get('http://localhost:5000/',res=>process.exit(res.statusCode<500?0:1));r.on('error',()=>process.exit(1));r.setTimeout(4000,()=>{r.destroy();process.exit(1)})"]
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          resources:
+            requests: {cpu: 200m, memory: 1Gi}
+            limits: {memory: 3Gi}
+          volumeMounts:
+            - {name: state, mountPath: /config, subPath: config}
+            - {name: state, mountPath: /uploads, subPath: uploads}
+      volumes:
+        - name: state
+          persistentVolumeClaim:
+            claimName: postiz
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postiz
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 20Gi
+---
+# Traefik (social.yml) and the bridge (POSTIZ_API_URL) reach it by this name
+apiVersion: v1
+kind: Service
+metadata:
+  name: postiz
+spec:
+  selector:
+    app: postiz
+  ports:
+    - {name: http, port: 5000, targetPort: http}

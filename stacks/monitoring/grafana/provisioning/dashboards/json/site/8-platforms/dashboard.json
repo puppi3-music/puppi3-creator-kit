@@ -1,0 +1,1425 @@
+{
+  "apiVersion": "dashboard.grafana.app/v2",
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "puppi3-platforms"
+  },
+  "spec": {
+    "title": "puppi3 \u00b7 Platforms",
+    "description": "Each network's own numbers (followers, plays, reach, per-post stats), collected by the Postiz bridge",
+    "tags": [
+      "puppi3",
+      "social"
+    ],
+    "editable": true,
+    "cursorSync": "Crosshair",
+    "liveNow": false,
+    "preload": false,
+    "timeSettings": {
+      "timezone": "browser",
+      "from": "now-30d",
+      "to": "now",
+      "autoRefresh": "5m",
+      "autoRefreshIntervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ],
+      "hideTimepicker": false,
+      "fiscalYearStartMonth": 0
+    },
+    "links": [
+      {
+        "title": "Overview",
+        "type": "link",
+        "url": "/d/puppi3-overview",
+        "icon": "dashboard",
+        "tooltip": "",
+        "tags": [],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": false,
+        "keepTime": true
+      },
+      {
+        "title": "Health",
+        "type": "link",
+        "url": "/d/puppi3-health",
+        "icon": "dashboard",
+        "tooltip": "",
+        "tags": [],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": false,
+        "keepTime": true
+      },
+      {
+        "title": "Traffic",
+        "type": "link",
+        "url": "/d/puppi3-traffic",
+        "icon": "dashboard",
+        "tooltip": "",
+        "tags": [],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": false,
+        "keepTime": true
+      },
+      {
+        "title": "Growth",
+        "type": "link",
+        "url": "/d/puppi3-growth",
+        "icon": "dashboard",
+        "tooltip": "",
+        "tags": [],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": false,
+        "keepTime": true
+      },
+      {
+        "title": "Members & Newsletters",
+        "type": "link",
+        "url": "/d/puppi3-members",
+        "icon": "dashboard",
+        "tooltip": "",
+        "tags": [],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": false,
+        "keepTime": true
+      },
+      {
+        "title": "Content & Engagement",
+        "type": "link",
+        "url": "/d/puppi3-content",
+        "icon": "dashboard",
+        "tooltip": "",
+        "tags": [],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": false,
+        "keepTime": true
+      },
+      {
+        "title": "Social",
+        "type": "link",
+        "url": "/d/puppi3-social",
+        "icon": "dashboard",
+        "tooltip": "",
+        "tags": [],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": false,
+        "keepTime": true
+      },
+      {
+        "title": "Platforms",
+        "type": "link",
+        "url": "/d/puppi3-platforms",
+        "icon": "dashboard",
+        "tooltip": "",
+        "tags": [],
+        "asDropdown": false,
+        "targetBlank": false,
+        "includeVars": false,
+        "keepTime": true
+      }
+    ],
+    "variables": [
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "has_ghost",
+          "label": "Ghost has numbers",
+          "description": "yes when the bridge's ghost.json has any numbers (now or from earlier days); no shows the Ghost section only to editors. Hidden: it only drives the section's show/hide rule.",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "has_ghost",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "has_ghost",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/ghost.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "($count(totals.*[$type($) = \"number\"]) > 0 or $count(daily) > 0 or $count(posts) > 0 or $count(videos) > 0 or $count(tracks) > 0 or $count(uploads) > 0 or $count($keys(history)) > 0 or $count(followerHistory) > 0) ? \"yes\" : \"no\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "has_bluesky",
+          "label": "Bluesky has numbers",
+          "description": "yes when the bridge's bluesky.json has any numbers (now or from earlier days); no shows the Bluesky section only to editors. Hidden: it only drives the section's show/hide rule.",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "has_bluesky",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "has_bluesky",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/bluesky.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "($count(totals.*[$type($) = \"number\"]) > 0 or $count(daily) > 0 or $count(posts) > 0 or $count(videos) > 0 or $count(tracks) > 0 or $count(uploads) > 0 or $count($keys(history)) > 0 or $count(followerHistory) > 0) ? \"yes\" : \"no\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "has_instagram",
+          "label": "Instagram has numbers",
+          "description": "yes when the bridge's instagram.json has any numbers (now or from earlier days); no shows the Instagram section only to editors. Hidden: it only drives the section's show/hide rule.",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "has_instagram",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "has_instagram",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/instagram.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "($count(totals.*[$type($) = \"number\"]) > 0 or $count(daily) > 0 or $count(posts) > 0 or $count(videos) > 0 or $count(tracks) > 0 or $count(uploads) > 0 or $count($keys(history)) > 0 or $count(followerHistory) > 0) ? \"yes\" : \"no\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "has_mixcloud",
+          "label": "Mixcloud has numbers",
+          "description": "yes when the bridge's mixcloud.json has any numbers (now or from earlier days); no shows the Mixcloud section only to editors. Hidden: it only drives the section's show/hide rule.",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "has_mixcloud",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "has_mixcloud",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/mixcloud.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "($count(totals.*[$type($) = \"number\"]) > 0 or $count(daily) > 0 or $count(posts) > 0 or $count(videos) > 0 or $count(tracks) > 0 or $count(uploads) > 0 or $count($keys(history)) > 0 or $count(followerHistory) > 0) ? \"yes\" : \"no\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "has_soundcloud",
+          "label": "SoundCloud has numbers",
+          "description": "yes when the bridge's soundcloud.json has any numbers (now or from earlier days); no shows the SoundCloud section only to editors. Hidden: it only drives the section's show/hide rule.",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "has_soundcloud",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "has_soundcloud",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/soundcloud.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "($count(totals.*[$type($) = \"number\"]) > 0 or $count(daily) > 0 or $count(posts) > 0 or $count(videos) > 0 or $count(tracks) > 0 or $count(uploads) > 0 or $count($keys(history)) > 0 or $count(followerHistory) > 0) ? \"yes\" : \"no\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "has_threads",
+          "label": "Threads has numbers",
+          "description": "yes when the bridge's threads.json has any numbers (now or from earlier days); no shows the Threads section only to editors. Hidden: it only drives the section's show/hide rule.",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "has_threads",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "has_threads",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/threads.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "($count(totals.*[$type($) = \"number\"]) > 0 or $count(daily) > 0 or $count(posts) > 0 or $count(videos) > 0 or $count(tracks) > 0 or $count(uploads) > 0 or $count($keys(history)) > 0 or $count(followerHistory) > 0) ? \"yes\" : \"no\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "has_tiktok",
+          "label": "TikTok has numbers",
+          "description": "yes when the bridge's tiktok.json has any numbers (now or from earlier days); no shows the TikTok section only to editors. Hidden: it only drives the section's show/hide rule.",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "has_tiktok",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "has_tiktok",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/tiktok.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "($count(totals.*[$type($) = \"number\"]) > 0 or $count(daily) > 0 or $count(posts) > 0 or $count(videos) > 0 or $count(tracks) > 0 or $count(uploads) > 0 or $count($keys(history)) > 0 or $count(followerHistory) > 0) ? \"yes\" : \"no\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "has_youtube",
+          "label": "YouTube has numbers",
+          "description": "yes when the bridge's youtube.json has any numbers (now or from earlier days); no shows the YouTube section only to editors. Hidden: it only drives the section's show/hide rule.",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "has_youtube",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "has_youtube",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/youtube.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "($count(totals.*[$type($) = \"number\"]) > 0 or $count(daily) > 0 or $count(posts) > 0 or $count(videos) > 0 or $count(tracks) > 0 or $count(uploads) > 0 or $count($keys(history)) > 0 or $count(followerHistory) > 0) ? \"yes\" : \"no\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "every_ghost",
+          "label": "The site: how often the bridge checks",
+          "description": "How often the bridge reads the site's numbers, in words (\"every hour\"), from checkedEvery in ghost.json, so the section's texts follow the bridge's setting; \"regularly\" until the bridge has written it. Hidden: only used in texts.",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "every_ghost",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "every_ghost",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/ghost.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "$type(checkedEvery) = \"string\" ? checkedEvery : \"regularly\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "every_bluesky",
+          "label": "Bluesky: how often the bridge checks",
+          "description": "How often the bridge reads Bluesky's numbers, in words (\"every hour\"), from checkedEvery in bluesky.json, so the section's texts follow the bridge's setting; \"regularly\" until the bridge has written it. Hidden: only used in texts.",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "every_bluesky",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "every_bluesky",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/bluesky.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "$type(checkedEvery) = \"string\" ? checkedEvery : \"regularly\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "every_instagram",
+          "label": "Instagram: how often the bridge checks",
+          "description": "How often the bridge reads Instagram's numbers, in words (\"every hour\"), from checkedEvery in instagram.json, so the section's texts follow the bridge's setting; \"regularly\" until the bridge has written it. Hidden: only used in texts.",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "every_instagram",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "every_instagram",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/instagram.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "$type(checkedEvery) = \"string\" ? checkedEvery : \"regularly\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "every_mixcloud",
+          "label": "Mixcloud: how often the bridge checks",
+          "description": "How often the bridge reads Mixcloud's numbers, in words (\"every hour\"), from checkedEvery in mixcloud.json, so the section's texts follow the bridge's setting; \"regularly\" until the bridge has written it. Hidden: only used in texts.",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "every_mixcloud",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "every_mixcloud",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/mixcloud.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "$type(checkedEvery) = \"string\" ? checkedEvery : \"regularly\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "every_soundcloud",
+          "label": "SoundCloud: how often the bridge checks",
+          "description": "How often the bridge reads SoundCloud's numbers, in words (\"every hour\"), from checkedEvery in soundcloud.json, so the section's texts follow the bridge's setting; \"regularly\" until the bridge has written it. Hidden: only used in texts.",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "every_soundcloud",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "every_soundcloud",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/soundcloud.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "$type(checkedEvery) = \"string\" ? checkedEvery : \"regularly\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "every_threads",
+          "label": "Threads: how often the bridge checks",
+          "description": "How often the bridge reads Threads's numbers, in words (\"every hour\"), from checkedEvery in threads.json, so the section's texts follow the bridge's setting; \"regularly\" until the bridge has written it. Hidden: only used in texts.",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "every_threads",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "every_threads",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/threads.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "$type(checkedEvery) = \"string\" ? checkedEvery : \"regularly\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "every_tiktok",
+          "label": "TikTok: how often the bridge checks",
+          "description": "How often the bridge reads TikTok's numbers, in words (\"every hour\"), from checkedEvery in tiktok.json, so the section's texts follow the bridge's setting; \"regularly\" until the bridge has written it. Hidden: only used in texts.",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "every_tiktok",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "every_tiktok",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/tiktok.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "$type(checkedEvery) = \"string\" ? checkedEvery : \"regularly\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "every_youtube",
+          "label": "YouTube: how often the bridge checks",
+          "description": "How often the bridge reads YouTube's numbers, in words (\"every hour\"), from checkedEvery in youtube.json, so the section's texts follow the bridge's setting; \"regularly\" until the bridge has written it. Hidden: only used in texts.",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "every_youtube",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "every_youtube",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/youtube.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "$type(checkedEvery) = \"string\" ? checkedEvery : \"regularly\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "chart",
+          "label": "Charts",
+          "description": "hour by hour when the time range is 7 days or less (every check the bridge makes, the last 90 days), else per day (with 7-day averages). Hidden: it follows the time range and fills the charts' titles and queries.",
+          "hide": "hideVariable",
+          "refresh": "onTimeRangeChanged",
+          "skipUrlSync": true,
+          "current": {
+            "text": "per day",
+            "value": "per day"
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "chart",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "chart",
+                "type": "json",
+                "source": "inline",
+                "parser": "backend",
+                "format": "table",
+                "data": "{}",
+                "url": "",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "(${__to} - ${__from}) <= 608400000 ? \"hour by hour\" : \"per day\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      }
+    ],
+    "annotations": [
+      {
+        "kind": "AnnotationQuery",
+        "spec": {
+          "query": {
+            "kind": "DataQuery",
+            "group": "grafana",
+            "version": "v0",
+            "datasource": {
+              "name": "-- Grafana --"
+            },
+            "spec": {}
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "builtIn": true,
+          "legacyOptions": {
+            "type": "dashboard"
+          }
+        }
+      },
+      {
+        "kind": "AnnotationQuery",
+        "spec": {
+          "query": {
+            "kind": "DataQuery",
+            "group": "mysql",
+            "version": "v0",
+            "datasource": {
+              "name": "ghost-mysql"
+            },
+            "spec": {
+              "datasource": {
+                "type": "mysql",
+                "uid": "ghost-mysql"
+              },
+              "editorMode": "code",
+              "format": "table",
+              "rawQuery": true,
+              "rawSql": "SELECT published_at AS time,\n       CONCAT('Published: ', title, '<br><a href=\"/d/puppi3-post?var-network=ghost&var-post=', id,\n              '&from=', CAST(UNIX_TIMESTAMP(published_at) * 1000 AS UNSIGNED), '&to=now\">This post up close \u203a</a>') AS text,\n       'ghost' AS tags\nFROM posts\nWHERE type = 'post' AND status = 'published' AND $__timeFilter(published_at)",
+              "refId": "Anno"
+            }
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "#E535C8",
+          "name": "Ghost posts",
+          "filter": {
+            "exclude": false,
+            "ids": [
+              102,
+              107
+            ]
+          }
+        }
+      },
+      {
+        "kind": "AnnotationQuery",
+        "spec": {
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "columns": [
+                {
+                  "selector": "time",
+                  "text": "time",
+                  "type": "timestamp_epoch"
+                },
+                {
+                  "selector": "caption",
+                  "text": "text",
+                  "type": "string"
+                },
+                {
+                  "selector": "network",
+                  "text": "tags",
+                  "type": "string"
+                }
+              ],
+              "filters": [],
+              "format": "table",
+              "parser": "backend",
+              "root_selector": "$append([], posts[time >= ${__from} and time <= ${__to}])",
+              "source": "url",
+              "type": "json",
+              "url": "http://postiz-ghost-bridge:8080/instagram.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "refId": "Anno"
+            }
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "#B28CFF",
+          "name": "Instagram posts",
+          "filter": {
+            "exclude": false,
+            "ids": [
+              19,
+              25,
+              27,
+              102
+            ]
+          }
+        }
+      },
+      {
+        "kind": "AnnotationQuery",
+        "spec": {
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "columns": [
+                {
+                  "selector": "time",
+                  "text": "time",
+                  "type": "timestamp_epoch"
+                },
+                {
+                  "selector": "title",
+                  "text": "text",
+                  "type": "string"
+                },
+                {
+                  "selector": "network",
+                  "text": "tags",
+                  "type": "string"
+                }
+              ],
+              "filters": [],
+              "format": "table",
+              "parser": "backend",
+              "root_selector": "$append([], videos[time >= ${__from} and time <= ${__to}])",
+              "source": "url",
+              "type": "json",
+              "url": "http://postiz-ghost-bridge:8080/youtube.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "refId": "Anno"
+            }
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "#B28CFF",
+          "name": "YouTube posts",
+          "filter": {
+            "exclude": false,
+            "ids": [
+              32,
+              38,
+              102
+            ]
+          }
+        }
+      },
+      {
+        "kind": "AnnotationQuery",
+        "spec": {
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "columns": [
+                {
+                  "selector": "time",
+                  "text": "time",
+                  "type": "timestamp_epoch"
+                },
+                {
+                  "selector": "title",
+                  "text": "text",
+                  "type": "string"
+                },
+                {
+                  "selector": "network",
+                  "text": "tags",
+                  "type": "string"
+                }
+              ],
+              "filters": [],
+              "format": "table",
+              "parser": "backend",
+              "root_selector": "$append([], tracks[time >= ${__from} and time <= ${__to}])",
+              "source": "url",
+              "type": "json",
+              "url": "http://postiz-ghost-bridge:8080/soundcloud.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "refId": "Anno"
+            }
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "#B28CFF",
+          "name": "SoundCloud posts",
+          "filter": {
+            "exclude": false,
+            "ids": [
+              42,
+              47,
+              102
+            ]
+          }
+        }
+      },
+      {
+        "kind": "AnnotationQuery",
+        "spec": {
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "columns": [
+                {
+                  "selector": "time",
+                  "text": "time",
+                  "type": "timestamp_epoch"
+                },
+                {
+                  "selector": "text",
+                  "text": "text",
+                  "type": "string"
+                },
+                {
+                  "selector": "network",
+                  "text": "tags",
+                  "type": "string"
+                }
+              ],
+              "filters": [],
+              "format": "table",
+              "parser": "backend",
+              "root_selector": "$append([], posts[time >= ${__from} and time <= ${__to}])",
+              "source": "url",
+              "type": "json",
+              "url": "http://postiz-ghost-bridge:8080/bluesky.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "refId": "Anno"
+            }
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "#B28CFF",
+          "name": "Bluesky posts",
+          "filter": {
+            "exclude": false,
+            "ids": [
+              52,
+              55,
+              102
+            ]
+          }
+        }
+      },
+      {
+        "kind": "AnnotationQuery",
+        "spec": {
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "columns": [
+                {
+                  "selector": "time",
+                  "text": "time",
+                  "type": "timestamp_epoch"
+                },
+                {
+                  "selector": "text",
+                  "text": "text",
+                  "type": "string"
+                },
+                {
+                  "selector": "network",
+                  "text": "tags",
+                  "type": "string"
+                }
+              ],
+              "filters": [],
+              "format": "table",
+              "parser": "backend",
+              "root_selector": "$append([], posts[time >= ${__from} and time <= ${__to}])",
+              "source": "url",
+              "type": "json",
+              "url": "http://postiz-ghost-bridge:8080/threads.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "refId": "Anno"
+            }
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "#B28CFF",
+          "name": "Threads posts",
+          "filter": {
+            "exclude": false,
+            "ids": [
+              62,
+              67,
+              102
+            ]
+          }
+        }
+      },
+      {
+        "kind": "AnnotationQuery",
+        "spec": {
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "columns": [
+                {
+                  "selector": "time",
+                  "text": "time",
+                  "type": "timestamp_epoch"
+                },
+                {
+                  "selector": "text",
+                  "text": "text",
+                  "type": "string"
+                },
+                {
+                  "selector": "network",
+                  "text": "tags",
+                  "type": "string"
+                }
+              ],
+              "filters": [],
+              "format": "table",
+              "parser": "backend",
+              "root_selector": "$append([], posts[time >= ${__from} and time <= ${__to}])",
+              "source": "url",
+              "type": "json",
+              "url": "http://postiz-ghost-bridge:8080/tiktok.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "refId": "Anno"
+            }
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "#B28CFF",
+          "name": "TikTok posts",
+          "filter": {
+            "exclude": false,
+            "ids": [
+              72,
+              76,
+              102
+            ]
+          }
+        }
+      },
+      {
+        "kind": "AnnotationQuery",
+        "spec": {
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "columns": [
+                {
+                  "selector": "time",
+                  "text": "time",
+                  "type": "timestamp_epoch"
+                },
+                {
+                  "selector": "title",
+                  "text": "text",
+                  "type": "string"
+                },
+                {
+                  "selector": "network",
+                  "text": "tags",
+                  "type": "string"
+                }
+              ],
+              "filters": [],
+              "format": "table",
+              "parser": "backend",
+              "root_selector": "$append([], uploads[time >= ${__from} and time <= ${__to}])",
+              "source": "url",
+              "type": "json",
+              "url": "http://postiz-ghost-bridge:8080/mixcloud.json",
+              "url_options": {
+                "data": "",
+                "method": "GET"
+              },
+              "refId": "Anno"
+            }
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "#B28CFF",
+          "name": "Mixcloud posts",
+          "filter": {
+            "exclude": false,
+            "ids": [
+              82,
+              87,
+              102
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

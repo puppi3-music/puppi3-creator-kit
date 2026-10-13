@@ -1,0 +1,14 @@
+# The Icecast relays' listeners: each relay's /status-json.xsl (Prometheus's tinyice-relays job asks json-exporter
+# for each ready relay) as icecast_relay_listeners{mount}. A relay without the stream has no "source" and gives
+# nothing, so Health counts only the relays that are TinyIce's listeners. A relay carries one mount, so "source" is
+# one object (Icecast makes it a list only for several).
+modules:
+  icecast:
+    metrics:
+      - name: icecast_relay
+        type: object
+        path: '{.icestats.source}'
+        labels:
+          mount: '{.listenurl}'
+        values:
+          listeners: '{.listeners}'

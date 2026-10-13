@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cellipse cx="32" cy="36" rx="18" ry="17" fill="%23E0EDF8" stroke="%231A6FB0" stroke-width="3"/%3E%3Cellipse cx="13" cy="33" rx="6.5" ry="13" transform="rotate%2822 13 33%29" fill="%231A6FB0"/%3E%3Cellipse cx="51" cy="33" rx="6.5" ry="13" transform="rotate%28-22 51 33%29" fill="%231A6FB0"/%3E%3Ccircle cx="25" cy="34" r="2.8" fill="%2314202B"/%3E%3Ccircle cx="39" cy="34" r="2.8" fill="%2314202B"/%3E%3Ccircle cx="26" cy="33" r="0.9" fill="%23fff"/%3E%3Ccircle cx="40" cy="33" r="0.9" fill="%23fff"/%3E%3Cellipse cx="32" cy="44" rx="8" ry="6" fill="%23fff"/%3E%3Cellipse cx="32" cy="41.2" rx="3.6" ry="2.6" fill="%2314202B"/%3E%3Cpath d="M30 47.5q2 5 4 0z" fill="%23F07C98"/%3E%3Cpath d="M32 43.6v2.6M27.6 46q4.4 2.8 4.4 0q0 2.8 4.4 0" fill="none" stroke="%2314202B" stroke-width="1.6" stroke-linecap="round"/%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Creator Kit Setup Guide</title>
+<meta name="description" content="Setting up a Puppi3's Creator Kit site: what you need, the site's folder, Docker Compose, Kubernetes, Amazon EKS and Google GKE, and the steps to finish by hand.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#F4F6F8; --surface:#FFFFFF; --sunken:#E9EDF1; --ink:#14202B; --muted:#52606E; --rule:#D5DDE5;
+  --accent:#1A6FB0; --accent-soft:#E0EDF8;
+  --auto:#0B7F80; --auto-soft:#DDF3F2;
+  --you:#9A5B00; --you-soft:#FBEFD9;
+  --skip:#66717D; --skip-soft:#EAEDF0;
+  --code-bg:#17212B; --code-ink:#E4EAF0;
+  --display:"Unbounded", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0E141A; --surface:#151E26; --sunken:#1C2731; --ink:#E3EAF0; --muted:#9EAEBC; --rule:#2A3845;
+    --accent:#5AB0F0; --accent-soft:#132A3D;
+    --auto:#3CC7C9; --auto-soft:#12302F;
+    --you:#F2B35A; --you-soft:#352812;
+    --skip:#9AA6B2; --skip-soft:#212B34;
+    --code-bg:#0A0F14; --code-ink:#E4EAF0;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E141A; --surface:#151E26; --sunken:#1C2731; --ink:#E3EAF0; --muted:#9EAEBC; --rule:#2A3845;
+  --accent:#5AB0F0; --accent-soft:#132A3D;
+  --auto:#3CC7C9; --auto-soft:#12302F;
+  --you:#F2B35A; --you-soft:#352812;
+  --skip:#9AA6B2; --skip-soft:#212B34;
+  --code-bg:#0A0F14; --code-ink:#E4EAF0;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;padding-inline:16px;padding-block:0 64px}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto}
+header.top{padding-block:40px 28px;border-bottom:1px solid var(--rule);display:grid;gap:14px}
+header.top .mark{width:64px;height:64px}
+header.top .mark svg{display:block;width:100%;height:100%}
+.mark .a{fill:var(--accent)}.mark .face{fill:#E0EDF8;stroke:var(--accent);stroke-width:3}.mark .ink{fill:#14202B}.mark .shine{fill:#fff}.mark .tongue{fill:#F07C98}.mark .line{fill:none;stroke:#14202B;stroke-width:1.6;stroke-linecap:round}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,5vw,44px);line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1 .dot{color:var(--accent)}
+.lede{font-size:19px;max-width:62ch;margin:0;color:var(--ink)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--muted)}
+.layout{display:grid;grid-template-columns:230px minmax(0,1fr);min-width:0;gap:48px;padding-top:32px}
+nav.toc{min-width:0;position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:14px}
+nav.toc p{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+nav.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+nav.toc a{display:block;padding:6px 10px;border-radius:6px;color:var(--ink);text-decoration:none}
+nav.toc a:hover{background:var(--sunken)}
+main{min-width:0;max-width:96ch}
+section{padding-block:8px 28px;border-bottom:1px solid var(--rule);margin-bottom:28px;scroll-margin-top:20px}
+section:last-of-type{border-bottom:0}
+h2{font-family:var(--display);font-weight:500;font-size:clamp(21px,3vw,26px);line-height:1.2;margin:8px 0 14px;text-wrap:balance}
+h3{font-size:18px;margin:26px 0 8px;font-family:var(--mono)}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 16px;padding-left:22px}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-variant-ligatures:none;font-size:.86em;background:var(--sunken);padding:1px 6px;border-radius:5px;overflow-wrap:anywhere}
+a code{color:var(--accent)}
+.note{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;margin:0 0 18px}
+.note b.label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.note p:last-child{margin-bottom:0}
+.pill{display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:1px 7px;border-radius:999px;white-space:nowrap;margin-left:6px;vertical-align:1px}
+.pill.auto{background:var(--auto-soft);color:var(--auto)}
+.pill.you{background:var(--you-soft);color:var(--you)}
+.pill.skip{background:var(--skip-soft);color:var(--skip)}
+.none{color:var(--muted);font-style:italic;font-size:14px}
+.tablewrap{overflow-x:auto;margin:0 0 18px;border:1px solid var(--rule);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--rule)}
+th{font-size:12px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--sunken);font-weight:600}
+tr:last-child td{border-bottom:0}
+td:first-child{white-space:nowrap}
+td:first-child code{scroll-margin-top:110px}
+td:nth-child(2){min-width:12em}
+td:nth-child(2) code{white-space:normal;overflow-wrap:anywhere}
+td code:target{outline:2px solid var(--accent);outline-offset:1px}
+.code{position:relative;margin:0 0 16px}
+.code pre{font-variant-ligatures:none;background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:13px;line-height:1.55;padding:14px 16px;padding-right:72px;border-radius:10px;overflow-x:auto;margin:0}
+.code button{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:var(--code-ink);border:1px solid color-mix(in srgb,var(--code-ink) 35%,transparent);border-radius:6px;padding:4px 8px;cursor:pointer}
+footer{max-width:96ch;margin:24px 0 0 278px;font-size:14px;color:var(--muted)}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;gap:18px}
+  nav.toc{position:static}
+  nav.toc ol{display:flex;overflow-x:auto;gap:6px;padding-bottom:6px}
+  nav.toc a{white-space:nowrap;border:1px solid var(--rule);background:var(--surface)}
+  footer{margin-left:0}
+  td:first-child{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+<!-- shared styles: from docs/assets/docs.css, copied in by docs/build-docs.py -->
+<style>
+/* Shared by the docs pages, on top of each page's own styles, and copied into each page by
+   docs/build-docs.py (so every guide works as a single file): the top bar with search and theme
+   switch, the contents list that follows along, search highlights, back to top. Colours come from
+   each page's variables, so light and dark mode both work. Edit this file, not the copies. */
+
+:root{--bar-h:58px}
+
+/* Headings land below the sticky bar */
+section,h3{scroll-margin-top:calc(var(--bar-h) + 18px)}
+nav.toc{top:calc(env(safe-area-inset-top,0px) + var(--bar-h) + 18px);max-height:calc(100vh - var(--bar-h) - 36px);overflow-y:auto}
+
+/* ---------- top bar ---------- */
+.docbar{position:sticky;top:0;z-index:50;margin-inline:-16px;padding:0 16px;
+  background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);
+  border-bottom:1px solid var(--rule)}
+.docbar-in{max-width:1180px;margin:0 auto;min-height:var(--bar-h);display:flex;align-items:center;gap:14px}
+.docbar .brand{font-family:var(--display);font-weight:700;font-size:15px;color:var(--ink);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.docbar .brand span{color:var(--accent)}
+.docbar .home{display:inline-flex;align-items:center;gap:6px;flex:none;font-size:13px;color:var(--muted);text-decoration:none;
+  border:1px solid var(--rule);border-radius:8px;padding:6px 10px;white-space:nowrap}
+.docbar .home svg{width:14px;height:14px;fill:currentColor}
+.docbar .home:hover{color:var(--accent);border-color:var(--accent)}
+.docbar .grow{flex:1}
+.docbar .iconbtn{font:inherit;font-size:13px;background:var(--surface);color:var(--ink);border:1px solid var(--rule);border-radius:8px;padding:6px 10px;cursor:pointer;white-space:nowrap}
+.docbar .iconbtn:hover{border-color:var(--accent)}
+
+/* ---------- search ---------- */
+.search{position:relative;width:min(420px,100%)}
+.search input{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--surface);border:1px solid var(--rule);
+  border-radius:10px;padding:8px 44px 8px 36px;outline:none;-webkit-appearance:none;appearance:none}
+.search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.search input::placeholder{color:var(--muted)}
+.search .glass{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);pointer-events:none}
+.search kbd{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:11px;color:var(--muted);
+  border:1px solid var(--rule);border-bottom-width:2px;border-radius:5px;padding:0 6px;background:var(--sunken);pointer-events:none}
+.search input:focus + kbd,.search input:not(:placeholder-shown) + kbd{display:none}
+.results{position:absolute;top:calc(100% + 8px);right:0;width:min(640px,calc(100vw - 32px));max-height:min(70vh,560px);overflow-y:auto;
+  background:var(--surface);border:1px solid var(--rule);border-radius:12px;box-shadow:0 18px 50px rgba(10,12,30,.22);padding:6px;display:none;z-index:60}
+.results.open{display:block}
+.results .hint{padding:10px 12px;font-size:14px;color:var(--muted)}
+.results .hint b{color:var(--ink)}
+.result{display:block;padding:10px 12px;border-radius:8px;color:var(--ink);text-decoration:none;border:1px solid transparent}
+.result[aria-selected="true"],.result:hover{background:var(--sunken);border-color:var(--rule)}
+.result .where{display:block;margin-bottom:3px;font-size:14.5px;font-weight:700;line-height:1.35}
+.result .snip{font-size:13.5px;color:var(--muted);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.result mark,mark.hit{background:var(--you-soft);color:inherit;border-radius:3px;padding:0 1px;box-shadow:0 0 0 1px color-mix(in srgb,var(--you) 45%,transparent)}
+
+@media (max-width:820px){
+  /* phones: name and theme on one row, search across the full width below */
+  :root{--bar-h:106px}
+  .docbar-in{flex-wrap:wrap;gap:8px 10px;padding-block:8px}
+  .docbar .brand{flex:1}
+  .docbar .home{padding:7px 8px}
+  .docbar .home span{display:none}
+  .docbar .grow{display:none}
+  .search{order:3;flex:1 1 100%;width:100%}
+  .search kbd{display:none}
+  .results{position:fixed;left:16px;right:16px;top:calc(var(--bar-h) + 6px);width:auto}
+}
+
+/* ---------- contents list that follows along ---------- */
+nav.toc a[aria-current="true"]{background:var(--accent-soft);color:var(--accent);font-weight:700}
+nav.toc ul.sub{list-style:none;margin:2px 0 6px 10px;padding:0 0 0 8px;border-left:2px solid var(--rule);display:none}
+nav.toc li.open > ul.sub{display:block}
+nav.toc ul.sub a{padding:4px 8px;font-size:13px;color:var(--muted)}
+nav.toc ul.sub a:hover{color:var(--ink)}
+nav.toc ul.sub a[aria-current="true"]{background:none;color:var(--ink);font-weight:700}
+@media (max-width:900px){ nav.toc ul.sub{display:none !important} nav.toc{max-height:none} }
+
+/* where a search result or link lands */
+.flash{animation:flash 1.6s ease-out}
+@keyframes flash{0%{background:var(--you-soft);box-shadow:0 0 0 8px var(--you-soft)}100%{background:transparent;box-shadow:0 0 0 8px transparent}}
+
+/* ---------- tables ---------- */
+/* Names in the first column break only when they can't fit a whole line: the pages' code{overflow-wrap:anywhere}
+   lets a table squeeze its first column to a letter or two per line, and that column holds the names. */
+td:first-child code{overflow-wrap:break-word;word-break:normal}
+/* the first column (names) only as wide as its longest name, the rest goes to the text */
+td:first-child{font-weight:600;width:1%;min-width:13rem}
+td:first-child code,td:first-child em{font-weight:normal}
+td{line-height:1.55}
+tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--sunken) 35%,transparent)}
+/* Lines between columns; a cell shared by several columns (colspan) runs across them and starts
+   with a tag naming the columns it covers */
+:is(td,th)+:is(td,th){border-left:1px solid var(--rule)}
+td[colspan][data-label]::before{content:attr(data-label);display:inline-block;margin-right:8px;padding:0 7px;
+  border:1px solid var(--rule);border-radius:999px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--muted);vertical-align:1px;line-height:1.6}
+/* Phones: each row becomes a card, every cell under its column name (data-label, set by docs.js) */
+@media (max-width:640px){
+  .tablewrap table,.tablewrap tbody,.tablewrap tr,.tablewrap td{display:block;width:auto}
+  .tablewrap thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .tablewrap tr{border-bottom:1px solid var(--rule);padding:6px 0}
+  .tablewrap tr:last-child{border-bottom:0}
+  .tablewrap td{border:0;padding:4px 14px;min-width:0}
+  .tablewrap td[data-label]:not(:first-child)::before{content:attr(data-label);display:block;font-family:var(--mono);font-size:11px;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+  .tablewrap :is(td,th){border-left:0}
+  .tablewrap td[colspan][data-label]::before{border:0;border-radius:0;padding:0;margin-right:0;letter-spacing:.08em}
+  .tablewrap tbody tr:nth-child(even) td{background:none}
+  .tablewrap tbody tr:nth-child(even){background:color-mix(in srgb,var(--sunken) 35%,transparent)}
+}
+
+/* ---------- small reading aids ---------- */
+tbody tr:hover td{background:color-mix(in srgb,var(--sunken) 60%,transparent)}
+h2 .anchor,h3 .anchor{opacity:0;margin-left:8px;font-size:.8em;color:var(--muted);text-decoration:none}
+h2:hover .anchor,h3:hover .anchor,.anchor:focus{opacity:1}
+.totop{position:fixed;right:18px;bottom:18px;z-index:40;font:inherit;font-size:13px;font-weight:700;background:var(--ink);color:var(--bg);
+  border:0;border-radius:999px;padding:9px 14px;cursor:pointer;box-shadow:0 8px 24px rgba(10,12,30,.25);opacity:0;pointer-events:none;transition:opacity .2s}
+.totop.show{opacity:1;pointer-events:auto}
+
+@media (prefers-reduced-motion:reduce){.flash{animation:none}.totop{transition:none}}
+@media print{.docbar,.totop{display:none}nav.toc{position:static;max-height:none}}
+
+/* ---------- the guide's puppy (the site mascot, drawn inline in each page's header) ---------- */
+header.top .pup{width:150px}
+header.top .pup svg{display:block;width:100%;height:auto}
+.pup .bg,.pup .cut{fill:var(--accent-soft)}
+.pup .tail{transform-box:fill-box;transform-origin:0% 100%}
+.pup:hover .tail{animation:pup-wag .35s ease-in-out infinite alternate}
+.pup .float{animation:pup-float 3.2s ease-in infinite;opacity:0}
+.pup .float.d1{animation-delay:1.05s}.pup .float.d2{animation-delay:2.1s}
+.pup .spin{transform-box:fill-box;transform-origin:50% 50%;animation:pup-spin 9s linear infinite}
+@keyframes pup-wag{from{transform:rotate(-12deg)}to{transform:rotate(14deg)}}
+@keyframes pup-float{0%{transform:translateY(10px);opacity:0}20%{opacity:1}100%{transform:translateY(-34px);opacity:0}}
+@keyframes pup-spin{to{transform:rotate(360deg)}}
+@media (min-width:821px){
+  /* wide screens: puppy to the right of the title, intro and meta */
+  header.top:has(.pup){grid-template-columns:minmax(0,1fr) auto;column-gap:32px}
+  header.top > *{grid-column:1}
+  header.top .pup{grid-column:2;grid-row:1 / span 4;align-self:center;width:210px}
+}
+@media (prefers-reduced-motion:reduce){.pup:hover .tail,.pup .spin{animation:none}.pup .float{animation:none;opacity:1}}
+</style>
+<!-- /shared styles -->
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="mark"><svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+    <ellipse class="face" cx="32" cy="36" rx="18" ry="17"/>
+    <ellipse class="a" cx="13" cy="33" rx="6.5" ry="13" transform="rotate(22 13 33)"/><ellipse class="a" cx="51" cy="33" rx="6.5" ry="13" transform="rotate(-22 51 33)"/>
+    <circle class="ink" cx="25" cy="34" r="2.8"/><circle class="ink" cx="39" cy="34" r="2.8"/><circle class="shine" cx="26" cy="33" r=".9"/><circle class="shine" cx="40" cy="33" r=".9"/>
+    <ellipse class="shine" cx="32" cy="44" rx="8" ry="6"/><ellipse class="ink" cx="32" cy="41.2" rx="3.6" ry="2.6"/>
+    <path class="tongue" d="M30 47.5q2 5 4 0z"/><path class="line" d="M32 43.6v2.6M27.6 46q4.4 2.8 4.4 0q0 2.8 4.4 0"/>
+  </svg></div>
+  <div class="eyebrow">Puppi3's Creator Kit · setup</div>
+  <h1>Setup Guide<span class="dot">.</span></h1>
+  <p class="lede">From nothing to a running site: what you need, making the site's folder, starting it with Docker Compose or on Kubernetes (your own cluster, Amazon EKS or Google GKE), and the steps only you can do once it's up.</p>
+  <div class="meta"><span>For: whoever installs a site</span><span>About an hour, most of it waiting for downloads and DNS</span></div>
+</header>
+
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <p>On this page</p>
+  <ol>
+    <li><a href="#before">Before you start</a></li>
+    <li><a href="#folder">The site's folder</a></li>
+    <li><a href="#compose">Docker Compose</a></li>
+    <li><a href="#tryout">Trying it at home first</a></li>
+    <li><a href="#finish">Finish by hand</a></li>
+    <li><a href="#k8s">Kubernetes</a></li>
+    <li><a href="#cloud">EKS or GKE</a></li>
+    <li><a href="#test">Trying it first</a></li>
+    <li><a href="#after">Changing things later</a></li>
+  </ol>
+</nav>
+
+<main>
+<section id="before">
+  <h2>Before you start</h2>
+  <h3 id="before-compose-or-kubernetes">Compose or Kubernetes</h3>
+  <p>The kit runs the same site two ways. Pick one; a site can move from one to the other later with its data (<a href="operations-guide.html#move">the operations guide</a> covers moving).</p>
+  <ul>
+    <li><b>Docker Compose</b>: one machine (a home server, a NAS, a rented server). The simplest, and the one to start with.</li>
+    <li><b>Kubernetes</b>: a cluster you have, or one in Amazon's or Google's cloud for a busy stretch. More moving parts and, in a cloud, a monthly bill.</li>
+  </ul>
+  <h3 id="before-what-you-need">What you need</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>For</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td>Everyone</td><td>A domain whose DNS you control; the kit itself (<code>git clone https://github.com/puppi3-music/puppi3-creator-kit.git</code>, or the ZIP from GitHub); Python 3; an email address (Let's Encrypt writes to it about your certificates); Node.js only for the theme's check before you upload it</td></tr>
+      <tr><td>Compose</td><td>Docker with Compose 2.24 or newer, on a machine that ports 80 and 443 reach from the internet (and 8222, with the <code>live</code> module, for your DJ software). Those are the only ports it opens to others (Temporal's admin page, with <code>social</code>, is on <code>127.0.0.1:8233</code>, this machine only); one that's taken can be another (<code>HTTP_PORT</code>, <code>HTTPS_PORT</code>, <code>LIVE_PORT</code> in <code>site.env</code>; Let's Encrypt's <code>le</code> needs 443 itself). <b>One kit site per Docker host</b>: its Traefik takes the web ports, and some of its containers have fixed names (<code>traefik</code>, <code>tinyice</code>, <code>postiz</code>...), so <code>kit.sh</code> stops if another container already has one.</td></tr>
+      <tr><td>Kubernetes</td><td><code>kubectl</code> pointed at the cluster, a default StorageClass, a way for a Service of type LoadBalancer to get an outside address, a registry the cluster pulls from, and Docker on your own machine to build the kit's four images</td></tr>
+      <tr><td><code>social</code></td><td>A developer app for each network you post to (Postiz's docs say how for each one); later, optional keys for SoundCloud, Cloudflare and Search Console numbers</td></tr>
+      <tr><td><code>live</code></td><td>DJ software that streams Ogg to an Icecast server (Mixxx, butt and most others do)</td></tr>
+      <tr><td>Phone notifications</td><td>The ntfy app; <a href="https://ntfy.sh">ntfy.sh</a> works, or your own ntfy server</td></tr>
+    </tbody>
+  </table></div>
+  <h3 id="before-cloudflare-or-not">Cloudflare or not</h3>
+  <p>The kit works with or without Cloudflare in front of the site.</p>
+  <ul>
+    <li><b>Behind Cloudflare</b> (<code>BEHIND_CLOUDFLARE=true</code>, the default): DNS records proxied (the orange cloud). Only Cloudflare's addresses get through; anyone else gets 403. Visitors' real addresses and countries still reach the analytics. Your server's own address stays hidden. Certificates come from Let's Encrypt through Cloudflare's DNS (<code>TLS_RESOLVER=cf</code>, setup's choice here): put a Cloudflare API token that may edit the site's DNS (Zone, DNS, Edit) in <code>CLOUDFLARE_DNS_API_TOKEN</code> in <code>secrets/traefik.env</code> before the first start. It works even before anything outside reaches the server. (<code>le</code> can't work here: Let's Encrypt's check on port 443 would reach Cloudflare, not your server.)</li>
+    <li><b>Without</b> (<code>BEHIND_CLOUDFLARE=false</code>): plain DNS records to your server, open to everyone, certificates from Let's Encrypt (<code>le</code>).</li>
+  </ul>
+  <p>Set Cloudflare's SSL mode to <b>Full (strict)</b>: the server has a real certificate either way. To let your home network in directly as well, put its range in <code>TRUSTED_EXTRA</code>.</p>
+</section>
+
+<section id="folder">
+  <h2>The site's folder</h2>
+  <p>A site is one folder. It holds everything that makes it that site, so back it up, and keep it private: it has the passwords. <code>kit/sites/</code> is kept out of git, so it's a good place for it.</p>
+  <div class="code"><pre>kit/setup.sh kit/sites/mysite</pre></div>
+  <h3 id="folder-what-it-asks">What it asks</h3>
+  <p>Press Enter to take the default shown in brackets.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Question</th><th>What to answer</th></tr></thead>
+    <tbody>
+      <tr><td>Trying it on this machine before the site is public?</td><td><code>yes</code> for a try-out before your domain points here (<a href="#tryout">below</a>): Traefik's own certificate, open to all, no phone alerts. <code>no</code> for the real thing</td></tr>
+      <tr><td>The site's address</td><td>The domain, without https:// (<code>example.com</code>)</td></tr>
+      <tr><td>Its name</td><td>As people see it (the weekly summary's title, Grafana's folder)</td></tr>
+      <tr><td>A short lowercase name used inside</td><td>Names containers, metrics, dashboards and, on Kubernetes, the namespace. Pick it once: changing it later starts those over</td></tr>
+      <tr><td>Time zone</td><td>Like <code>Europe/Berlin</code>: the weekly summary, When to post and the seasonal reminders use it</td></tr>
+      <tr><td>Modules</td><td>Any of <code>analytics</code>, <code>social</code>, <code>live</code>, <code>monitoring</code>, comma-separated (the README says what each does)</td></tr>
+      <tr><td>The live stream's address</td><td>Only with <code>live</code>: usually <code>live.</code> + your domain</td></tr>
+      <tr><td>Only Cloudflare reaches the site</td><td><code>true</code> or <code>false</code> (<a href="#before-cloudflare-or-not">above</a>)</td></tr>
+      <tr><td>Certificates</td><td><code>cf</code> behind Cloudflare, else <code>le</code> (<a href="#before-cloudflare-or-not">above</a>); <code>self</code> is Traefik's own certificate, <code>none</code> plain http</td></tr>
+      <tr><td>Home-network-only names end in</td><td>A local domain your home DNS answers (Traefik's dashboard, TinyIce's admin and Grafana live there, reachable from private addresses only). <code>localhost</code> if you have none</td></tr>
+      <tr><td>ntfy server</td><td><code>https://ntfy.sh</code>, or your own; empty for no phone notifications. Not asked for a try-out (none then)</td></tr>
+      <tr><td>Networks you use</td><td>With <code>social</code>: the ones you post to or want numbers from (<code>ghost</code> is your own site). Each gets its section on the dashboards; one listed but not set up yet shows as an alert error, so add each when it's ready</td></tr>
+      <tr><td>Email for Let's Encrypt</td><td>Yours (only with <code>cf</code> or <code>le</code> certificates)</td></tr>
+    </tbody>
+  </table></div>
+  <p>To answer without being asked (a script, a second site), give the values as variables and add <code>--yes</code>: <code>SITE_HOST=example.com ID_PREFIX=ex kit/setup.sh kit/sites/ex --yes</code>.</p>
+  <h3 id="folder-what-it-makes">What it makes</h3>
+  <ul>
+    <li><code>site.env</code>: your answers, and every other setting explained, including how posts are shared (which networks, which go out by themselves, the tags you use in Ghost). Read it once.</li>
+    <li><code>secrets/</code>: one file per part, with random passwords filled in and a comment on each line. The keys from outside services go here later.</li>
+    <li><code>data/</code>: everything the site keeps (databases, images, Grafana, the stream server's settings), with the config files the parts need to start.</li>
+  </ul>
+  <p>Inside, each part has its folder and its secrets file by its name in the kit: <code>traefik</code>, <code>postiz</code> (Postiz and the bridge), <code>icecast</code> (the stream server), <code>monitoring</code>, and <code>puppi3</code>, which is Ghost and its database (the kit was first made for DJ Puppi3's own site, and the name stayed).</p>
+  <p>Running setup again on the same folder keeps what's there and only adds what's missing. Every setting, its default and which file it's in: the <a href="settings-reference.html">Settings reference</a>.</p>
+</section>
+
+<section id="compose">
+  <h2>Docker Compose</h2>
+  <h3 id="compose-dns">DNS first</h3>
+  <p>Point these names at the server (proxied, if behind Cloudflare). Setup printed the list for your modules:</p>
+  <ul>
+    <li>the site, and <code>www.</code> (which goes to the site; so does <code>http://</code>, to <code>https://</code>)</li>
+    <li><code>live.</code> (with <code>live</code>), for listeners. Cloudflare doesn't pass port 8222, so behind Cloudflare your DJ software connects to the server's own address instead (<a href="#finish-live">Live</a>).</li>
+    <li><code>postiz.</code> (with <code>social</code>)</li>
+    <li><code>grafana.</code> (with <code>monitoring</code>), if you want it outside home</li>
+  </ul>
+  <h3 id="compose-start">Start it</h3>
+  <div class="code"><pre>kit/kit.sh kit/sites/mysite up -d</pre></div>
+  <p>The first start downloads the images and sets up the analytics, a few minutes in all. <code>kit.sh</code> takes any <code>docker compose</code> command after the folder:</p>
+  <div class="code"><pre>kit/kit.sh kit/sites/mysite ps            # what's running
+kit/kit.sh kit/sites/mysite logs -f ghost # one part's log
+kit/kit.sh kit/sites/mysite down          # stop it (the data stays)</pre></div>
+  <p>Open <code>https://&lt;your site&gt;/</code>: Ghost's welcome page means it works. Then <a href="#finish">finish by hand</a>.</p>
+  <div class="note"><b class="label">On Linux</b><p>Setup asks for sudo once to give the stream server, Prometheus and Grafana their folders (each runs as its own user).</p></div>
+  <p>If it stops with <b>port is already allocated</b>, something else on the machine has that port: stop it, or give the kit another one (<code>HTTP_PORT</code>, <code>HTTPS_PORT</code>, <code>LIVE_PORT</code> in <code>site.env</code>) and start again.</p>
+</section>
+
+<section id="tryout">
+  <h2>Trying it at home first</h2>
+  <p>You can run the whole site on your own computer before your domain points anywhere, to look around. Answer <b>yes</b> to setup's first question. Then:</p>
+  <ul>
+    <li><b>Reaching it:</b> your browser needs to find the site's names on your computer. Add a line to your hosts file (<code>/etc/hosts</code> on a Mac or Linux) with every name setup listed, such as <code>127.0.0.1 example.com www.example.com live.example.com postiz.example.com grafana.example.com</code>. The home-network names (<code>grafana.localhost</code> and the like) need nothing: browsers send <code>*.localhost</code> to your own machine. The browser warns about the certificate once (it's Traefik's own, not a real one). From a terminal: <code>curl -k --resolve example.com:443:127.0.0.1 https://example.com/</code>.</li>
+    <li><b>What works:</b> Ghost and its admin (setup turns off its sign-in codes by email for a try-out, as there's no mail service yet; turn them back on with the real thing: <a href="#finish-ghost">Mail first</a>), the theme, the short links, the analytics (your own visits are counted), Grafana, Postiz and its sign-up.</li>
+    <li><b>What waits for the real thing:</b> certificates from Let's Encrypt, Ghost's webhook to the bridge (Ghost sends it only to a public address), the networks' sign-ins, and your phone's alerts. Grafana's public checks can't reach a name only your computer knows, so Health shows the site, Ghost's backend, the live stream and the certificate as down or empty, and the "is down" and "Ghost isn't answering" alerts fire in Grafana (not on your phone: a try-out has no notifications). That's expected.</li>
+    <li><b>On a Mac or Windows:</b> Health's container and disk tiles stay empty (they read the Linux host, which Docker Desktop hides).</li>
+  </ul>
+  <p>When the domain is ready: point its DNS here, set <code>TLS_RESOLVER</code> (and <code>BEHIND_CLOUDFLARE</code>) for the real certificates and <code>NTFY_URL</code> for phone alerts in <code>site.env</code>, give Ghost its mail and set <code>staffDeviceVerification</code> back to <code>true</code> in <code>data/puppi3/ghost/config.production.json</code>, and start again (<code>up -d --force-recreate ghost</code> for Ghost's file).</p>
+  <p>To try it and keep nothing: <code>kit/kit.sh &lt;folder&gt; down -v</code>, then delete the folder. Docker keeps what it downloaded and built (several GB of images) and a few unnamed volumes; to free that space too:</p>
+<div class="code"><pre>docker volume rm $(docker volume ls -q --filter label=com.docker.compose.project=&lt;short name&gt;)
+docker image rm &lt;short name&gt;-ghost-bridge:local &lt;short name&gt;-tb-setup
+docker image prune -a      # every image no container uses: also other projects' (it asks first)</pre></div>
+</section>
+
+<section id="finish">
+  <h2>Finish by hand</h2>
+  <p>What only you can do, in this order. Setup printed the same list with your names in it. On Kubernetes it's the same, except where it says so.</p>
+  <h3 id="finish-ghost">Ghost</h3>
+  <ol>
+    <li><b>Mail first.</b> Ghost emails staff a code each time they sign in on a new device, and members their sign-in links. Its own way of sending rarely arrives, so give it a mail service (any with SMTP). On Compose: the <code>mail</code> part of <code>data/puppi3/ghost/config.production.json</code> (<a href="https://ghost.org/docs/config/#mail">Ghost's docs</a>), then <code>kit/kit.sh &lt;folder&gt; up -d --force-recreate ghost</code>. On Kubernetes: <code>secrets/ghost-mail.env</code> (<a href="settings-reference.html#k8s-ghost-mail">its settings</a>).</li>
+    <li>Make the owner account at <code>https://&lt;your site&gt;/ghost/</code>, then set Ghost's own time zone (Settings, General, Timezone) to the site's: Ghost keeps its own, for its dates and its scheduled posts.</li>
+    <li>The theme: <code>kit/theme-zip.sh</code> builds <code>kit/dist/puppi3-creator-kit-theme.zip</code>. Upload it in Settings, Design &amp; branding, Customize, Change theme. With <code>live</code>, set the theme's <b>Live stream URL</b> (Design &amp; branding, Customize, the Theme tab) to <code>https://live.&lt;your site&gt;/stream-mp3</code>: the LIVE NOW bar shows only once it's set. The theme's other settings, music links in the footer and the short links: the <a href="theme-guide.html">Theme guide</a>.</li>
+    <li>Short links: upload <code>kit/redirects.yaml</code> in Settings, Labs (under Advanced: Open, Beta features), Redirects (the bio links like <code>/ig</code>, and the tagged links the bridge posts).</li>
+  </ol>
+  <h3 id="finish-social">Social</h3>
+  <ol>
+    <li>Make your account at <code>https://postiz.&lt;your site&gt;</code>, then close sign-ups: <code>POSTIZ_DISABLE_REGISTRATION=true</code> in <code>secrets/postiz.env</code>.</li>
+    <li>Put each network's app keys in <code>secrets/postiz.env</code>, start again, and connect the networks in Postiz.</li>
+    <li>In Postiz's settings, make an API key: <code>POSTIZ_API_KEY</code>.</li>
+    <li>In Ghost, Settings, Integrations, the Custom tab, add a custom integration. Its Admin API key goes in <code>GHOST_ADMIN_API_KEY</code> (the Social preview button). Give it a webhook: event <b>Post published</b>, address <code>https://postiz.&lt;your site&gt;/ghost-webhook</code>, secret = <code>GHOST_WEBHOOK_SECRET</code> from <code>secrets/postiz.env</code>. Ghost sends it only to a public address: <code>postiz.&lt;your site&gt;</code> must resolve to one from the server (so not a home-network address, even if your home DNS gives one).</li>
+    <li>To see what it would post before anything goes out: <code>GHOST_BRIDGE_DRY_RUN=true</code> in <code>secrets/postiz.env</code>. The bridge then posts nothing, and logs and previews what it would; set it back to <code>false</code> when you're happy. While it's on, its phone notifications are off too, unless you also set <code>DRY_RUN_NTFY=true</code>.</li>
+    <li>If you use the manual drafts (the default for Instagram and TikTok), make a tag called <b>Post in app</b> once in Postiz's post editor, or change <code>DRAFT_TAG</code> in <code>site.env</code>.</li>
+    <li>Compose with <code>analytics</code>: for the site's own numbers on the Platforms dashboard, copy <code>tinybird__adminToken</code> from <code>data/puppi3/tinybird/tokens.env</code> to <code>TINYBIRD_TOKEN</code> in <code>secrets/postiz.env</code>. (Kubernetes does this itself.)</li>
+    <li>Start again (<code>kit/kit.sh &lt;folder&gt; up -d</code> or <code>k8s/up.sh &lt;folder&gt; &lt;overlay&gt;</code>), then publish a test post with the internal tag <code>#nosocial</code> to see that nothing goes out, and a real one when you're ready.</li>
+  </ol>
+  <p>Whoever posts: the <a href="posting-guide.html">Posting guide</a>. How posts are shared (which networks, what posts by itself, the tags) is set in <code>site.env</code>; the defaults post Bluesky and Threads by themselves and make Instagram and TikTok drafts with a phone notification for each.</p>
+  <h3 id="finish-phone">Phone notifications</h3>
+  <p>In the ntfy app, subscribe to the topic in <code>NTFY_TOPIC</code> (<code>secrets/postiz.env</code>) on your ntfy server. Setup made up a long random one: on ntfy.sh anyone who knows a topic can read it, so keep it unguessable. The alerts use the same topic.</p>
+  <h3 id="finish-live">Live</h3>
+  <p>In your DJ software, an Icecast stream: server <code>live.&lt;your site&gt;</code>, or the server's own address when the site is behind Cloudflare (which doesn't pass this port), port 8222 (or your <code>LIVE_PORT</code>), mount <code>/stream-ogg</code>, user <code>source</code>, password <code>TINYICE_SOURCE_PASSWORD</code> from <code>secrets/icecast.env</code>, format Ogg (Vorbis or Opus, either works). It goes straight to the stream server, not through Traefik (which would drop the audio). On Kubernetes, port 8222 is the <code>tinyice-source</code> Service's own outside address.</p>
+  <p>TinyIce's admin page is <code>http://tinyice.&lt;home domain&gt;</code>, from home, with <code>TINYICE_ADMIN_USER</code> and <code>TINYICE_ADMIN_PASSWORD</code>.</p>
+  <h3 id="finish-grafana">Grafana</h3>
+  <p><code>https://grafana.&lt;your site&gt;</code>, or <code>http://grafana.&lt;home domain&gt;</code> at home: user <code>admin</code>, password <code>GRAFANA_ADMIN_PASSWORD</code> in <code>secrets/monitoring.env</code>. The dashboards are made for your site each time the site starts, so changes made in Grafana don't stay. A network in <code>NETWORKS</code> that isn't set up yet shows as an alert error until you set it up or take it out. On Docker Desktop (a Mac or Windows), Health's container and disk tiles stay empty: they need a Linux host. Reading the dashboards: the <a href="analytics-guide.html">Analytics guide</a>.</p>
+</section>
+
+<section id="k8s">
+  <h2>Kubernetes</h2>
+  <p>The same folder runs on a cluster with <code>k8s/up.sh</code>. It turns <code>site.env</code> and <code>secrets/</code> into the cluster's settings, applies everything into a namespace named after the short name, and waits until every part is ready, stopping early with the reason if one is stuck.</p>
+  <h3 id="k8s-overlays">Which overlay</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Overlay</th><th>For</th></tr></thead>
+    <tbody>
+      <tr><td><code>selfhosted</code></td><td>Any cluster of your own: MySQL runs in the cluster, Ghost's files on a volume</td></tr>
+      <tr><td><code>eks</code></td><td>Amazon EKS, with RDS databases and an S3 bucket (<a href="#cloud">below</a>)</td></tr>
+      <tr><td><code>gke</code></td><td>Google GKE Standard, with Cloud SQL and a Cloud Storage bucket (<a href="#cloud">below</a>)</td></tr>
+      <tr><td><code>local</code>, <code>k3d-eks</code>, <code>k3d-gke</code></td><td>Not for a real site: a throwaway cluster on your own machine, for <a href="#test">trying things</a>: <code>k8s/test/k3d.sh up</code> makes one (k3d, with a registry at <code>localhost:5111</code>), then <code>k8s/build-images.sh --registry k3d</code> and <code>k8s/up.sh &lt;folder&gt; local</code></td></tr>
+    </tbody>
+  </table></div>
+  <h3 id="k8s-images">Build the images</h3>
+  <p>Four of the images are the kit's own (Traefik with the kit's plugins, the analytics setup job, the stream relay, the bridge); the rest come from Docker Hub. Build and push them to your registry once, and again after an update of the kit. A cloud has its own registry (<a href="#cloud">below</a>); on a home cluster, any registry its nodes can pull from (k3s and k3d can run one of their own: see their docs on registries).</p>
+  <div class="code"><pre>docker login &lt;registry&gt;
+PLATFORM=linux/amd64 k8s/build-images.sh --registry &lt;registry&gt;/creator-kit</pre></div>
+  <p><code>PLATFORM</code> is the nodes' kind of processor (<code>linux/arm64</code> for ARM nodes). It writes <code>k8s/images/built.env</code>, which <code>up.sh</code> reads.</p>
+  <h3 id="k8s-up">Up</h3>
+  <div class="code"><pre>k8s/up.sh kit/sites/mysite selfhosted --render   # only writes what it would apply: data/k8s/rendered.yaml
+UP_TIMEOUT=1200 k8s/up.sh kit/sites/mysite selfhosted</pre></div>
+  <p>It names the cluster <code>kubectl</code> points at and asks before using it. The first time takes a while (image downloads, the analytics' first start). Ghost, Grafana and the bridge wait with <code>CreateContainerConfigError</code> until the analytics setup job has made its tokens: that's normal.</p>
+  <p>Then the outside addresses, for DNS:</p>
+  <div class="code"><pre>kubectl -n &lt;short name&gt; get svc traefik tinyice-source    # EXTERNAL-IP</pre></div>
+  <p>Point the site's names at <code>traefik</code>'s address and the DJ software at <code>tinyice-source</code>'s, then <a href="#finish">finish by hand</a> as on Compose. <code>k8s/up.sh &lt;folder&gt; --down</code> deletes the site from the cluster, volumes and all.</p>
+</section>
+
+<section id="cloud">
+  <h2>EKS or GKE</h2>
+  <p>A cloud site needs a few things made once with the cloud's own tools: the cluster, the databases (Ghost's MySQL, and Postgres for Postiz with <code>social</code>), a private bucket for Ghost's images and files, and a registry. Their addresses go in <code>cloud-eks.env</code> or <code>cloud-gke.env</code> in the site's folder; the comments in each overlay's example say what each line is. The cloud costs money for as long as these exist, so tear them down when you're done.</p>
+  <h3 id="cloud-amazon-eks">Amazon EKS</h3>
+  <ul>
+    <li><b>Cluster</b>: <code>eksctl create cluster -f k8s/clusters/eks.yaml</code> (check its name, region and node size first), then <code>kubectl apply -f k8s/clusters/eks-gp3.yaml</code> and the AWS Load Balancer Controller (Helm chart <code>eks/aws-load-balancer-controller</code>, with the ServiceAccount the cluster file made).</li>
+    <li><b>Databases</b>: RDS for MySQL 8 and RDS for Postgres 17 in the cluster's network, on its private subnets, reachable only from the nodes' security group. Postgres's parameter group needs <code>rds.force_ssl=0</code> (Postiz connects without TLS; the traffic stays in the network).</li>
+    <li><b>Bucket</b>: a private S3 bucket, and an IAM role for ServiceAccount <code>ghost</code> in your namespace (IRSA) that may read, write and delete its objects and list it. No key is stored anywhere.</li>
+    <li><b>Registry</b>: ECR repositories <code>creator-kit/traefik</code>, <code>tb-setup</code>, <code>icecast-relay</code>, <code>ghost-bridge</code>.</li>
+  </ul>
+  <p>Then <code>cp k8s/overlays/eks/cloud.env.example &lt;folder&gt;/cloud-eks.env</code> and fill it in.</p>
+  <h3 id="cloud-google-gke">Google GKE</h3>
+  <ul>
+    <li><b>Cluster</b>: <code>PROJECT=&lt;project&gt; REGION=&lt;region&gt; k8s/clusters/gke.sh up</code> (one zone, two nodes, Workload Identity on).</li>
+    <li><b>Databases</b>: Cloud SQL for MySQL 8 and for Postgres 17, and a Google service account with the Cloud SQL Client role, tied to Kubernetes ServiceAccount <code>cloud-sql</code> in your namespace. Pods reach the databases through the Cloud SQL Auth Proxy beside them.</li>
+    <li><b>Bucket</b>: a private Cloud Storage bucket, a service account that may use only it, and an HMAC key for it (Ghost uses Cloud Storage's S3-compatible side).</li>
+    <li><b>Registry</b>: an Artifact Registry Docker repository.</li>
+  </ul>
+  <p>Then <code>cp k8s/overlays/gke/cloud.env.example &lt;folder&gt;/cloud-gke.env</code> and fill it in.</p>
+  <h3 id="cloud-the-site-s-secrets">The site's secrets for a cloud</h3>
+  <ul>
+    <li><code>secrets/puppi3.env</code>: Ghost's login on the cloud's MySQL (its master user and password, and the database's name).</li>
+    <li><code>secrets/cloud.env</code>: Postgres's master login (<code>POSTGRES_MASTER_USER</code>, <code>POSTGRES_MASTER_PASSWORD</code>); a job makes Postiz's own logins with it.</li>
+    <li><code>secrets/s3.env</code> (GKE only): the HMAC key.</li>
+    <li><code>secrets/ghost-mail.env</code>: Ghost's mail.</li>
+  </ul>
+  <p>The examples are in <code>k8s/examples/</code>, and the <a href="settings-reference.html#k8s">Settings reference</a> lists every line. Then build the images (<code>PLATFORM=linux/amd64</code>) and <code>k8s/up.sh &lt;folder&gt; eks --render</code> (or <code>gke</code>), and up.</p>
+  <h3 id="cloud-test-before-the-dns">Test before the DNS</h3>
+  <p>Before pointing the domain at the cloud, check it through its own address: put yours in <code>TRUSTED_EXTRA</code> (behind Cloudflare, nothing else gets in), then</p>
+  <div class="code"><pre>curl -k --connect-to example.com:443:&lt;traefik's EXTERNAL-IP&gt;:443 -sI https://example.com/</pre></div>
+  <p>Upload a picture to a draft in Ghost: if it shows, Ghost can reach the bucket. Take your address out of <code>TRUSTED_EXTRA</code> once the DNS points at the cloud.</p>
+</section>
+
+<section id="test">
+  <h2>Trying it first</h2>
+  <p>On a Mac with Docker Desktop, the kit can build a throwaway site and check every part end to end, then remove it:</p>
+  <div class="code"><pre>kit/test.sh                               # Compose: the site kit.test
+k8s/test/test.sh                          # Kubernetes, on a k3d cluster it makes (local overlay)
+k8s/test/test.sh --overlay k3d-eks        # the eks overlay, with stand-ins for RDS and S3
+k8s/test/test.sh --overlay k3d-gke        # the gke overlay, with stand-ins for Cloud SQL and Cloud Storage
+k8s/test/test.sh --render-only            # every overlay rendered and checked, no cluster (a minute)</pre></div>
+  <p>The Compose test needs ports 80, 443, 8222 free (<code>LIVE_PORT=&lt;another&gt; kit/test.sh</code> for the stream's) and ffmpeg; the Kubernetes ones also need <code>k3d</code>, <code>kubeconform</code> and 12 GB of memory for Docker. <code>--keep</code> leaves the site up to look around.</p>
+</section>
+
+<section id="after">
+  <h2>Changing things later</h2>
+  <ul>
+    <li><b>A setting</b>: edit <code>site.env</code> or a file in <code>secrets/</code>, then start again (<code>kit/kit.sh &lt;folder&gt; up -d</code>, or <code>k8s/up.sh &lt;folder&gt; &lt;overlay&gt;</code>). Only the parts that use it restart.</li>
+    <li><b>A module</b>: change <code>MODULES</code> and start again. A module switched off has its alerts taken out of Grafana too. Switching <code>live</code> on later needs only its DNS name and the theme's Live stream URL: its passwords were made at setup.</li>
+    <li><b>Phone notifications</b>: <code>NTFY_URL</code> in <code>site.env</code> is the one place for both the bridge and Grafana's alerts (empty = none); start again and <code>kit.sh</code> restarts Grafana for it.</li>
+    <li><b>A network</b>: change <code>NETWORKS</code> (the dashboards' sections and the bridge's collectors) and <code>CHANNELS</code> (where posts go).</li>
+  </ul>
+  <p>Updating the kit, backups, moving between Compose, Kubernetes and the clouds, and troubleshooting: the <a href="operations-guide.html">Operations guide</a>.</p>
+</section>
+</main>
+</div>
+<footer>Setup Guide · Puppi3's Creator Kit 🐾</footer>
+</div>
+<!-- shared script: from docs/assets/docs.js, copied in by docs/build-docs.py -->
+<script>
+/* Shared by the docs pages, and copied into each one by docs/build-docs.py, so every guide is a
+   single file that works on its own (send just that file and search still works):
+   a top bar (a link to the front page, the guide's name, search, theme switch), search through this page, a contents list
+   that follows along, heading links, copy buttons and "back to top". Edit this file, not the
+   copies in the pages; the pre-commit hook rebuilds them. */
+(function () {
+  'use strict';
+
+  var store = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+  };
+  var esc = function (s) {
+    return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+  };
+  var el = function (tag, attrs, html) {
+    var n = document.createElement(tag);
+    for (var k in attrs || {}) n.setAttribute(k, attrs[k]);
+    if (html != null) n.innerHTML = html;
+    return n;
+  };
+
+  /* ---------- theme: auto / light / dark ---------- */
+  var THEMES = ['auto', 'light', 'dark'];
+  var THEME_LABEL = { auto: '◐ Auto', light: '☀ Light', dark: '☾ Dark' };
+  function applyTheme(t) {
+    if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    else document.documentElement.removeAttribute('data-theme');
+  }
+  var theme = store.get('docs-theme') || 'auto';
+  applyTheme(theme);
+
+  /* ---------- top bar ---------- */
+  var bar = el('div', { class: 'docbar' });
+  var inner = el('div', { class: 'docbar-in' });
+  var h1 = document.querySelector('h1');
+  var name = (h1 ? h1.textContent : document.title).replace(/\.\s*$/, '').trim();
+  // back to the front page, only when served (the docs site): a guide sent as a file has no index next to it
+  if (/^https?:$/.test(location.protocol)) {
+    inner.appendChild(el('a', { class: 'home', href: './', title: 'All the guides', 'aria-label': 'All guides' },
+      '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.5"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.5"/>' +
+      '<rect x="1.5" y="9" width="5.5" height="5.5" rx="1.5"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.5"/></svg><span>All guides</span>'));
+  }
+  inner.appendChild(el('a', { class: 'brand', href: '#', title: 'Back to the top' }, esc(name) + '<span>.</span>'));
+  inner.appendChild(el('div', { class: 'grow' }));
+  var search = el('div', { class: 'search' });
+  search.innerHTML =
+    '<svg class="glass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>' +
+    '<input type="search" placeholder="Search this guide" autocomplete="off" spellcheck="false" role="combobox" ' +
+    'aria-autocomplete="list" aria-expanded="false" aria-controls="doc-results" aria-label="Search this guide">' +
+    '<kbd>/</kbd><div class="results" id="doc-results" role="listbox" aria-label="Search results"></div>';
+  inner.appendChild(search);
+  var themeBtn = el('button', { class: 'iconbtn', type: 'button', title: 'Colour theme' }, THEME_LABEL[theme]);
+  themeBtn.addEventListener('click', function () {
+    theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
+    applyTheme(theme);
+    store.set('docs-theme', theme === 'auto' ? null : theme);
+    themeBtn.textContent = THEME_LABEL[theme];
+  });
+  inner.appendChild(themeBtn);
+  bar.appendChild(inner);
+  document.body.insertBefore(bar, document.body.firstChild);
+
+  /* ---------- this page in parts: each section's intro, then each h3's part ---------- */
+  // readable text: spaces between table cells, list items and blocks (textContent runs them together)
+  var BLOCK = /^(P|DIV|LI|TD|TH|TR|DT|DD|H\d|BLOCKQUOTE|PRE|BR|UL|OL|TABLE|FIGCAPTION|SECTION)$/;
+  function textOf(nodes) {
+    var parts = [];
+    var walk = function (n) {
+      if (n.nodeType === 3) { parts.push(n.nodeValue); return; }
+      if (n.nodeType !== 1 || /^(SCRIPT|STYLE|BUTTON|NAV)$/.test(n.nodeName) || (n.classList && n.classList.contains('anchor'))) return;
+      var block = BLOCK.test(n.nodeName);
+      if (block) parts.push(' ');
+      for (var c = n.firstChild; c; c = c.nextSibling) walk(c);
+      if (block) parts.push(' ');
+    };
+    nodes.forEach(walk);
+    return parts.join('').replace(/\s+/g, ' ').trim();
+  }
+  function headingText(h) { var c = h.cloneNode(true); c.querySelectorAll('.anchor').forEach(function (x) { x.remove(); }); return c.textContent.replace(/\s+/g, ' ').trim(); }
+  function pageEntries() {
+    var out = [];
+    document.querySelectorAll('main section[id]').forEach(function (sec) {
+      var h2 = sec.querySelector('h2'), title = h2 ? headingText(h2) : sec.id;
+      var chunk = { id: sec.id, h: title, nodes: [] };
+      out.push(chunk);
+      Array.prototype.forEach.call(sec.childNodes, function (n) {
+        if (n === h2) return;
+        if (n.nodeType === 1 && n.nodeName === 'H3' && n.id) {
+          chunk = { id: n.id, h: title + ' › ' + headingText(n), nodes: [] };
+          out.push(chunk);
+          return;
+        }
+        chunk.nodes.push(n);
+      });
+    });
+    return out.map(function (c) { var x = textOf(c.nodes); return { id: c.id, h: c.h, x: x, hl: c.h.toLowerCase(), xl: x.toLowerCase() }; });
+  }
+  var entries = null;
+  function allEntries() { return entries || (entries = pageEntries()); }
+
+  /* ---------- search ---------- */
+  var input = search.querySelector('input'), box = search.querySelector('.results');
+  var hits = [], active = -1;
+  function terms(q) { return q.toLowerCase().split(/\s+/).filter(function (t) { return t.length > 0; }); }
+  function count(hay, t) { var n = 0, i = hay.indexOf(t); while (i !== -1 && n < 6) { n++; i = hay.indexOf(t, i + t.length); } return n; }
+  var reEsc = function (t) { return t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); };
+  // highlight the words in plain text, escaping each piece (so words never match inside &amp; and the like)
+  function markup(text, ts) {
+    var re = new RegExp(ts.map(reEsc).join('|'), 'gi'), out = '', last = 0, m;
+    while ((m = re.exec(text))) {
+      out += esc(text.slice(last, m.index)) + '<mark>' + esc(m[0]) + '</mark>';
+      last = m.index + m[0].length;
+    }
+    return out + esc(text.slice(last));
+  }
+  function snippet(e, ts) {
+    var at = -1;
+    ts.forEach(function (t) { var i = e.xl.indexOf(t); if (i !== -1 && (at === -1 || i < at)) at = i; });
+    if (at === -1) return e.x.slice(0, 150) + (e.x.length > 150 ? '…' : '');
+    var start = Math.max(0, at - 60), end = Math.min(e.x.length, at + 120);
+    return (start > 0 ? '…' : '') + e.x.slice(start, end) + (end < e.x.length ? '…' : '');
+  }
+  function run(q) {
+    var ts = terms(q);
+    if (!ts.length) { close(); return; }
+    var list = allEntries(), scored = [];
+    list.forEach(function (e) {
+      var score = 0;
+      for (var i = 0; i < ts.length; i++) {
+        var t = ts[i], inH = e.hl.indexOf(t) !== -1, n = count(e.xl, t);
+        if (!inH && !n) return;                      // every word must appear
+        if (inH) score += 12 + (new RegExp('(^|[^a-z0-9])' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(e.hl) ? 6 : 0);
+        score += Math.min(n, 5);
+      }
+      scored.push({ e: e, s: score });
+    });
+    scored.sort(function (a, b) { return b.s - a.s; });
+    hits = scored.slice(0, 20).map(function (r) { return r.e; });
+    active = hits.length ? 0 : -1;
+    render(ts);
+  }
+  function hrefFor(e, ts) { return '?q=' + encodeURIComponent(ts.join(' ')) + '#' + encodeURIComponent(e.id); }
+  function render(ts) {
+    if (!hits.length) {
+      box.innerHTML = '<div class="hint">No matches for <b>' + esc(ts.join(' ')) + '</b>. Try fewer or different words.</div>';
+    } else {
+      box.innerHTML = hits.map(function (e, i) {
+        return '<a class="result" role="option" id="doc-hit-' + i + '" aria-selected="' + (i === active) + '" href="' + esc(hrefFor(e, ts)) + '" data-i="' + i + '">' +
+          '<span class="where">' + markup(e.h, ts) + '</span><span class="snip">' + markup(snippet(e, ts), ts) + '</span></a>';
+      }).join('') + '<div class="hint">↑ ↓ to choose · Enter to open · Esc to close</div>';
+    }
+    box.classList.add('open');
+    input.setAttribute('aria-expanded', 'true');
+    input.setAttribute('aria-activedescendant', active >= 0 ? 'doc-hit-' + active : '');
+  }
+  function close() { box.classList.remove('open'); input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); }
+  function move(d) {
+    if (!hits.length) return;
+    active = (active + d + hits.length) % hits.length;
+    box.querySelectorAll('.result').forEach(function (a, i) { a.setAttribute('aria-selected', String(i === active)); });
+    var cur = box.querySelector('#doc-hit-' + active);
+    if (cur) { cur.scrollIntoView({ block: 'nearest' }); input.setAttribute('aria-activedescendant', cur.id); }
+  }
+  function open(e, ts) {
+    close();
+    // keep the address in step where allowed (pages opened from disk may refuse), then land
+    try { history.replaceState(null, '', hrefFor(e, ts)); } catch (err) {}
+    land(e.id, ts); input.blur();
+  }
+  var timer;
+  input.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(function () { run(input.value); }, 60); });
+  input.addEventListener('focus', function () { if (input.value.trim()) run(input.value); });
+  input.addEventListener('keydown', function (ev) {
+    if (ev.key === 'ArrowDown') { ev.preventDefault(); move(1); }
+    else if (ev.key === 'ArrowUp') { ev.preventDefault(); move(-1); }
+    else if (ev.key === 'Enter') { ev.preventDefault(); if (active >= 0) open(hits[active], terms(input.value)); }
+    else if (ev.key === 'Escape') { if (box.classList.contains('open')) close(); else input.blur(); }
+  });
+  box.addEventListener('click', function (ev) {
+    var a = ev.target.closest('.result'); if (!a) return;
+    if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button === 1) return;   // new tab: let the link work
+    ev.preventDefault(); open(hits[+a.getAttribute('data-i')], terms(input.value));
+  });
+  document.addEventListener('click', function (ev) { if (!search.contains(ev.target)) close(); });
+  document.addEventListener('keydown', function (ev) {
+    var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.nodeName);
+    if ((ev.key === '/' && !typing) || ((ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === 'k')) {
+      ev.preventDefault(); input.focus(); input.select();
+    }
+  });
+
+  /* ---------- landing on a result: flash the heading and mark the words in its part ---------- */
+  function clearMarks() {
+    document.querySelectorAll('mark.hit').forEach(function (m) { m.replaceWith(document.createTextNode(m.textContent)); });
+    document.querySelectorAll('main section').forEach(function (s) { s.normalize(); });
+  }
+  function partOf(target) {
+    // the heading's part: an h3 up to the next h3; a section's intro up to its first h3
+    var nodes = [], sec = target.closest('section') || target;
+    var start = target.nodeName === 'SECTION' ? sec.firstChild : target.nextSibling;
+    for (var n = start; n; n = n.nextSibling) { if (n.nodeName === 'H3' && n !== target) break; nodes.push(n); }
+    return nodes;
+  }
+  function markIn(nodes, ts) {
+    if (!ts.length) return null;
+    var re = new RegExp(ts.map(function (t) { return t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|'), 'gi'), first = null;
+    nodes.forEach(function (root) {
+      var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode: function (n) { return n.parentNode.closest('button,script,style,mark,.anchor') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; }
+      }), texts = [];
+      if (root.nodeType === 3) texts.push(root); else while (walker.nextNode()) texts.push(walker.currentNode);
+      texts.forEach(function (tn) {
+        var s = tn.nodeValue; re.lastIndex = 0; if (!re.test(s)) return; re.lastIndex = 0;
+        var frag = document.createDocumentFragment(), last = 0, m;
+        while ((m = re.exec(s))) {
+          frag.appendChild(document.createTextNode(s.slice(last, m.index)));
+          var mk = el('mark', { class: 'hit' }); mk.textContent = m[0]; frag.appendChild(mk); if (!first) first = mk;
+          last = m.index + m[0].length;
+        }
+        frag.appendChild(document.createTextNode(s.slice(last)));
+        tn.parentNode.replaceChild(frag, tn);
+      });
+    });
+    return first;
+  }
+  function land(id, ts) {
+    var target = document.getElementById(id); if (!target) return;
+    clearMarks();
+    markIn(partOf(target), ts || []);
+    var h = target.nodeName === 'SECTION' ? target.querySelector('h2') || target : target;
+    h.scrollIntoView({ block: 'start' });
+    h.classList.remove('flash'); void h.offsetWidth; h.classList.add('flash');
+  }
+  var q0 = new URLSearchParams(location.search).get('q');
+  if (q0) input.value = q0;
+  if (location.hash.length > 1) {
+    var id0 = decodeURIComponent(location.hash.slice(1));
+    requestAnimationFrame(function () { land(id0, q0 ? terms(q0) : []); });
+  }
+
+  /* ---------- heading links (#) ---------- */
+  document.querySelectorAll('main section[id] > h2, main h3[id]').forEach(function (h) {
+    var id = h.nodeName === 'H2' ? h.parentNode.id : h.id;
+    var a = el('a', { class: 'anchor', href: '#' + id, 'aria-label': 'Link to this part' }, '#');
+    h.appendChild(a);
+  });
+
+  /* ---------- contents list that follows along, with the current section's sub-headings ---------- */
+  var toc = document.querySelector('nav.toc');
+  var tocLinks = {};
+  if (toc) {
+    toc.querySelectorAll('a[href^="#"]').forEach(function (a) {
+      var id = a.getAttribute('href').slice(1), sec = document.getElementById(id);
+      if (!sec) return;
+      tocLinks[id] = a;
+      var subs = sec.querySelectorAll('h3[id]');
+      if (!subs.length) return;
+      var ul = el('ul', { class: 'sub' });
+      subs.forEach(function (h) { var li = el('li'); li.appendChild(el('a', { href: '#' + h.id }, esc(headingText(h)))); ul.appendChild(li); });
+      a.parentNode.appendChild(ul);
+    });
+    var headings = Array.prototype.slice.call(document.querySelectorAll('main section[id], main h3[id]'));
+    var ticking = false;
+    var spy = function () {
+      ticking = false;
+      var line = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bar-h')) + 40 || 100, cur = null;
+      for (var i = 0; i < headings.length; i++) { if (headings[i].getBoundingClientRect().top <= line) cur = headings[i]; else break; }
+      var sec = cur ? (cur.nodeName === 'SECTION' ? cur : cur.closest('section')) : null;
+      toc.querySelectorAll('a[aria-current]').forEach(function (a) { a.removeAttribute('aria-current'); });
+      toc.querySelectorAll('li.open').forEach(function (li) { li.classList.remove('open'); });
+      if (!sec || !tocLinks[sec.id]) return;
+      tocLinks[sec.id].setAttribute('aria-current', 'true');
+      tocLinks[sec.id].parentNode.classList.add('open');
+      if (cur.nodeName === 'H3') { var s = toc.querySelector('ul.sub a[href="#' + cur.id + '"]'); if (s) s.setAttribute('aria-current', 'true'); }
+    };
+    addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(spy); } }, { passive: true });
+    addEventListener('resize', spy);
+    spy();
+  }
+
+  /* ---------- copy buttons on code blocks ---------- */
+  document.querySelectorAll('.code').forEach(function (codeBox) {
+    var pre = codeBox.querySelector('pre');
+    if (!pre || codeBox.querySelector('button')) return;
+    var b = el('button', { type: 'button', 'aria-label': 'Copy code' }, 'Copy');
+    b.addEventListener('click', function () {
+      var reset = function () { setTimeout(function () { b.textContent = 'Copy'; }, 1500); };
+      var select = function () {
+        var r = document.createRange(); r.selectNodeContents(pre);
+        var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; reset();
+      };
+      try { navigator.clipboard.writeText(pre.innerText).then(function () { b.textContent = 'Copied'; reset(); }, select); } catch (e) { select(); }
+    });
+    codeBox.appendChild(b);
+  });
+
+  /* ---------- column names on each cell, for the phone layout (docs.css) ---------- */
+  document.querySelectorAll('.tablewrap table').forEach(function (t) {
+    // long paths in the first column may wrap after a "/" (docs.css keeps them from breaking mid-name)
+    t.querySelectorAll('td:first-child code').forEach(function (c) {
+      if (c.children.length || c.textContent.length < 30 || c.textContent.indexOf('/') === -1) return;
+      c.innerHTML = esc(c.textContent).replace(/\//g, '/<wbr>');
+    });
+    var names = Array.prototype.map.call(t.querySelectorAll('thead th'), function (th) { return th.textContent.trim(); });
+    t.querySelectorAll('tbody tr').forEach(function (tr) {
+      var col = 0;
+      Array.prototype.forEach.call(tr.children, function (td) {
+        // a cell spanning columns is labelled with all of them ("Production & Staging")
+        var label = names.slice(col, col + td.colSpan).filter(Boolean).join(' & ');
+        if (label) td.setAttribute('data-label', label);
+        col += td.colSpan;
+      });
+    });
+  });
+
+  /* ---------- back to top ---------- */
+  var up = el('button', { class: 'totop', type: 'button', 'aria-label': 'Back to top' }, '↑ Top');
+  up.addEventListener('click', function () { scrollTo({ top: 0 }); });
+  bar.querySelector('.brand').addEventListener('click', function (ev) { ev.preventDefault(); scrollTo({ top: 0 }); });
+  document.body.appendChild(up);
+  addEventListener('scroll', function () { up.classList.toggle('show', scrollY > 700); }, { passive: true });
+})();
+</script>
+<!-- /shared script -->
+</body>
+</html>

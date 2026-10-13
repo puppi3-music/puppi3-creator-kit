@@ -1,0 +1,242 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 1,
+    "title": "The post",
+    "description": "Open a post from a posts table on the Platforms dashboard. The numbers below come from the bridge (post.json): the post as the network last gave it, its numbers kept each day, and the site page it leads to: the one it links to, or, for posts without a link (Instagram and TikTok captions can't carry one), a guess: the post its caption names, else the newest post published in the week before it.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "label",
+                      "text": "Network",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "type",
+                      "text": "Type",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "time",
+                      "text": "Posted",
+                      "type": "timestamp_epoch"
+                    },
+                    {
+                      "selector": "title",
+                      "text": "Post",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "pageTitle",
+                      "text": "Site page",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "pageNote",
+                      "text": "How the page was found",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "historyNote",
+                      "text": "Daily numbers from",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "problems",
+                      "text": "Problems",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "permalink",
+                      "text": "Link",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "pageUrl",
+                      "text": "pageUrl",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "page",
+                      "text": "Path",
+                      "type": "string"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "$merge([$, {\"problems\": $join(errors, \"; \")}])",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/post.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "network",
+                        "value": "${network}"
+                      },
+                      {
+                        "key": "id",
+                        "value": "${post}"
+                      },
+                      {
+                        "key": "time",
+                        "value": "${time}"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "table",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "cellHeight": "sm",
+          "showHeader": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "noValue": "\u2013",
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "auto"
+              }
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Post"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 380
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Problems"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-text"
+                  }
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "fixedColor": "red",
+                    "mode": "fixed"
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Link"
+              },
+              "properties": [
+                {
+                  "id": "links",
+                  "value": [
+                    {
+                      "targetBlank": true,
+                      "title": "Open on ${label}",
+                      "url": "${__value.raw}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Site page"
+              },
+              "properties": [
+                {
+                  "id": "links",
+                  "value": [
+                    {
+                      "targetBlank": true,
+                      "title": "Open the page",
+                      "url": "https://@SITE_HOST@${__data.fields.Path}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "pageUrl"
+              },
+              "properties": [
+                {
+                  "id": "custom.hidden",
+                  "value": true
+                },
+                {
+                  "id": "custom.hideFrom",
+                  "value": {
+                    "legend": false,
+                    "tooltip": true,
+                    "viz": true
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Path"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 160
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

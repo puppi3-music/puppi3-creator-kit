@@ -1,0 +1,23 @@
+# Ghost's analytics settings, as the puppi3 stack's: tb-setup's tokens (envFrom, not optional, so the pod waits for the
+# Secret and Ghost starts with them), and where the tracker, Ghost and Ghost Admin's charts reach Tinybird.
+# A JSON patch that appends (a strategic merge puts new variables first, before SITE_HOST, which $(SITE_HOST) needs).
+- op: add
+  path: /spec/template/spec/containers/0/envFrom/-
+  value:
+    secretRef:
+      name: tinybird-tokens
+# Visitors' browsers send page hits here (Traefik -> traffic-analytics)
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value: {name: tinybird__tracker__endpoint, value: "https://$(SITE_HOST)/.ghost/analytics/api/v1/page_hit"}
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value: {name: tinybird__tracker__datasource, value: analytics_events}
+# Ghost -> Tinybird, in the cluster
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value: {name: tinybird__stats__endpoint, value: "http://tinybird-local:7181"}
+# Your browser in Ghost Admin -> Tinybird (Traefik, read-only pipe queries only)
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value: {name: tinybird__stats__endpointBrowser, value: "https://$(SITE_HOST)/.ghost/stats"}

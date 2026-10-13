@@ -1,0 +1,247 @@
+{
+  "kind": "RowsLayoutRow",
+  "spec": {
+    "title": "The site (Ghost)",
+    "collapse": false,
+    "variables": [
+      {
+        "kind": "CustomVariable",
+        "spec": {
+          "name": "sort_ghost",
+          "query": "Newest first : Posted,Doing best first : Score,Visitors : Visitors,Page views : Page views,Sign-ups : Sign-ups,Paid sign-ups : Paid sign-ups,Emailed to : Emailed to,Opens : Opens,Open rate : Open rate,Email clicks : Email clicks,More like this : More like this,Less like this : Less like this",
+          "current": {
+            "text": "Newest first",
+            "value": "Posted"
+          },
+          "options": [
+            {
+              "selected": true,
+              "text": "Newest first",
+              "value": "Posted"
+            },
+            {
+              "selected": false,
+              "text": "Doing best first",
+              "value": "Score"
+            },
+            {
+              "selected": false,
+              "text": "Visitors",
+              "value": "Visitors"
+            },
+            {
+              "selected": false,
+              "text": "Page views",
+              "value": "Page views"
+            },
+            {
+              "selected": false,
+              "text": "Sign-ups",
+              "value": "Sign-ups"
+            },
+            {
+              "selected": false,
+              "text": "Paid sign-ups",
+              "value": "Paid sign-ups"
+            },
+            {
+              "selected": false,
+              "text": "Emailed to",
+              "value": "Emailed to"
+            },
+            {
+              "selected": false,
+              "text": "Opens",
+              "value": "Opens"
+            },
+            {
+              "selected": false,
+              "text": "Open rate",
+              "value": "Open rate"
+            },
+            {
+              "selected": false,
+              "text": "Email clicks",
+              "value": "Email clicks"
+            },
+            {
+              "selected": false,
+              "text": "More like this",
+              "value": "More like this"
+            },
+            {
+              "selected": false,
+              "text": "Less like this",
+              "value": "Less like this"
+            }
+          ],
+          "multi": false,
+          "includeAll": false,
+          "label": "Sort by",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "description": "The order of the Ghost posts table below: newest first, or the most of a number first (a header click still sorts it for you)",
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "CustomVariable",
+        "spec": {
+          "name": "show_ghost",
+          "query": "All kept : all,Posted in the time range : range",
+          "current": {
+            "text": "All kept",
+            "value": "all"
+          },
+          "options": [
+            {
+              "selected": true,
+              "text": "All kept",
+              "value": "all"
+            },
+            {
+              "selected": false,
+              "text": "Posted in the time range",
+              "value": "range"
+            }
+          ],
+          "multi": false,
+          "includeAll": false,
+          "label": "Show",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "description": "Every published Ghost post, or only those published in the time range picked at the top",
+          "allowCustomValue": false
+        }
+      }
+    ],
+    "layout": {
+      "kind": "GridLayout",
+      "spec": {
+        "items": [
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 0,
+              "width": 24,
+              "height": 2,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-9011"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-100"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-105"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 12,
+              "y": 2,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-106"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 18,
+              "y": 2,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-101"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 6,
+              "width": 12,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-107"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 12,
+              "y": 6,
+              "width": 12,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-102"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 14,
+              "width": 24,
+              "height": 10,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-103"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "conditionalRendering": {
+      "kind": "ConditionalRenderingGroup",
+      "spec": {
+        "visibility": "show",
+        "condition": "and",
+        "items": [
+          {
+            "kind": "ConditionalRenderingVariable",
+            "spec": {
+              "variable": "has_ghost",
+              "operator": "equals",
+              "value": "yes"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

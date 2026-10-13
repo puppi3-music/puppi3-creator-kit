@@ -1,0 +1,79 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 706,
+    "title": "Social posts",
+    "description": "Posts published through Postiz in the time range, on every network (the violet markers on the chart below).",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "grafana-postgresql-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "postiz-pg"
+                },
+                "spec": {
+                  "editorMode": "code",
+                  "format": "table",
+                  "rawQuery": true,
+                  "rawSql": "SELECT count(*) AS posts FROM \"Post\" p WHERE p.\"deletedAt\" IS NULL AND p.\"parentPostId\" IS NULL AND p.state = 'PUBLISHED' AND $__timeFilter(p.\"publishDate\")"
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "stat",
+      "version": "",
+      "spec": {
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "#B28CFF"
+            },
+            "noValue": "0"
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

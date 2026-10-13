@@ -1,0 +1,535 @@
+{
+  "kind": "RowsLayoutRow",
+  "spec": {
+    "title": "When to post",
+    "collapse": false,
+    "layout": {
+      "kind": "GridLayout",
+      "spec": {
+        "items": [
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 0,
+              "width": 24,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-90"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 8,
+              "width": 24,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-91"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 16,
+              "width": 24,
+              "height": 9,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-92"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "variables": [
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "cmp_bluesky",
+          "label": "Bluesky",
+          "description": "What this section compares Bluesky posts on. Lists the numbers at least 3 of its posts have, the usual one first; empty until Bluesky has them.",
+          "hide": "dontHide",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "cmp_bluesky",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "cmp_bluesky",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/timing.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "$append([], options.bluesky)",
+                "columns": [
+                  {
+                    "selector": "label",
+                    "text": "__text",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "key",
+                    "text": "__value",
+                    "type": "string"
+                  }
+                ],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "cmp_ghost",
+          "label": "Ghost",
+          "description": "What this section compares Ghost posts on (visitors, or sign-ups, newsletter opens...). Lists the numbers at least 3 of its posts have, the usual one first; empty until Ghost has them.",
+          "hide": "dontHide",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "cmp_ghost",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "cmp_ghost",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/timing.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "$append([], options.ghost)",
+                "columns": [
+                  {
+                    "selector": "label",
+                    "text": "__text",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "key",
+                    "text": "__value",
+                    "type": "string"
+                  }
+                ],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "cmp_instagram",
+          "label": "Instagram",
+          "description": "What this section compares Instagram posts on. Lists the numbers at least 3 of its posts have, the usual one first; empty until Instagram has them.",
+          "hide": "dontHide",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "cmp_instagram",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "cmp_instagram",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/timing.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "$append([], options.instagram)",
+                "columns": [
+                  {
+                    "selector": "label",
+                    "text": "__text",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "key",
+                    "text": "__value",
+                    "type": "string"
+                  }
+                ],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "cmp_mixcloud",
+          "label": "Mixcloud",
+          "description": "What this section compares Mixcloud posts on. Lists the numbers at least 3 of its posts have, the usual one first; empty until Mixcloud has them.",
+          "hide": "dontHide",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "cmp_mixcloud",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "cmp_mixcloud",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/timing.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "$append([], options.mixcloud)",
+                "columns": [
+                  {
+                    "selector": "label",
+                    "text": "__text",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "key",
+                    "text": "__value",
+                    "type": "string"
+                  }
+                ],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "cmp_soundcloud",
+          "label": "SoundCloud",
+          "description": "What this section compares SoundCloud posts on. Lists the numbers at least 3 of its posts have, the usual one first; empty until SoundCloud has them.",
+          "hide": "dontHide",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "cmp_soundcloud",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "cmp_soundcloud",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/timing.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "$append([], options.soundcloud)",
+                "columns": [
+                  {
+                    "selector": "label",
+                    "text": "__text",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "key",
+                    "text": "__value",
+                    "type": "string"
+                  }
+                ],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "cmp_threads",
+          "label": "Threads",
+          "description": "What this section compares Threads posts on. Lists the numbers at least 3 of its posts have, the usual one first; empty until Threads has them.",
+          "hide": "dontHide",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "cmp_threads",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "cmp_threads",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/timing.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "$append([], options.threads)",
+                "columns": [
+                  {
+                    "selector": "label",
+                    "text": "__text",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "key",
+                    "text": "__value",
+                    "type": "string"
+                  }
+                ],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "cmp_tiktok",
+          "label": "TikTok",
+          "description": "What this section compares TikTok posts on. Lists the numbers at least 3 of its posts have, the usual one first; empty until TikTok has them.",
+          "hide": "dontHide",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "cmp_tiktok",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "cmp_tiktok",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/timing.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "$append([], options.tiktok)",
+                "columns": [
+                  {
+                    "selector": "label",
+                    "text": "__text",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "key",
+                    "text": "__value",
+                    "type": "string"
+                  }
+                ],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "cmp_youtube",
+          "label": "YouTube",
+          "description": "What this section compares YouTube posts on. Lists the numbers at least 3 of its posts have, the usual one first; empty until YouTube has them.",
+          "hide": "dontHide",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": false,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "cmp_youtube",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "cmp_youtube",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/timing.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "$append([], options.youtube)",
+                "columns": [
+                  {
+                    "selector": "label",
+                    "text": "__text",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "key",
+                    "text": "__value",
+                    "type": "string"
+                  }
+                ],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+# The eks overlay's values on k3d: the stand-ins' (components/k3d-standins/). k8s/up.sh fills in {namespace}. Not a .env:
+# .gitignore keeps *.env out of git (secrets), and these are none.
+# CLOUD: the overlay whose replacements these fill in.
+CLOUD=eks
+MYSQL_HOST=standin-mysql.{namespace}.svc.cluster.local
+POSTGRES_HOST=standin-postgres.{namespace}.svc.cluster.local
+S3_BUCKET=ghost-content
+S3_REGION=us-east-1
+# the gateway (S3 itself needs no endpoint)
+S3_ENDPOINT=http://s3:7070
+GHOST_ROLE_ARN=arn:aws:iam::000000000000:role/k3d-standin

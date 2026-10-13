@@ -1,0 +1,10 @@
+# The selfhosted setup on this Mac's k3d cluster (k8s/test/k3d.sh), with the images from k3d's own registry
+# (k8s/build-images.sh --registry k3d), and Ghost's images, media and files in a bucket on an in-cluster S3 gateway,
+# as they would be in a cloud's. k8s/test/test.sh tries it.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../selfhosted
+components:
+  - ../../components/s3-storage
+  - ../../components/s3-gateway

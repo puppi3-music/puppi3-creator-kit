@@ -1,0 +1,105 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 22,
+    "title": "When followers are online",
+    "description": "How many of your followers were on Instagram in each hour of the day, averaged over the last days Instagram gave (it gives up to a week, checked once a day). Hours are in your time (18 = 6-7 pm; SITE_TIMEZONE, @SITE_TIMEZONE@): Instagram gives its hours in Pacific time, which the bridge turns into yours. The hours before the busiest ones are good times to post. Needs 100 followers. Not affected by the dashboard's time range.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "hour",
+                      "text": "Hour",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "followers",
+                      "text": "Followers online",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "$append([], onlineByHour)",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/instagram.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "barchart",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "xField": "Hour",
+          "orientation": "vertical",
+          "showValue": "never",
+          "barWidth": 0.8,
+          "groupWidth": 0.7,
+          "xTickLabelSpacing": 0,
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": false
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "#E1306C"
+            },
+            "custom": {
+              "fillOpacity": 60,
+              "lineWidth": 1
+            },
+            "noValue": "Instagram shares this only from accounts with 100 followers"
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

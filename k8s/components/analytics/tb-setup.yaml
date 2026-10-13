@@ -1,0 +1,101 @@
+# tb-setup as a Job (k8s/up.sh deletes it before each apply, so it runs on every up, as on Compose): Ghost's Tinybird
+# schema files copied out of Ghost's image (the stack's tinybird-sync), deployed to tinybird-local by the stack's own
+# setup.sh (TB_SETUP_EXIT=1: it ends instead of idling), then the tokens it wrote saved as Secret "tinybird-tokens"
+# through the Kubernetes API (server-side apply, so it's made the first time and kept after). It may touch that one
+# Secret only.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: tb-setup
+spec:
+  backoffLimit: 6
+  template:
+    metadata:
+      labels:
+        app: tb-setup
+    spec:
+      serviceAccountName: tb-setup
+      restartPolicy: OnFailure
+      initContainers:
+        - name: tinybird-sync
+          image: ghost:6-alpine
+          command: [sh, -c, 'cp -rf /var/lib/ghost/current/core/server/data/tinybird/. /data/tinybird/']
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 128Mi}
+          volumeMounts:
+            - {name: files, mountPath: /data/tinybird}
+        - name: tb-setup
+          image: creator-kit/tb-setup
+          workingDir: /data/tinybird
+          command: [bash, -c, 'until curl -fs "$TB_HOST/v0/health" >/dev/null; do echo "waiting for tinybird-local"; sleep 3; done; exec setup.sh']
+          env:
+            - {name: TB_HOST, value: http://tinybird-local:7181}
+            - {name: TB_LOCAL_HOST, value: tinybird-local}
+            - {name: TB_SETUP_EXIT, value: "1"}
+          resources:
+            requests: {cpu: 50m, memory: 128Mi}
+            limits: {memory: 512Mi}
+          volumeMounts:
+            - {name: files, mountPath: /data/tinybird}
+            - {name: out, mountPath: /out}
+      containers:
+        - name: save-tokens
+          image: creator-kit/tb-setup
+          command:
+            - bash
+            - -c
+            - |
+              set -euo pipefail
+              . /out/tokens.env
+              sa=/var/run/secrets/kubernetes.io/serviceaccount
+              b() { printf %s "$1" | base64 | tr -d '\n'; }
+              jq -n --arg w "$(b "$tinybird__workspaceId")" --arg a "$(b "$tinybird__adminToken")" \
+                  --arg t "$(b "$TINYBIRD_TRACKER_TOKEN")" \
+                  '{apiVersion: "v1", kind: "Secret", metadata: {name: "tinybird-tokens"}, type: "Opaque",
+                    data: {tinybird__workspaceId: $w, tinybird__adminToken: $a, TINYBIRD_TRACKER_TOKEN: $t}}' |
+              curl -fsS -o /dev/null --cacert "$sa/ca.crt" -H "Authorization: Bearer $(cat "$sa/token")" \
+                  -X PATCH -H 'Content-Type: application/apply-patch+yaml' --data-binary @- \
+                  "https://kubernetes.default.svc/api/v1/namespaces/$(cat "$sa/namespace")/secrets/tinybird-tokens?fieldManager=tb-setup&force=true"
+              echo "saved Secret tinybird-tokens"
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {memory: 64Mi}
+          volumeMounts:
+            - {name: out, mountPath: /out, readOnly: true}
+      volumes:
+        - name: files
+          emptyDir: {}
+        - name: out
+          emptyDir: {medium: Memory}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tb-setup
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: tb-setup
+rules:
+  # making it the first time (create can't be limited to a name)
+  - apiGroups: [""]
+    resources: [secrets]
+    verbs: [create]
+  - apiGroups: [""]
+    resources: [secrets]
+    resourceNames: [tinybird-tokens]
+    verbs: [get, patch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: tb-setup
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: tb-setup
+subjects:
+  - kind: ServiceAccount
+    name: tb-setup

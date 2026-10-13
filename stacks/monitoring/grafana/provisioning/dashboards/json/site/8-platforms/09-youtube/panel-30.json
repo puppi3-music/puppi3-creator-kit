@@ -1,0 +1,129 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 30,
+    "title": "YouTube: subscribers",
+    "description": "Subscribers and videos now; subscribers gained and lost over the last 30 days (YouTube Analytics). YouTube rounds subscriber counts above 1000. Not affected by the dashboard's time range.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "subscribers",
+                      "text": "Subscribers",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "subscribersGained",
+                      "text": "Subscribers gained",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "subscribersLost",
+                      "text": "Subscribers lost",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "videos",
+                      "text": "Videos (all time)",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "totals",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/youtube.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "organize",
+            "spec": {
+              "options": {
+                "excludeByName": {},
+                "indexByName": {
+                  "Subscribers": 0,
+                  "Subscribers gained": 1,
+                  "Subscribers lost": 2,
+                  "Videos (all time)": 3
+                },
+                "renameByName": {}
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "stat",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "center",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "value_and_name",
+          "orientation": "vertical",
+          "wideLayout": false,
+          "text": {
+            "titleSize": 12
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "#FF0000"
+            },
+            "noValue": "\u2013"
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

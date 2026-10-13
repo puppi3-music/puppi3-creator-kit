@@ -1,0 +1,199 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 9,
+    "title": "What it was judged on",
+    "description": "Each number ${label} ranks posts by: this post's, your usual post's (the median of the posts compared), and where this post ranks among them (100 = above all of them, 50 = the middle). Weight = how much it counts, from what ${label} says matters most. Compared: \"same age\" = each post's number at the same days since posted; \"as now\" = rates, which hardly change with age. A number missing here wasn't given for this post or hasn't 5 posts to compare with.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "signal",
+                      "text": "Number",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "mine",
+                      "text": "This post",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "usual",
+                      "text": "Your usual",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "percentile",
+                      "text": "Rank among them",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "weight",
+                      "text": "Weight",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "posts",
+                      "text": "Posts compared",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "sameAge",
+                      "text": "Compared",
+                      "type": "string"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "perfSignals",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/post.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "network",
+                        "value": "${network}"
+                      },
+                      {
+                        "key": "id",
+                        "value": "${post}"
+                      },
+                      {
+                        "key": "time",
+                        "value": "${time}"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "organize",
+            "spec": {
+              "options": {
+                "indexByName": {
+                  "Number": 0,
+                  "This post": 1,
+                  "Your usual": 2,
+                  "Rank among them": 3,
+                  "Weight": 4,
+                  "Posts compared": 5,
+                  "Compared": 6
+                },
+                "excludeByName": {},
+                "renameByName": {}
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "table",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "cellHeight": "sm",
+          "showHeader": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "decimals": 0,
+            "noValue": "\u2013",
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "auto"
+              }
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Rank among them"
+              },
+              "properties": [
+                {
+                  "id": "min",
+                  "value": 0
+                },
+                {
+                  "id": "max",
+                  "value": 100
+                },
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-background",
+                    "mode": "basic"
+                  }
+                },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 20,
+                        "color": "light-orange"
+                      },
+                      {
+                        "value": 40,
+                        "color": "transparent"
+                      },
+                      {
+                        "value": 60,
+                        "color": "light-green"
+                      },
+                      {
+                        "value": 80,
+                        "color": "green"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "thresholds"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+# eks's finish, after the stand-ins (so their volumes get gp3 too, as everything else); Ghost reaches the S3 gateway
+# at its endpoint (S3 needs none)
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+components:
+  - ../../../components/k3d-standins
+  - ../../eks/finish
+patches:
+  - path: ../../../components/s3-storage/endpoint.yaml
+    target: {kind: Deployment, name: ghost}

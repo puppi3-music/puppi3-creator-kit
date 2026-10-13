@@ -1,0 +1,134 @@
+{
+  "kind": "RowsLayoutRow",
+  "spec": {
+    "title": "One source up close: ${source:text}",
+    "collapse": false,
+    "variables": [
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "source",
+          "current": {
+            "text": "Instagram",
+            "value": "Instagram"
+          },
+          "label": "Source",
+          "hide": "dontHide",
+          "refresh": "onTimeRangeChanged",
+          "skipUrlSync": false,
+          "description": "The source this section shows",
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "ghost-analytics"
+            },
+            "spec": {
+              "infinityQuery": {
+                "columns": [
+                  {
+                    "selector": "source",
+                    "text": "source",
+                    "type": "string"
+                  }
+                ],
+                "computed_columns": [
+                  {
+                    "selector": "source",
+                    "text": "__value",
+                    "type": "string"
+                  },
+                  {
+                    "selector": "source == 'Facebook' ? 'Facebook (mostly Instagram links)' : (source == '@SITE_HOST@' ? 'Your own site' : (source == 'ig' ? 'Instagram (tag: ig, set by Instagram)' : (source == 'instagram' ? 'Instagram (tag: instagram)' : (source == 'bluesky' ? 'Bluesky (tag: bluesky)' : (source == 'threads' ? 'Threads (tag: threads)' : (source == 'tiktok' ? 'TikTok (tag: tiktok)' : (source == 'discord' ? 'Discord (tag: discord)' : (source == 'youtube' ? 'YouTube (tag: youtube)' : (source == 'facebook' ? 'Facebook (tag: facebook)' : (source == 'x' ? 'X (tag: x)' : source))))))))))",
+                    "text": "__text",
+                    "type": "string"
+                  }
+                ],
+                "datasource": {
+                  "type": "yesoreyeram-infinity-datasource",
+                  "uid": "ghost-analytics"
+                },
+                "filters": [],
+                "format": "table",
+                "parser": "backend",
+                "refId": "variable",
+                "root_selector": "data",
+                "source": "url",
+                "type": "json",
+                "url": "http://tinybird-local:7181/v0/pipes/api_top_sources.json",
+                "url_options": {
+                  "data": "",
+                  "method": "GET",
+                  "params": [
+                    {
+                      "key": "site_uuid",
+                      "value": "@GHOST_SITE_UUID@"
+                    },
+                    {
+                      "key": "timezone",
+                      "value": "@SITE_TIMEZONE@"
+                    },
+                    {
+                      "key": "date_from",
+                      "value": "${__from:date:YYYY-MM-DD}"
+                    },
+                    {
+                      "key": "date_to",
+                      "value": "${__to:date:YYYY-MM-DD}"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    }
+                  ]
+                }
+              },
+              "query": "",
+              "queryType": "infinity"
+            }
+          },
+          "regex": "/^(?!$).+/",
+          "sort": "disabled",
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": true
+        }
+      }
+    ],
+    "layout": {
+      "kind": "GridLayout",
+      "spec": {
+        "items": [
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 0,
+              "width": 14,
+              "height": 9,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-721"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 14,
+              "y": 0,
+              "width": 10,
+              "height": 9,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-722"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "kind": "RowsLayoutRow",
+  "spec": {
+    "title": "What they read, and what makes them join",
+    "collapse": false,
+    "variables": [
+      {
+        "kind": "CustomVariable",
+        "spec": {
+          "name": "hide_home",
+          "query": "Hide : ^/$,Show : (?!)",
+          "current": {
+            "text": "Hide",
+            "value": "^/$"
+          },
+          "options": [
+            {
+              "selected": true,
+              "text": "Hide",
+              "value": "^/$"
+            },
+            {
+              "selected": false,
+              "text": "Show",
+              "value": "(?!)"
+            }
+          ],
+          "multi": false,
+          "includeAll": false,
+          "label": "Home page (/)",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "description": "Hide the home page row in this section's Content table",
+          "allowCustomValue": true
+        }
+      }
+    ],
+    "layout": {
+      "kind": "GridLayout",
+      "spec": {
+        "items": [
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 0,
+              "width": 24,
+              "height": 12,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-713"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+displayName: Real visitor IP
+type: middleware
+import: creatorkit/realip
+summary: Sets X-Forwarded-For to the visitor's address, from CF-Connecting-IP when Cloudflare connected, else the connecting address.
+testData:
+  trustedIPs:
+    - 173.245.48.0/20

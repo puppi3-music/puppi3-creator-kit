@@ -1,0 +1,35 @@
+# Google GKE (Standard, not Autopilot: Temporal's Elasticsearch and the pods' sizes, plan step 11): Ghost's MySQL and
+# Postiz's and Temporal's Postgres on Cloud SQL, reached through the Cloud SQL Auth Proxy as a sidecar in each pod
+# that uses them (its Google service account through Workload Identity: no database address opened), Ghost's images,
+# media and files in Cloud Storage through its S3 API (an HMAC key: the same s3-storage adapter as everywhere),
+# standard-rwo volumes, Traefik and the stream's source port on a passthrough Network Load Balancer, the kit's images
+# from Artifact Registry (k8s/build-images.sh --registry <region>-docker.pkg.dev/<project>/creator-kit).
+# - The site's values (the Cloud SQL instances, the bucket, the proxies' service account) are <site>/cloud-gke.env
+#   (cloud.env.example says what); k8s/up.sh makes ConfigMap "cloud" of them (the proxies read it; replacements.yaml
+#   fills in the service account) and ConfigMap "s3". The HMAC key is the site's secrets/s3.env (AWS_ACCESS_KEY_ID,
+#   AWS_SECRET_ACCESS_KEY), Cloud SQL Postgres's master login its secrets/cloud.env (POSTGRES_MASTER_USER,
+#   POSTGRES_MASTER_PASSWORD).
+# - finish/: what reaches the modules' resources too (k8s/up.sh adds it after them): the proxies, standard-rwo, the
+#   load balancer, Postiz's Postgres on Cloud SQL.
+# - k3d-gke is this overlay as it is, plus the k3d stand-ins and a TCP forwarder in place of the proxy
+#   (k8s/overlays/k3d-gke/).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+  - cloud-sql.yaml
+components:
+  - ../../components/s3-storage
+patches:
+  # Cloud Storage's S3 API: its endpoint, and the AWS SDK's checksums only where S3 requires them (the SDK in Ghost
+  # sends them by default, and Cloud Storage refuses some)
+  - path: ../../components/s3-storage/endpoint.yaml
+    target: {kind: Deployment, name: ghost}
+  - target: {kind: Deployment, name: ghost}
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value: {name: AWS_REQUEST_CHECKSUM_CALCULATION, value: WHEN_REQUIRED}
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value: {name: AWS_RESPONSE_CHECKSUM_VALIDATION, value: WHEN_REQUIRED}
