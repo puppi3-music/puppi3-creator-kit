@@ -43,10 +43,58 @@ a.guide:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 a.guide h2{font-family:var(--display);font-weight:500;font-size:22px;line-height:1.2;margin:0}
 a.guide p{margin:0;color:var(--muted);font-size:15.5px}
 footer{font-size:14px;color:var(--muted)}
-@media (prefers-reduced-motion:reduce){a.guide{transition:none}a.guide:hover{transform:none}}
+/* Puppy art: the kit's puppy on a sitting body, drawn inline (shared parts in the hidden #kp-* defs) so the page stays
+   one file; each card adds that guide's outfit. Hover: the tail wags and the head tilts. */
+.art{margin:-6px -6px 4px;height:160px;border-radius:10px;overflow:hidden}
+.art svg{display:block;width:100%;height:100%}
+.art .bg{fill:var(--accent-soft)}
+.art .s{stroke:var(--accent)}
+.tail{transform-box:fill-box;transform-origin:0% 100%}
+.head{transform-box:view-box;transform-origin:120px 120px;transition:transform .3s}
+a.guide:hover .tail{animation:wag .35s ease-in-out infinite alternate}
+a.guide:hover .head{transform:rotate(-7deg)}
+.float{animation:float 3.2s ease-in infinite;opacity:0}
+.float.d1{animation-delay:1.05s}.float.d2{animation-delay:2.1s}
+.spin{transform-box:fill-box;transform-origin:50% 50%;animation:spin 9s linear infinite}
+.spin.back{animation-direction:reverse;animation-duration:6s}
+@keyframes wag{from{transform:rotate(-12deg)}to{transform:rotate(14deg)}}
+@keyframes float{0%{transform:translateY(10px);opacity:0}20%{opacity:1}100%{transform:translateY(-34px);opacity:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){a.guide{transition:none}a.guide:hover{transform:none}
+  a.guide:hover .tail,.spin{animation:none}.head{transition:none}a.guide:hover .head{transform:none}.float{animation:none;opacity:1}}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <!-- The kit's puppy (images/kit-puppy.svg) on a sitting body; the ears and outlines take the accent colour -->
+  <g id="kp-body">
+    <path d="M88 116 C72 136 70 176 92 178 H148 C170 176 168 136 152 116 Z" fill="#E0EDF8" stroke-width="3" style="stroke:var(--accent)"/>
+    <ellipse cx="120" cy="156" rx="21" ry="18" fill="#fff"/>
+  </g>
+  <g id="kp-feet">
+    <ellipse cx="100" cy="178" rx="15" ry="8" fill="#E0EDF8" stroke-width="3" style="stroke:var(--accent)"/><ellipse cx="140" cy="178" rx="15" ry="8" fill="#E0EDF8" stroke-width="3" style="stroke:var(--accent)"/>
+    <path d="M96 175v5M104 175v5M136 175v5M144 175v5" stroke-width="2.2" stroke-linecap="round" style="stroke:var(--accent)"/>
+  </g>
+  <g id="kp-head">
+    <g transform="translate(120 78) scale(2.5) translate(-32 -36)">
+      <ellipse cx="32" cy="36" rx="18" ry="17" fill="#E0EDF8" stroke-width="1.3" style="stroke:var(--accent)"/>
+      <ellipse cx="13" cy="33" rx="6.5" ry="13" transform="rotate(22 13 33)" style="fill:var(--accent)"/><ellipse cx="51" cy="33" rx="6.5" ry="13" transform="rotate(-22 51 33)" style="fill:var(--accent)"/>
+      <circle cx="21" cy="40" r="2.6" fill="#FF7E8C" opacity=".45"/><circle cx="43" cy="40" r="2.6" fill="#FF7E8C" opacity=".45"/>
+      <circle cx="25" cy="34" r="2.8" fill="#14202B"/><circle cx="39" cy="34" r="2.8" fill="#14202B"/><circle cx="26" cy="33" r=".9" fill="#fff"/><circle cx="40" cy="33" r=".9" fill="#fff"/>
+      <ellipse cx="32" cy="44" rx="8" ry="6" fill="#fff"/><ellipse cx="32" cy="41.2" rx="3.6" ry="2.6" fill="#14202B"/>
+      <path d="M30 47.5q2 5 4 0z" fill="#F07C98"/><path d="M32 43.6v2.6M27.6 46q4.4 2.8 4.4 0q0 2.8 4.4 0" fill="none" stroke="#14202B" stroke-width="1.6" stroke-linecap="round"/>
+    </g>
+  </g>
+  <!-- a paw raised to hold something at (166 128) -->
+  <g id="kp-arm">
+    <path d="M150 128 Q160 134 166 128" fill="none" stroke-width="16" stroke-linecap="round" style="stroke:var(--accent)"/>
+    <path d="M150 128 Q160 134 166 128" fill="none" stroke="#E0EDF8" stroke-width="10" stroke-linecap="round"/>
+  </g>
+  <g id="kp-paw"><ellipse cx="166" cy="128" rx="10" ry="9" fill="#E0EDF8" stroke-width="3" style="stroke:var(--accent)"/><path d="M163 131v4M169 131v4" stroke-width="2" stroke-linecap="round" style="stroke:var(--accent)"/></g>
+  <g id="kp-gear"><circle r="12" fill="none" stroke-width="7" stroke-dasharray="3.6 2.68" stroke="#7A8A99"/><circle r="10" fill="#7A8A99"/><circle r="4" fill="#E0EDF8"/></g>
+  <path id="kp-heart" d="M0 3 C0 -2 -7 -3 -7 2.5 C-7 7 -1 9 0 12 C1 9 7 7 7 2.5 C7 -3 0 -2 0 3 Z"/>
+  <path id="kp-star" d="M0 -6 l1.6 4.4 4.4 1.6 -4.4 1.6 -1.6 4.4 -1.6 -4.4 -4.4 -1.6 4.4 -1.6 z"/>
+</defs></svg>
 <div class="wrap">
 <header>
   <div class="mark"><svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
@@ -62,31 +110,101 @@ footer{font-size:14px;color:var(--muted)}
 </header>
 <main class="guides">
   <a class="guide" href="setup-guide.html">
+    <div class="art"><svg viewBox="22 14 200 176" aria-hidden="true" focusable="false">
+      <circle class="bg" cx="120" cy="104" r="86"/>
+      <g transform="translate(46 96)"><use class="float" href="#kp-star" fill="#FFC83D"/></g><g transform="translate(58 74)"><use class="float d1" href="#kp-star" fill="#2BB5B0"/></g><g transform="translate(38 70)"><use class="float d2" href="#kp-star" fill="#5AB0F0"/></g>
+      <path class="tail s" d="M155 162 q26 -4 24 -32" fill="none" stroke-width="10" stroke-linecap="round"/><use href="#kp-body"/>
+      <path d="M94 117 q26 12 52 0" fill="none" stroke="#FF8A3D" stroke-width="5" stroke-linecap="round"/>
+      <use href="#kp-feet"/><g class="head"><use href="#kp-head"/>
+        <path d="M80 50 C82 16 158 16 160 50 Z" fill="#FFC83D"/><rect x="72" y="46" width="96" height="9" rx="4.5" fill="#F0A800"/><rect x="114" y="22" width="12" height="26" rx="4" fill="#F0A800"/>
+      </g>
+      <use href="#kp-arm"/>
+      <g transform="rotate(-35 172 116)"><rect x="168" y="96" width="8" height="38" rx="3" fill="#7A8A99"/><path d="M172 84 a11 11 0 1 0 0.01 0 z M168 84 v10 h8 v-10 z" fill="#7A8A99" fill-rule="evenodd"/></g>
+      <use href="#kp-paw"/>
+    </svg></div>
     <span class="who">For installers</span>
     <h2>Setup Guide</h2>
     <p>From nothing to a running site: what you need, the site's folder, Docker Compose or Kubernetes (your own cluster, Amazon EKS, Google GKE), and the steps to finish by hand.</p>
   </a>
   <a class="guide" href="operations-guide.html">
+    <div class="art"><svg viewBox="22 14 200 176" aria-hidden="true" focusable="false">
+      <circle class="bg" cx="120" cy="104" r="86"/>
+      <g transform="translate(44 112)"><use class="spin" href="#kp-gear"/></g><g transform="translate(62 140) scale(.65)"><use class="spin back" href="#kp-gear"/></g>
+      <path class="tail s" d="M155 162 q26 -4 24 -32" fill="none" stroke-width="10" stroke-linecap="round"/><use href="#kp-body"/>
+      <path d="M94 117 q26 13 52 0 l-26 25 z" fill="#2BB5B0"/>
+      <use href="#kp-feet"/><g class="head"><use href="#kp-head"/></g>
+      <use href="#kp-arm"/>
+      <path d="M158 92 h40 a4 4 0 0 1 4 4 v22 h-48 v-22 a4 4 0 0 1 4 -4 z" fill="#14202B"/><path d="M162 108 h8 l4 -8 l5 14 l4 -6 h12" fill="none" stroke="#3DDC97" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+      <rect x="150" y="118" width="56" height="7" rx="3" fill="#52606E"/>
+      <use href="#kp-paw"/>
+    </svg></div>
     <span class="who">For whoever runs a site</span>
     <h2>Operations Guide</h2>
     <p>Keeping it running: updating the kit, backups and putting one back, moving between machines, Docker Compose, Kubernetes and the clouds, and troubleshooting.</p>
   </a>
   <a class="guide" href="posting-guide.html">
+    <div class="art"><svg viewBox="22 14 200 176" aria-hidden="true" focusable="false">
+      <circle class="bg" cx="120" cy="104" r="86"/>
+      <path class="tail s" d="M155 162 q26 -4 24 -32" fill="none" stroke-width="10" stroke-linecap="round"/><use href="#kp-body"/>
+      <path d="M94 117 q26 13 52 0 l-26 25 z" fill="#FF3D8B"/>
+      <use href="#kp-feet"/><g class="head"><use href="#kp-head"/></g>
+      <use href="#kp-arm"/>
+      <rect x="160" y="84" width="32" height="52" rx="7" fill="#14202B"/><rect x="164" y="91" width="24" height="38" rx="3" fill="#FFD6E4"/>
+      <use href="#kp-heart" transform="translate(176 104)" fill="#FF3D8B"/>
+      <use href="#kp-paw"/>
+      <g transform="translate(198 72)"><use class="float" href="#kp-heart" fill="#FF3D8B"/></g><g transform="translate(214 58)"><use class="float d1" href="#kp-heart" fill="#FF7EB0"/></g><g transform="translate(188 52)"><use class="float d2" href="#kp-heart" fill="#E0457B"/></g>
+    </svg></div>
     <span class="who">For whoever posts</span>
     <h2>Posting Guide</h2>
     <p>Writing a post so it shares well: what goes to Bluesky, Threads, Instagram and TikTok, the tags, the phone notifications, and finishing Instagram and TikTok posts.</p>
   </a>
   <a class="guide" href="analytics-guide.html">
+    <div class="art"><svg viewBox="22 14 200 176" aria-hidden="true" focusable="false">
+      <circle class="bg" cx="120" cy="104" r="86"/>
+      <rect x="30" y="96" width="44" height="40" rx="5" fill="#fff" stroke="#C9D3DD" stroke-width="2"/>
+      <rect x="37" y="120" width="7" height="10" rx="1.5" fill="#5AB0F0"/><rect x="48" y="112" width="7" height="18" rx="1.5" fill="#2BB5B0"/><rect x="59" y="104" width="7" height="26" rx="1.5" fill="#FF3D8B"/>
+      <g transform="translate(52 90)"><path class="float" d="M0 -7 l6 7 h-4 v6 h-4 v-6 h-4 z" fill="#3DDC97"/></g><g transform="translate(40 84)"><path class="float d1" d="M0 -7 l6 7 h-4 v6 h-4 v-6 h-4 z" fill="#2BB5B0"/></g><g transform="translate(64 80)"><path class="float d2" d="M0 -7 l6 7 h-4 v6 h-4 v-6 h-4 z" fill="#5AB0F0"/></g>
+      <path class="tail s" d="M155 162 q26 -4 24 -32" fill="none" stroke-width="10" stroke-linecap="round"/><use href="#kp-body"/>
+      <path d="M108 118 l12 9 l12 -9 l-4 14 h-16 z" fill="#FF3D8B"/>
+      <use href="#kp-feet"/><g class="head"><use href="#kp-head"/>
+        <g fill="none" stroke="#14202B" stroke-width="2.6"><circle cx="102" cy="78" r="11"/><circle cx="138" cy="78" r="11"/><path d="M113 77 q7 -5 14 0"/></g>
+      </g>
+    </svg></div>
     <span class="who">For the site's owner</span>
     <h2>Analytics Guide</h2>
     <p>Reading the dashboards: who visits and from where, what turns visitors into members, how each post did, the newsletter, live shows and when to post.</p>
   </a>
   <a class="guide" href="theme-guide.html">
+    <div class="art"><svg viewBox="22 14 200 176" aria-hidden="true" focusable="false">
+      <circle class="bg" cx="120" cy="104" r="86"/>
+      <g transform="translate(46 96)"><use class="float" href="#kp-star" fill="#FF3D8B"/></g><g transform="translate(58 74)"><use class="float d1" href="#kp-star" fill="#FFC83D"/></g><g transform="translate(38 70)"><use class="float d2" href="#kp-star" fill="#2BB5B0"/></g>
+      <path class="tail s" d="M155 162 q26 -4 24 -32" fill="none" stroke-width="10" stroke-linecap="round"/><use href="#kp-body"/>
+      <path d="M94 117 q26 13 52 0 l-26 25 z" fill="#FFC83D"/>
+      <use href="#kp-feet"/><g class="head"><use href="#kp-head"/>
+        <ellipse cx="114" cy="40" rx="38" ry="13" transform="rotate(-10 114 40)" fill="#7B4FD6"/><circle cx="112" cy="27" r="4" fill="#7B4FD6"/>
+      </g>
+      <use href="#kp-arm"/>
+      <g transform="rotate(30 170 120)"><rect x="167" y="84" width="6" height="40" rx="3" fill="#B97B48"/><rect x="166" y="80" width="8" height="8" fill="#C9D3DD"/><path d="M166 80 q4 -16 8 0 z" fill="#FF3D8B"/></g>
+      <use href="#kp-paw"/>
+      <g transform="translate(196 132)"><ellipse rx="20" ry="14" fill="#F3E2C7"/><circle cx="-9" cy="-4" r="3.6" fill="#FF3D8B"/><circle cx="0" cy="-7" r="3.6" fill="#2BB5B0"/><circle cx="9" cy="-3" r="3.6" fill="#FFC83D"/><circle cx="6" cy="6" r="3.6" fill="#5AB0F0"/></g>
+    </svg></div>
     <span class="who">For the site's owner</span>
     <h2>Theme Guide</h2>
     <p>What visitors see and what you change in Ghost Admin: the theme's settings, the LIVE NOW bar, the Social preview button, music links, the short links, and using another theme.</p>
   </a>
   <a class="guide" href="settings-reference.html">
+    <div class="art"><svg viewBox="22 14 200 176" aria-hidden="true" focusable="false">
+      <circle class="bg" cx="120" cy="104" r="86"/>
+      <g transform="translate(46 116) scale(.8)"><use class="spin" href="#kp-gear"/></g>
+      <path class="tail s" d="M155 162 q26 -4 24 -32" fill="none" stroke-width="10" stroke-linecap="round"/><use href="#kp-body"/>
+      <path d="M94 117 q26 13 52 0 l-26 25 z" fill="#5AB0F0"/>
+      <use href="#kp-feet"/><g class="head"><use href="#kp-head"/></g>
+      <use href="#kp-arm"/>
+      <rect x="158" y="82" width="40" height="54" rx="5" fill="#B97B48"/><rect x="162" y="88" width="32" height="44" rx="2" fill="#fff"/><rect x="170" y="78" width="16" height="9" rx="3" fill="#7A8A99"/>
+      <g fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M166 98 l3 3 l5 -6 M166 110 l3 3 l5 -6 M166 122 l3 3 l5 -6" stroke="#2BB5B0"/><path d="M178 99 h12 M178 111 h12 M178 123 h9" stroke="#9EAEBC"/></g>
+      <use href="#kp-paw"/>
+      <g transform="translate(206 76)"><path class="float" d="M-5 0 l3.5 4 l7 -8" fill="none" stroke="#2BB5B0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g><g transform="translate(216 60)"><path class="float d1" d="M-5 0 l3.5 4 l7 -8" fill="none" stroke="#3DDC97" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g>
+    </svg></div>
     <span class="who">For installers</span>
     <h2>Settings Reference</h2>
     <p>Every setting a site has: site.env, each part's secrets, the Kubernetes and cloud files. What each one does, its default, and what setup fills in for you.</p>
