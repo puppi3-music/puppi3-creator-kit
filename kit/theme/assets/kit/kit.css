@@ -63,3 +63,4 @@
 /* The author credit in the footer (partials/components/footer.hbs): its own line under "Powered by Ghost", which may
    wrap on a phone (Source keeps that line on one) */
 .kit-credit { display: block; white-space: normal; }
+.kit-source { color: inherit; text-decoration: underline; }
