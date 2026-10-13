@@ -12,7 +12,7 @@ import { STATE_FILE, log, SITE_HOSTS, LIVE_HOSTS, METRIC_PREFIX } from '../confi
 export function liveShows({ env, log, file, files, enabled }) {
   // ---------- live shows ----------
   // TinyIce's status every 30 s (LIVE_STATUS_URL, the JSON the LIVE NOW bar reads). A show runs while the mount
-  // the DJ software sends to (LIVE_MOUNT) is listed; a gap under LIVE_GAP_MINUTES (it reconnecting) doesn't end it.
+  // the streaming software sends to (LIVE_MOUNT) is listed; a gap under LIVE_GAP_MINUTES (it reconnecting) doesn't end it.
   // Listeners = all mounts' listeners together (the mp3 transcode is where most listen). Shows shorter than
   // LIVE_MIN_MINUTES (a test connection) aren't kept. The show in progress is saved too, so a restart carries on.
   // LIVE_RELAYS (the kit on Kubernetes: a name whose addresses are the relays, k8s/components/live/): listeners on
@@ -157,6 +157,8 @@ const SERVICES = [
   [/(^|\.)spotify\.com$/, 'Spotify'], [/^music\.apple\.com$/, 'Apple Music'], [/(^|\.)beatport\.com$/, 'Beatport'],
   [/(^|\.)instagram\.com$/, 'Instagram'], [/(^|\.)tiktok\.com$/, 'TikTok'], [/^bsky\.app$/, 'Bluesky'],
   [/(^|\.)threads\.(net|com)$/, 'Threads'], [/(^|\.)discord\.(gg|com)$/, 'Discord'], [/(^|\.)twitch\.tv$/, 'Twitch'],
+  [/(^|\.)vimeo\.com$/, 'Vimeo'], [/^podcasts\.apple\.com$/, 'Apple Podcasts'], [/(^|\.)patreon\.com$/, 'Patreon'],
+  [/(^|\.)ko-fi\.com$/, 'Ko-fi'], [/(^|\.)substack\.com$/, 'Substack'], [/(^|\.)etsy\.com$/, 'Etsy'], [/(^|\.)behance\.net$/, 'Behance'],
   [/^ra\.co$/, 'Resident Advisor'], [{ test: (host) => LIVE_HOSTS.includes(host) }, 'Live stream'], // LIVE_HOSTS (config.mjs)
 ];
 const serviceOf = (host) => SERVICES.find(([re]) => re.test(host))?.[1] || 'Other';

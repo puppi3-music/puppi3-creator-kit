@@ -38,7 +38,7 @@ The site is always there. Each other part is a module you switch on in your site
 |---|---|---|
 | (always on) | Ghost 6 with MySQL, behind Traefik (https, and optionally only reachable through Cloudflare); the kit's theme (Ghost's Source with the kit's extras) | A domain and its DNS; an email address for Let's Encrypt |
 | `analytics` | Ghost's own web analytics (Tinybird, run locally), with each visitor's country | Nothing |
-| `live` | A live stream server (TinyIce): your DJ software streams to it, and the site shows a LIVE NOW bar that plays it | DJ software that streams Ogg to Icecast (Traktor, Mixxx, butt...) |
+| `live` | A live audio stream (TinyIce) for a radio show, a live podcast or a DJ set: your streaming software sends to it, and the site shows a LIVE NOW bar that plays it | Software that streams Ogg to Icecast (butt, Mixxx, Traktor, ffmpeg...) |
 | `social` | Postiz, plus a bridge that shares each Ghost post to your networks, draws social previews of drafts, counts clicks and collects every network's numbers | A developer app for each network you post to (their keys go in `secrets/postiz.env`); optional keys for SoundCloud, Cloudflare and Search Console numbers |
 | `monitoring` | Grafana with the dashboards (traffic, growth, members, content, social, each platform, each post) and alerts to your phone; Prometheus, which collects the numbers they show | Nothing (a DNS name for Grafana if you want it outside home) |
 
@@ -91,7 +91,7 @@ reach it from your browser. The Setup guide's [Trying it at home first](kit/docs
    - Your Postiz account and networks.
    - The Ghost webhook to the bridge.
    - The ntfy topic.
-   - Your DJ software's stream settings.
+   - Your streaming software's stream settings.
 
    For the Ghost numbers on the Platforms dashboard, copy `tinybird__adminToken` from
    `data/puppi3/tinybird/tokens.env` to `TINYBIRD_TOKEN` in `secrets/postiz.env`. Then run `up -d` again.
@@ -105,7 +105,7 @@ Every setting, what it does and its default: [the Settings reference](kit/docs/s
 Updating the kit, backups, moving the site between machines, Compose, Kubernetes and the clouds, and
 troubleshooting: [the Operations guide](kit/docs/operations-guide.html). For whoever posts: [the Posting
 guide](kit/docs/posting-guide.html); reading the dashboards: [the Analytics guide](kit/docs/analytics-guide.html); the theme's
-settings, the LIVE NOW bar, music links, short links and using another theme: [the Theme guide](kit/docs/theme-guide.html).
+settings, the LIVE NOW bar, links to your other platforms, short links and using another theme: [the Theme guide](kit/docs/theme-guide.html).
 
 To switch a module on or off later, change `MODULES` in `site.env` and run `up -d` again. With `live` off there's no
 stream server and no LIVE NOW bar (the theme shows it only once its Live stream URL is set). Its passwords are made

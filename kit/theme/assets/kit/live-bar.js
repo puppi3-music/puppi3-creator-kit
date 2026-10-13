@@ -7,7 +7,7 @@
     var sendClick = site.sendClick;
 
     /* Live now bar (partials/kit/live-bar.hbs): shown while the site is streaming. Every 15 s it reads the streaming server's
-       status and looks for the mount the DJ software sends to; the mp3 mount listeners play is always listed, so it
+       status and looks for the mount the streaming software sends to; the mp3 mount listeners play is always listed, so it
        can't tell. That mount is any source other than the one the bar plays and TinyIce's own (named /_...), so
        renaming the mounts in TinyIce needs nothing here (data-mount names one, if a theme wants to).
        The track playing, when the stream sends it, comes from the same status. A listener whose stream drops

@@ -3,7 +3,7 @@
 The `live` module's stream server: TinyIce (one container: stream input, mounts, the mp3 transcode, the player page,
 admin). What visitors see of it, the LIVE NOW bar, is in the theme (`kit/theme/`, `kit/CLAUDE.md`).
 
-- The DJ software sends Ogg to `/stream-ogg` on host port 8222, always straight to TinyIce's port, never through
+- The streaming software sends Ogg to `/stream-ogg` on host port 8222, always straight to TinyIce's port, never through
   Traefik: Traefik drops a SOURCE request's body, so TinyIce logs "has sent no audio", the mp3 transcoder can't start
   and `/stream-mp3` 404s. TinyIce transcodes it to `/stream-mp3`, which listeners get.
 - Routes (labels in `compose.yaml`): `LIVE_HOST` (default `live.<SITE_HOST>`, Cloudflare-only) for listening and the

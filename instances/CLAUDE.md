@@ -11,7 +11,7 @@ its folder, with the answers it asked for; its comments are the Settings referen
   `SITE_HOST`, `ID_PREFIX`, `MODULES`, `BEHIND_CLOUDFLARE`, `TRUSTED_EXTRA`, `TLS_RESOLVER` from Traefik's environment
   (`stacks/traefik/CLAUDE.md`). The bridge reads `SITE_HOST`, `SITE_NAME`, `SITE_TIMEZONE`, `ID_PREFIX`, `SITE_HOSTS`,
   `LIVE_HOSTS`, `PETS`, `NETWORKS`, `GRAFANA_URL`, and the optional posting settings (`CHANNELS` … `TIKTOK_PRIVACY`,
-  commented out in `example.env` with their defaults; `stacks/postiz/CLAUDE.md`). `render.py` reads the profile for
+  commented out in `example.env` with their defaults; `stacks/postiz/CLAUDE.md`; the `FEATURED_*` ones are the featured link's wording, neutral by default). `render.py` reads the profile for
   the dashboards' placeholders and which modules and networks to leave out (`stacks/monitoring/grafana/CLAUDE.md`).
 - `kit/kit.sh` passes the profile to Compose with `--env-file`; `k8s/up.sh` turns it into the cluster's settings.
 - A profile variable with the same name as a stack secret wins over it when both are passed, so a name lives in one

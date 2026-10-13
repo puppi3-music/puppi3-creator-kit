@@ -54,7 +54,7 @@ fi
 OUT="$SITE_DIR/data/k8s"; mkdir -p "$OUT"
 [ "$RENDER" = 1 ] || cluster
 
-# ---- live: TinyIce's mounts (the DJ's and the mp3 listeners play: its transcoder's input and output), from the
+# ---- live: TinyIce's mounts (the source's and the mp3 listeners play: its transcoder's input and output), from the
 # running TinyIce's config when there is one (a rename in its admin is saved on its volume), else the site's
 # (kit/setup.sh's). They name the relays' mount, their readiness check and Traefik's route; the relays' config also
 # takes TinyIce's admin password and the mp3's burst size.
@@ -104,7 +104,7 @@ open(sys.argv[3], "w").write(f"""<icecast>
     <relay-shoutcast-metadata>1</relay-shoutcast-metadata>
   </relay>
   <!-- How often a relay that failed is tried again (default 120 s: on a new site the relays would miss the first
-       stream for two minutes; TinyIce has no mp3 mount until a DJ first connects). No master server here. -->
+       stream for two minutes; TinyIce has no mp3 mount until a source first connects). No master server here. -->
   <master-update-interval>5</master-update-interval>
   <fileserve>1</fileserve>
   <paths>

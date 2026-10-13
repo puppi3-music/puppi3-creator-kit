@@ -11,8 +11,13 @@ copyright line). `CONTRIBUTING.md`: where things are, what goes with a change, w
 `scrub.py`: no secrets and no private names in the kit. It runs gitleaks (Docker, pinned) over the repo's whole history
 and every file, then looks in every file for `PRIVATE_WORDS` (settings_reference's) plus `EXTRA` (more names,
 addresses and paths that mustn't be in it), apart from what `ALLOW` keeps on purpose (the copyright and author credit,
-the checks' own word lists, the guides' swaps). `--names` skips Docker, `-v` prints each line. It only reports; a
-mention meant to stay goes in `ALLOW` with its reason.
+the checks' own word lists, the guides' swaps); then the repo's whole history the same way (every version of every
+file, the messages, author and committer both the theme's author). `--names` skips Docker, `-v` prints each line. It
+only reports; a mention meant to stay goes in `ALLOW` with its reason.
+
+**For any creator.** The kit is for artists, podcasters, writers, makers and musicians alike: keep its words neutral
+("streaming software", "the featured link", "your other platforms", made-up creators in examples). A site's own
+wording goes in its `site.env` (the bridge's `FEATURED_*` lines).
 
 - `docs/`: the kit's own guides, built by `docs/build-docs.py` (`KIT_PAGES`: the shared styles and script, their own
   neutral header, a blue palette and the kit's puppy mark (`docs/images/kit-puppy.svg`, also the README's top and the pages' tab icon); build-docs also fails on `PRIVATE_WORDS` anywhere in a kit page or the shared assets). `index.html` is
@@ -32,7 +37,7 @@ mention meant to stay goes in `ALLOW` with its reason.
   `k8s/migrate/`.
   `theme-guide.html` (by hand, for the site's owner): the kit's theme (Source plus the kit's parts; installing and
   updating it), Source's settings as Ghost Admin shows them (`theme/package.json`'s `config.custom`), the LIVE NOW bar,
-  the Social preview button, the music services `kit.js` gives icons, the short links (`redirects.yaml`), and another
+  the Social preview button, the platforms `kit.js` gives icons ("Links to your other platforms", `#platforms`), the short links (`redirects.yaml`), and another
   theme (what it lacks, adding the kit's parts from `theme/KIT.md`). Keep it current with `theme/` and `redirects.yaml`.
   `posting-guide.html` (for whoever posts: the bridge's tags, captions, media, notifications, finishing Instagram and
   TikTok) and `analytics-guide.html` (each dashboard, the verdicts, When to post) are by hand too: keep them current
@@ -84,7 +89,7 @@ A kit site is a folder (`kit/sites/<name>/`, git-ignored, or anywhere): `site.en
   that was there already; copies the kit's Traefik files into `data/traefik/dynamic/`
   as `kit-*.yml` (`puppi3.yml` as `kit-site.yml`; never staging.yml, staging-bar.yml or the NAS's lan-only.yml);
   without `live` it exports `LIVE_STATS=false` (the bridge's live-show polling;
-  the shell's value wins over site.env's), with it `LIVE_MOUNT` = the DJ's mount from TinyIce's `config.json` (its mp3
+  the shell's value wins over site.env's), with it `LIVE_MOUNT` = the source mount from TinyIce's `config.json` (its mp3
   transcoder's input), so the mounts can be renamed in TinyIce. A first `up` with analytics starts tb-setup alone and waits for its tokens:
   recreating Ghost for them later could stop it mid-migration and leave Ghost's migration lock taken. With
   monitoring: writes `data/monitoring/prometheus/prometheus.yml` (jobs for the modules that are on; the bridge's job is
@@ -159,8 +164,8 @@ Ghost's Source (MIT) with the kit's hooks, so a kit site looks like its own. A s
 
 - `theme/`: Source as released (the files `theme/KIT.md` lists left out; its README is `SOURCE-README.md`), plus
   `assets/kit/` (`kit.js`: `window.site`, `/.site/click` beacons for links out, the Social preview button on
-  `/p/<uuid>/`, icons on music links in the footer's secondary navigation; `live-bar.js`: the LIVE NOW player
-  (no mascot); live = any source but the mp3 it plays and TinyIce's own `/_…`, so the DJ's mount can be
+  `/p/<uuid>/`, icons on links to other platforms (Patreon, Substack, Vimeo, SoundCloud...: `.kit-platform-link`) in the footer's secondary navigation; `live-bar.js`: the LIVE NOW player
+  (no mascot); live = any source but the mp3 it plays and TinyIce's own `/_…`, so the source mount can be
   renamed (a `data-mount` attribute would name it) (a theme may add `window.site.livePup`); `kit.css`), `partials/kit/` (the bar, the icon
   sprite), and the edits to `default.hbs`, `partials/components/footer.hbs` (the credit line "Theme: Puppi3's Creator
   Kit by DJ Puppi3", `.kit-credit`, which the licence's 7(b) term asks copies to keep) and `package.json` (the

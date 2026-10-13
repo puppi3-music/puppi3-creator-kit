@@ -22,7 +22,7 @@ services:
       - traefik.http.routers.tinyice.entrypoints=https
       - traefik.http.routers.tinyice.tls=true
       - traefik.http.routers.tinyice.tls.certresolver=${TLS_RESOLVER:-cf}
-      # Listening, the player pages and stream input (the DJ software, also from outside home) stay public, through
+      # Listening, the player pages and stream input (the streaming software, also from outside home) stay public, through
       # Cloudflare only (traefik/dynamic/cloudflare-only.yml).
       - traefik.http.routers.tinyice.middlewares=cloudflare-only@file
       - traefik.http.services.tinyice.loadbalancer.server.port=8080

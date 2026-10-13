@@ -64,22 +64,22 @@ A site is the same folder as on Compose (`kit/setup.sh` makes it: `site.env`, `s
 - `components/live/` (module `live`): the main `tinyice` Deployment (the stack's digest, 1 replica, Recreate; its
   config from Secret `tinyice-config` = `data/icecast/tinyice-data/config.json`, copied onto its PVC only when the
   volume has none, so admin edits stay; history on the same PVC), Service `tinyice` (Traefik, the relays, the bridge's
-  `LIVE_STATUS_URL` default, Prometheus) and LoadBalancer `tinyice-source` on 8222 for the DJ software (straight to
+  `LIVE_STATUS_URL` default, Prometheus) and LoadBalancer `tinyice-source` on 8222 for the streaming software (straight to
   TinyIce: Traefik drops a SOURCE body). Listeners' `/stream-mp3` goes to `tinyice-relay`: **Icecast 2** relays
   (`images/icecast-relay/`, Alpine's package, uid 100), 2 replicas, stateless, pulling `/stream-mp3` from `tinyice`;
   their `icecast.xml` is Secret `icecast-relay-config` from `up.sh` (TinyIce's admin password and mp3 burst size,
   500 listeners each, logs to /dev/stdout and /dev/stderr: Icecast puts `<logdir>` in front of the names;
   `master-update-interval` 5, how often a failed relay is retried: the default 120 s missed a new site's first
-  stream). Readiness: ready when the relay has `/stream-mp3` or no DJ is on the main TinyIce's `/stream-ogg`
-  (TinyIce lists `/stream-mp3` even with no DJ, sending nothing, so relays reconnect every 10 s then), so listeners
-  don't land on a relay catching up and `up.sh` doesn't wait for a DJ; it asks `127.0.0.1` (busybox wget tries
+  stream). Readiness: ready when the relay has `/stream-mp3` or no source is on the main TinyIce's `/stream-ogg`
+  (TinyIce lists `/stream-mp3` even with no source, sending nothing, so relays reconnect every 10 s then), so listeners
+  don't land on a relay catching up and `up.sh` doesn't wait for a source; it asks `127.0.0.1` (busybox wget tries
   `::1` for localhost; Icecast is IPv4 only). **TinyIce's
   own edge relays can't do it**: they refuse private addresses ("outbound request to a non-routable target
-  refused") and have no switch. TinyIce keeps `/stream-mp3` up with no DJ, so the relays stay connected, and a DJ
+  refused") and have no switch. TinyIce keeps `/stream-mp3` up with no source, so the relays stay connected, and a source
   reconnecting comes through them (checked). Icecast handles the mp3 with its generic passthrough (a warning in its
   log). `live.yml`: the icecast stack's labels as a Traefik file, the same router names (`tinyice`, `tinyice-admin`,
   `tinyice-lan`, `live-status`) plus `tinyice-mp3` (priority 90, to the relays).
-  **The mounts' names are TinyIce's own:** `up.sh` reads the DJ's and the mp3 mount (the mp3 transcoder's input and
+  **The mounts' names are TinyIce's own:** `up.sh` reads the source's and the mp3 mount (the mp3 transcoder's input and
   output) from the running TinyIce's config (`kubectl exec … cat /data/config.json`; a rename in its admin is saved on
   its volume), else the site's, into ConfigMap `live` (`LIVE_SOURCE_MOUNT`, `LIVE_MP3_MOUNT`) and the relays' config;
   Traefik gets it through a patch appending to its `envFrom` (`traefik.yaml`), the relays' readiness through theirs.
@@ -94,7 +94,7 @@ A site is the same folder as on Compose (`kit/setup.sh` makes it: `site.env`, `s
   **Postiz's and the bridge's settings come from the stack itself:** `up.sh` runs `docker compose config` on
   `stacks/postiz/compose.yaml` with `site.env` and `secrets/postiz.env` (in an empty environment: nothing from your
   shell) and writes each service's environment as a Secret's env file, changing only the bridge's `GHOST_API_URL`
-  (`http://ghost:2368`), `LIVE_STATS=false` without live or `LIVE_MOUNT` = the DJ's mount with it, and `LIVE_RELAYS`
+  (`http://ghost:2368`), `LIVE_STATS=false` without live or `LIVE_MOUNT` = the source mount with it, and `LIVE_RELAYS`
   (below). So a new setting or default in the stack reaches Kubernetes with no change here. Values on more than one
   line are refused (an env file can't hold them). Kustomize keeps values like `#campaign-` and `Post in app` (checked).
   With analytics on, the bridge also gets `tinybird-tokens` (its `tinybird__adminToken`, as staging's bridge) and
@@ -238,7 +238,7 @@ A site is the same folder as on Compose (`kit/setup.sh` makes it: `site.env`, `s
   middleware in error, the plugins loaded, the kit's theme uploaded and a post, Ghost's files in the bucket (an image, a sound and a file land under content/images|media|files/ and none on Ghost's volume, served at the site's addresses byte for byte, a w600 resize made and kept, byte ranges, a post storing `__GHOST_URL__/content/...`, served again by a new Ghost pod), analytics (the Secret, Ghost never
   restarted, a page hit as Ghost's tracker sends it reaching Tinybird with page-hit-country's CA, the GET-only stats
   route answering and Tinybird's other API not), monitoring (Grafana on both names, the 10 dashboards in the site's folder, a real query through each datasource, every Prometheus job up, Health's pod memory by workload and disk from the volumes, the alert rules; with one listener on a relay, Health's listeners say 1), social (Postiz on `postiz.<SITE_HOST>`, Cloudflare-only; the webhook (401 unsigned), the theme's clicks (204) and the social preview reaching the bridge; the bridge's Tinybird tokens; with one listener on a relay its live shows say 1, not the relays; a new bridge pod keeping `data/`), live (ffmpeg to 8222, `/live-status.json`, a 320 kbps mp3 from a relay through Traefik
-  that's really the tone (pitch from zero crossings), the DJ reconnecting with another tone heard through the relays, a
+  that's really the tone (pitch from zero crossings), the source reconnecting with another tone heard through the relays, a
   relay pod killed, TinyIce's admin 403 public and open on `tinyice.<LAN_DOMAIN>`), the Ghost and MySQL pods killed and back with their data, no puppi3 in names (Secret `puppi3-*` is Phase E's stack rename), `BEHIND_CLOUDFLARE=false` open,
   and Ghost's pod untouched by that change. `--migrate` then: a fake NAS (`kit/sites/k8s-test-nas`: this site's profile, secrets and setup files on Compose, `ghost:6-alpine` pulled to match the cluster's; databases and Prometheus running, the rest made but stopped; a fake ssh, a sudo that wants a password, a fake Keychain), to-nas.sh, checks there, `up.sh --down`, a fresh up of the other twin, to-cloud.sh, checks in the cluster (posts, site_uuid, theme, the picture's bytes, page hits, TinyIce's renamed mounts, the bridge's data, older Prometheus samples, Postiz, grafana_ro). Requests go through `curl --connect-to kit.test:443:127.0.0.1:9443`, so the
   Host stays `kit.test`. Deletes the cluster only if it made it.

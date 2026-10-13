@@ -7,7 +7,7 @@
 #   grants); their Services go, since the pods reach the names on their own proxy
 # - standard-rwo (pd-balanced, GKE's own StorageClass) for every volume
 # - Traefik's and the stream source's LoadBalancers as passthrough Network Load Balancers (backend services);
-#   externalTrafficPolicy Local keeps the visitor's address (cloudflare-only checks it), the DJ's too
+#   externalTrafficPolicy Local keeps the visitor's address (cloudflare-only checks it), the streamer's too
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 components:

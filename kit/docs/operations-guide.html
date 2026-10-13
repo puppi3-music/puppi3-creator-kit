@@ -279,7 +279,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
     <li><b>Take a <a href="#backup">backup</a>.</b> Ghost moves its database forward when a newer Ghost starts, and an older Ghost can't read it afterwards. The backup is the only way back.</li>
     <li><b>Note where you are</b>, so you can see what changed and come back to it:
 <div class="code"><pre>git rev-parse --short HEAD          # write this down</pre></div></li>
-    <li>Pick a quiet moment: no live set, nothing scheduled to publish in the next few minutes.</li>
+    <li>Pick a quiet moment: no live show, nothing scheduled to publish in the next few minutes.</li>
   </ul>
   <div class="note"><b class="label">From a ZIP</b><p>No git? Download the new ZIP, unzip it beside the old copy, and move your site's folder (<code>kit/sites/mysite</code>) into the new one; then run the commands below from the new copy, without <code>git pull</code>. Keep the old copy until the site runs well: it's your way back (going back is the same move the other way, with the backup). Where the steps below use <code>git diff</code>, compare the two copies instead: <code>diff -rq old/kit/theme new/kit/theme</code> and <code>diff old/kit/redirects.yaml new/kit/redirects.yaml</code> for the theme and short links, <code>diff</code> of their <code>instances/example.env</code> and <code>stacks/*/.env.example</code> for the settings.</p></div>
   <h3 id="upgrade-compose">On Docker Compose</h3>
@@ -390,13 +390,13 @@ cp -Rp kit/sites/mysite/site.env kit/sites/mysite/secrets kit/sites/mysite-k8s/
 cp -p kit/sites/mysite/data/icecast/tinyice-data/config.json kit/sites/mysite-k8s/data/icecast/tinyice-data/</pre></div>
     Keep <code>ID_PREFIX</code> as it is: the scripts find the site by it on both sides. Add <code>secrets/ghost-mail.env</code> (Ghost's mail, from the <code>mail</code> part of <code>data/puppi3/ghost/config.production.json</code>, one setting per line). For EKS or GKE, add the cloud's file and secrets as the <a href="setup-guide.html#cloud">setup guide</a> says. Behind Cloudflare, use <code>TLS_RESOLVER=cf</code>: it gets certificates from anywhere.</div></li>
     <li><div><b>The empty site up</b>, a day or so before: build the images and run <code>k8s/up.sh kit/sites/mysite-k8s &lt;overlay&gt;</code>. Check it through the cluster's own address (<a href="setup-guide.html#cloud-test-before-the-dns">how</a>) while the Compose site keeps serving.</div></li>
-    <li><div><b>Freeze.</b> From now until the DNS points at the cluster: no edits or new posts in Ghost Admin, nothing scheduled to publish, no live set. Anything written on the Compose side after the copy starts stays behind.</div></li>
+    <li><div><b>Freeze.</b> From now until the DNS points at the cluster: no edits or new posts in Ghost Admin, nothing scheduled to publish, no live show. Anything written on the Compose side after the copy starts stays behind.</div></li>
     <li><div><b>Move.</b> A dry run, then the real one. The data folder is the Compose site's <code>data/</code>, here or on another machine:
 <div class="code"><pre>k8s/migrate/to-cloud.sh kit/sites/mysite-k8s &lt;overlay&gt; --from &lt;user&gt;@&lt;host&gt;:/path/to/mysite/data -n
 k8s/migrate/to-cloud.sh kit/sites/mysite-k8s &lt;overlay&gt; --from &lt;user&gt;@&lt;host&gt;:/path/to/mysite/data</pre></div>
     It stops Postiz, Temporal and the bridge on the Compose side (for good), copies everything, and ends by starting the site in the cluster with <code>up.sh</code>.</div></li>
     <li><div><b>Check</b>, still through the cluster's own address: the front page, a post with its pictures, signing in to Ghost Admin (a code arrives by mail), Postiz's channels, Grafana's history.</div></li>
-    <li><div><b>Point the DNS</b> at the cluster: the site's names at <code>traefik</code>'s address, and a name that isn't proxied by Cloudflare at <code>tinyice-source</code>'s, for your DJ software. If you put your own address in <code>TRUSTED_EXTRA</code> for the check, take it out and run <code>up.sh</code> again. Then end the freeze.</div></li>
+    <li><div><b>Point the DNS</b> at the cluster: the site's names at <code>traefik</code>'s address, and a name that isn't proxied by Cloudflare at <code>tinyice-source</code>'s, for your streaming software. If you put your own address in <code>TRUSTED_EXTRA</code> for the check, take it out and run <code>up.sh</code> again. Then end the freeze.</div></li>
   </ol>
   <p>The Compose side keeps its copy, its social part stopped. Leave it so until you move back, or until you're sure, then <code>kit/kit.sh kit/sites/mysite stop</code>. Never <code>up -d</code> it while the site is in the cluster.</p>
   <h3 id="move-back-to-compose">Kubernetes → Compose</h3>
@@ -475,7 +475,7 @@ kit/kit.sh kit/sites/mysite restart ghost</pre></div>
   </dl>
   <h3 id="trouble-live">Live</h3>
   <dl class="faq">
-    <dt>The DJ software can't connect</dt>
+    <dt>The streaming software can't connect</dt>
     <dd>Behind Cloudflare, stream to the server's own address, not the site's name: Cloudflare doesn't pass port 8222. Port 8222 forwarded to the server, mount <code>/stream-ogg</code>, user <code>source</code>, <code>TINYICE_SOURCE_PASSWORD</code>, format Ogg.</dd>
     <dt>Streaming, but no LIVE NOW bar</dt>
     <dd>The theme's Live stream URL must be set (<code>https://live.&lt;your site&gt;/stream-mp3</code>). <code>https://live.&lt;your site&gt;/live-status.json</code> lists the stream while you're on.</dd>

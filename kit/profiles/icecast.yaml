@@ -2,6 +2,6 @@
 services:
   tinyice:
     profiles: [live]
-    # the DJ software's port (LIVE_PORT): TinyIce straight, as Traefik would drop the audio
+    # the streaming software's port (LIVE_PORT): TinyIce straight, as Traefik would drop the audio
     ports: !override
       - ${LIVE_PORT:-8222}:8080

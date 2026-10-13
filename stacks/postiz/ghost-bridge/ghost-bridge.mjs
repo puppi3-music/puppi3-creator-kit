@@ -1,12 +1,12 @@
 // ghost-bridge: Ghost "Post published" webhook -> Postiz public API
 // Shares each newly published Ghost post to Bluesky, Threads, Instagram and TikTok via Postiz.
-// - A YouTube/SoundCloud/Mixcloud link anywhere in the post (e.g. an embed caption) is added as a "Listen" line
-//   (YouTube preferred; the Social preview can pick another link, or none).
+// - A link to where the work is (YouTube, Vimeo, SoundCloud, Spotify...: FEATURED_DOMAINS) anywhere in the post (e.g.
+//   an embed caption) gets a line of its own, the featured link (the Social preview can pick another link, or none).
 // - Posts tagged #bigdrop send an ntfy reminder to post a link-sticker Story (optionally an auto Story too).
 // - Postiz's own notifications (publish errors, reconnect warnings) are forwarded to ntfy.
 // - Once a week (WEEKLY_SUMMARY_AT), ntfy gets a summary of the week: visitors, members, followers, the best posts.
 // - Bluesky + Threads auto-post. Instagram + TikTok get a Postiz draft + one ntfy notification each, so
-//   you can add @tags and music in the app (IG_TIKTOK_MODE=audio/auto to auto-post them instead).
+//   you can add @tags and sound in the app (IG_TIKTOK_MODE=audio/auto to auto-post them instead).
 //   Internal tags: #autopost / #manualpost override, #story = Instagram Story,
 //   #campaign-<name> = links carry utm_campaign=<name>.
 // - If the post contains a Ghost-hosted video (video card, .mp4), the video is shared
@@ -19,7 +19,7 @@
 // - Draft previews: /ghost/social-preview/<uuid>/ (linked from the theme's Ghost preview page) reads the
 //   draft through the Ghost Admin API and shows what publishing it would post. Never posts anything.
 //   Only for someone signed in to Ghost Admin in that browser (checked with Ghost on every request).
-//   There you can also give a channel its own text, pick the Listen link and line up the Instagram photos (custom.json);
+//   There you can also give a channel its own text, pick the featured link and line up the Instagram photos (custom.json);
 //   on publish they're used instead of the post text / centred crop.
 // - Instagram numbers (IG_STATS): the account's followers/reach, profile views and taps on its links per day, and
 //   each post's likes, views, saves..., also for posts made in the app, in instagram.json, served at

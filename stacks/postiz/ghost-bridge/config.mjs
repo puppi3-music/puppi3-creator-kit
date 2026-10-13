@@ -22,7 +22,7 @@ export const SKIP_TAG = (env.SKIP_TAG || '#nosocial').toLowerCase();
 export const BIG_DROP_TAG = (env.BIG_DROP_TAG || '#bigdrop').toLowerCase();
 // Also auto-post a (link-less) Instagram Story? Off by default - you post the one Story with the link.
 export const BIG_DROP_AUTO_STORY = (env.BIG_DROP_AUTO_STORY || 'false') === 'true';
-// Instagram + TikTok routing ("music platforms"). Bluesky + Threads always auto-post.
+// Instagram + TikTok routing (the apps where you add sound and tags yourself). Bluesky + Threads always auto-post.
 //   manual = Postiz draft + an ntfy notification per platform, you finish it in the app (default)
 //   audio  = auto-post when the post has sound (Ghost video, or audio card -> clip), else manual
 //   auto   = always auto-post
@@ -92,15 +92,24 @@ export const MAX_IMAGES = Math.min(20, Math.max(1, Number(env.MAX_IMAGES || 10))
 // DIRECT_POST = publish straight away (unaudited apps can only use TIKTOK_PRIVACY=SELF_ONLY)
 export const TIKTOK_METHOD = env.TIKTOK_METHOD === 'DIRECT_POST' ? 'DIRECT_POST' : 'UPLOAD';
 export const TIKTOK_PRIVACY = env.TIKTOK_PRIVACY || 'SELF_ONLY';
-// Links to listen to a set: one found anywhere in the post (caption, bookmark card, text link or a YouTube
-// embed) gets its own line in the social posts. The order of LISTEN_DOMAINS is the preference: a link to an
-// earlier service wins, else the first in the post. Empty = off. The Social preview can pick another link
-// for a post, any address, or none (custom.json "listen").
-export const LISTEN_DOMAINS = (env.LISTEN_DOMAINS ?? 'youtube.com,youtu.be,soundcloud.com,on.soundcloud.com,mixcloud.com')
+// The featured link: a link to where the work itself is (a video, an episode, a track or a set...) found anywhere in
+// the post (caption, bookmark card, text link or a YouTube embed) gets its own line in the social posts. The order
+// of FEATURED_DOMAINS is the preference: a link to an earlier service wins, else the first in the post. "none" =
+// off. The Social preview can pick another link for a post, any address, or none (custom.json "listen").
+export const FEATURED_DOMAINS = (env.FEATURED_DOMAINS === 'none' ? '' : env.FEATURED_DOMAINS
+  || 'youtube.com,youtu.be,vimeo.com,soundcloud.com,on.soundcloud.com,mixcloud.com,open.spotify.com,podcasts.apple.com,music.apple.com,bandcamp.com,twitch.tv')
   .split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
-export const LISTEN_NAMES = { 'youtube.com': 'YouTube', 'youtu.be': 'YouTube', 'music.youtube.com': 'YouTube Music',
-  'soundcloud.com': 'SoundCloud', 'on.soundcloud.com': 'SoundCloud', 'mixcloud.com': 'Mixcloud', 'bandcamp.com': 'Bandcamp',
-  'open.spotify.com': 'Spotify', 'music.apple.com': 'Apple Music', 'beatport.com': 'Beatport', 'twitch.tv': 'Twitch' };
+// Its line where links can be tapped (Bluesky, Threads) and where they can't (Instagram, TikTok: the bio), [name]
+// = the service, [url] = the link; what the Social preview calls it, after the line's first emoji
+export const FEATURED_LINE = env.FEATURED_LINE || '🔗 [name]: [url]';
+export const FEATURED_BIO_LINE = env.FEATURED_BIO_LINE || '🔗 Also on [name] + the full post: link in bio';
+export const FEATURED_ICON = (FEATURED_LINE.match(/^\p{Extended_Pictographic}\uFE0F?/u) || ['🔗'])[0];
+export const FEATURED_LABEL = `${FEATURED_ICON} ${env.FEATURED_LABEL || 'Featured link'}`;
+export const SERVICE_NAMES = { 'youtube.com': 'YouTube', 'youtu.be': 'YouTube', 'music.youtube.com': 'YouTube Music',
+  'vimeo.com': 'Vimeo', 'soundcloud.com': 'SoundCloud', 'on.soundcloud.com': 'SoundCloud', 'mixcloud.com': 'Mixcloud',
+  'bandcamp.com': 'Bandcamp', 'open.spotify.com': 'Spotify', 'music.apple.com': 'Apple Music',
+  'podcasts.apple.com': 'Apple Podcasts', 'beatport.com': 'Beatport', 'twitch.tv': 'Twitch', 'patreon.com': 'Patreon',
+  'ko-fi.com': 'Ko-fi', 'substack.com': 'Substack', 'etsy.com': 'Etsy', 'behance.net': 'Behance' };
 // ntfy phone notifications (empty NTFY_URL = off)
 export const NTFY_URL = (env.NTFY_URL || '').replace(/\/$/, '');
 export const NTFY_TOPIC = env.NTFY_TOPIC || 'postiz';

@@ -27,6 +27,8 @@ const PLATFORMS = {
 const logo = (p) => (p.logo ? `<svg class="logo" viewBox="0 0 24 24" aria-hidden="true" style="color:${p.color}" fill="currentColor">${p.logo}</svg>` : '');
 PLATFORMS['instagram-standalone'] = PLATFORMS.instagram;
 PLATFORMS['tiktok-business'] = PLATFORMS.tiktok;
+// The featured link's name without its emoji ("🔗 Featured link" -> "Featured link")
+const words = (label) => label.replace(/^\P{L}+/u, '');
 export const escAttr = (s) => esc(s).replace(/"/g, '&quot;');
 
 const shortUrl = (u) => {
@@ -158,7 +160,7 @@ function previewCard(e, pv, s) {
       + `<textarea data-channel="${key}" data-auto="${escAttr(auto)}" rows="5" maxlength="${CUSTOM_MAX}" spellcheck="true">${esc(own || auto)}</textarea>`
       + `<div class="emeta"><span class="len"></span><span class="saved" aria-live="polite">${own ? 'Saved' : ''}</span></div>`
       + `<div class="hint">${NO_LINK_IDS.includes(e.idf) ? 'Used instead of the post text here. The "link in bio" line is still added.'
-        : 'Used instead of the post text here. The post link (and Listen link) are added after it, unless your text has them.'}`
+        : `Used instead of the post text here. The post link (and ${esc(words(s.FEATURED_LABEL))}) are added after it, unless your text has them.`}`
       + ` Hashtags at the end are dropped first if it's too long.</div></div></div>`;
   return `<section class="card" data-url="${escAttr(pv.post.url || '')}" data-label="${escAttr(e.label)}" data-channel="${key}">
     <h2>${logo(p)}${esc(p.name)} <span class="dim">${esc(e.name || '')} · ${esc(format)}${own ? ' · modified text' : ''}</span></h2>
@@ -450,25 +452,31 @@ saveLabel();
 })();</script></body></html>`;
 }
 
-// Draft previews: which link becomes the 🎧 Listen line (found automatically, another link in the post,
+// Draft previews: which link becomes the featured link's line (found automatically, another link in the post,
 // any address, or none), saved for the post by POST .../listen
-function listenPicker(pv) {
+function listenPicker(pv, s) {
   const { auto = null, links = [], chosen = '' } = pv.listen || {};
   const opt = (value, label, on) => `<option value="${escAttr(value)}"${on ? ' selected' : ''}>${esc(label)}</option>`;
   const listed = links.some((l) => l.url === chosen);
   const other = !!chosen && chosen !== 'none' && !listed;
+  const label = words(s.FEATURED_LABEL);
   const options = [
     opt('', auto ? `Automatic: ${auto.name} (${auto.url})` : 'Automatic: none found in the post', !chosen),
     ...links.map((l) => opt(l.url, `${l.name}: ${l.url}`, l.url === chosen)),
-    opt('none', 'None: no Listen link', chosen === 'none'),
+    opt('none', `None: no ${label}`, chosen === 'none'),
     opt('other', 'Another address…', other),
   ];
-  return `<div class="listen"><label for="listen-pick">🎧 Listen link</label>
+  // the settings' lines as the posts show them, and the services in the order Automatic prefers them
+  const shown = (line) => line.replace(/\s*\[url\]\s*/g, ' ').replace(/\[name\]/g, '…').trim();
+  const names = [...new Set(s.FEATURED_DOMAINS.map((d) => s.SERVICE_NAMES[d] || d))];
+  const order = names.length > 1 ? `${names[0]} first, then ${names.slice(1).join(', ')}` : names[0] || 'nothing';
+  return `<div class="listen"><label for="listen-pick">${esc(s.FEATURED_LABEL)}</label>
     <select id="listen-pick" data-listen>${options.join('')}</select>
     <input type="url" data-listen-other placeholder="https://…" value="${escAttr(other ? chosen : '')}"${other ? '' : ' hidden'}>
     <span class="lsaved" aria-live="polite"></span>
-    <div class="hint">Bluesky and Threads get a "🎧 Listen:" line with it, Instagram and TikTok "Full set on … + the full post: link in bio",
-    and a #bigdrop's link sticker points to it. Automatic picks YouTube first, then SoundCloud, then Mixcloud (the order of LISTEN_DOMAINS).</div></div>`;
+    <div class="hint">Bluesky and Threads get a "${esc(shown(s.FEATURED_LINE))}" line with it, Instagram and TikTok
+    "${esc(shown(s.FEATURED_BIO_LINE))}", and a #bigdrop's link sticker points to it. Automatic picks ${esc(order)}
+    (the order of FEATURED_DOMAINS).</div></div>`;
 }
 
 // s: the bridge's settings the cards show (limits, channel ids, tags...), see PREVIEW_SETTINGS there
@@ -479,7 +487,7 @@ export function renderPreview(pv, s) {
   const flags = [
     m ? `Media: ${m.audiogram ? 'audio clip (rendered from the audio card)' : m.kind === 'image' && m.count > 1 ? `${m.count} images` : m.kind}` : 'Media: none',
     pv.bigDrop && `${BIG_DROP_TAG}`, pv.asStory && `${STORY_TAG}`,
-    pv.listen && !pv.draft && `Listen: ${(pv.listen.chosen ? 'picked: ' : '') + (pv.listen.chosen === 'none' ? 'none'
+    pv.listen && !pv.draft && `${words(s.FEATURED_LABEL)}: ${(pv.listen.chosen ? 'picked: ' : '') + (pv.listen.chosen === 'none' ? 'none'
       : pv.listen.chosen ? pv.listen.chosen : pv.listen.auto ? `${pv.listen.auto.name}` : 'none')}`,
   ].filter(Boolean);
   const cards = pv.entries.map((e) => previewCard(e, pv, s)).join('')
@@ -497,6 +505,6 @@ export function renderPreview(pv, s) {
     <div class="meta"><span>${esc(pv.at.toLocaleString('en-GB'))}</span>
     ${openLink ? `<span><a href="${escAttr(openLink)}" target="_blank" rel="noopener">Open the post</a></span>` : ''}
     ${flags.map((f) => `<span>${esc(f)}</span>`).join('')}${pv.draft ? '' : '<span><a href="./">All previews</a></span>'}</div>
-    ${banner}${pv.draft && pv.listen ? listenPicker(pv) : ''}<div class="grid">${cards}</div>${notes}
+    ${banner}${pv.draft && pv.listen ? listenPicker(pv, s) : ''}<div class="grid">${cards}</div>${notes}
     <details class="log"><summary>Bridge log</summary><pre>${esc(pv.log.join('\n'))}</pre></details>`);
 }

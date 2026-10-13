@@ -1,6 +1,6 @@
 {
     "name": "puppi3-creator-kit",
-    "description": "Puppi3's Creator Kit's theme: Ghost's Source theme with the kit's hooks (LIVE NOW bar, Social preview button, click beacons, music links)",
+    "description": "Puppi3's Creator Kit's theme: Ghost's Source theme with the kit's hooks (LIVE NOW bar, Social preview button, click beacons, platform link icons)",
     "version": "0.1.0",
     "engines": {
         "ghost": ">=5.0.0",

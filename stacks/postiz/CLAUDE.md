@@ -53,9 +53,14 @@ DRY_RUN bridge as a staging copy (it previews and logs, never posts); some notes
   key; a key Ghost turns down (401) gets a page and a start-up log WARNING (`checkGhostKey`) naming
   `GHOST_ADMIN_API_KEY` and how to fix it, plus "staging has its own keys" on a DRY_RUN bridge), runs the publish logic fully dry (never posts or notifies), caches per a hash of the post Ghost sends (not `updated_at`: a tag-only save can leave it as it was). Each card has
   a "Modify text for <channel>" checkbox + textarea: saved via `POST /ghost/social-preview/<uuid>/custom` to
-  `data/custom.json` (post id -> channel -> text), used instead of the post text on publish. A "🎧 Listen link" menu above the cards (`POST .../listen`, `listen` in
+  `data/custom.json` (post id -> channel -> text), used instead of the post text on publish. A featured-link menu above the cards (`FEATURED_LABEL`
+  after `FEATURED_LINE`'s first emoji: the kit's "🔗 Featured link", puppi3's "🎧 Listen link"; `POST .../listen`, `listen` in
   `custom.json`: '' auto, 'none' or any address) overrides the automatic one: `postLinks` (a hrefs + YouTube embeds)
-  -> `findListenLink`, preferring the earliest service in `LISTEN_DOMAINS` (default YouTube, SoundCloud, Mixcloud). On the Instagram
+  -> `findListenLink`, preferring the earliest service in `FEATURED_DOMAINS` (puppi3's YouTube, SoundCloud, Mixcloud; the
+  kit's default adds Vimeo, Spotify, Apple Podcasts/Music, Bandcamp, Twitch). Its caption lines are `FEATURED_LINE`
+  (Bluesky/Threads) and `FEATURED_BIO_LINE` (Instagram/TikTok), `[name]`/`[url]` filled in (`featuredLine`); puppi3's
+  wording ("🎧 Listen: …", "🎧 Full set on …") is in her own instance profile, the neutral defaults in the compose files
+  (`[…]`, not `{…}`: compose's defaults and settings_reference's parser end at `}`). On the Instagram
   card you drag photos within the frame (`POST .../frame`, saved as `frames` in `custom.json`); on publish
   the bridge crops Instagram's feed photos (ffmpeg) to the first photo's shape (4:5-1.91:1) at that framing
   (centred otherwise). It also fits every channel's photos to what Postiz and the platform accept (`IMAGE_RULES`:
@@ -69,7 +74,7 @@ DRY_RUN bridge as a staging copy (it previews and logs, never posts); some notes
   bluesky, threads, instagram, tiktok; must match the theme's redirects.yaml (which also has `/d/` Discord and `/y/` YouTube, shared by hand), which 302s them to
   `/<path>/?utm_source=<network>&utm_medium=social`; Ghost's redirects can't copy the slug into the query, so no
   utm_campaign: the landing page tells the post). Other networks, or links with a #fragment, get the long query form
-  (listen links untouched; a link already carrying utm_source is kept). Growth's "Tagged links" table reads it back.
+  (featured links untouched; a link already carrying utm_source is kept). Growth's "Tagged links" table reads it back.
   The redirects themselves: `kit/redirects.yaml`.
 - Internal tag `#campaign-<name>` (`CAMPAIGN_TAG`, `campaignOf`): that post's site links and IG sticker get the long
   form plus `&utm_campaign=<name>` (even with TAG_LINKS off), for Growth's Campaigns table.
@@ -79,7 +84,7 @@ DRY_RUN bridge as a staging copy (it previews and logs, never posts); some notes
   through the bridge (site images via `GHOST_API_URL`), "Share all" (`navigator.share` files: https + phone browser)
   and "Save" (one photo per tap: browsers allow one download per tap). If it can't be saved, the old one-notification-per-photo fallback is used. `#story` sends IG one
   photo, so no page. Story notifications come in first (the #bigdrop one, then an IG #story one, then the rest; queue failures last), each followed by a `NTFY_STORY_GAP` [2 s] pause when more follow, so the phone gets them in that order. #bigdrop gets its own link-Story notification when an IG channel exists (`notifyBigDrop`: first photo uncropped via
-  `igStory[0]`, or the video; Copy sticker link / Open Instagram / Open listen or post), except #story + #bigdrop by
+  `igStory[0]`, or the video; Copy sticker link / Open Instagram / Open the featured link or post), except #story + #bigdrop by
   hand, where the IG Story notification carries the sticker link.
 - `GET /upnext.json` (`upNextDoc`: Admin API `status:scheduled`, then handlePost's rules without uploading: `musicRouting` shared with handlePost, media kind, channels
   -> Posts itself to / You post in the app / Left out, link to the Social preview; 1-min cache; not routed by Traefik):
@@ -169,7 +174,7 @@ DRY_RUN bridge as a staging copy (it previews and logs, never posts); some notes
   time (same `POST_KIND` if `PERF_MIN` 5), rates shrunk by `prior` exposures toward the group's pooled rate, percentile per
   signal, weighted mean ranked among the compared posts' own means (calibrated: no-pattern data gives ~1/5 per label), pulled
   to 50 by n/(n+2); labels 80/60/40/20 (`PERF_LABELS`), "Too soon" <12 h (unless judged by the hour on the first-days checks from 2 h), "Not enough posts yet" <5. `INDUSTRY` = published
-  averages (Socialinsider: IG 3.2%/reach Aug 2026, TikTok 3.85%/view Q2 2026 (theirs counts saves, TikTok's API has none); never their per-follower headline figures; YouTube music 1-3%, Shorts 5-8%; Mailchimp media click 4%;
+  averages (Socialinsider: IG 3.2%/reach Aug 2026, TikTok 3.85%/view Q2 2026 (theirs counts saves, TikTok's API has none); never their per-follower headline figures; YouTube 2-6% videos, 2.5-4% Shorts (CreatorDB/SociaVault 2026, all channels); Mailchimp media click 4%;
   update yearly; About = 0.67-1.5× or inside a range, Well past 2× its top / under half its bottom, `INDUSTRY_MIN` 50), its own verdict, never in perf.
 - `GET /performance.json` (`performanceDoc(dataDir)`, last 30 days all networks, best first, `summary`; not routed): Overview's
   "Posts doing well" and "Best posts lately"; the weekly summary's best posts too. Owner's

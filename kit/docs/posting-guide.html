@@ -333,7 +333,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
 <main>
 <section id="overview">
   <h2>How it works</h2>
-  <p>When you publish a post on example.com, it's shared out automatically. Bluesky and Threads get posted for you. Instagram and TikTok are left for you to finish, because those are the apps where you add music and tag the artists.</p>
+  <p>When you publish a post on example.com, it's shared out automatically. Bluesky and Threads get posted for you. Instagram and TikTok are left for you to finish, because those are the apps where you add music and tag <span>people</span>.</p>
   <div class="note"><b class="label">About this guide</b><p>It describes the kit's settings as they come. Whoever runs the site can change which networks get posts, what posts by itself and the tags' names (in <code>site.env</code>), so ask them if something here doesn't match. <code>example.com</code> stands for your site's address.</p></div>
   <div class="flow" role="img" aria-label="Ghost post goes to the bridge, which posts to Bluesky and Threads automatically and prepares drafts plus a phone notification for Instagram and TikTok.">
     <div class="node"><b>Ghost</b><small>you publish a post</small></div>
@@ -371,9 +371,9 @@ header.top .pup svg{display:block;width:100%;height:auto}
   <ul>
     <li><strong>No titles.</strong> None of these platforms show titles, so the post title isn't included.</li>
     <li><strong>Formatting:</strong> bulleted lists keep their • bullets, numbered lists keep their numbers, and quotes get “quotation marks”. Bold, italics and headings come out as plain text: none of these platforms has text styling.</li>
-    <li><strong>Links in your text:</strong> on Bluesky and Threads, where links can be tapped, the address goes after the link text, e.g. "Out now on SoundCloud (https://soundcloud.com/…)". Links to example.com get tagged like the post link. On Instagram and TikTok only the link text shows. The link that becomes the 🎧 Listen line isn't repeated in your text. If adding the addresses would push the post over Bluesky's or Threads' limit (dropping hashtags or shortening your text), they're left out and only the link text shows. The Social preview shows which way each post went.</li>
+    <li><strong>Links in your text:</strong> on Bluesky and Threads, where links can be tapped, the address goes after the link text, e.g. <span>&quot;Watch it on YouTube (https://youtube.com/…)&quot;</span>. Links to example.com get tagged like the post link. On Instagram and TikTok only the link text shows. <span>The featured link (see below)</span> isn't repeated in your text. If adding the addresses would push the post over Bluesky's or Threads' limit (dropping hashtags or shortening your text), they're left out and only the link text shows. The Social preview shows which way each post went.</li>
     <li><strong>Hashtags go last.</strong> Put them in their own paragraph at the end of the post, and they stay at the end of the social posts too, after the links.</li>
-    <li><strong>Cards are left out:</strong> images, video, audio, the SoundCloud player and its caption, and bookmark cards. Their links still count (see below).</li>
+    <li><strong>Cards are left out:</strong> images, video, audio, <span>embeds (a YouTube, Spotify or SoundCloud player...) and their captions</span>, and bookmark cards. Their links still count (see below).</li>
     <li><strong>Long posts get fitted.</strong> Bluesky allows about 300 characters and Threads 500. If a post is too long, hashtags are dropped first, then your text is shortened with "…". Instagram and TikTok have plenty of room.</li>
     <li><strong>Want a shorter social text?</strong> Write it in the post's <strong>Excerpt</strong> field (post settings) and add the <span class="tag">#useexcerpt</span> tag. The social posts then use the Excerpt instead of your post text. The hashtags from the end of your post are still added. Without the tag, the Excerpt is only used when the post has no text of its own, for example a post that's just a video.</li>
   </ul>
@@ -415,18 +415,24 @@ header.top .pup svg{display:block;width:100%;height:auto}
     <li><strong>On your phone:</strong> open the video in CapCut or InShot and export it. They save as MP4. This is also the easiest way to trim a long recording into a short clip.</li>
     <li><strong>OBS recordings:</strong> in OBS, choose <em>File → Remux Recordings</em>, pick the MKV and click <em>Remux</em>. You get an MP4 in seconds, with no quality loss.</li>
   </ul>
-  <div class="note warn"><b class="label">Keep uploads small</b><p>Uploads to Ghost over <strong>100 MB fail</strong>. Don't upload a whole 2-hour set; upload a short clip and link the full set on SoundCloud.</p></div>
+  <div class="note warn"><b class="label">Keep uploads small</b><p>Uploads to Ghost over <strong>100 MB fail</strong>. <span>Don&#x27;t upload a whole 2-hour recording; upload a short clip and link the full one on YouTube, Vimeo, Spotify or wherever it lives.</span></p></div>
 
-  <h3 id="writing-linking-your-set">Linking your set: YouTube, SoundCloud or Mixcloud</h3>
-  <p>If the post contains a link to YouTube, SoundCloud or Mixcloud, the social posts mention it. On Bluesky and Threads you get a <strong>🎧 Listen:</strong> line with the tappable link. On Instagram and TikTok, where links can't be tapped, you get "🎧 Full set on YouTube + the full post: link in bio". The link can be anywhere in the post: a YouTube video embedded in the post, a caption under the SoundCloud player, a bookmark card, or normal text. YouTube comes first: if the post links to YouTube and SoundCloud, the YouTube link is used, then SoundCloud, then Mixcloud. With several links to the same site, the first is used. To use a different link (Bandcamp, a second YouTube video, anything) or none at all, pick it on the <a href="#writing-checking-the-social-posts-before-you-publish">Social preview</a>.</p>
+  
+  
+  <h3 id="writing-linking-your-set">The featured link: where your work is</h3>
+  <p>If the post links to where the work itself is (a video on YouTube or Vimeo, an episode on Spotify or Apple Podcasts, a track on SoundCloud, Mixcloud, Apple Music or Bandcamp, a stream on Twitch), the social posts point to it. On Bluesky and Threads you get a line with the service's name and the tappable link, like <strong>🔗 YouTube: https://youtube.com/…</strong>. On Instagram and TikTok, where links can't be tapped, you get "🔗 Also on YouTube + the full post: link in bio". The link can be anywhere in the post: a video embedded in the post, a caption under an embed, a bookmark card, or normal text. The services are ranked in that order, YouTube first, so if the post links to YouTube and Spotify the YouTube link is used. With several links to the same site, the first is used. To use a different link (your shop, a second video, anything) or none at all, pick it on the <a href="#writing-checking-the-social-posts-before-you-publish">Social preview</a>. Whoever runs the site can change the services and the wording (<a href="settings-reference.html#var-FEATURED_DOMAINS">FEATURED_DOMAINS</a> and the lines after it).</p>
   <p><strong>Links carry a tag.</strong> The link to your post is a short link with a letter for the network: <code>example.com/b/&lt;the post's slug&gt;</code> on Bluesky, <code>/t/</code> on Threads, <code>/i/</code> for the Instagram link sticker, <code>/k/</code> on TikTok. It takes people straight to the post and tells the site's stats which network each visitor and new member came from (apps often hide it). Leave it on when you edit a caption. For the same reason, use the short links in your bios: <code>example.com/ig</code>, <code>/bsky</code>, <code>/th</code>, <code>/tk</code>, <code>/dis</code> for Discord and <code>/yt</code> for YouTube (they're tagged as bio links). The bridge doesn't post to Discord or YouTube, so when you share a post there yourself, use <code>example.com/d/&lt;the post's slug&gt;</code> on Discord or <code>example.com/y/&lt;the post's slug&gt;</code> on YouTube (in a video's description, a pinned comment or a community post; or <code>/d</code>, <code>/y</code> alone for the home page) and it's counted as a Discord or YouTube post. To group posts into a campaign, add an internal tag like <span class="tag">#campaign-summer-launch</span> (see below); its links are then longer.</p>
-  <p>A caption under the SoundCloud player works well. The link can be the URL itself, or words you've linked:</p>
+  
+  
+  <p>A caption under an embed works well. The link can be the URL itself, or words you've linked:</p>
   <ul>
-    <li><strong>Pasting the URL:</strong> Ghost normally turns a pasted SoundCloud URL into a link automatically. You'll see it change colour or get underlined.</li>
-    <li><strong>Linking your own words:</strong> for example "grab the full set on SoundCloud". Select the words, press <strong>Cmd/Ctrl + K</strong> and paste the URL.</li>
+    <li><strong>Pasting the URL:</strong> Ghost normally turns a pasted URL into a link automatically. You'll see it change colour or get underlined.</li>
+    <li><strong>Linking your own words:</strong> for example "watch the whole thing on YouTube". Select the words, press <strong>Cmd/Ctrl + K</strong> and paste the URL.</li>
   </ul>
   <p>The only thing that doesn't work is a URL that stays as <em>plain text</em>, with no link colour. If that happens, select it and press <strong>Cmd/Ctrl + K</strong> to make it a link.</p>
-  <div class="note"><b class="label">Tip: newsletters</b><p>The SoundCloud player doesn't show up in the email newsletter. Add a linked caption under it, like "Recorded live at the Cochrane session: grab the full set on SoundCloud". That makes the set reachable from the newsletter too, and the social posts pick up the same link.</p></div>
+  
+
+  <div class="note"><b class="label">Tip: newsletters</b><p>Some players (SoundCloud's, Spotify's) don't show up in the email newsletter. Add a linked caption under the embed, like "Listen to the whole episode on Spotify". That makes it reachable from the newsletter too, and the social posts pick up the same link.</p></div>
 
   <h3 id="writing-who-can-see-the-post">Who can see the post</h3>
   <p>Only posts with <strong>Post access: Public</strong> are shared. Members-only and paid posts are skipped, so paywalled content isn't advertised.</p>
@@ -441,7 +447,8 @@ header.top .pup svg{display:block;width:100%;height:auto}
   </ul>
   <p>Each mock-up is laid out like the app (icons included, though they're only pictures), so you can see how the text, links, hashtags and media will sit. Play any video, step through a carousel with the ‹ › arrows (or swipe or scroll), and click a photo to open it full size.</p>
   <p><strong>Lining up photos for Instagram:</strong> Instagram shows every photo of a post in the first photo's shape (between square-ish 4:5 and wide 1.91:1), so the others get cropped. On the Instagram card, drag a photo to choose which part shows; double-click puts it back in the middle. It's saved straight away, and when you publish, the photos are cropped exactly like that for Instagram (the Postiz draft and the photo in your notification too). The other platforms get the whole photos.</p>
-  <p><strong>Choosing the Listen link:</strong> the <strong>🎧 Listen link</strong> menu above the cards shows which link the posts will use. <em>Automatic</em> is the one found in the post (YouTube first, see <a href="#writing-linking-your-set">Linking your set</a>). You can pick any other link in the post, <em>None</em> for no Listen line, or <em>Another address…</em> and type any web address (press Enter or click away to save). The page reloads with every card, and the #bigdrop link sticker, using it. Pick <em>Automatic</em> to go back.</p>
+  
+  <p><strong>Choosing the featured link:</strong> the <strong>🔗 Featured link</strong> menu above the cards shows which link the posts will use. <em>Automatic</em> is the one found in the post (see <a href="#writing-linking-your-set">The featured link</a>). You can pick any other link in the post, <em>None</em> for no featured link, or <em>Another address…</em> and type any web address (press Enter or click away to save). The page reloads with every card, and the #bigdrop link sticker, using it. Pick <em>Automatic</em> to go back.</p>
   <p><strong>Different text for one channel:</strong> tick <strong>Modify text for Bluesky</strong> (or Threads, Instagram, TikTok) on that channel's card. A box opens with your post text; change it there. It saves as you type and the mock-up updates. When you publish, that channel gets your own text instead of the post text. The post link (or on Instagram and TikTok, the "link in bio" line) is still added after it, unless your text already has it. Untick it to go back to the post text. Until you actually change the text, nothing is saved, so that channel keeps following the post: later edits in Ghost still reach it. It's handy for Bluesky's 300 characters.</p>
   <p>Nothing is posted. It shows the post as last saved, so after changing something, wait for Ghost to say <em>Saved</em> and refresh the tab. A post with an audio card takes a few seconds, while the clip is made.</p>
 </section>
@@ -482,143 +489,148 @@ header.top .pup svg{display:block;width:100%;height:auto}
 
 <section id="samples">
   <h2>Samples</h2>
-  <p>Four typical posts, and exactly what each one produces. The captions and notifications below come from running these posts through the real system. <span>All four are made-up examples.</span> "/" in the post text marks a new paragraph.</p>
-<article class="sample" id="sample-everyday"><h3 id="samples-an-everyday-post-image-only">An everyday post: image only</h3><p>A quick gig thank-you with a photo. No sound and no special tags, so Instagram and TikTok come to you to finish, where you add music and tag people.</p>
-<div class="ghostbox"><div class="gb-label">In Ghost</div><dl><dt>Title</dt><dd>Thank you, Cochrane!</dd><dt>Post text</dt><dd>What a night. Packed floor, a sweaty booth and a crowd that went off for every drop. Thank you, Cochrane 🙏  /  #DJ #DJLife #Cochrane</dd><dt>Feature image</dt><dd>crowd.jpg</dd><dt>Cards</dt><dd>none</dd><dt>Tags</dt><dd>none</dd></dl></div>
+  <p>Four typical posts, and exactly what each one produces. The captions and notifications below come from running these posts through the real system. <span>All four are made-up creators.</span> "/" in the post text marks a new paragraph.</p>
+
+
+
+
+<article class="sample" id="sample-everyday"><h3 id="samples-an-everyday-post-image-only">An everyday post: image only</h3><p>A potter shows a new batch with one photo. No sound and no special tags, so Instagram and TikTok come to you to finish, where you add music and tag people.</p>
+<div class="ghostbox"><div class="gb-label">In Ghost</div><dl><dt>Title</dt><dd>Fresh out of the kiln</dd><dt>Post text</dt><dd>Glaze day finally paid off. Twelve mugs, two cracked, ten going in the shop on Friday 🙏  /  #ceramics #pottery #handmade</dd><dt>Feature image</dt><dd>kiln.jpg</dd><dt>Cards</dt><dd>none</dd><dt>Tags</dt><dd>none</dd></dl></div>
 <div class="results"><div class="out auto"><span class="pill auto">Auto</span><span>Bluesky, Threads: image post</span></div><div class="out you"><span class="pill you">You finish</span><span>Instagram, TikTok: draft + notification</span></div></div>
-<p class="caption-label">Bluesky and Threads get (Bluesky's shown: on Threads the link starts <code>example.com/t/</code>)</p><div class="caption">What a night. Packed floor, a sweaty booth and a crowd that went off for every drop. Thank you, Cochrane 🙏
+<p class="caption-label">Bluesky and Threads get (Bluesky's shown: on Threads the link starts <code>example.com/t/</code>)</p><div class="caption">Glaze day finally paid off. Twelve mugs, two cracked, ten going in the shop on Friday 🙏
 
-https://example.com/b/thank-you-cochrane
+https://example.com/b/fresh-out-of-the-kiln
 
-#DJ #DJLife #Cochrane</div>
-<p class="caption-label">Your notifications</p><div class="phones"><div class="phone"><div class="app">ntfy · postiz</div><div class="t">📸 Instagram: post &quot;Thank you, Cochrane!&quot;</div><pre>Post it as a feed post in the Instagram app:
+#ceramics #pottery #handmade</div>
+<p class="caption-label">Your notifications</p><div class="phones"><div class="phone"><div class="app">ntfy · postiz</div><div class="t">📸 Instagram: post &quot;Fresh out of the kiln&quot;</div><pre>Post it as a feed post in the Instagram app:
 1. Save the attached image: tap ⋯ → Save file and it lands in your Download album.
 2. Add your @tags and music.
-3. Paste the caption (tap &quot;Copy caption&quot;) and post.
+3. Paste the caption (tap "Copy caption") and post.
 
-An Instagram draft is in Postiz too (tagged &quot;Post in app&quot;) - keep it as your record, or post it from Postiz if it needs nothing.
+An Instagram draft is in Postiz too (tagged "Post in app") - keep it as your record, or post it from Postiz if it needs nothing.
 
 Caption:
-What a night. Packed floor, a sweaty booth and a crowd that went off for every drop. Thank you, Cochrane 🙏
+Glaze day finally paid off. Twelve mugs, two cracked, ten going in the shop on Friday 🙏
 
 Full post: link in bio 🔗
 
-#DJ #DJLife #Cochrane</pre><div class="btns"><span>Copy caption</span><span>Open Instagram</span><span>Open Postiz</span></div><div class="attach">Attached: crowd.jpg</div></div><div class="phone"><div class="app">ntfy · postiz</div><div class="t">🎵 TikTok: post &quot;Thank you, Cochrane!&quot;</div><pre>Post it as a photo post in the TikTok app:
+#ceramics #pottery #handmade</pre><div class="btns"><span>Copy caption</span><span>Open Instagram</span><span>Open Postiz</span></div><div class="attach">Attached: kiln.jpg</div></div><div class="phone"><div class="app">ntfy · postiz</div><div class="t">🎵 TikTok: post &quot;Fresh out of the kiln&quot;</div><pre>Post it as a photo post in the TikTok app:
 1. Save the attached image: tap ⋯ → Save file and it lands in your Download album.
 2. Add your @tags and music.
-3. Paste the caption (tap &quot;Copy caption&quot;) and post.
+3. Paste the caption (tap "Copy caption") and post.
 
-A TikTok draft is in Postiz too (tagged &quot;Post in app&quot;) - keep it as your record, or post it from Postiz if it needs nothing.
+A TikTok draft is in Postiz too (tagged "Post in app") - keep it as your record, or post it from Postiz if it needs nothing.
 
 Caption:
-What a night. Packed floor, a sweaty booth and a crowd that went off for every drop. Thank you, Cochrane 🙏
+Glaze day finally paid off. Twelve mugs, two cracked, ten going in the shop on Friday 🙏
 
 Full post: link in bio 🔗
 
-#DJ #DJLife #Cochrane</pre><div class="btns"><span>Copy caption</span><span>Open TikTok</span><span>Open Postiz</span></div><div class="attach">Attached: crowd.jpg</div></div></div></article>
-<article class="sample" id="sample-bigdrop"><h3 id="samples-a-big-drop-new-set-with-a-soundcloud-link">A big drop: new set with a SoundCloud link</h3><p>The SoundCloud link sits in a caption under the player, so it becomes the Listen line (the caption text itself stays out of the social posts). #bigdrop adds a third notification: the link-Story reminder.</p>
-<div class="ghostbox"><div class="gb-label">In Ghost</div><dl><dt>Title</dt><dd>Hardcore Trance - A Journey</dd><dt>Post text</dt><dd>In this set, I discover something new. Something I find myself really connecting to. I present Hardcore Trance.</dd><dt>Feature image</dt><dd>your artwork (PNG)</dd><dt>Cards</dt><dd>SoundCloud player, with the caption &quot;Recorded live - grab the full set on SoundCloud&quot; linked to the set</dd><dt>Tags</dt><dd><span class="tag">#bigdrop</span> </dd></dl></div>
-<div class="results"><div class="out auto"><span class="pill auto">Auto</span><span>Bluesky, Threads: image + Listen link</span></div><div class="out you"><span class="pill you">You finish</span><span>Instagram, TikTok: draft + notification each, plus a link-Story notification</span></div></div>
-<p class="caption-label">Bluesky and Threads get (Bluesky's shown: on Threads the link starts <code>example.com/t/</code>)</p><div class="caption">In this set, I discover something new. Something I find myself really connecting to. I present Hardcore Trance.
+#ceramics #pottery #handmade</pre><div class="btns"><span>Copy caption</span><span>Open TikTok</span><span>Open Postiz</span></div><div class="attach">Attached: kiln.jpg</div></div></div></article>
+<article class="sample" id="sample-bigdrop"><h3 id="samples-a-big-drop-new-episode-with-a-spotify-link">A big drop: new episode with a Spotify link</h3><p>A podcast episode, with the Spotify player embedded and a linked caption under it, so that link becomes the featured link (the caption text itself stays out of the social posts). #bigdrop adds a third notification: the link-Story reminder.</p>
+<div class="ghostbox"><div class="gb-label">In Ghost</div><dl><dt>Title</dt><dd>Episode 12: Starting over at 40</dd><dt>Post text</dt><dd>Twelve episodes in, and this is the one I was nervous to record. Maya left a law career at 40 to bake bread, and she has never been happier.</dd><dt>Feature image</dt><dd>the episode artwork (PNG)</dd><dt>Cards</dt><dd>Spotify player, with the caption &quot;Listen to the whole episode on Spotify&quot; linked to the episode</dd><dt>Tags</dt><dd><span class="tag">#bigdrop</span> </dd></dl></div>
+<div class="results"><div class="out auto"><span class="pill auto">Auto</span><span>Bluesky, Threads: image + featured link</span></div><div class="out you"><span class="pill you">You finish</span><span>Instagram, TikTok: draft + notification each, plus a link-Story notification</span></div></div>
+<p class="caption-label">Bluesky and Threads get (Bluesky's shown: on Threads the link starts <code>example.com/t/</code>)</p><div class="caption">Twelve episodes in, and this is the one I was nervous to record. Maya left a law career at 40 to bake bread, and she has never been happier.
 
-🎧 Listen: https://soundcloud.com/yourname/hardcore-trance-a-journey
-https://example.com/b/hardcore-trance-a-journey</div>
-<p class="caption-label">Your notifications</p><div class="phones"><div class="phone"><div class="app">ntfy · postiz</div><div class="t">🎧 Big drop: add the link Story for &quot;Hardcore Trance - A Journey&quot;</div><pre>Add a Story with a link sticker for &quot;Hardcore Trance - A Journey&quot;:
+🔗 Spotify: https://open.spotify.com/episode/7xkTqDcVZ3A
+https://example.com/b/episode-12-starting-over-at-40</div>
+<p class="caption-label">Your notifications</p><div class="phones"><div class="phone"><div class="app">ntfy · postiz</div><div class="t">🔗 Big drop: add the link Story for &quot;Episode 12: Starting over at 40&quot;</div><pre>Add a Story with a link sticker for &quot;Episode 12: Starting over at 40&quot;:
 1. Save the attached photo: tap ⋯ → Save file. It isn't cropped, so it fills the Story.
 2. In Instagram: + → Story, pick it, and add a Link sticker with the link (tap &quot;Copy sticker link&quot;).
 3. Post the Story.
 
 Sticker link:
-https://soundcloud.com/yourname/hardcore-trance-a-journey
+https://open.spotify.com/episode/7xkTqDcVZ3A
 
 Post:
-https://example.com/hardcore-trance-a-journey/</pre><div class="btns"><span>Copy sticker link</span><span>Open Instagram</span><span>Open SoundCloud</span></div><div class="attach">Attached: your artwork, uncropped</div></div><div class="phone"><div class="app">ntfy · postiz</div><div class="t">📸 Instagram: post &quot;Hardcore Trance - A Journey&quot;</div><pre>Post it as a feed post in the Instagram app:
+https://example.com/episode-12-starting-over-at-40/</pre><div class="btns"><span>Copy sticker link</span><span>Open Instagram</span><span>Open Spotify</span></div><div class="attach">Attached: the episode artwork, uncropped</div></div><div class="phone"><div class="app">ntfy · postiz</div><div class="t">📸 Instagram: post &quot;Episode 12: Starting over at 40&quot;</div><pre>Post it as a feed post in the Instagram app:
 1. Save the attached image: tap ⋯ → Save file and it lands in your Download album.
 2. Add your @tags and music.
-3. Paste the caption (tap &quot;Copy caption&quot;) and post.
+3. Paste the caption (tap "Copy caption") and post.
 
-An Instagram draft is in Postiz too (tagged &quot;Post in app&quot;) - keep it as your record, or post it from Postiz if it needs nothing.
+An Instagram draft is in Postiz too (tagged "Post in app") - keep it as your record, or post it from Postiz if it needs nothing.
 
 Caption:
-In this set, I discover something new. Something I find myself really connecting to. I present Hardcore Trance.
+Twelve episodes in, and this is the one I was nervous to record. Maya left a law career at 40 to bake bread, and she has never been happier.
 
-🎧 Full set on SoundCloud + the full post: link in bio 🔗</pre><div class="btns"><span>Copy caption</span><span>Open Instagram</span><span>Open Postiz</span></div><div class="attach">Attached: 3fdcbeb365af63ff3d38b10a5a4512458.png</div></div><div class="phone"><div class="app">ntfy · postiz</div><div class="t">🎵 TikTok: post &quot;Hardcore Trance - A Journey&quot;</div><pre>Post it as a photo post in the TikTok app:
+🔗 Also on Spotify + the full post: link in bio</pre><div class="btns"><span>Copy caption</span><span>Open Instagram</span><span>Open Postiz</span></div><div class="attach">Attached: episode-12.png</div></div><div class="phone"><div class="app">ntfy · postiz</div><div class="t">🎵 TikTok: post &quot;Episode 12: Starting over at 40&quot;</div><pre>Post it as a photo post in the TikTok app:
 1. Save the attached image: tap ⋯ → Save file and it lands in your Download album.
 2. Add your @tags and music.
-3. Paste the caption (tap &quot;Copy caption&quot;) and post.
+3. Paste the caption (tap "Copy caption") and post.
 
-A TikTok draft is in Postiz too (tagged &quot;Post in app&quot;) - keep it as your record, or post it from Postiz if it needs nothing.
+A TikTok draft is in Postiz too (tagged "Post in app") - keep it as your record, or post it from Postiz if it needs nothing.
 
 Caption:
-In this set, I discover something new. Something I find myself really connecting to. I present Hardcore Trance.
+Twelve episodes in, and this is the one I was nervous to record. Maya left a law career at 40 to bake bread, and she has never been happier.
 
-🎧 Full set on SoundCloud + the full post: link in bio 🔗</pre><div class="btns"><span>Copy caption</span><span>Open TikTok</span><span>Open Postiz</span></div><div class="attach">Attached: 3fdcbeb365af63ff3d38b10a5a4512458.png</div></div></div></article>
-<article class="sample" id="sample-preview"><h3 id="samples-a-track-preview-with-an-audio-card">A track preview with an audio card</h3><p>A 40-second MP3 uploaded as an audio card. It is under 90 seconds, so the whole clip is used, and the system turns it into a video of your artwork with the audio playing.</p>
-<div class="ghostbox"><div class="gb-label">In Ghost</div><dl><dt>Title</dt><dd>Preview: the edit I close every set with</dd><dt>Post text</dt><dd>A 40-second taste of the edit that has been ending my sets lately. Full version soon 👀  /  #DJ #Techno #NewMusic</dd><dt>Feature image</dt><dd>cover artwork</dd><dt>Cards</dt><dd>audio card with a 40-second MP3</dd><dt>Tags</dt><dd>none</dd></dl></div>
+🔗 Also on Spotify + the full post: link in bio</pre><div class="btns"><span>Copy caption</span><span>Open TikTok</span><span>Open Postiz</span></div><div class="attach">Attached: episode-12.png</div></div></div></article>
+<article class="sample" id="sample-preview"><h3 id="samples-a-preview-with-an-audio-card">A preview with an audio card</h3><p>A writer reads the first page of a new story: a 40-second MP3 uploaded as an audio card. It is under 90 seconds, so the whole clip is used, and the system turns it into a video of the cover with the audio playing.</p>
+<div class="ghostbox"><div class="gb-label">In Ghost</div><dl><dt>Title</dt><dd>Hear the first page</dd><dt>Post text</dt><dd>Forty seconds of the opening, read by me. The whole story is out on the 1st 👀  /  #amwriting #shortstory #audiobook</dd><dt>Feature image</dt><dd>the story's cover</dd><dt>Cards</dt><dd>audio card with a 40-second MP3</dd><dt>Tags</dt><dd>none</dd></dl></div>
 <div class="results"><div class="out auto"><span class="pill auto">Auto</span><span>Bluesky, Threads: the video</span></div><div class="out you"><span class="pill you">You finish</span><span>Instagram (Reel), TikTok: draft + notification, sound already included</span></div></div>
-<p class="caption-label">Bluesky and Threads get (Bluesky's shown: on Threads the link starts <code>example.com/t/</code>)</p><div class="caption">A 40-second taste of the edit that has been ending my sets lately. Full version soon 👀
+<p class="caption-label">Bluesky and Threads get (Bluesky's shown: on Threads the link starts <code>example.com/t/</code>)</p><div class="caption">Forty seconds of the opening, read by me. The whole story is out on the 1st 👀
 
-https://example.com/b/preview-the-edit-i-close-every-set-with
+https://example.com/b/hear-the-first-page
 
-#DJ #Techno #NewMusic</div>
-<p class="caption-label">Your notifications</p><div class="phones"><div class="phone"><div class="app">ntfy · postiz</div><div class="t">📸 Instagram: post &quot;Preview: the edit I close every set with&quot;</div><pre>Post it as a Reel in the Instagram app:
+#amwriting #shortstory #audiobook</div>
+<p class="caption-label">Your notifications</p><div class="phones"><div class="phone"><div class="app">ntfy · postiz</div><div class="t">📸 Instagram: post &quot;Hear the first page&quot;</div><pre>Post it as a Reel in the Instagram app:
 1. Save the attached video (made from your artwork + the audio in the post): tap ⋯ → Save file and it lands in your Download album.
 2. Add your @tags - it already has sound.
-3. Paste the caption (tap &quot;Copy caption&quot;) and post.
+3. Paste the caption (tap "Copy caption") and post.
 
-An Instagram draft is in Postiz too (tagged &quot;Post in app&quot;) - keep it as your record, or post it from Postiz if it needs nothing.
+An Instagram draft is in Postiz too (tagged "Post in app") - keep it as your record, or post it from Postiz if it needs nothing.
 
 Caption:
-A 40-second taste of the edit that has been ending my sets lately. Full version soon 👀
+Forty seconds of the opening, read by me. The whole story is out on the 1st 👀
 
 Full post: link in bio 🔗
 
-#DJ #Techno #NewMusic</pre><div class="btns"><span>Copy caption</span><span>Open Instagram</span><span>Open Postiz</span></div><div class="attach">Attached: clip.mp4</div></div><div class="phone"><div class="app">ntfy · postiz</div><div class="t">🎵 TikTok: post &quot;Preview: the edit I close every set with&quot;</div><pre>Post it as a video in the TikTok app:
+#amwriting #shortstory #audiobook</pre><div class="btns"><span>Copy caption</span><span>Open Instagram</span><span>Open Postiz</span></div><div class="attach">Attached: clip.mp4</div></div><div class="phone"><div class="app">ntfy · postiz</div><div class="t">🎵 TikTok: post &quot;Hear the first page&quot;</div><pre>Post it as a video in the TikTok app:
 1. Save the attached video (made from your artwork + the audio in the post): tap ⋯ → Save file and it lands in your Download album.
 2. Add your @tags - it already has sound.
-3. Paste the caption (tap &quot;Copy caption&quot;) and post.
+3. Paste the caption (tap "Copy caption") and post.
 
-A TikTok draft is in Postiz too (tagged &quot;Post in app&quot;) - keep it as your record, or post it from Postiz if it needs nothing.
+A TikTok draft is in Postiz too (tagged "Post in app") - keep it as your record, or post it from Postiz if it needs nothing.
 
 Caption:
-A 40-second taste of the edit that has been ending my sets lately. Full version soon 👀
+Forty seconds of the opening, read by me. The whole story is out on the 1st 👀
 
 Full post: link in bio 🔗
 
-#DJ #Techno #NewMusic</pre><div class="btns"><span>Copy caption</span><span>Open TikTok</span><span>Open Postiz</span></div><div class="attach">Attached: clip.mp4</div></div></div></article>
-<article class="sample" id="sample-vibe"><h3 id="samples-a-video-clip-from-the-booth">A video clip from the booth</h3><p><span>A clip</span>: an MP4 in a video card, with your text and hashtags. The post also has an Excerpt, but your own text is what gets used.</p>
-<div class="ghostbox"><div class="gb-label">In Ghost</div><dl><dt>Title</dt><dd>Vibe at La Récré (example title)</dd><dt>Post text</dt><dd>Caught a moment in the booth playing Charles D &amp; Tempr – &quot;Vibe&quot; at La Récré last weekend. Love this track so hard. It&#x27;s heavy and I love that synth lead. Goes so hard 🔥🔥🔥  /  #DJ #DJLife #DJMix #Techno #TechnoDJ #yourname</dd><dt>Feature image</dt><dd>booth.jpg</dd><dt>Cards</dt><dd>video card with an MP4</dd><dt>Tags</dt><dd>none</dd></dl></div>
+#amwriting #shortstory #audiobook</pre><div class="btns"><span>Copy caption</span><span>Open TikTok</span><span>Open Postiz</span></div><div class="attach">Attached: clip.mp4</div></div></div></article>
+<article class="sample" id="sample-vibe"><h3 id="samples-a-video-clip">A video clip</h3><p>A painter's timelapse: an MP4 in a video card, with the text and hashtags. The post also has an Excerpt, but the post text is what gets used.</p>
+<div class="ghostbox"><div class="gb-label">In Ghost</div><dl><dt>Title</dt><dd>Three hours in thirty seconds</dd><dt>Post text</dt><dd>Three hours of painting in thirty seconds. The sky took longer than everything else put together 🎨  /  #oilpainting #timelapse #artprocess #yourname</dd><dt>Feature image</dt><dd>canvas.jpg</dd><dt>Cards</dt><dd>video card with an MP4</dd><dt>Tags</dt><dd>none</dd></dl></div>
 <div class="results"><div class="out auto"><span class="pill auto">Auto</span><span>Bluesky, Threads: the video</span></div><div class="out you"><span class="pill you">You finish</span><span>Instagram (Reel), TikTok: draft + notification, sound already included</span></div></div>
-<p class="caption-label">Bluesky and Threads get (Bluesky's shown: on Threads the link starts <code>example.com/t/</code>)</p><div class="caption">Caught a moment in the booth playing Charles D &amp; Tempr – &quot;Vibe&quot; at La Récré last weekend. Love this track so hard. It&#x27;s heavy and I love that synth lead. Goes so hard 🔥🔥🔥
+<p class="caption-label">Bluesky and Threads get (Bluesky's shown: on Threads the link starts <code>example.com/t/</code>)</p><div class="caption">Three hours of painting in thirty seconds. The sky took longer than everything else put together 🎨
 
-https://example.com/b/vibe-at-la-recre
+https://example.com/b/three-hours-in-thirty-seconds
 
-#DJ #DJLife #DJMix #Techno #TechnoDJ #yourname</div>
-<p class="caption-label">Your notifications</p><div class="phones"><div class="phone"><div class="app">ntfy · postiz</div><div class="t">📸 Instagram: post &quot;Vibe at La Récré&quot;</div><pre>Post it as a Reel in the Instagram app:
+#oilpainting #timelapse #artprocess #yourname</div>
+<p class="caption-label">Your notifications</p><div class="phones"><div class="phone"><div class="app">ntfy · postiz</div><div class="t">📸 Instagram: post &quot;Three hours in thirty seconds&quot;</div><pre>Post it as a Reel in the Instagram app:
 1. Save the attached video: tap ⋯ → Save file and it lands in your Download album.
 2. Add your @tags - it already has sound.
-3. Paste the caption (tap &quot;Copy caption&quot;) and post.
+3. Paste the caption (tap "Copy caption") and post.
 
-An Instagram draft is in Postiz too (tagged &quot;Post in app&quot;) - keep it as your record, or post it from Postiz if it needs nothing.
+An Instagram draft is in Postiz too (tagged "Post in app") - keep it as your record, or post it from Postiz if it needs nothing.
 
 Caption:
-Caught a moment in the booth playing Charles D &amp; Tempr – &quot;Vibe&quot; at La Récré last weekend. Love this track so hard. It&#x27;s heavy and I love that synth lead. Goes so hard 🔥🔥🔥
+Three hours of painting in thirty seconds. The sky took longer than everything else put together 🎨
 
 Full post: link in bio 🔗
 
-#DJ #DJLife #DJMix #Techno #TechnoDJ #yourname</pre><div class="btns"><span>Copy caption</span><span>Open Instagram</span><span>Open Postiz</span></div><div class="attach">Attached: x.mp4</div></div><div class="phone"><div class="app">ntfy · postiz</div><div class="t">🎵 TikTok: post &quot;Vibe at La Récré&quot;</div><pre>Post it as a video in the TikTok app:
+#oilpainting #timelapse #artprocess #yourname</pre><div class="btns"><span>Copy caption</span><span>Open Instagram</span><span>Open Postiz</span></div><div class="attach">Attached: timelapse.mp4</div></div><div class="phone"><div class="app">ntfy · postiz</div><div class="t">🎵 TikTok: post &quot;Three hours in thirty seconds&quot;</div><pre>Post it as a video in the TikTok app:
 1. Save the attached video: tap ⋯ → Save file and it lands in your Download album.
 2. Add your @tags - it already has sound.
-3. Paste the caption (tap &quot;Copy caption&quot;) and post.
+3. Paste the caption (tap "Copy caption") and post.
 
-A TikTok draft is in Postiz too (tagged &quot;Post in app&quot;) - keep it as your record, or post it from Postiz if it needs nothing.
+A TikTok draft is in Postiz too (tagged "Post in app") - keep it as your record, or post it from Postiz if it needs nothing.
 
 Caption:
-Caught a moment in the booth playing Charles D &amp; Tempr – &quot;Vibe&quot; at La Récré last weekend. Love this track so hard. It&#x27;s heavy and I love that synth lead. Goes so hard 🔥🔥🔥
+Three hours of painting in thirty seconds. The sky took longer than everything else put together 🎨
 
 Full post: link in bio 🔗
 
-#DJ #DJLife #DJMix #Techno #TechnoDJ #yourname</pre><div class="btns"><span>Copy caption</span><span>Open TikTok</span><span>Open Postiz</span></div><div class="attach">Attached: x.mp4</div></div></div></article>
+#oilpainting #timelapse #artprocess #yourname</pre><div class="btns"><span>Copy caption</span><span>Open TikTok</span><span>Open Postiz</span></div><div class="attach">Attached: timelapse.mp4</div></div></div></article>
+
 </section>
 
 <section id="notifications">
@@ -628,7 +640,7 @@ Full post: link in bio 🔗
   <h3 id="notifications-instagram-finish-the-post">Instagram: finish the post</h3>
   <div class="phone" aria-label="Example Instagram notification">
     <div class="app">ntfy · postiz</div>
-    <div class="t">📸 Instagram: post "Hardcore Trance - A Journey"</div>
+    <div class="t">📸 Instagram: post "<span>Hear the first page</span>"</div>
 <pre>Post it as a Reel in the Instagram app:
 1. Save the attached video (made from your artwork + the audio in the post): tap ⋯ → Save file and it lands in your Download album.
 2. Add your @tags - it already has sound.
@@ -637,7 +649,7 @@ Full post: link in bio 🔗
 An Instagram draft is in Postiz too (tagged "Post in app") - keep it as your record, or post it from Postiz if it needs nothing.
 
 Caption:
-In this set, I discover something new. …</pre>
+<span>Forty seconds of the opening, read by me. …</span></pre>
     <div class="btns"><span>Copy caption</span><span>Open Instagram</span><span>Open Postiz</span></div>
   </div>
   <p>This example is for a post with an audio card. It tells you whether to post a <strong>feed post</strong> (image only), a <strong>Reel</strong> (when the post has a video or an audio card) or a <strong>Story</strong> (with <span class="tag">#story</span>). When it says "it already has sound", the attached video already plays your audio or your video's soundtrack, so you only need to add @tags. With several photos, <em>Open Postiz</em> becomes <em>All N photos</em> (see <a href="#finishing">Finishing</a>). With <span class="tag">#story</span> and <span class="tag">#bigdrop</span> together, the Story is the link Story, so this notification gets a "Big drop: add a link sticker to it" line and <em>Copy sticker link</em> instead of a separate reminder.</p>
@@ -646,10 +658,10 @@ In this set, I discover something new. …</pre>
   <p>Same idea, with a 🎵 and TikTok's own caption. Buttons: <em>Copy caption</em>, <em>Open TikTok</em>, <em>Open Postiz</em>.</p>
 
   <h3 id="notifications-big-drop-reminder">Big-drop reminder</h3>
-  <p>Every <span class="tag">#bigdrop</span> post gets its own "🎧 Big drop: add the link Story" notification (as long as Instagram is connected in Postiz), sent first, before the Instagram and TikTok ones, whether Instagram was posted by hand or automatically. It has the Story's photo attached (the first one, uncropped so it fills the Story), or the video, and the buttons <em>Copy sticker link</em>, <em>Open Instagram</em> and <em>Open SoundCloud</em> (or <em>Open post</em> when there's no listen link). See <a href="#finishing-big-drop-the-link-story">Big drop: the link Story</a>. The one exception is <span class="tag">#story</span> + <span class="tag">#bigdrop</span>, covered by the Instagram notification above. Story notifications always come in first (the bridge waits a couple of seconds before sending the rest, so they reach your phone in that order): with <span class="tag">#story</span>, Instagram's arrives before TikTok's.</p>
+  <p>Every <span class="tag">#bigdrop</span> post gets its own "<span>🔗</span> Big drop: add the link Story" notification (as long as Instagram is connected in Postiz), sent first, before the Instagram and TikTok ones, whether Instagram was posted by hand or automatically. It has the Story's photo attached (the first one, uncropped so it fills the Story), or the video, and the buttons <em>Copy sticker link</em>, <em>Open Instagram</em> and <em><span>Open Spotify</span></em> (or <em>Open post</em> when there's no <span>featured link</span>). See <a href="#finishing-big-drop-the-link-story">Big drop: the link Story</a>. The one exception is <span class="tag">#story</span> + <span class="tag">#bigdrop</span>, covered by the Instagram notification above. Story notifications always come in first (the bridge waits a couple of seconds before sending the rest, so they reach your phone in that order): with <span class="tag">#story</span>, Instagram's arrives before TikTok's.</p>
 
   <h3 id="notifications-taking-off">📈 Taking off</h3>
-  <p>"📈 Your YouTube video is taking off" (or SoundCloud track, Instagram post and so on) means an older post suddenly picked up: in the last 4 hours or so, or the last day, it gained at least 5% of what it had, and at least 3 times what it usually gets. It says how much it gained and what it usually gets, with buttons to its <em>Post dashboard</em> in Grafana and to the post itself. Nothing to do: it's a good moment to reshare it, pin it or post something like it. You get one per take-off; the Post dashboard shows how it goes.</p>
+  <p>"📈 Your YouTube video is taking off" (or <span>Instagram post</span>, <span>TikTok video</span> and so on) means an older post suddenly picked up: in the last 4 hours or so, or the last day, it gained at least 5% of what it had, and at least 3 times what it usually gets. It says how much it gained and what it usually gets, with buttons to its <em>Post dashboard</em> in Grafana and to the post itself. Nothing to do: it's a good moment to reshare it, pin it or post something like it. You get one per take-off; the Post dashboard shows how it goes.</p>
 
   
   
@@ -677,17 +689,17 @@ In this set, I discover something new. …</pre>
     <li><div><strong>Save the attachment.</strong> Tap the notification to open it in ntfy. Tap <strong>⋯</strong> (top right of the message), then <strong>Save file</strong>. That puts it in your phone's <em>Downloads</em>. ntfy's own <em>Download</em> button only keeps it inside ntfy, and tapping the preview just zooms in.<br><strong>Several photos?</strong> Tap <strong>Copy caption</strong> first, then <strong>All N photos</strong>. On the page that opens, tap <strong>Share all N photos</strong> and pick Instagram (<em>Feed</em>) or TikTok: the app opens with all the photos, in order, so skip the next two steps' picking and go on to music and @tags. Rather keep them on the phone first? Tap <strong>Save photo 1 of N</strong> once per photo: each tap puts the next one in <em>Downloads</em>, in order (browsers only allow one download per tap), and a ✓ marks the ones saved. The page works for 14 days.</div></li>
     <li><div><strong>Tap "Copy caption".</strong> The whole caption is now on your clipboard.</div></li>
     <li><div><strong>Create the post in the app.</strong> On Instagram: <em>+ → Post</em> (or Reel, or Story). At the top of the photo grid, tap <em>Recents</em>, switch to <em>Download</em>, and pick the file. On TikTok: <em>+ → Upload</em>, then look in the Download folder the same way.</div></li>
-    <li><div><strong>Add music and @tags.</strong> If the attachment is a video (from a video card, or the one made from your audio card), it already has sound, so skip the music. Image posts need music, which you add from the app's music picker. Tag the artists using the app's @ search.</div></li>
+    <li><div><strong>Add music and @tags.</strong> If the attachment is a video (from a video card, or the one made from your audio card), it already has sound, so skip the music. Image posts need music, which you add from the app's music picker. <span>Tag people</span> using the app's @ search.</div></li>
     <li><div><strong>Paste the caption and share.</strong></div></li>
     <li><div><strong>Leave the draft in Postiz.</strong> It's tagged <strong>Post in app</strong>, so the calendar shows it went out by hand, and it stays as your record. Just don't click Post on it, or it would go out a second time. If you decided the post doesn't need music or tags, you can post the draft from Postiz instead of using the app.</div></li>
   </ol>
   <h3 id="finishing-big-drop-the-link-story">Big drop: the link Story</h3>
   <p>Instagram Stories are the only place on Instagram where a link can be tapped. On <span class="tag">#bigdrop</span> posts:</p>
   <ol>
-    <li>Open the "🎧 Big drop: add the link Story" notification and save its attachment (<strong>⋯ → Save file</strong>). It's the first photo uncropped, so it fills the Story, or the video.</li>
+    <li>Open the "<span>🔗</span> Big drop: add the link Story" notification and save its attachment (<strong>⋯ → Save file</strong>). It's the first photo uncropped, so it fills the Story, or the video.</li>
     <li>Instagram: <em>+ → Story</em>, then pick it from the <em>Download</em> album.</li>
     <li>Tap the sticker icon, then <strong>Link</strong>. Paste the link (tap <em>Copy sticker link</em> in the notification).</li>
-    <li>Tap <em>Customize sticker text</em> and write something like "🎧 Listen now", then share.</li>
+    <li>Tap <em>Customize sticker text</em> and write something like "<span>Out now</span>", then share.</li>
   </ol>
 </section>
 
@@ -708,11 +720,13 @@ In this set, I discover something new. …</pre>
 <section id="habits">
   <h2>Good habits</h2>
   <ul>
-    <li><strong>Pick music that represents you.</strong> A track from the set, or one clearly in your style. Avoid random trending songs.</li>
+    
+    <li><strong>Pick music that fits you.</strong> One that matches your work and your audience, rather than whatever is trending that day.</li>
     <li><strong>Use an Instagram Creator account,</strong> not Business. Creator accounts get the full music library.</li>
-    <li><strong>Keep your bio links current.</strong> On Instagram, add <code>example.com</code> and your SoundCloud profile under <em>Edit profile → Links</em>. The site's home page always shows the newest post, so "link in bio" keeps working. On TikTok, bio links need 1,000 followers or a Business account.</li>
-    <li><strong>Mind the copyright.</strong> Clips of mixes contain other artists' tracks, so Instagram and TikTok sometimes mute them. Short clips and your own edits get through more often. Music picked from the apps' own libraries is always allowed.</li>
-    <li><strong>Engage.</strong> Replying to comments and resharing when artists tag you does more for growth than posting more often.</li>
+    <li><strong>Keep your bio links current.</strong> On Instagram, add <code>example.com</code> and <span>your other main page (a shop, a channel, a newsletter)</span> under <em>Edit profile → Links</em>. The site's home page always shows the newest post, so "link in bio" keeps working. On TikTok, bio links need 1,000 followers or a Business account.</li>
+    
+    <li><strong>Mind the copyright.</strong> A video with someone else's song in it can get muted on Instagram and TikTok. Your own sound gets through; music picked from the apps' own libraries is always allowed.</li>
+    <li><strong>Engage.</strong> Replying to comments and resharing when <span>people tag you</span> does more for growth than posting more often.</li>
   </ul>
 </section>
 

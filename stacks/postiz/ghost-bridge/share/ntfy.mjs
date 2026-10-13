@@ -2,7 +2,7 @@
 // link-Story reminder, and an older post taking off (stats/history.mjs finds those).
 
 import { env, NTFY_URL, NTFY_TOPIC, NTFY_TOKEN, NTFY_USER, NTFY_PASS, DRY_RUN, DRY_RUN_NTFY, NTFY_TITLE_PREFIX,
-  DRAFT_TAG, POSTIZ_PUBLIC_URL, SITE_TIMEZONE, previewStore, log, isDry, GRAFANA_URL, ID_PREFIX } from '../config.mjs';
+  DRAFT_TAG, POSTIZ_PUBLIC_URL, SITE_TIMEZONE, FEATURED_ICON, previewStore, log, isDry, GRAFANA_URL, ID_PREFIX } from '../config.mjs';
 import { photoPage } from '../pages/preview-routes.mjs';
 import { stickerLink } from './content.mjs';
 import { setTakeOffNotice, takeOffWords, postRef } from '../stats/history.mjs';
@@ -73,7 +73,7 @@ export async function notifyBigDrop({ title, url, listen, campaign, attachment, 
   ];
   if (listen) lines.push('', `Post:\n${url}`);
   return notify({
-    title: `🎧 Big drop: add the link Story for "${title}"`,
+    title: `${FEATURED_ICON} Big drop: add the link Story for "${title}"`,
     message: lines.join('\n'),
     tags: ['loudspeaker'],
     priority: 4,
@@ -116,7 +116,7 @@ export async function notifyManual({ platform, title, url, listen, campaign, big
     story && isIG ? '3. Post the Story.' : '3. Paste the caption (tap "Copy caption") and post.',
   ];
   if (drafted) lines.push('', `${isIG ? 'An' : 'A'} ${platform} draft is in Postiz too${DRAFT_TAG ? ` (tagged "${DRAFT_TAG}")` : ''} - keep it as your record, or post it from Postiz if it needs nothing.`);
-  if (linkStory) lines.push('', `🎧 Big drop: add a link sticker to it → ${stickerLink(listen, url, campaign)}`);
+  if (linkStory) lines.push('', `${FEATURED_ICON} Big drop: add a link sticker to it → ${stickerLink(listen, url, campaign)}`);
   if (caption) lines.push('', 'Caption:', caption);
 
   const actions = [];

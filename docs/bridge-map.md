@@ -78,8 +78,8 @@ Admin API (JWT from `GHOST_ADMIN_API_KEY`).
 - Imports: config, services, share/content, share/media, share/ntfy
 
 ### `share/content.mjs`
-Reading Ghost's HTML, then each channel's caption fitted to its limits, Listen line, tagged links.
-- Exports: `bodyText`, `LINK_RE`, `findVideo`, `findAudio`, `findAudioThumb`, `findGalleryImages`, `clipFromTags`, `cleanLink`, `postLinks`, `findListenLink`, `chosenListen`, `splitHashtags`, `channelText`, `buildLines`, `buildContent`, `tagLink`, `campaignOf`, `stickerLink`
+Reading Ghost's HTML, then each channel's caption fitted to its limits, the featured link's line (`featuredLine`), tagged links.
+- Exports: `bodyText`, `LINK_RE`, `findVideo`, `findAudio`, `findAudioThumb`, `findGalleryImages`, `clipFromTags`, `cleanLink`, `postLinks`, `findListenLink`, `chosenListen`, `featuredLine`, `splitHashtags`, `channelText`, `buildLines`, `buildContent`, `tagLink`, `campaignOf`, `stickerLink`
 - Imports: config, pages/preview (`esc`)
 
 ### `share/media.mjs`
@@ -115,7 +115,7 @@ Renders preview pages (each channel's mock-up) and the photos page, each with th
 ### `pages/preview-routes.mjs`
 Dry-run previews written to `data/previews/` and served; photo pages (photos.json, `PHOTO_PAGE_DAYS`); the draft
 Social preview (`staffSignedIn` via Ghost's session cookie, cached per a hash of the post Ghost sends) and its saves (custom text,
-Listen link, frames).
+featured link, frames).
 - Exports: `writePreview`, `servePreview`, `serveFile`, `PREVIEW_SETTINGS`, `draftPage`, `photoPage`, `servePhotos`, `serveDraftPreview`, `cleanDraftMedia`, `sendJson`
 - Imports: config, services, pages/preview, share/content, share/share (`handlePost`, run fully dry)
 - Routes (called from ghost-bridge.mjs): `/previews/...`, `<PHOTOS_BASE>/<id>/[n]`, `/ghost/social-preview/<uuid>/` +

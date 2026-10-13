@@ -110,9 +110,12 @@ const INDUSTRY = {
   // saves, which TikTok's API doesn't give us, so ours runs a little low; the verdict says so.
   tiktok: { what: 'engagement per view', num: ['likes', 'comments', 'shares'], den: 'views', typical: () => 3.85,
     source: 'Socialinsider, Q2 2026, which also counts saves: TikTok doesn\'t give us those' },
-  // 2025-26 YouTube benchmarks: music channels 1-3% (likes + comments per view), Shorts 5-8%
+  // Every kind of channel, not one niche: CreatorDB's study of 1.46M channels (creatordb.app/research/
+  // youtube-view-count-change, Aug 2026): long-form likes + comments per view, middle half 1.90-6.44% (median 3.67%),
+  // measured before YouTube's Aug 24 2026 change to counting views from the first frame (more views, so rates read
+  // a little lower since); Shorts' median 2.59% there and 3.8% in SociaVault's 75,000 channels (Apr 2026)
   youtube: { what: 'likes + comments per view', num: ['likes', 'comments'], den: 'views',
-    typical: (p) => (POST_KIND.youtube(p) === 'Short' ? [5, 8] : [1, 3]), source: 'YouTube benchmarks 2025-26 (music)' },
+    typical: (p) => (POST_KIND.youtube(p) === 'Short' ? [2.5, 4] : [2, 6]), source: 'CreatorDB and SociaVault, 2026 (all channels)' },
   // Mailchimp's email benchmarks: media & publishing click rate 4.0% (opens aren't used: Apple Mail inflates them)
   ghost: { what: 'newsletter click rate', num: ['emailClicks'], den: 'emailRecipients', typical: () => 4.0, source: 'Mailchimp (media)' },
 };

@@ -1,12 +1,12 @@
-# Module live: the DJ's live stream, as the icecast stack's TinyIce, plus relays for the listeners.
-# - tinyice: the main TinyIce. The DJ software streams Ogg to its own LoadBalancer port (8222, straight to it: Traefik
+# Module live: the live stream, as the icecast stack's TinyIce, plus relays for the listeners.
+# - tinyice: the main TinyIce. The streaming software sends Ogg to its own LoadBalancer port (8222, straight to it: Traefik
 #   drops a SOURCE request's body), it transcodes /stream-mp3, serves the player page, /live-status.json and its admin
 #   (home network only). Its config starts as the site's (Secret tinyice-config, from kit/setup.sh's config.json, which
 #   k8s/up.sh adds) and lives on its volume after that, so changes made in its admin stay.
 # - tinyice-relay: Icecast 2 relays (TinyIce's own refuse in-cluster addresses), each pulling the mp3 from the main one
 #   (Secret icecast-relay-config, which k8s/up.sh makes). Listeners' mp3 goes to them, so more listeners = more relays
 #   (kubectl scale deployment tinyice-relay --replicas=N; 500 listeners each).
-# - The mounts' names (the DJ's, /stream-ogg, and the mp3, /stream-mp3, as kit/setup.sh makes them) are TinyIce's own:
+# - The mounts' names (the source's, /stream-ogg, and the mp3, /stream-mp3, as kit/setup.sh makes them) are TinyIce's own:
 #   k8s/up.sh reads them from its config (the running one's, so a rename in its admin counts) into ConfigMap "live",
 #   which Traefik's route and the relays read; renamed there, run k8s/up.sh again.
 # - live.yml: Traefik's routes, the icecast stack's labels as a file, with the same router names.

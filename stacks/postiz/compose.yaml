@@ -137,7 +137,10 @@ services:
       SHARE_VIDEO: "${SHARE_VIDEO:-true}"  # share a Ghost-hosted .mp4 (video card) instead of the feature image
       GALLERY: "${GALLERY:-true}"  # also share gallery card images (Bluesky grid of 4, Threads/Instagram carousel, TikTok photos)
       MAX_IMAGES: "${MAX_IMAGES:-10}"  # at most this many images per post (feature image + gallery)
-      LISTEN_DOMAINS: "${LISTEN_DOMAINS:-youtube.com,youtu.be,soundcloud.com,on.soundcloud.com,mixcloud.com}"  # "🎧 Listen" line: earlier service wins
+      FEATURED_DOMAINS: "${FEATURED_DOMAINS:-youtube.com,youtu.be,vimeo.com,soundcloud.com,on.soundcloud.com,mixcloud.com,open.spotify.com,podcasts.apple.com,music.apple.com,bandcamp.com,twitch.tv}"  # the featured link's services: an earlier one wins; none = off
+      FEATURED_LINE: "${FEATURED_LINE:-🔗 [name]: [url]}"  # its line on Bluesky/Threads ([name] = the service, [url] = the link)
+      FEATURED_BIO_LINE: "${FEATURED_BIO_LINE:-🔗 Also on [name] + the full post: link in bio}"  # its line on Instagram/TikTok
+      FEATURED_LABEL: "${FEATURED_LABEL:-Featured link}"  # what the Social preview calls it
       TIKTOK_METHOD: "${TIKTOK_METHOD:-UPLOAD}"  # UPLOAD = draft in your TikTok inbox; DIRECT_POST = publish directly
       TIKTOK_PRIVACY: "${TIKTOK_PRIVACY:-SELF_ONLY}"  # only used with DIRECT_POST; unaudited TikTok apps must use SELF_ONLY
       DRY_RUN: "${GHOST_BRIDGE_DRY_RUN:-false}"
@@ -222,7 +225,7 @@ services:
       # A kit site without the live module sets it false (kit/kit.sh), so nothing asks a TinyIce that isn't there.
       LIVE_STATS: "${LIVE_STATS:-true}"
       LIVE_STATUS_URL: "http://tinyice:8080/status-json.xsl"
-      LIVE_MOUNT: "${LIVE_MOUNT:-/stream-ogg}"     # the mount the DJ software sends to (a kit site: kit/kit.sh, from TinyIce's config)
+      LIVE_MOUNT: "${LIVE_MOUNT:-/stream-ogg}"     # the mount the streaming software sends to (a kit site: kit/kit.sh, from TinyIce's config)
       # Links followed off the site and LIVE NOW bar plays (the theme's POST /.puppy/click, traefik/dynamic/puppi3.yml)
       CLICK_STATS: "true"            # "false" = links followed off the site and LIVE NOW plays aren't counted
       # Postiz's own analytics for every channel connected there (any network), kept per day in the archive only.
