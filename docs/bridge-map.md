@@ -108,7 +108,7 @@ checks), best posts (`performanceDoc`), most-read pages (Tinybird) and live show
 - Imports: config, share/ntfy (`notify`), stats/history, stats/performance (`performanceDoc`)
 
 ### `pages/preview-render.mjs`
-Renders preview pages (each channel's mock-up) and the photos page; rendering only.
+Renders preview pages (each channel's mock-up) and the photos page, each with the kit's "Source" link (`SOURCE_URL`, the AGPL's offer); rendering only.
 - Exports: `esc`, `escAttr`, `previewPage`, `photosPage`, `renderPreview`
 - Imports: nothing of the bridge's
 

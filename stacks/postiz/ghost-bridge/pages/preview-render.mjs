@@ -3,6 +3,11 @@
 // page's styles and script. Rendering only: the bridge collects what a publish would do (a "pv") and
 // passes its settings in; this file reads and writes nothing. Not a copy of each app.
 
+// The bridge is part of Puppi3's Creator Kit (AGPL-3.0): its pages link the kit's source, so a site running it
+// unchanged offers its visitors the source as the licence asks
+const SOURCE_URL = 'https://github.com/puppi3-music/puppi3-creator-kit';
+const sourceLink = `<p class="source"><a href="${SOURCE_URL}">Source</a></p>`;
+
 export const esc = (s) => String(s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -168,6 +173,7 @@ const PREVIEW_CSS = `
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);
 font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 main{max-width:1300px;margin:0 auto;padding:24px 16px 48px}
+.source{margin:0 auto;padding:0 16px 24px;text-align:center;font-size:12px}.source a{color:var(--dim)}
 h1{font-size:22px;margin:0 0 4px}a{color:var(--link)}.dim{color:var(--dim);font-weight:400}.small{font-size:12px;margin-top:6px}
 .meta{color:var(--dim);margin-bottom:20px}.meta span{margin-right:12px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;align-items:start}
@@ -375,7 +381,7 @@ document.addEventListener('change', function (e) {
 
 export const previewPage = (title, inner) => `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title>
-<style>${PREVIEW_CSS}</style></head><body><main>${inner}</main><script>${PREVIEW_JS}</script></body></html>`;
+<style>${PREVIEW_CSS}</style></head><body><main>${inner}</main>${sourceLink}<script>${PREVIEW_JS}</script></body></html>`;
 
 // A notification's buttons: links for "view" ones (a draft's photo page isn't made yet, so it's just named)
 const noteButtons = (n) => (n.actions?.length ? `<span class="buttons">Buttons: ${n.actions.map((a) =>
@@ -405,7 +411,7 @@ main{max-width:640px}.acts{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
 <div class="acts"><button type="button" class="main" id="share" disabled>Loading photos…</button><button type="button" id="save">Save</button></div>
 <p id="msg" class="dim"></p>
 <div class="shots">${shots}</div>
-<p class="dim small">The Save button takes one photo per tap, in order. Or tap a photo to save just that one.</p></main>
+<p class="dim small">The Save button takes one photo per tap, in order. Or tap a photo to save just that one.</p></main>${sourceLink}
 <script>(function () {
 var share = document.getElementById('share'), save = document.getElementById('save'), msg = document.getElementById('msg');
 var links = [].slice.call(document.querySelectorAll('.shots a')), files = null;
