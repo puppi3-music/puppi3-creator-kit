@@ -210,7 +210,7 @@ def kit_values(paths, cloud=False):
         "SITE_TIMEZONE": tz, "TZ_NAME": tz, "TZ_HOURS": str(std_hours(tz)),
         # the site's Ghost's site_uuid (kit.sh asks Ghost once it's up; until then the Tinybird panels are empty)
         "GHOST_SITE_UUID": v.get("GHOST_SITE_UUID") or "00000000-0000-0000-0000-000000000000",
-        "DISK_MOUNT": v.get("DISK_MOUNT") or "/", "DJ_SOFTWARE": "the DJ software",
+        "DISK_MOUNT": v.get("DISK_MOUNT") or "/", "DJ_SOFTWARE": "the streaming software",
         "NTFY_URL": (v.get("NTFY_URL") or "https://ntfy.sh").rstrip("/"), "NTFY_TOPIC": v.get("NTFY_TOPIC") or f"{p}-alerts",
     }
     mp = p.replace("-", "_")
@@ -227,6 +227,12 @@ def kit_values(paths, cloud=False):
          lambda m: f'container_label_com_docker_compose_project="{p}",name=~"postiz.*"'),
         (r"\bpuppi3_", lambda m: mp + "_"),
         (r"NAS disk", lambda m: "Disk"),
+        # Content's music clicks, for any creator: the watch-or-listen services (live.mjs's SERVICES names)
+        (r"Clicks to music", lambda m: "Clicks to watch or listen"),
+        (r"YouTube, SoundCloud, Mixcloud, Bandcamp, Spotify, Apple Music or Beatport: people going to listen",
+         lambda m: "YouTube, Vimeo, Twitch, SoundCloud, Mixcloud, Bandcamp, Spotify, Apple Music, Apple Podcasts or "
+                   "Beatport: people going to watch or listen"),
+        (r'"Apple Music", "Beatport"\]', lambda m: '"Apple Music", "Beatport", "Vimeo", "Twitch", "Apple Podcasts"]'),
         (r"the postiz \.env", lambda m: "secrets/postiz.env"),
         (r"puppi3 · ", lambda m: f"{name} · "),
         (r"\bpuppi3\b", lambda m: p),

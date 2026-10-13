@@ -4,8 +4,8 @@
      counted by the kit's bridge at POST /.site/click (which page and which link, nothing about the visitor).
    - The Social preview button on Ghost's draft previews (/p/<uuid>/): opens the bridge's preview of what publishing
      would post, for staff signed in to Ghost Admin.
-   - Icons beside music links (SoundCloud, Mixcloud, Bandcamp…) in the footer's secondary navigation: Ghost's own
-     social accounts don't cover them, so a site adds them as navigation links and the kit recognises the address. */
+   - Icons beside links to the other platforms a creator is on (SoundCloud, Patreon, Substack, Vimeo…) in the footer's
+     secondary navigation: Ghost's own social accounts don't cover them, so a site adds them as navigation links and the kit recognises the address. */
 (function () {
     'use strict';
 
@@ -45,11 +45,13 @@
         document.body.appendChild(button);
     }
 
-    /* Music links in the footer's navigation get their service's icon (partials/kit/icons.hbs) */
+    /* Links to other platforms in the footer's navigation get their service's icon (partials/kit/icons.hbs) */
     var SERVICES = [
         [/(^|\.)soundcloud\.com$/, 'soundcloud'], [/(^|\.)mixcloud\.com$/, 'mixcloud'], [/(^|\.)bandcamp\.com$/, 'bandcamp'],
         [/(^|\.)spotify\.com$/, 'spotify'], [/(^|\.)twitch\.tv$/, 'twitch'], [/(^|\.)beatport\.com$/, 'beatport'],
-        [/^ra\.co$/, 'ra']
+        [/^ra\.co$/, 'ra'], [/(^|\.)vimeo\.com$/, 'vimeo'], [/^podcasts\.apple\.com$/, 'podcasts'],
+        [/(^|\.)patreon\.com$/, 'patreon'], [/(^|\.)ko-fi\.com$/, 'kofi'], [/(^|\.)substack\.com$/, 'substack'],
+        [/(^|\.)etsy\.com$/, 'etsy'], [/(^|\.)behance\.net$/, 'behance'], [/(^|\.)discord\.(gg|com)$/, 'discord']
     ];
     var links = document.querySelectorAll('.gh-footer-menu a[href]');
     for (var i = 0; i < links.length; i++) {
@@ -61,7 +63,7 @@
             use.setAttribute('href', '#kit-i-' + SERVICES[j][1]);
             svg.setAttribute('aria-hidden', 'true');
             svg.appendChild(use);
-            links[i].classList.add('kit-music-link');
+            links[i].classList.add('kit-platform-link');
             links[i].insertBefore(svg, links[i].firstChild);
             break;
         }

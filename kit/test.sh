@@ -8,7 +8,7 @@
 #     through Traefik (https on Traefik's own certificate: TLS_RESOLVER=self); with BEHIND_CLOUDFLARE=false, from anywhere
 #   - Ghost with the kit's theme (uploaded through the Admin API): a page hit reaches Tinybird, with its country
 #     filled in by page-hit-country (the browser says UTC, Cloudflare's header says CA)
-#   - Live: ffmpeg streams Ogg to TinyIce like the DJ software; /live-status.json shows it, the LIVE NOW bar appears
+#   - Live: ffmpeg streams Ogg to TinyIce like the streaming software; /live-status.json shows it, the LIVE NOW bar appears
 #     with the track and plays /stream-mp3; the play and a link out reach the bridge as click beacons
 #   - The bridge: /health, /performance.json, a signed Ghost webhook through Traefik makes a DRY_RUN preview
 #   - The draft preview has the Social preview button; no pets route; no puppi3 in container names, routers, metrics
@@ -118,7 +118,7 @@ admin POST /posts/ -H 'Content-Type: application/json' -d '{"posts":[{"title":"A
 slug="$(python3 -c "import json; print(json.load(open('$SP/post.json'))['posts'][0]['slug'])")"
 uuid="$(python3 -c "import json; print(json.load(open('$SP/draft.json'))['posts'][0]['uuid'])")"
 
-# ---- Live: a source like the DJ software's
+# ---- Live: a source like the streaming software's
 echo "== live stream and the browser"
 pw="$(sed -n 's/^TINYICE_SOURCE_PASSWORD=//p' "$S/secrets/icecast.env")"
 ffmpeg -nostdin -loglevel error -re -f lavfi -i "sine=frequency=440:sample_rate=44100" -t 120 -ac 2 -c:a vorbis \

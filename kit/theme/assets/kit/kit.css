@@ -56,9 +56,9 @@
 }
 .kit-preview-button:hover { opacity: 0.9; }
 
-/* Music links in the footer's secondary navigation (kit.js adds the icon by address) */
-.kit-music-link { display: inline-flex; align-items: center; gap: 6px; }
-.kit-music-link svg { flex: none; width: 18px; height: 18px; }
+/* Links to other platforms in the footer's secondary navigation (kit.js adds the icon by address) */
+.kit-platform-link { display: inline-flex; align-items: center; gap: 6px; }
+.kit-platform-link svg { flex: none; width: 18px; height: 18px; }
 
 /* The author credit in the footer (partials/components/footer.hbs): its own line under "Powered by Ghost", which may
    wrap on a phone (Source keeps that line on one) */

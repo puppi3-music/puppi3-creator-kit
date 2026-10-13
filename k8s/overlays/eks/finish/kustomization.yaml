@@ -3,7 +3,7 @@
 # does nothing.
 # - gp3 (EBS, the cluster recipe's StorageClass) for every volume
 # - Traefik's and the stream source's LoadBalancers as an NLB (AWS Load Balancer Controller): instance targets with
-#   externalTrafficPolicy Local keep the visitor's address (cloudflare-only checks it), the DJ's too
+#   externalTrafficPolicy Local keep the visitor's address (cloudflare-only checks it), the streamer's too
 # - Postiz's and Temporal's Postgres on RDS (components/cloud-postgres/: the logins, the waits, Grafana's grants),
 #   their Services DNS aliases of POSTGRES_HOST (replacements.yaml)
 apiVersion: kustomize.config.k8s.io/v1alpha1

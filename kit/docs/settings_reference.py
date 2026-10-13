@@ -56,7 +56,7 @@ K8S = [
 # another Traefik): never in a site's files. Each must still be read somewhere, or the check says so.
 SET_FOR_YOU = {
     "SITE_DIR": "kit.sh: the site's folder.",
-    "LIVE_MOUNT": "kit.sh and k8s/up.sh: the mount your DJ software streams to, read from TinyIce's own config, so "
+    "LIVE_MOUNT": "kit.sh and k8s/up.sh: the mount your streaming software sends to, read from TinyIce's own config, so "
                   "the bridge counts the right one.",
     "GHOST_UPSTREAM": "The kit's Traefik profile (and k8s's Traefik): where Ghost answers.",
     "ANALYTICS_UPSTREAM": "Where Ghost's analytics service answers (the kit's own name is the default).",

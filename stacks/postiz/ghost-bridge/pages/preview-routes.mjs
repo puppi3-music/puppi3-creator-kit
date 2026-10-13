@@ -9,7 +9,7 @@ import { esc, escAttr, previewPage, renderPreview, photosPage } from './preview-
 import { LIMITS, IMAGE_LIMITS, INSTAGRAM_IDS, TIKTOK_IDS, NO_LINK_IDS, CUSTOM_CHANNELS, CUSTOM_MAX, MANUAL_DRAFTS,
   BIG_DROP_TAG, STORY_TAG, PREVIEW_DIR, PREVIEW_KEEP, PREVIEW_URL, log, channelKey, PHOTOS_FILE, PHOTOS_BASE,
   PHOTO_PAGE_DAYS, GHOST_API_URL, previewStore, DRAFT_BASE, DRAFT_PREVIEWS, editCustom, setCustom,
-  setFrame } from '../config.mjs';
+  setFrame, FEATURED_DOMAINS, SERVICE_NAMES, FEATURED_LINE, FEATURED_BIO_LINE, FEATURED_LABEL } from '../config.mjs';
 import { ghostPostByUuid, ghostSiteOrigin, GHOST_KEY_FIX } from '../services.mjs';
 import { cleanLink } from '../share/content.mjs';
 import { handlePost } from '../share/share.mjs';
@@ -20,7 +20,8 @@ import { handlePost } from '../share/share.mjs';
 // The pages themselves are drawn by pages/preview-render.mjs. Written to PREVIEW_DIR/<time>-<slug>.html after each
 // webhook in DRY_RUN, and used for draft previews.
 export const PREVIEW_SETTINGS = { LIMITS, IMAGE_LIMITS, INSTAGRAM_IDS, TIKTOK_IDS, NO_LINK_IDS, CUSTOM_CHANNELS, CUSTOM_MAX,
-  MANUAL_DRAFTS, BIG_DROP_TAG, STORY_TAG, channelKey };
+  MANUAL_DRAFTS, BIG_DROP_TAG, STORY_TAG, channelKey, FEATURED_DOMAINS, SERVICE_NAMES, FEATURED_LINE, FEATURED_BIO_LINE,
+  FEATURED_LABEL };
 
 export async function writePreview(pv) {
   await fs.mkdir(PREVIEW_DIR, { recursive: true });
@@ -147,7 +148,7 @@ export async function servePhotos(req, res, p) {
 
 // ---------- draft previews (/ghost/social-preview/<uuid>/) ----------
 // The Social preview of a draft (/ghost/social-preview/<uuid>/), and its saves (a channel's own
-// text, the Listen link, Instagram framing).
+// text, the featured link, Instagram framing).
 // Ghost's preview page (/p/<uuid>/) links here from the theme. Only for staff signed in to Ghost Admin
 // (staffSignedIn). The draft is read with the Admin API (so only real posts are rendered), run through
 // the same logic as a publish with everything dry, and cached until Ghost's copy of it changes.
@@ -251,8 +252,8 @@ async function saveFrame(req, res, uuid) {
   return sendJson(res, 200, { ok: true });
 }
 
-// POST /ghost/social-preview/<uuid>/listen {url}: the post's Listen link: '' = found automatically,
-// 'none' = no Listen line, or any web address
+// POST /ghost/social-preview/<uuid>/listen {url}: the post's featured link: '' = found automatically,
+// 'none' = no featured link line, or any web address
 async function saveListen(req, res, uuid) {
   const body = await readJson(req, res);
   if (!body) return;
@@ -268,7 +269,7 @@ async function saveListen(req, res, uuid) {
   if (!post) return sendJson(res, 404, { error: 'no post has that preview link' });
   await editCustom(post.id, (m) => { if (url) m.listen = url; else delete m.listen; });
   if (hit) hit.html = null;
-  log(`social preview: listen link for "${post.title}": ${url || 'automatic'}`);
+  log(`social preview: featured link for "${post.title}": ${url || 'automatic'}`);
   return sendJson(res, 200, { ok: true });
 }
 

@@ -33,7 +33,7 @@ export NTFY_URL="$(val NTFY_URL)"
 
 # Live off: the bridge stops asking TinyIce for shows (stacks/postiz/compose.yaml's LIVE_STATS; the shell's value wins
 # over site.env's).
-# Live on: the bridge's LIVE_MOUNT is the DJ's mount in TinyIce's config (its transcoder's input), so a rename there
+# Live on: the bridge's LIVE_MOUNT is the source mount in TinyIce's config (its transcoder's input), so a rename there
 # (config.json or TinyIce's admin, which writes the same file) carries over at the next run
 case ",$MODULES," in
     *,live,*)

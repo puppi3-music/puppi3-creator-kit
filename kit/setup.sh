@@ -140,7 +140,7 @@ mkdir -p "$d/puppi3/ghost/content" "$d/puppi3/db" "$d/puppi3/tinybird" "$d/iceca
   "paths": { "contentPath": "/var/lib/ghost/content" }
 }
 JSON
-# TinyIce's config, set up (else it waits for its web setup page): /stream-ogg for the DJ software, transcoded to
+# TinyIce's config, set up (else it waits for its web setup page): /stream-ogg for the streaming software, transcoded to
 # /stream-mp3 for listeners, with the burst sizes a live site runs with (a smaller mp3 burst leaves a slow
 # listener room before TinyIce's 512 KB ring jumps them). Passwords bcrypt-hashed, as TinyIce keeps them.
 bcrypt() {
@@ -240,7 +240,7 @@ on social && cat <<EOF
     Then kit/kit.sh $SITE_DIR up -d again.
 EOF
 if on live; then cat <<EOF
-  - Live: the DJ software streams Ogg to $(val LIVE_HOST) port $(val LIVE_PORT | grep . || echo 8222) (this host's own address if behind Cloudflare,
+  - Live: the streaming software sends Ogg to $(val LIVE_HOST) port $(val LIVE_PORT | grep . || echo 8222) (this host's own address if behind Cloudflare,
     which doesn't pass the port; straight to TinyIce: Traefik would drop the audio), mount /stream-ogg, user source, password TINYICE_SOURCE_PASSWORD from secrets/icecast.env.
     TinyIce's admin: http://tinyice.$(val LAN_DOMAIN) (home network), TINYICE_ADMIN_USER / TINYICE_ADMIN_PASSWORD.
 EOF

@@ -1,13 +1,13 @@
-// share/content.mjs: what a post says: reading its HTML (text, video, audio card, gallery images, links, the Listen
+// share/content.mjs: what a post says: reading its HTML (text, video, audio card, gallery images, links, the featured
 // link, the #clip tag), and each channel's caption made from it.
 
-import { LISTEN_DOMAINS, LISTEN_NAMES, CLIP_TAG, log, LIMITS, NO_LINK_IDS, INCLUDE_TITLE, TAG_LINKS,
+import { FEATURED_DOMAINS, SERVICE_NAMES, FEATURED_LINE, FEATURED_BIO_LINE, CLIP_TAG, log, LIMITS, NO_LINK_IDS, INCLUDE_TITLE, TAG_LINKS,
   CAMPAIGN_TAG } from '../config.mjs';
 import { esc } from '../pages/preview-render.mjs';
 
 // ---------- Ghost content helpers ----------
 // Reading a Ghost post's HTML: its text (bodyText, links marked for the captions below), video, audio
-// card, gallery images, links (and which is the Listen link), and the #clip tag.
+// card, gallery images, links (and which is the featured link), and the #clip tag.
 // First Ghost-hosted .mp4 from a video card in the post HTML
 export function findVideo(html, postUrl) {
   if (!html) return null;
@@ -23,10 +23,10 @@ export function findVideo(html, postUrl) {
   return null;
 }
 
-// A link's service name: LISTEN_NAMES for its host or a parent domain, else the host (artist.bandcamp.com -> Bandcamp)
+// A link's service name: SERVICE_NAMES for its host or a parent domain, else the host (artist.bandcamp.com -> Bandcamp)
 function serviceName(u) {
   const host = u.hostname.toLowerCase().replace(/^(www|m)\./, '');
-  for (let h = host; h.includes('.'); h = h.slice(h.indexOf('.') + 1)) if (LISTEN_NAMES[h]) return LISTEN_NAMES[h];
+  for (let h = host; h.includes('.'); h = h.slice(h.indexOf('.') + 1)) if (SERVICE_NAMES[h]) return SERVICE_NAMES[h];
   return host;
 }
 // A shareable address: tracking junk dropped from share links, no #fragment
@@ -39,7 +39,7 @@ export function cleanLink(u) {
 }
 // Every web link in the post that isn't to the site itself, in order, once each: <a href> (text links,
 // bookmark cards, captions) and YouTube embeds (as their watch address). { url, name, rank }: rank = place
-// of its service in LISTEN_DOMAINS (-1: not a listen link). Player (w.) and API addresses don't count.
+// of its service in FEATURED_DOMAINS (-1: not a featured link). Player (w.) and API addresses don't count.
 export function postLinks(html, postUrl) {
   if (!html) return [];
   let site = '';
@@ -61,19 +61,19 @@ export function postLinks(html, postUrl) {
     const url = cleanLink(u);
     if (found.some((f) => f.url === url)) continue;
     const name = serviceName(u);
-    const domain = LISTEN_DOMAINS.find((d) => host === d || host.endsWith('.' + d));
+    const domain = FEATURED_DOMAINS.find((d) => host === d || host.endsWith('.' + d));
     // the rank of a service is its first domain's (soundcloud.com and on.soundcloud.com rank the same)
-    const rank = domain ? LISTEN_DOMAINS.findIndex((d) => (LISTEN_NAMES[d] || d) === (LISTEN_NAMES[domain] || domain)) : -1;
+    const rank = domain ? FEATURED_DOMAINS.findIndex((d) => (SERVICE_NAMES[d] || d) === (SERVICE_NAMES[domain] || domain)) : -1;
     found.push({ url, name, rank });
   }
   return found;
 }
-// The Listen link: the best-ranked service's first link (see LISTEN_DOMAINS)
+// The featured link: the best-ranked service's first link (see FEATURED_DOMAINS)
 export function findListenLink(links) {
   const best = links.filter((l) => l.rank >= 0).sort((a, b) => a.rank - b.rank)[0];
   return best ? { url: best.url, name: best.name } : null;
 }
-// A Listen link picked on the Social preview: 'none', or an address (any web link)
+// A featured link picked on the Social preview: 'none', or an address (any web link)
 export function chosenListen(choice) {
   if (choice === 'none') return null;
   try { const u = new URL(choice); return { url: cleanLink(u), name: serviceName(u) }; } catch { return null; }
@@ -231,12 +231,12 @@ export const LINK_RE = /\uE000([^\uE000-\uE002]*)\uE001([^\uE000-\uE002]*)\uE002
 
 // ---------- captions ----------
 // Each channel's caption: its text fitted to the platform's limit (hashtags dropped first), link
-// addresses where links can be tapped, the Listen line, and the site's links tagged with the network (short links).
+// addresses where links can be tapped, the featured link's line, and the site's links tagged with the network (short links).
 const hasLinks = (text) => /[\uE000-\uE002]/.test(text || '');
 // The link text only (Instagram and TikTok, where links can't be tapped, or when addresses don't fit)
 const withoutLinks = (text) => (text || '').replace(LINK_RE, '$1').replace(/[\uE000-\uE002]/g, '');
 // "text (address)" for each web link, tagged like the post link when it's to the site. A link whose text
-// already is its address, or that is the Listen link (it gets its own 🎧 line), stays as its text.
+// already is its address, or that is the featured link (it gets its own line), stays as its text.
 function withLinks(text, { url, listen, identifier, campaign }) {
   const bare = (u) => u.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/+$/, '').toLowerCase();
   let site = '';
@@ -323,6 +323,9 @@ export function buildLines(identifier, data) {
   return fitLines(identifier, { ...data, text: withoutLinks(data.text) });
 }
 
+// FEATURED_LINE / FEATURED_BIO_LINE for a featured link: [name] = its service, [url] = the link
+export const featuredLine = (line, { name, url }) => line.replace(/\[name\]/g, name).replace(/\[url\]/g, url);
+
 // The caption's lines, fitted to the platform. With whole, null when it doesn't fit without trimming.
 function fitLines(identifier, { title, text, url, listen, campaign, custom = false }, { whole = false } = {}) {
   const limit = LIMITS[identifier] ?? 490;
@@ -331,11 +334,11 @@ function fitLines(identifier, { title, text, url, listen, campaign, custom = fal
   let links;
   if (noLinks) {
     // links aren't clickable here - one line pointing to the bio
-    links = [listen ? `🎧 Full set on ${listen.name} + the full post: link in bio 🔗` : 'Full post: link in bio 🔗'];
+    links = [listen ? featuredLine(FEATURED_BIO_LINE, listen) : 'Full post: link in bio 🔗'];
   } else {
     // a link that's already in your text isn't added again
     const has = (u) => (text || '').includes(u);
-    links = [...(listen && !has(listen.url) ? [`🎧 Listen: ${listen.url}`] : []), ...(has(url) ? [] : [tagLink(url, identifier, campaign)])];
+    links = [...(listen && !has(listen.url) ? [featuredLine(FEATURED_LINE, listen)] : []), ...(has(url) ? [] : [tagLink(url, identifier, campaign)])];
   }
   const { main, hashtags } = splitHashtags(text || '');
   const head = INCLUDE_TITLE && title && !custom ? title : '';

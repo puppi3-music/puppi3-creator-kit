@@ -1,4 +1,4 @@
-# The main TinyIce (the icecast stack's): the DJ software's Ogg in, the mp3 transcode, the player page, its status and
+# The main TinyIce (the icecast stack's): the streaming software's Ogg in, the mp3 transcode, the player page, its status and
 # admin. One replica (its config and history are on a ReadWriteOnce volume), Recreate.
 apiVersion: apps/v1
 kind: Deployment
@@ -79,8 +79,8 @@ spec:
   ports:
     - {name: http, port: 8080, targetPort: http}
 ---
-# The DJ software's way in: straight to TinyIce (never through Traefik), on port 8222 as on Compose. Local keeps the
-# DJ's address (TinyIce's bans and logs see it).
+# The streaming software's way in: straight to TinyIce (never through Traefik), on port 8222 as on Compose. Local keeps the
+# streamer's address (TinyIce's bans and logs see it).
 apiVersion: v1
 kind: Service
 metadata:

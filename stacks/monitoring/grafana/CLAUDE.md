@@ -44,9 +44,10 @@ other seven (Page included), and everything the dashboards share (files, gotchas
   `deleteContactPoints` for `<ID_PREFIX>-ntfy`.
   Swaps (`kit_values`): uids and `/d/` links `puppi3-` -> `<ID_PREFIX>-`, the placeholders filled from the profile
   (`SITE_HOST`, `LIVE_HOST` or `live.<SITE_HOST>`, `SITE_NAME` or SITE_HOST, `SITE_TIMEZONE` (`TZ_NAME` too, and
-  `TZ_HOURS` its winter offset), `GHOST_SITE_UUID`, `DISK_MOUNT` (`/`), "the DJ software", `NTFY_URL`/`NTFY_TOPIC`),
+  `TZ_HOURS` its winter offset), `GHOST_SITE_UUID`, `DISK_MOUNT` (`/`), "the streaming software", `NTFY_URL`/`NTFY_TOPIC`),
   Health's containers and routers, Social's Postiz containers (compose project = `ID_PREFIX`), `puppi3_` counters ->
-  `METRIC_PREFIX`, "NAS disk" -> "Disk", "the postiz .env" -> "secrets/postiz.env", then any `puppi3` left -> `ID_PREFIX`; value-mapping keys too ("@SITE_HOST@":
+  `METRIC_PREFIX`, "NAS disk" -> "Disk", Content's "Clicks to music" -> "Clicks to watch or listen" (Vimeo, Twitch and Apple
+  Podcasts added to its services: the kit is for any creator), "the postiz .env" -> "secrets/postiz.env", then any `puppi3` left -> `ID_PREFIX`; value-mapping keys too ("@SITE_HOST@":
   "Your own site"). Drops (`OFF`, matched on the source's text, placeholders and all): panels, variables, annotations and alert rules of a module that's off (analytics: `ghost-analytics`; social:
   `postiz-pg`, `bridge-instagram`, the bridge's job and counters; live: `tinyice_`, live counters, `/live.json`; pets
   with `PETS` not true), Platforms rows/variables/annotations and stats rules of networks not in `NETWORKS` (empty =

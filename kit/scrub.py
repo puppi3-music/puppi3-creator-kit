@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
-"""The scrub check before the kit goes public: are the files the kit's own repo will carry free of secrets and of
-puppi3.party's own names, NAS and owner? The kit's repo starts with fresh history (plans/creator-kit.md, Publishing),
-so what matters there is these files as they are now. This repo's whole history is scanned for secrets too, in case
-it's ever made public.
+"""The scrub check before the kit goes public: are the files the kit's own repo will carry, and everything its public
+history has ever carried, free of secrets and of puppi3.party's own names, NAS and owner? This repo's whole history
+is scanned for secrets too, in case it's ever made public.
 
 1. Secrets: gitleaks (in Docker, pinned below) over this repo's whole git history, and over the kit's files.
 2. Private names: puppi3.party's addresses, NAS, home network and owner (settings_reference.PRIVATE_WORDS plus
    EXTRA below) in the kit's files, apart from the few mentions ALLOW lists on purpose. Here the kit's files are what
    kit/export.py would write for the kit's repo (its list, the moves, kit/kit-repo/, the marked blocks left out); in
    the kit's own repo, every file it has.
+3. History: the kit's repo's every commit (here, the one beside this repo or KIT_REPO, when it's there; in the kit's
+   own repo, itself): every version of every file, the commit messages (private names, as in 2), and who made each
+   commit: author and committer must both be the kit's author (the theme's package.json: GitHub's no-reply
+   address), never a personal account. gitleaks scans that history for secrets too. A finding in a commit that's
+   pushed already means rewriting the kit's history (and a force push), so it's caught before the push:
+   kit/publish.sh runs this after committing and pushes only when it passes.
 
     python3 kit/scrub.py              # both; per file, how many lines name what (exit 1 on any finding)
     python3 kit/scrub.py -v           # ...with every line
-    python3 kit/scrub.py --names      # only the private names (no Docker)
+    python3 kit/scrub.py --names      # only the private names and the history's (no Docker)
 
 Nothing is changed: it only reports. A finding is fixed in the file, or, if the mention is meant to stay in the kit
 (the author credit, a list of words to check for), added to ALLOW with its reason.
@@ -43,7 +48,7 @@ ALLOW = [
     ("*", r"github\.com/puppi3-music/puppi3-creator-kit|puppi3-music\.github\.io/puppi3-creator-kit",
      "the kit's own repo and its guides online"),
     ("kit/theme/package.json", r"\"(name|email)\": \"(\d+\+)?puppi3-music", "the theme's author (GitHub's no-reply address)"),
-    ("README.md", r"Traktor, Mixxx", "a list of DJ software"),
+    ("README.md", r"Mixxx, Traktor|Traktor, Mixxx", "a list of streaming software (Traktor, Mixxx: before 1.1.0)"),
     ("stacks/monitoring/grafana/render.py", r"^SOURCE_PRIVATE = |^LEFTOVERS_CLOUD = ",
      "the dashboards' own checks for names that mustn't be in them"),
 ]
@@ -77,7 +82,7 @@ def allowed(path, line):
     return any(fnmatch.fnmatch(path, p) and re.search(l, line) for p, l, _ in ALLOW)
 
 
-def names(files, verbose):
+def names(files, verbose, where=""):
     words = private_words()
     found = 0
     for f, data in files.items():
@@ -92,10 +97,58 @@ def names(files, verbose):
                 hits.append((n, w, line))
         if hits:
             found += len(hits)
-            print(f"{f}: {len(hits)} line(s): " + ", ".join(sorted(set(x for _, w, _ in hits for x in w))))
+            print(f"{where}{f}: {len(hits)} line(s): " + ", ".join(sorted(set(x for _, w, _ in hits for x in w))))
             if verbose:
                 for n, _, line in hits:
                     print(f"    {n}: {line.strip()[:160]}")
+    return found
+
+
+def kit_repo():
+    """The kit's repo whose history goes public: here, the one beside this repo (or KIT_REPO), when it's there; in the
+    kit's own repo, itself. None when there's none yet."""
+    if not os.path.isfile(os.path.join(REPO, "kit", "export.py")):
+        return REPO
+    path = os.environ.get("KIT_REPO") or os.path.join(os.path.dirname(REPO), "puppi3-creator-kit")
+    return path if os.path.isdir(os.path.join(path, ".git")) else None
+
+
+def kit_author():
+    with open(os.path.join(REPO, "kit", "theme", "package.json")) as fh:
+        return json.load(fh)["author"]
+
+
+def history(repo, verbose):
+    """Every commit of the kit's repo: who made it, its message, and every version of every file it carried."""
+    git = lambda *a: subprocess.run(["git", "-C", repo, *a], capture_output=True, check=True).stdout
+    words = private_words()
+    email = kit_author()["email"]
+    found = 0
+    commits = git("rev-list", "--all").decode().split()
+    for c in commits:
+        who = git("log", "-1", "--format=%an <%ae>%n%cn <%ce>", c).decode().split("\n")[:2]
+        for role, ident in zip(("author", "committer"), who):
+            bad = [m.group(0) for r in (words, EXTRA) for m in r.finditer(ident)]
+            if not ident.endswith(f"<{email}>") or bad:
+                found += 1
+                print(f"commit {c[:8]}: its {role} is {ident}, not the kit's author <{email}>")
+        msg = git("log", "-1", "--format=%B", c).decode()
+        w = sorted(set(m.group(0).lower() for r in (words, EXTRA) for m in r.finditer(msg)))
+        if w:
+            found += 1
+            print(f"commit {c[:8]}: its message names " + ", ".join(w))
+    seen = set()
+    for c in commits:
+        for entry in git("ls-tree", "-r", "-z", c).decode().split("\0"):
+            if not entry:
+                continue
+            meta, path = entry.split("\t", 1)
+            blob = meta.split()[2]
+            if (blob, path) in seen:
+                continue
+            seen.add((blob, path))
+            n = names({path: git("cat-file", "blob", blob)}, verbose, where=f"commit {c[:8]}: ")
+            found += n
     return found
 
 
@@ -103,6 +156,9 @@ def gitleaks(files):
     """Exit 1 from gitleaks means leaks (its report says where, redacted); anything else non-zero is a failure to run."""
     bad = 0
     runs = [("this repo's whole history", ["-v", f"{REPO}:/repo:ro"], ["git", "/repo", "--log-opts=--all"])]
+    kit = kit_repo()
+    if kit and kit != REPO:
+        runs.append(("the kit's repo's whole history", ["-v", f"{kit}:/repo:ro"], ["git", "/repo", "--log-opts=--all"]))
     with tempfile.TemporaryDirectory() as tmp:
         for f, data in files.items():
             dst = os.path.join(tmp, f)
@@ -134,7 +190,11 @@ def main():
     bad = 0 if "--names" in args else gitleaks(files)
     found = names(files, "-v" in args)
     print(f"Private names: {found} line(s)" if found else "Private names: none")
-    sys.exit(1 if bad or found else 0)
+    kit = kit_repo()
+    past = history(kit, "-v" in args) if kit else 0
+    print("History: no kit repo yet" if not kit else f"History ({kit}): {past} finding(s)" if past else
+          f"History ({kit}): clean")
+    sys.exit(1 if bad or found or past else 0)
 
 
 if __name__ == "__main__":

@@ -53,6 +53,7 @@ await call('PUT', '/themes/kit/activate/');
 await call('PUT', '/settings/', { settings: [
     { key: 'secondary_navigation', value: JSON.stringify([
         { label: 'SoundCloud', url: 'https://soundcloud.com/kit-test' },
+        { label: 'Patreon', url: 'https://www.patreon.com/kit-test' },
         { label: 'Sign up', url: '#/portal/' },
     ]) },
 ] });
@@ -90,7 +91,7 @@ try {
     const context = await browser.newContext();
     let live = false, djMount = '/stream-ogg';
     const beacons = [];
-    // As TinyIce lists them: its own /_pcm and the mp3 always, the DJ's mount while live
+    // As TinyIce lists them: its own /_pcm and the mp3 always, the source mount while live
     await context.route('**/live-status.json*', route => route.fulfill({ contentType: 'application/json',
         body: JSON.stringify({ icestats: { source: [{ listenurl: `${BASE}/_pcm` }, { listenurl: `${BASE}/stream-mp3` }]
             .concat(live ? [{ listenurl: `${BASE}${djMount}`, artist: 'Kit Test', title: 'First Track' }] : []) } }) }));
@@ -118,15 +119,17 @@ try {
     const play = beacons.find(u => u.searchParams.get('kind') === 'play');
     check(!!play && play.searchParams.get('from') === '/', 'play sends a kind=play beacon from /');
 
-    // The DJ's mount renamed in TinyIce: the bar still knows it's live (anything but the mp3 it plays and /_...)
+    // The source mount renamed in TinyIce: the bar still knows it's live (anything but the mp3 it plays and /_...)
     djMount = '/dj-input.ogg';
     await page.reload();
     await page.locator('#live-now').waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-    check(await page.locator('#live-now').isVisible(), 'the bar shows with the DJ\'s mount renamed');
+    check(await page.locator('#live-now').isVisible(), 'the bar shows with the source mount renamed');
 
-    // The footer's SoundCloud link gets its icon
-    check(await page.locator('.gh-footer-menu a.kit-music-link use[href="#kit-i-soundcloud"]').count() === 1,
+    // The footer's SoundCloud and Patreon links get their icons
+    check(await page.locator('.gh-footer-menu a.kit-platform-link use[href="#kit-i-soundcloud"]').count() === 1,
         "the footer's SoundCloud link has its icon");
+    check(await page.locator('.gh-footer-menu a.kit-platform-link use[href="#kit-i-patreon"]').count() === 1,
+        "the footer's Patreon link has its icon");
     check(await page.locator('#kit-i-soundcloud').count() === 1, 'the icon sprite is on the page');
     check((await page.locator('.gh-footer-copyright .kit-credit').textContent()) === "Theme: Puppi3's Creator Kit by DJ Puppi3",
         "the footer has the kit's credit line");

@@ -30,9 +30,9 @@ spec:
           envFrom:
             - configMapRef:
                 name: live
-          # Ready when it has the mp3, or when no DJ is on the main TinyIce's source mount (TinyIce lists the mp3 even
+          # Ready when it has the mp3, or when no source is on the main TinyIce's source mount (TinyIce lists the mp3 even
           # then, sending nothing, so the relay reconnects every 10 s): listeners never land on a relay still catching
-          # up with a live show, and k8s/up.sh doesn't wait for a DJ. 127.0.0.1, not localhost: busybox wget tries ::1
+          # up with a live show, and k8s/up.sh doesn't wait for a source. 127.0.0.1, not localhost: busybox wget tries ::1
           # first and Icecast listens on IPv4.
           readinessProbe:
             exec:

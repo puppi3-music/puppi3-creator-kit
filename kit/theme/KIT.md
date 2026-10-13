@@ -7,16 +7,17 @@ rebuilt: the kit's additions are files of their own, plus the few edits listed b
 ## What the kit adds (its own files)
 - `assets/kit/kit.js`: `window.site` (`beacon`, `sendClick`), click beacons for links followed to other sites
   (`POST /.site/click?kind=out&to=&from=`, counted by the kit's bridge), the **Social preview** button on draft
-  previews (`/p/<uuid>/` -> `/ghost/social-preview/<uuid>/`, the bridge's page, staff only), and icons beside music
-  links (SoundCloud, Mixcloud, Bandcamp, Spotify, Twitch, Beatport, Resident Advisor) in the footer's secondary
+  previews (`/p/<uuid>/` -> `/ghost/social-preview/<uuid>/`, the bridge's page, staff only), and icons beside links
+  to the other platforms a creator is on (Vimeo, Twitch, Discord, Patreon, Ko-fi, Substack, Etsy, Behance, Apple
+  Podcasts, SoundCloud, Mixcloud, Bandcamp, Spotify, Beatport, Resident Advisor) in the footer's secondary
   navigation (Ghost Admin -> Settings -> Navigation -> Secondary). Ghost's own social accounts (Settings -> General)
   are shown by Source's footer already.
 - `assets/kit/live-bar.js`: the **LIVE NOW** bar's player (with no mascot: `window.site.livePup` stands in when a
   theme adds one). Plays, pauses and hiccups go out as beacons (`kind=play|stall|reconnect`).
-- `assets/kit/kit.css`: the bar, the button, the music link icons, in Source's accent colour.
+- `assets/kit/kit.css`: the bar, the button, the platform link icons (`.kit-platform-link`), in Source's accent colour.
 - `partials/kit/live-bar.hbs`: the bar: shown while `/live-status.json` lists `/stream-ogg` (the kit's live module);
   plays the **Live stream URL** setting; empty = no bar.
-- `partials/kit/icons.hbs`: the bar's play/pause and the music services' icons (`#kit-i-<name>`).
+- `partials/kit/icons.hbs`: the bar's play/pause and the platforms' icons (`#kit-i-<name>`).
 
 ## What the kit changes in Source's files (re-apply after an upgrade)
 - `default.hbs`: `kit/kit.css` after `built/screen.css`; `{{> "kit/icons"}}` and `{{> "kit/live-bar"}}` before

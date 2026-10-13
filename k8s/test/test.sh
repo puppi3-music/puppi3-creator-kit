@@ -34,12 +34,12 @@
 #     players); a post stores the image as __GHOST_URL__/content/..., as on the NAS; served still after a new Ghost pod
 #   - analytics: tb-setup's tokens in a Secret, Ghost started with them; a page hit through Traefik reaches Tinybird
 #     with page-hit-country's country; Ghost Admin's GET-only stats route answers, Tinybird's other API doesn't
-#   - live: ffmpeg streams Ogg to TinyIce's port like the DJ software; /live-status.json shows it; a listener through
-#     Traefik gets the 320 kbps mp3 from a relay, and it's the tone; the DJ drops out and reconnects with another tone,
+#   - live: ffmpeg streams Ogg to TinyIce's port like the streaming software; /live-status.json shows it; a listener through
+#     Traefik gets the 320 kbps mp3 from a relay, and it's the tone; the source drops out and reconnects with another tone,
 #     which the relays carry; a relay pod killed doesn't stop listening; TinyIce's admin 403 on the public name, open on
 #     tinyice.<LAN_DOMAIN>
 #   - both mounts renamed in the running TinyIce's config (as its admin would): k8s/up.sh takes the new names, a stream
-#     to the new DJ mount reaches listeners of the new mp3 mount, from a relay
+#     to the new source mount reaches listeners of the new mp3 mount, from a relay
 #   - social: Postiz through Traefik on postiz.<SITE_HOST>; the webhook, the theme's clicks and the social preview
 #     reach the bridge; the bridge has Tinybird's tokens; with listeners on the relays, its live shows count the
 #     listeners, not the relays; a new bridge pod keeps its data
@@ -387,7 +387,7 @@ python3 "$REPO/stacks/monitoring/grafana/render.py" --profile cloud --site "$SP/
 check "a render with live off leaves out its panels and rules" eval '! grep -lE "tinyice_|icecast_relay|live-down" "$SP"/off/dashboards/*.json "$SP"/off/alerting/*.yml'
 
 echo "== live stream"
-# A source like the DJ software's: Ogg straight to TinyIce's own port (8222), never through Traefik
+# A source like the streaming software's: Ogg straight to TinyIce's own port (8222), never through Traefik
 src() { pw="$(sed -n 's/^TINYICE_SOURCE_PASSWORD=//p' "$S/secrets/icecast.env")"
     ffmpeg -nostdin -loglevel error -re -f lavfi -i "sine=frequency=$1:sample_rate=44100" -t 300 -ac 2 -c:a vorbis \
         -strict -2 -content_type audio/ogg -metadata artist=Kit -metadata title="$2" -f ogg \
@@ -414,12 +414,12 @@ l="$(loud first)"
 p1="$(pitch first)"
 tone() { near "$p1" 440 && [ "${l%.*}" -gt -40 ]; }
 check "...and it's the tone, not silence (${p1} Hz, ${l} dB)" tone
-# The DJ drops out and comes back: the relays carry the new stream
+# the source drops out and comes back: the relays carry the new stream
 stop_src; sleep 15; src 880 "Second Tone"
 wait_for "the new track shows" 15 status_has 'Kit - Second Tone'
 wait_for "the relays carry the reconnected stream" 10 mp3 second
 p2="$(pitch second)"
-check "after the DJ reconnects, listeners hear the new stream through the relays (${p2} Hz)" near "$p2" 880
+check "after the source reconnects, listeners hear the new stream through the relays (${p2} Hz)" near "$p2" 880
 # One listener on a relay, for a minute: the bridge's live shows (every 30 s) count 1, not the relays (each is a
 # listener on the main TinyIce)
 curl "${R[@]}" "${CF[@]}" --max-time 60 -o /dev/null https://live.kit.test/stream-mp3 & lpid=$!
