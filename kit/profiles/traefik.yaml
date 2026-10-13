@@ -1,0 +1,15 @@
+# Traefik: always on. Its plugins from the repo; its dynamic files are in the site's data folder (kit.sh copies the
+# kit's in as kit-*.yml on every run), next to any routes of the site's own.
+# Host ports: only the web ones (HTTP_PORT, HTTPS_PORT, for a machine where 80 or 443 is taken); the dashboard is
+# at traefik.<LAN_DOMAIN>, never on a port of its own that would skip lan-only.
+services:
+  traefik:
+    ports: !override
+      - ${HTTP_PORT:-80}:80
+      - ${HTTPS_PORT:-443}:443
+    environment:
+      GHOST_UPSTREAM: http://${ID_PREFIX:-site}-ghost:2368
+      # http:// and www.<site> -> https://<site> (kit-site.yml's redirect routers)
+      HTTPS_REDIRECT: ${HTTPS_REDIRECT:-true}
+    volumes:
+      - ./plugins-local:/plugins-local:ro

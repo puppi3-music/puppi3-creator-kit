@@ -1,0 +1,23 @@
+# Puppi3's Creator Kit on one host: every module stack in one Compose project.
+# Run it through kit.sh, which sets SITE_DIR, DATA_DIR and the profiles from the site's MODULES:
+#   kit/kit.sh <site folder> up -d
+# Always on: Traefik, Ghost + MySQL. The rest by profile: analytics, social, live, monitoring (kit-only: monitoring/).
+# The stack files themselves also run on their own, one project per stack (no profiles in them: a stack run
+# without --profile would skip those services); profiles/*.yaml add the profiles and the kit's paths and names here only.
+# Each stack's secrets come from the site folder's secrets/<stack>.env (setup.sh writes them), never from stacks/:
+# a stack run on its own reads its folder's .env, so a site's there could end up as another's.
+include:
+  - path: [../stacks/traefik/compose.yaml, profiles/traefik.yaml]
+    env_file: ["${SITE_DIR:?run through kit/kit.sh}/secrets/traefik.env"]
+  - path: [../stacks/puppi3/compose.yaml, profiles/puppi3.yaml]
+    env_file: ["${SITE_DIR:?run through kit/kit.sh}/secrets/puppi3.env"]
+  - path: [../stacks/postiz/compose.yaml, profiles/postiz.yaml]
+    env_file: ["${SITE_DIR:?run through kit/kit.sh}/secrets/postiz.env"]
+  - path: [../stacks/icecast/compose.yaml, profiles/icecast.yaml]
+    env_file: ["${SITE_DIR:?run through kit/kit.sh}/secrets/icecast.env"]
+  # Grafana's logins and the grants job read Ghost's and Postiz's database passwords too
+  - path: monitoring/compose.yaml
+    env_file:
+      - "${SITE_DIR:?run through kit/kit.sh}/secrets/puppi3.env"
+      - "${SITE_DIR:?run through kit/kit.sh}/secrets/postiz.env"
+      - "${SITE_DIR:?run through kit/kit.sh}/secrets/monitoring.env"

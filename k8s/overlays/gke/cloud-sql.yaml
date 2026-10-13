@@ -1,0 +1,9 @@
+# The Kubernetes service account every pod with a Cloud SQL proxy runs as (finish/cloud-sql-proxy.yaml): Workload
+# Identity lets it act as the site's Google service account (CLOUD_SQL_SA, cloud-gke.env), which has the Cloud SQL
+# Client role. Ghost's bucket uses an HMAC key instead (secrets/s3.env).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloud-sql
+  annotations:
+    iam.gke.io/gcp-service-account: unset@example.iam.gserviceaccount.com   # replacements.yaml: CLOUD_SQL_SA

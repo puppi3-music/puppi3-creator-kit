@@ -1,0 +1,184 @@
+services:
+  ghost:
+    image: ghost:6-alpine
+    container_name: website-puppi3
+    restart: unless-stopped
+    user: 1002:1003
+    ports:
+      - 8900:2368
+    # Tinybird tokens, written by tb-setup (see tinybird/setup.sh)
+    env_file:
+      - path: ./tinybird/tokens.env
+        required: false
+    environment:
+      # see https://ghost.org/docs/config/#configuration-options
+      database__client: mysql
+      # By container name, never "db": Ghost is on the shared proxy network too, where another stack's "db"
+      # answers. Its own variable, so an old database__connection__host=db in the .env can't bring "db" back.
+      database__connection__host: ${GHOST_DB_HOST:-puppi3-db-1}
+      database__connection__user: ${database__connection__user:-root}
+      database__connection__password: ${database__connection__password:-example}
+      database__connection__database: ${database__connection__database:-ghost-puppi3}
+      url: https://${SITE_HOST:?set it in the site's profile}
+      # --- Native web analytics (self-hosted Tinybird) ---
+      # Visitors' browsers send page hits here (routed by Traefik to traffic-analytics)
+      tinybird__tracker__endpoint: https://${SITE_HOST:?set it in the site's profile}/.ghost/analytics/api/v1/page_hit
+      tinybird__tracker__datasource: analytics_events
+      # Ghost server -> Tinybird (internal Docker network)
+      tinybird__stats__endpoint: http://tinybird-local:7181
+      # Your browser in Ghost Admin -> Tinybird (via Traefik, read-only pipe queries only)
+      tinybird__stats__endpointBrowser: https://${SITE_HOST:?set it in the site's profile}/.ghost/stats
+    volumes:
+      # Only your data + config; Ghost's code comes from the image so upgrades work. DATA_DIR = the folder
+      # holding the stacks' folders (instances/example.env); the default is the NAS's, so a .env without it
+      # can't move a mount.
+      - ${DATA_DIR:?set it in the site's profile}/puppi3/ghost/content:/var/lib/ghost/content
+      - ${DATA_DIR:?set it in the site's profile}/puppi3/ghost/config.production.json:/var/lib/ghost/config.production.json
+    depends_on:
+      db:
+        condition: service_started
+      tb-setup:
+        condition: service_healthy
+    # Routed by Traefik's traefik/dynamic/puppi3.yml (Cloudflare only), not labels: Traefik picks that
+    # file up by itself, while changing labels here would mean restarting Ghost.
+    # On the proxy network so Traefik and the bridge reach it by name (http://website-puppi3:2368), the same
+    # on Compose and Kubernetes. Never address it as "ghost" there: staging's Ghost answers to that too.
+    networks:
+      default: null
+      proxy: null
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    user: 1002:1003
+    environment:
+      MYSQL_ROOT_PASSWORD: ${database__connection__password:-example}
+    volumes:
+      - ${DATA_DIR:?set it in the site's profile}/puppi3/db:/var/lib/mysql
+    # Receives page hits from visitors at <SITE_HOST>/.ghost/analytics/*
+    # and forwards them to Tinybird
+    networks:
+      default: null
+      monitoring:
+        aliases:
+          - ghost-db
+  traffic-analytics:
+    image: ghost/traffic-analytics:1.0.336
+    restart: unless-stopped
+    ports:
+      - 8901:3000
+    env_file:
+      - path: ./tinybird/tokens.env
+        required: false
+    environment:
+      NODE_ENV: production
+      PROXY_TARGET: http://tinybird-local:7181/v0/events
+      SALT_STORE_TYPE: file
+      SALT_STORE_FILE_PATH: /data/salts.json
+    volumes:
+      - traffic_analytics_data:/data
+    depends_on:
+      tb-setup:
+        condition: service_healthy
+    # Routed by Traefik's traefik/dynamic/puppi3.yml (/.ghost/analytics -> traffic-analytics:3000 on the proxy network)
+    networks:
+      default: null
+      proxy: null
+  # Self-hosted Tinybird (ClickHouse under the hood) - replaces Tinybird Cloud
+  tinybird-local:
+    # Pinned by digest to what ran on 2026-10-11 (its version label is the Ubuntu base's, so no tag to name)
+    image: tinybirdco/tinybird-local@sha256:16c661bba64b99d904d9384ac414ee7ffa9d09d12bf77a42d41885408a2d8963
+    restart: unless-stopped
+    stop_grace_period: 10s
+    # No host port: Traefik reaches it over the proxy network, so only the GET-only route below
+    # is exposed (a host port would open its whole API, admin and tokens included, to the LAN)
+    volumes:
+      - tinybird_clickhouse:/var/lib/clickhouse
+      - tinybird_redis:/redis-data
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -f
+        - http://localhost:7181/v0/health
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 120s
+      start_interval: 2s
+    # Routed by Traefik's traefik/dynamic/puppi3.yml: Ghost Admin's charts, GET /.ghost/stats/v0/pipes/ only
+    # (the rest of Tinybird's API, admin, datasources and tokens, isn't reachable from outside)
+    networks:
+      default: null
+      monitoring: null
+      proxy: null   # for Traefik
+  # Copies the Tinybird schema files that ship inside the Ghost image, then idles
+  # (stays "running" so a stack manager shows the stack as active)
+  tinybird-sync:
+    image: ghost:6-alpine
+    user: root
+    entrypoint:
+      - sh
+      - -c
+    command:
+      - >
+        rm -f /tmp/ready
+
+        rm -rf /data/tinybird/* && cp -rf /var/lib/ghost/current/core/server/data/tinybird/. /data/tinybird/ || exit 1
+
+        echo 'Tinybird files synced.'
+
+        touch /tmp/ready
+
+        trap 'exit 0' TERM INT
+
+        while :; do sleep 3600 & wait $$!; done
+    volumes:
+      - tinybird_files:/data/tinybird
+    healthcheck:
+      test:
+        - CMD
+        - test
+        - -f
+        - /tmp/ready
+      interval: 60s
+      start_period: 60s
+      start_interval: 2s
+    restart: unless-stopped
+  # Deploys those schemas to tinybird-local, writes tinybird/tokens.env, then idles
+  tb-setup:
+    build: ./tinybird
+    working_dir: /data/tinybird
+    environment:
+      TB_HOST: http://tinybird-local:7181
+      TB_LOCAL_HOST: tinybird-local
+    volumes:
+      - tinybird_files:/data/tinybird
+      # Absolute, never ./tinybird: a stack manager that runs compose inside its own container turns a relative
+      # mount into a path inside that container, which the host then creates empty, so tokens.env would land where
+      # env_file (./tinybird/tokens.env) never looks (stacks/CLAUDE.md)
+      - ${DATA_DIR:?set it in the site's profile}/puppi3/tinybird:/out
+    depends_on:
+      tinybird-local:
+        condition: service_healthy
+      tinybird-sync:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - test
+        - -f
+        - /tmp/ready
+      interval: 60s
+      start_period: 300s
+      start_interval: 3s
+    restart: unless-stopped
+volumes:
+  traffic_analytics_data: null
+  tinybird_clickhouse: null
+  tinybird_redis: null
+  tinybird_files: null
+networks:
+  proxy:
+    external: true
+  monitoring:
+    external: true

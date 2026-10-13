@@ -1,0 +1,449 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 723,
+    "title": "Tagged links, by network and link",
+    "description": "Visitors and signups from your tagged links, one row per network and kind of link (the tags are listed in the theme's redirects.yaml): posts = links inside posts (utm_medium=social: the social bridge's /b/, /t/, /i/, /k/ links in posts, captions and the Instagram link-sticker Story link, plus the /d/ Discord and /y/ YouTube links you share by hand); bio link = your profile's bio short link (utm_medium=bio: /bsky, /th, /ig, /tk, /dis, /yt). These count exactly even when the app hides where people came from. ig is Instagram's own tag: its app adds utm_source=ig&utm_medium=social&utm_content=link_in_bio when someone taps a plain @SITE_HOST@ link in a profile (yours or anyone's) instead of your /ig short link, so its Link says tagged by Instagram. Links tagged some other way (someone else's utm_medium) are in Posts vs bio links.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "ghost-analytics"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "utm_source",
+                      "text": "Network",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "visits",
+                      "text": "Visitors",
+                      "type": "number"
+                    }
+                  ],
+                  "computed_columns": [
+                    {
+                      "selector": "Network == 'ig' ? 'tagged by Instagram' : 'posts'",
+                      "text": "Link"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "data",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://tinybird-local:7181/v0/pipes/api_top_utm_sources.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "site_uuid",
+                        "value": "@GHOST_SITE_UUID@"
+                      },
+                      {
+                        "key": "timezone",
+                        "value": "@SITE_TIMEZONE@"
+                      },
+                      {
+                        "key": "date_from",
+                        "value": "${__from:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "date_to",
+                        "value": "${__to:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "limit",
+                        "value": "50"
+                      },
+                      {
+                        "key": "utm_medium",
+                        "value": "social"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          },
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "ghost-analytics"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "utm_source",
+                      "text": "Network",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "visits",
+                      "text": "Visitors",
+                      "type": "number"
+                    }
+                  ],
+                  "computed_columns": [
+                    {
+                      "selector": "Network == 'ig' ? 'tagged by Instagram' : 'bio link'",
+                      "text": "Link"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "data",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://tinybird-local:7181/v0/pipes/api_top_utm_sources.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "site_uuid",
+                        "value": "@GHOST_SITE_UUID@"
+                      },
+                      {
+                        "key": "timezone",
+                        "value": "@SITE_TIMEZONE@"
+                      },
+                      {
+                        "key": "date_from",
+                        "value": "${__from:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "date_to",
+                        "value": "${__to:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "limit",
+                        "value": "50"
+                      },
+                      {
+                        "key": "utm_medium",
+                        "value": "bio"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "B",
+              "hidden": false
+            }
+          },
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "mysql",
+                "version": "v0",
+                "datasource": {
+                  "name": "ghost-mysql"
+                },
+                "spec": {
+                  "editorMode": "code",
+                  "format": "table",
+                  "rawQuery": true,
+                  "rawSql": "SELECT utm_source AS Network, IF(utm_source = 'ig', 'tagged by Instagram', IF(utm_medium = 'bio', 'bio link', 'posts')) AS Link, COUNT(*) AS Members\nFROM members_created_events\nWHERE utm_source IS NOT NULL AND utm_source <> '' AND utm_medium IN ('social', 'bio') AND $__timeFilter(created_at) GROUP BY 1, 2"
+                }
+              },
+              "refId": "C",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "merge",
+            "spec": {
+              "options": {}
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "calculateField",
+            "spec": {
+              "options": {
+                "alias": "Visitor \u2192 member",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Members"
+                    }
+                  },
+                  "operator": "/",
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Visitors"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "replaceFields": false
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "organize",
+            "spec": {
+              "options": {
+                "indexByName": {
+                  "Link": 1,
+                  "Members": 3,
+                  "Network": 0,
+                  "Visitor \u2192 member": 4,
+                  "Visitors": 2
+                }
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "sortBy",
+            "spec": {
+              "options": {
+                "sort": [
+                  {
+                    "desc": true,
+                    "field": "Visitors"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "table",
+      "version": "",
+      "spec": {
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": true,
+              "displayName": "Visitors"
+            }
+          ]
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "auto"
+              },
+              "filterable": true
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Visitor \u2192 member"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "percentunit"
+                },
+                {
+                  "id": "decimals",
+                  "value": 1
+                },
+                {
+                  "id": "mappings",
+                  "value": [
+                    {
+                      "options": {
+                        "match": "nan",
+                        "result": {
+                          "text": "0%"
+                        }
+                      },
+                      "type": "special"
+                    },
+                    {
+                      "options": {
+                        "match": "null",
+                        "result": {
+                          "text": "0%"
+                        }
+                      },
+                      "type": "special"
+                    }
+                  ]
+                },
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-text"
+                  }
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "continuous-RdYlGr"
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Visitors"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "mode": "basic",
+                    "type": "gauge",
+                    "valueDisplayMode": "text"
+                  }
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "purple"
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Network"
+              },
+              "properties": [
+                {
+                  "id": "mappings",
+                  "value": [
+                    {
+                      "options": {
+                        "bluesky": {
+                          "index": 2,
+                          "text": "Bluesky"
+                        },
+                        "discord": {
+                          "index": 5,
+                          "text": "Discord"
+                        },
+                        "facebook": {
+                          "index": 6,
+                          "text": "Facebook"
+                        },
+                        "ig": {
+                          "index": 0,
+                          "text": "Instagram"
+                        },
+                        "instagram": {
+                          "index": 1,
+                          "text": "Instagram"
+                        },
+                        "threads": {
+                          "index": 3,
+                          "text": "Threads"
+                        },
+                        "tiktok": {
+                          "index": 4,
+                          "text": "TikTok"
+                        },
+                        "x": {
+                          "index": 7,
+                          "text": "X"
+                        },
+                        "youtube": {
+                          "index": 8,
+                          "text": "YouTube"
+                        }
+                      },
+                      "type": "value"
+                    }
+                  ]
+                },
+                {
+                  "id": "custom.width",
+                  "value": 170
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Members"
+              },
+              "properties": [
+                {
+                  "id": "mappings",
+                  "value": [
+                    {
+                      "options": {
+                        "match": "null",
+                        "result": {
+                          "text": "0"
+                        }
+                      },
+                      "type": "special"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Link"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 150
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

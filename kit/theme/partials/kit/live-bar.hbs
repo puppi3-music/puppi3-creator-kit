@@ -1,0 +1,29 @@
+{{!--
+    LIVE NOW bar (Puppi3's Creator Kit): shown only while the site is streaming (assets/kit/live-bar.js).
+    It reads the streaming server's status at data-status (a route on this site to TinyIce's /status-json.xsl, the
+    kit's live module) and is live while the DJ software's mount is connected (any source but the one it plays and
+    TinyIce's own, so the mounts can be renamed in TinyIce; a data-mount attribute would name it instead). The track
+    playing comes from the same status, when the stream sends it. Listeners play the "Live stream URL" theme setting;
+    empty turns the bar off. The <audio> has no controls of its own (hidden); live-bar.js drives it from the button.
+--}}
+{{#if @custom.live_stream_url}}
+<div class="live-bar gh-outer" id="live-now" role="region" aria-label="Live stream" hidden
+     data-stream="{{@custom.live_stream_url}}" data-status="/live-status.json"
+     data-artist="{{@site.title}}">
+    <div class="gh-inner live-bar__inner">
+        <span class="live-bar__signal"><span class="live-bar__dot" aria-hidden="true"></span>{{t "Live now"}}</span>
+        {{!-- Our own controls, not the browser's: a live stream has no timeline to show or seek in. The volume slider
+              is hidden on phones, which use their own buttons. --}}
+        <span class="live-bar__controls">
+            <button class="live-bar__play" type="button" aria-label="{{t "Play the live stream"}}">
+                <svg class="live-bar__icon-play" aria-hidden="true"><use href="#kit-i-play"/></svg>
+                <svg class="live-bar__icon-pause" aria-hidden="true"><use href="#kit-i-pause"/></svg>
+            </button>
+            <input class="live-bar__volume" type="range" min="0" max="1" step="0.05" value="1" aria-label="{{t "Volume"}}">
+        </span>
+        <audio class="live-bar__player" preload="none"></audio>
+        <span class="live-bar__buffering kit-sr-only" role="status" hidden>{{t "Buffering…"}}</span>
+        <span class="live-bar__track" hidden></span>
+    </div>
+</div>
+{{/if}}

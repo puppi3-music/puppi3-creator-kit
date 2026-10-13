@@ -1,0 +1,2729 @@
+{
+  "id": null,
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "liveNow": false,
+  "refresh": "5m",
+  "schemaVersion": 41,
+  "version": 1,
+  "timepicker": {},
+  "timezone": "browser",
+  "weekStart": "",
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "templating": {
+    "list": []
+  },
+  "uid": "puppi3-social",
+  "title": "puppi3 \u00b7 Social (Postiz)",
+  "description": "Postiz: scheduled, published and failed posts per network, channel health",
+  "tags": [
+    "puppi3",
+    "postiz"
+  ],
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "links": [
+    {
+      "title": "Overview",
+      "type": "link",
+      "url": "/d/puppi3-overview",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Health",
+      "type": "link",
+      "url": "/d/puppi3-health",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Traffic",
+      "type": "link",
+      "url": "/d/puppi3-traffic",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Growth",
+      "type": "link",
+      "url": "/d/puppi3-growth",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Members & Newsletters",
+      "type": "link",
+      "url": "/d/puppi3-members",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Content & Engagement",
+      "type": "link",
+      "url": "/d/puppi3-content",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Social",
+      "type": "link",
+      "url": "/d/puppi3-social",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Platforms",
+      "type": "link",
+      "url": "/d/puppi3-platforms",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    }
+  ],
+  "panels": [
+    {
+      "id": 9000,
+      "type": "text",
+      "title": "",
+      "transparent": true,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 2
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**@SITE_HOST@**&nbsp;&nbsp;|&nbsp;&nbsp;[Overview](/d/puppi3-overview?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Health](/d/puppi3-health?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Traffic](/d/puppi3-traffic?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Growth](/d/puppi3-growth?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Members & Newsletters](/d/puppi3-members?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Content & Engagement](/d/puppi3-content?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;**\u25b8 Social**&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Platforms](/d/puppi3-platforms?${__url_time_range})&nbsp;&nbsp;|&nbsp;&nbsp;[Site \u2197](https://@SITE_HOST@)&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Ghost admin \u2197](https://@SITE_HOST@/ghost/)",
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        }
+      },
+      "pluginVersion": "13.0.2"
+    },
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Published (selected range)",
+      "description": "One per channel (a post to 3 networks counts 3). Instagram counts what's on the account (posted by hand or not), from the bridge's Instagram numbers (every post on the account). SoundCloud counts uploads to the profile, from the bridge's SoundCloud numbers, Mixcloud uploads from its Mixcloud numbers (every track and upload).",
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Mixed --"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "postiz",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postiz-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT count(*) AS postiz FROM \"Post\" p JOIN \"Integration\" i ON i.id = p.\"integrationId\" WHERE p.\"deletedAt\" IS NULL AND p.\"parentPostId\" IS NULL AND p.state = 'PUBLISHED' AND $__timeFilter(p.\"publishDate\") AND i.\"providerIdentifier\" NOT IN ('instagram', 'instagram-standalone')"
+        },
+        {
+          "refId": "instagram",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/instagram.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "$count(posts[time >= ${__from} and time <= ${__to}])",
+          "filters": [],
+          "columns": []
+        },
+        {
+          "refId": "soundcloud",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/soundcloud.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "$count(tracks[time >= ${__from} and time <= ${__to}])",
+          "filters": [],
+          "columns": []
+        },
+        {
+          "refId": "mixcloud",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/mixcloud.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "$count(uploads[time >= ${__from} and time <= ${__to}])",
+          "filters": [],
+          "columns": []
+        },
+        {
+          "refId": "total",
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "type": "math",
+          "expression": "$postiz + $instagram + $soundcloud + $mixcloud"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#B28CFF"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^total$/",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Scheduled",
+      "description": "Posts scheduled in Ghost (each goes to the socials when Ghost publishes it), plus any scheduled straight in Postiz.",
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Mixed --"
+      },
+      "gridPos": {
+        "x": 4,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "ghost",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/upnext.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "$count(posts)",
+          "filters": [],
+          "columns": []
+        },
+        {
+          "refId": "postiz",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postiz-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT count(*) AS postiz FROM \"Post\" p WHERE p.\"deletedAt\" IS NULL AND p.\"parentPostId\" IS NULL AND p.state = 'QUEUE' AND p.\"publishDate\" > now()"
+        },
+        {
+          "refId": "scheduled",
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "type": "math",
+          "expression": "$ghost + $postiz"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#B28CFF"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "noValue": "0"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^scheduled$/",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Failed (selected range)",
+      "description": "Posts Postiz tried to publish in the selected range and couldn't. Details in Failed posts below.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "postiz-pg"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postiz-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT count(*) FROM \"Post\" p WHERE p.\"deletedAt\" IS NULL AND p.\"parentPostId\" IS NULL AND p.state = 'ERROR' AND $__timeFilter(p.\"publishDate\")"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Overdue in queue",
+      "description": "Should have gone out 15+ min ago but are still queued: the Postiz workers may be stuck",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "postiz-pg"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postiz-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT count(*) FROM \"Post\" p WHERE p.\"deletedAt\" IS NULL AND p.\"parentPostId\" IS NULL AND p.state = 'QUEUE' AND p.\"publishDate\" < now() - interval '15 minutes'"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Channels connected",
+      "description": "Social accounts connected in Postiz and not disabled.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "postiz-pg"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postiz-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT count(*) FROM \"Integration\" i WHERE i.\"deletedAt\" IS NULL AND NOT i.disabled"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Channels needing attention",
+      "description": "Disabled, or needs re-login in Postiz",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "postiz-pg"
+      },
+      "gridPos": {
+        "x": 20,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postiz-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT count(*) FROM \"Integration\" i WHERE i.\"deletedAt\" IS NULL AND (i.\"refreshNeeded\" OR i.\"inBetweenSteps\" OR i.disabled)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Posts published per day by network",
+      "description": "Instagram: posts on the account (by hand or not), from the bridge's Instagram numbers (every post on the account). SoundCloud and Mixcloud: uploads to the profiles, from the bridge's SoundCloud and Mixcloud numbers.",
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Mixed --"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 16,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postiz-pg"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(p.\"publishDate\", '1d'), initcap(replace(replace(i.\"providerIdentifier\", '-standalone', ''), '-', ' ')) AS metric, count(*) AS posts\nFROM \"Post\" p JOIN \"Integration\" i ON i.id = p.\"integrationId\"\nWHERE p.\"deletedAt\" IS NULL AND p.\"parentPostId\" IS NULL AND p.state = 'PUBLISHED' AND $__timeFilter(p.\"publishDate\") AND i.\"providerIdentifier\" NOT IN ('instagram', 'instagram-standalone')\nGROUP BY 1, 2\nORDER BY 1"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/instagram.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "postsPerDay",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "date",
+              "text": "Day",
+              "type": "string"
+            },
+            {
+              "selector": "posts",
+              "text": "Instagram",
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/soundcloud.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "tracksPerDay",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "date",
+              "text": "Day",
+              "type": "string"
+            },
+            {
+              "selector": "tracks",
+              "text": "SoundCloud",
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/mixcloud.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "uploadsPerDay",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "date",
+              "text": "Day",
+              "type": "string"
+            },
+            {
+              "selector": "posts",
+              "text": "Mixcloud",
+              "type": "number"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60,
+            "lineWidth": 1,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "showPoints": "never"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^instagram/i"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#E1306C"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^youtube/i"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF0000"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^soundcloud/i"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF5500"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^bluesky/i"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#1185FE"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^threads/i"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#8f8f8f"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^tiktok/i"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FE2C55"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/^mixcloud/i"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5000FF"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "fields": {},
+            "conversions": [
+              {
+                "targetField": "Day",
+                "destinationType": "time",
+                "dateFormat": "YYYY-MM-DD",
+                "timezone": "utc"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "piechart",
+      "title": "Published by network (selected range)",
+      "description": "Instagram: posts on the account (by hand or not), from the bridge's Instagram numbers. SoundCloud and Mixcloud: uploads to the profiles.",
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Mixed --"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 6,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postiz-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT initcap(replace(replace(i.\"providerIdentifier\", '-standalone', ''), '-', ' ')) AS network, count(*) AS posts\nFROM \"Post\" p JOIN \"Integration\" i ON i.id = p.\"integrationId\"\nWHERE p.\"deletedAt\" IS NULL AND p.\"parentPostId\" IS NULL AND p.state = 'PUBLISHED' AND $__timeFilter(p.\"publishDate\") AND i.\"providerIdentifier\" NOT IN ('instagram', 'instagram-standalone')\nGROUP BY 1 ORDER BY 2 DESC"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/instagram.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "posts",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "network",
+              "text": "network",
+              "type": "string"
+            },
+            {
+              "selector": "time",
+              "text": "time",
+              "type": "number"
+            }
+          ],
+          "filterExpression": "time >= ${__from} && time <= ${__to}",
+          "summarizeExpression": "count(time)",
+          "summarizeBy": "network",
+          "summarizeAlias": "posts"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/soundcloud.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "tracks",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "network",
+              "text": "network",
+              "type": "string"
+            },
+            {
+              "selector": "time",
+              "text": "time",
+              "type": "number"
+            }
+          ],
+          "filterExpression": "time >= ${__from} && time <= ${__to}",
+          "summarizeExpression": "count(time)",
+          "summarizeBy": "network",
+          "summarizeAlias": "posts"
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/mixcloud.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "uploads",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "network",
+              "text": "network",
+              "type": "string"
+            },
+            {
+              "selector": "time",
+              "text": "time",
+              "type": "number"
+            }
+          ],
+          "filterExpression": "time >= ${__from} && time <= ${__to}",
+          "summarizeExpression": "count(time)",
+          "summarizeBy": "network",
+          "summarizeAlias": "posts"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "pieType": "donut",
+        "legend": {
+          "showLegend": true,
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value"
+          ]
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "table",
+      "title": "Up next",
+      "description": "Ghost's scheduled posts, soonest first, and where each will go when Ghost publishes it, worked out by the bridge (GET /upnext.json) from the post's tags, its media and the connected Postiz channels, by the same rules it posts with: \"Posts itself to\" goes out at once; \"You post in the app\" gets a Postiz draft and an ntfy reminder (Instagram/TikTok without sound, unless #autopost; #bigdrop's link Story); \"Left out\" won't get it. Photos that can't be made to fit only show at publish time: the Social preview runs it all. Posts scheduled straight in Postiz are listed too. Edit the post in Ghost to change any of it.",
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Mixed --"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "ghost",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/upnext.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "posts",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "time",
+              "text": "Scheduled for",
+              "type": "timestamp_epoch"
+            },
+            {
+              "selector": "title",
+              "text": "Post",
+              "type": "string"
+            },
+            {
+              "selector": "auto",
+              "text": "Posts itself to",
+              "type": "string"
+            },
+            {
+              "selector": "inApp",
+              "text": "You post in the app",
+              "type": "string"
+            },
+            {
+              "selector": "leftOut",
+              "text": "Left out",
+              "type": "string"
+            },
+            {
+              "selector": "media",
+              "text": "Media",
+              "type": "string"
+            },
+            {
+              "selector": "notes",
+              "text": "Notes",
+              "type": "string"
+            },
+            {
+              "selector": "previewText",
+              "text": "Social preview",
+              "type": "string"
+            },
+            {
+              "selector": "preview",
+              "text": "preview",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "refId": "postiz",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postiz-pg"
+          },
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT p.\"publishDate\" AS \"Scheduled for\", left(regexp_replace(p.content, '<[^>]+>', '', 'g'), 140) AS \"Post\",\n       initcap(replace(replace(i.\"providerIdentifier\", '-standalone', ''), '-', ' ')) || ' (' || i.name || ')' AS \"Posts itself to\",\n       '' AS \"You post in the app\", '' AS \"Left out\", '' AS \"Media\", 'Scheduled in Postiz' AS \"Notes\",\n       '' AS \"Social preview\", '' AS preview\nFROM \"Post\" p JOIN \"Integration\" i ON i.id = p.\"integrationId\"\nWHERE p.\"deletedAt\" IS NULL AND p.\"parentPostId\" IS NULL AND p.state = 'QUEUE' AND p.\"publishDate\" > now()\nORDER BY p.\"publishDate\"\nLIMIT 25"
+        },
+        {
+          "refId": "problems",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/upnext.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "$count(errors) = 0 ? [] : [$merge([{\"Post\": \"Couldn't read what's next: \" & $join(errors, \"; \")}])]",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "Post",
+              "text": "Post",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "preview"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Social preview"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "The post's Social preview: each channel's caption and photos (sign in to Ghost first)",
+                    "url": "${__data.fields.preview}",
+                    "targetBlank": true
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Scheduled for"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 160
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Notes"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Scheduled for",
+                "desc": false
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "table",
+      "title": "Recently published",
+      "description": "Instagram, YouTube, SoundCloud, Mixcloud, Bluesky, Threads and TikTok rows are the accounts' own posts, videos and uploads (made in the app or through Postiz), from the bridge's numbers for each (every post on the account); the rest (X, LinkedIn\u2026) are Postiz's. vs your usual: each post against your other posts on that network, on what the network ranks posts by (hover for why); vs industry: against the published average for that network (hover for the numbers; the analytics guide explains both). Click a row for that post up close (the Post dashboard); Postiz's rows have no numbers, as the bridge doesn't collect those networks.",
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Mixed --"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 23,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postiz-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT p.\"publishDate\" AS \"Published\", initcap(replace(replace(i.\"providerIdentifier\", '-standalone', ''), '-', ' ')) AS \"Network\", i.name AS \"Account\",\n       left(regexp_replace(p.content, '<[^>]+>', '', 'g'), 120) AS \"Post\", p.\"releaseURL\" AS \"Link\",\n       '' AS ref, (extract(epoch FROM p.\"publishDate\") * 1000)::bigint::text AS posted_ms,\n       '' AS \"vs your usual\", '' AS perf_tip, '' AS \"vs industry\", '' AS industry_tip\nFROM \"Post\" p JOIN \"Integration\" i ON i.id = p.\"integrationId\"\nWHERE p.\"deletedAt\" IS NULL AND p.\"parentPostId\" IS NULL AND p.state = 'PUBLISHED' AND i.\"providerIdentifier\" NOT IN ('instagram', 'instagram-standalone', 'youtube', 'bluesky', 'threads', 'tiktok', 'tiktok-business')\nORDER BY p.\"publishDate\" DESC\nLIMIT 25"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/instagram.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "posts",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "time",
+              "text": "Published",
+              "type": "timestamp_epoch"
+            },
+            {
+              "selector": "network",
+              "text": "Network",
+              "type": "string"
+            },
+            {
+              "selector": "account",
+              "text": "Account",
+              "type": "string"
+            },
+            {
+              "selector": "caption",
+              "text": "Post",
+              "type": "string"
+            },
+            {
+              "selector": "permalink",
+              "text": "Link",
+              "type": "string"
+            },
+            {
+              "selector": "ref",
+              "text": "ref",
+              "type": "string"
+            },
+            {
+              "selector": "posted_ms",
+              "text": "posted_ms",
+              "type": "string"
+            },
+            {
+              "selector": "perf_label",
+              "text": "vs your usual",
+              "type": "string"
+            },
+            {
+              "selector": "perf_tip",
+              "text": "perf_tip",
+              "type": "string"
+            },
+            {
+              "selector": "perf_industry_label",
+              "text": "vs industry",
+              "type": "string"
+            },
+            {
+              "selector": "perf_industry",
+              "text": "industry_tip",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/youtube.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "videos",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "time",
+              "text": "Published",
+              "type": "timestamp_epoch"
+            },
+            {
+              "selector": "network",
+              "text": "Network",
+              "type": "string"
+            },
+            {
+              "selector": "account",
+              "text": "Account",
+              "type": "string"
+            },
+            {
+              "selector": "title",
+              "text": "Post",
+              "type": "string"
+            },
+            {
+              "selector": "permalink",
+              "text": "Link",
+              "type": "string"
+            },
+            {
+              "selector": "ref",
+              "text": "ref",
+              "type": "string"
+            },
+            {
+              "selector": "posted_ms",
+              "text": "posted_ms",
+              "type": "string"
+            },
+            {
+              "selector": "perf_label",
+              "text": "vs your usual",
+              "type": "string"
+            },
+            {
+              "selector": "perf_tip",
+              "text": "perf_tip",
+              "type": "string"
+            },
+            {
+              "selector": "perf_industry_label",
+              "text": "vs industry",
+              "type": "string"
+            },
+            {
+              "selector": "perf_industry",
+              "text": "industry_tip",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/soundcloud.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "tracks",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "time",
+              "text": "Published",
+              "type": "timestamp_epoch"
+            },
+            {
+              "selector": "network",
+              "text": "Network",
+              "type": "string"
+            },
+            {
+              "selector": "account",
+              "text": "Account",
+              "type": "string"
+            },
+            {
+              "selector": "title",
+              "text": "Post",
+              "type": "string"
+            },
+            {
+              "selector": "permalink",
+              "text": "Link",
+              "type": "string"
+            },
+            {
+              "selector": "ref",
+              "text": "ref",
+              "type": "string"
+            },
+            {
+              "selector": "posted_ms",
+              "text": "posted_ms",
+              "type": "string"
+            },
+            {
+              "selector": "perf_label",
+              "text": "vs your usual",
+              "type": "string"
+            },
+            {
+              "selector": "perf_tip",
+              "text": "perf_tip",
+              "type": "string"
+            },
+            {
+              "selector": "perf_industry_label",
+              "text": "vs industry",
+              "type": "string"
+            },
+            {
+              "selector": "perf_industry",
+              "text": "industry_tip",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "refId": "E",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/mixcloud.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "uploads",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "time",
+              "text": "Published",
+              "type": "timestamp_epoch"
+            },
+            {
+              "selector": "network",
+              "text": "Network",
+              "type": "string"
+            },
+            {
+              "selector": "account",
+              "text": "Account",
+              "type": "string"
+            },
+            {
+              "selector": "title",
+              "text": "Post",
+              "type": "string"
+            },
+            {
+              "selector": "permalink",
+              "text": "Link",
+              "type": "string"
+            },
+            {
+              "selector": "ref",
+              "text": "ref",
+              "type": "string"
+            },
+            {
+              "selector": "posted_ms",
+              "text": "posted_ms",
+              "type": "string"
+            },
+            {
+              "selector": "perf_label",
+              "text": "vs your usual",
+              "type": "string"
+            },
+            {
+              "selector": "perf_tip",
+              "text": "perf_tip",
+              "type": "string"
+            },
+            {
+              "selector": "perf_industry_label",
+              "text": "vs industry",
+              "type": "string"
+            },
+            {
+              "selector": "perf_industry",
+              "text": "industry_tip",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "refId": "F",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/bluesky.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "posts",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "time",
+              "text": "Published",
+              "type": "timestamp_epoch"
+            },
+            {
+              "selector": "network",
+              "text": "Network",
+              "type": "string"
+            },
+            {
+              "selector": "account",
+              "text": "Account",
+              "type": "string"
+            },
+            {
+              "selector": "text",
+              "text": "Post",
+              "type": "string"
+            },
+            {
+              "selector": "permalink",
+              "text": "Link",
+              "type": "string"
+            },
+            {
+              "selector": "ref",
+              "text": "ref",
+              "type": "string"
+            },
+            {
+              "selector": "posted_ms",
+              "text": "posted_ms",
+              "type": "string"
+            },
+            {
+              "selector": "perf_label",
+              "text": "vs your usual",
+              "type": "string"
+            },
+            {
+              "selector": "perf_tip",
+              "text": "perf_tip",
+              "type": "string"
+            },
+            {
+              "selector": "perf_industry_label",
+              "text": "vs industry",
+              "type": "string"
+            },
+            {
+              "selector": "perf_industry",
+              "text": "industry_tip",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "refId": "G",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/threads.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "posts",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "time",
+              "text": "Published",
+              "type": "timestamp_epoch"
+            },
+            {
+              "selector": "network",
+              "text": "Network",
+              "type": "string"
+            },
+            {
+              "selector": "account",
+              "text": "Account",
+              "type": "string"
+            },
+            {
+              "selector": "text",
+              "text": "Post",
+              "type": "string"
+            },
+            {
+              "selector": "permalink",
+              "text": "Link",
+              "type": "string"
+            },
+            {
+              "selector": "ref",
+              "text": "ref",
+              "type": "string"
+            },
+            {
+              "selector": "posted_ms",
+              "text": "posted_ms",
+              "type": "string"
+            },
+            {
+              "selector": "perf_label",
+              "text": "vs your usual",
+              "type": "string"
+            },
+            {
+              "selector": "perf_tip",
+              "text": "perf_tip",
+              "type": "string"
+            },
+            {
+              "selector": "perf_industry_label",
+              "text": "vs industry",
+              "type": "string"
+            },
+            {
+              "selector": "perf_industry",
+              "text": "industry_tip",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "refId": "H",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "bridge-instagram"
+          },
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://postiz-ghost-bridge:8080/tiktok.json",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "posts",
+          "filters": [],
+          "columns": [
+            {
+              "selector": "time",
+              "text": "Published",
+              "type": "timestamp_epoch"
+            },
+            {
+              "selector": "network",
+              "text": "Network",
+              "type": "string"
+            },
+            {
+              "selector": "account",
+              "text": "Account",
+              "type": "string"
+            },
+            {
+              "selector": "text",
+              "text": "Post",
+              "type": "string"
+            },
+            {
+              "selector": "permalink",
+              "text": "Link",
+              "type": "string"
+            },
+            {
+              "selector": "ref",
+              "text": "ref",
+              "type": "string"
+            },
+            {
+              "selector": "posted_ms",
+              "text": "posted_ms",
+              "type": "string"
+            },
+            {
+              "selector": "perf_label",
+              "text": "vs your usual",
+              "type": "string"
+            },
+            {
+              "selector": "perf_tip",
+              "text": "perf_tip",
+              "type": "string"
+            },
+            {
+              "selector": "perf_industry_label",
+              "text": "vs industry",
+              "type": "string"
+            },
+            {
+              "selector": "perf_industry",
+              "text": "industry_tip",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "links": [
+            {
+              "title": "This post up close: its numbers per day and what it did for the site",
+              "url": "/d/puppi3-post?var-network=${__data.fields.Network}&var-post=${__data.fields.ref}&var-time=${__data.fields.posted_ms}&from=${__data.fields.posted_ms}&to=now"
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Link"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Open",
+                    "url": "${__value.raw}",
+                    "targetBlank": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ref"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": false,
+                  "tooltip": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "posted_ms"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": false,
+                  "tooltip": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "vs your usual"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^Doing great.*",
+                      "result": {
+                        "color": "green",
+                        "index": 0
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^Above usual.*",
+                      "result": {
+                        "color": "light-green",
+                        "index": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^Below usual.*",
+                      "result": {
+                        "color": "light-orange",
+                        "index": 2
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^Well below usual.*",
+                      "result": {
+                        "color": "orange",
+                        "index": 3
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "value": null,
+                      "color": "transparent"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "custom.tooltip.field",
+                "value": "perf_tip"
+              },
+              {
+                "id": "custom.width",
+                "value": 240
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "perf_tip"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": false,
+                  "tooltip": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "vs industry"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^Well above typical.*",
+                      "result": {
+                        "color": "green",
+                        "index": 0
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^Above typical.*",
+                      "result": {
+                        "color": "light-green",
+                        "index": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^Below typical.*",
+                      "result": {
+                        "color": "light-orange",
+                        "index": 2
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^Well below typical.*",
+                      "result": {
+                        "color": "orange",
+                        "index": 3
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "value": null,
+                      "color": "transparent"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "custom.tooltip.field",
+                "value": "industry_tip"
+              },
+              {
+                "id": "custom.width",
+                "value": 240
+              },
+              {
+                "id": "description",
+                "value": "Against the published average for this network (Instagram per person reached, TikTok and YouTube per view, newsletters' click rate). Mostly big brand accounts, so a second opinion. Hover for the numbers."
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "industry_tip"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "viz": true,
+                  "legend": false,
+                  "tooltip": false
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "Published": 0,
+              "Network": 1,
+              "Account": 2,
+              "Post": 3,
+              "vs your usual": 4,
+              "Link": 6,
+              "ref": 7,
+              "posted_ms": 8,
+              "perf_tip": 9,
+              "vs industry": 5,
+              "industry_tip": 10
+            },
+            "excludeByName": {},
+            "renameByName": {}
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Published",
+                "desc": true
+              }
+            ]
+          }
+        },
+        {
+          "id": "limit",
+          "options": {
+            "limitField": 25
+          }
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "table",
+      "title": "Failed posts",
+      "description": "Posts Postiz couldn't publish, with the error it got.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "postiz-pg"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 32,
+        "w": 12,
+        "h": 6
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postiz-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT p.\"publishDate\" AS \"When\", initcap(replace(replace(i.\"providerIdentifier\", '-standalone', ''), '-', ' ')) AS \"Network\", i.name AS \"Account\",\n       left(regexp_replace(p.content, '<[^>]+>', '', 'g'), 80) AS \"Post\", left(coalesce(p.error, ''), 200) AS \"Error\"\nFROM \"Post\" p JOIN \"Integration\" i ON i.id = p.\"integrationId\"\nWHERE p.\"deletedAt\" IS NULL AND p.\"parentPostId\" IS NULL AND p.state = 'ERROR'\nORDER BY p.\"publishDate\" DESC\nLIMIT 25"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 12,
+      "type": "table",
+      "title": "Channels",
+      "description": "Each social account in Postiz and whether it needs reconnecting.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "postiz-pg"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 32,
+        "w": 12,
+        "h": 6
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postiz-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT initcap(replace(replace(i.\"providerIdentifier\", '-standalone', ''), '-', ' ')) AS \"Network\", i.name AS \"Account\",\n       CASE WHEN i.disabled THEN 'Disabled' WHEN i.\"refreshNeeded\" OR i.\"inBetweenSteps\" THEN 'Reconnect needed' ELSE 'OK' END AS \"Status\",\n       i.\"createdAt\" AS \"Connected\"\nFROM \"Integration\" i\nWHERE i.\"deletedAt\" IS NULL\nORDER BY 1, 2"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "OK": {
+                        "color": "green",
+                        "index": 0
+                      },
+                      "Reconnect needed": {
+                        "color": "orange",
+                        "index": 1
+                      },
+                      "Disabled": {
+                        "color": "red",
+                        "index": 2
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 9101,
+      "type": "row",
+      "title": "Drafts to post in the app",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 38,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 9001,
+      "type": "text",
+      "title": "",
+      "description": "",
+      "gridPos": {
+        "x": 0,
+        "y": 39,
+        "w": 24,
+        "h": 2
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "Drafts the bridge handed you (tag \"Post in app\"): Instagram and TikTok posts you share by hand from its notifications. Each network's own numbers are on [Platforms](/d/puppi3-platforms)."
+      },
+      "pluginVersion": "13.0.2",
+      "transparent": true
+    },
+    {
+      "id": 20,
+      "type": "stat",
+      "title": "Drafts to post in the app",
+      "description": "Postiz drafts the bridge tagged \"Post in app\" (Instagram/TikTok posts you share by hand), dated in the selected range",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "postiz-pg"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 41,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postiz-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT count(*) FROM \"Post\" p JOIN \"Integration\" i ON i.id = p.\"integrationId\"\nWHERE p.\"deletedAt\" IS NULL AND p.\"parentPostId\" IS NULL AND p.state = 'DRAFT' AND $__timeFilter(p.\"publishDate\")\n  AND EXISTS (SELECT 1 FROM \"TagsPosts\" tp JOIN \"Tags\" t ON t.id = tp.\"tagId\" WHERE tp.\"postId\" = p.id AND t.name = 'Post in app' AND t.\"deletedAt\" IS NULL)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#B28CFF"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 22,
+      "type": "table",
+      "title": "Drafts handed to you (post in the app)",
+      "description": "Newest first. Post = the caption without formatting; a Story has none.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "postiz-pg"
+      },
+      "gridPos": {
+        "x": 4,
+        "y": 41,
+        "w": 20,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postiz-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT p.\"publishDate\" AS \"Date\", initcap(replace(replace(i.\"providerIdentifier\", '-standalone', ''), '-', ' ')) AS \"Network\", i.name AS \"Account\",\n       coalesce(nullif(left(regexp_replace(p.content, '<[^>]+>', '', 'g'), 120), ''), 'Story') AS \"Post\"\nFROM \"Post\" p JOIN \"Integration\" i ON i.id = p.\"integrationId\"\nWHERE p.\"deletedAt\" IS NULL AND p.\"parentPostId\" IS NULL AND p.state = 'DRAFT' AND $__timeFilter(p.\"publishDate\")\n  AND EXISTS (SELECT 1 FROM \"TagsPosts\" tp JOIN \"Tags\" t ON t.id = tp.\"tagId\" WHERE tp.\"postId\" = p.id AND t.name = 'Post in app' AND t.\"deletedAt\" IS NULL)\nORDER BY p.\"publishDate\" DESC\nLIMIT 50"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 21,
+      "type": "bargauge",
+      "title": "Drafts by network",
+      "description": "Drafts waiting for you to post in the app, per network.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "postiz-pg"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 45,
+        "w": 4,
+        "h": 6
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "postiz-pg"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT initcap(replace(replace(i.\"providerIdentifier\", '-standalone', ''), '-', ' ')) AS \"Network\", count(*) AS \"Drafts\"\nFROM \"Post\" p JOIN \"Integration\" i ON i.id = p.\"integrationId\"\nWHERE p.\"deletedAt\" IS NULL AND p.\"parentPostId\" IS NULL AND p.state = 'DRAFT' AND $__timeFilter(p.\"publishDate\")\n  AND EXISTS (SELECT 1 FROM \"TagsPosts\" tp JOIN \"Tags\" t ON t.id = tp.\"tagId\" WHERE tp.\"postId\" = p.id AND t.name = 'Post in app' AND t.\"deletedAt\" IS NULL)\nGROUP BY 1\nORDER BY 2 DESC"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#B28CFF"
+          },
+          "min": 0,
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "orientation": "horizontal",
+        "displayMode": "basic",
+        "showUnfilled": true,
+        "valueMode": "color"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 9104,
+      "type": "row",
+      "title": "Postiz containers",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 51,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "id": 13,
+          "type": "timeseries",
+          "title": "Postiz containers: CPU",
+          "description": "Everything in the postiz stack",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 52,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum by (name) (rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_project=\"postiz\",name!=\"\"}[5m])) * 100",
+              "legendFormat": "{{name}}",
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "percent",
+              "custom": {
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "auto"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "showLegend": true,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "13.0.2",
+          "links": [],
+          "transformations": []
+        },
+        {
+          "id": 14,
+          "type": "timeseries",
+          "title": "Postiz containers: memory",
+          "description": "Memory in use (working set) of each container in the postiz stack, the bridge included.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 52,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum by (name) (container_memory_working_set_bytes{container_label_com_docker_compose_project=\"postiz\",name!=\"\"})",
+              "legendFormat": "{{name}}",
+              "range": true
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "bytes",
+              "custom": {
+                "lineWidth": 2,
+                "fillOpacity": 10,
+                "showPoints": "auto"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "showLegend": true,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "13.0.2",
+          "links": [],
+          "transformations": []
+        }
+      ]
+    }
+  ]
+}

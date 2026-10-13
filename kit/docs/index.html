@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cellipse cx="32" cy="36" rx="18" ry="17" fill="%23E0EDF8" stroke="%231A6FB0" stroke-width="3"/%3E%3Cellipse cx="13" cy="33" rx="6.5" ry="13" transform="rotate%2822 13 33%29" fill="%231A6FB0"/%3E%3Cellipse cx="51" cy="33" rx="6.5" ry="13" transform="rotate%28-22 51 33%29" fill="%231A6FB0"/%3E%3Ccircle cx="25" cy="34" r="2.8" fill="%2314202B"/%3E%3Ccircle cx="39" cy="34" r="2.8" fill="%2314202B"/%3E%3Ccircle cx="26" cy="33" r="0.9" fill="%23fff"/%3E%3Ccircle cx="40" cy="33" r="0.9" fill="%23fff"/%3E%3Cellipse cx="32" cy="44" rx="8" ry="6" fill="%23fff"/%3E%3Cellipse cx="32" cy="41.2" rx="3.6" ry="2.6" fill="%2314202B"/%3E%3Cpath d="M30 47.5q2 5 4 0z" fill="%23F07C98"/%3E%3Cpath d="M32 43.6v2.6M27.6 46q4.4 2.8 4.4 0q0 2.8 4.4 0" fill="none" stroke="%2314202B" stroke-width="1.6" stroke-linecap="round"/%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Creator Kit Guides</title>
+<meta name="description" content="The guides for Puppi3's Creator Kit: setting up a site, every setting, running it, its theme, posting and the dashboards.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* The kit's front page: points to its guides. Each guide is a single file with its own search (built by
+   docs/build-docs.py, KIT_PAGES), so any of them can be sent on its own; this page just ties them together. */
+:root{
+  --bg:#F4F6F8; --surface:#FFFFFF; --sunken:#E9EDF1; --ink:#14202B; --muted:#52606E; --rule:#D5DDE5;
+  --accent:#1A6FB0; --accent-soft:#E0EDF8;
+  --display:"Unbounded", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{color-scheme:dark;--bg:#0E141A;--surface:#151E26;--sunken:#1C2731;--ink:#E3EAF0;--muted:#9EAEBC;--rule:#2A3845;--accent:#5AB0F0;--accent-soft:#132A3D}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;padding:0 16px 64px}
+.wrap{max-width:1080px;margin:0 auto}
+header{padding:56px 0 30px}
+.mark{width:56px;height:56px;margin-bottom:18px}
+.mark svg{display:block;width:100%;height:100%}
+.mark .a{fill:var(--accent)}.mark .face{fill:#E0EDF8;stroke:var(--accent);stroke-width:3}.mark .ink{fill:#14202B}.mark .shine{fill:#fff}.mark .tongue{fill:#F07C98}.mark .line{fill:none;stroke:#14202B;stroke-width:1.6;stroke-linecap:round}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,6vw,52px);line-height:1.08;margin:0 0 14px;letter-spacing:-.01em;text-wrap:balance}
+h1 span{color:var(--accent)}
+.lede{font-size:19px;max-width:58ch;margin:0;color:var(--muted)}
+.guides{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(400px,100%),1fr));gap:16px;margin:8px 0 34px}
+a.guide{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:22px 22px 20px;
+  color:var(--ink);text-decoration:none;transition:border-color .15s,transform .15s}
+a.guide:hover{border-color:var(--accent);transform:translateY(-2px)}
+a.guide:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.who{align-self:flex-start;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--accent-soft);color:var(--accent);padding:3px 9px;border-radius:999px}
+a.guide h2{font-family:var(--display);font-weight:500;font-size:22px;line-height:1.2;margin:0}
+a.guide p{margin:0;color:var(--muted);font-size:15.5px}
+footer{font-size:14px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){a.guide{transition:none}a.guide:hover{transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="mark"><svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+    <ellipse class="face" cx="32" cy="36" rx="18" ry="17"/>
+    <ellipse class="a" cx="13" cy="33" rx="6.5" ry="13" transform="rotate(22 13 33)"/><ellipse class="a" cx="51" cy="33" rx="6.5" ry="13" transform="rotate(-22 51 33)"/>
+    <circle class="ink" cx="25" cy="34" r="2.8"/><circle class="ink" cx="39" cy="34" r="2.8"/><circle class="shine" cx="26" cy="33" r=".9"/><circle class="shine" cx="40" cy="33" r=".9"/>
+    <ellipse class="shine" cx="32" cy="44" rx="8" ry="6"/><ellipse class="ink" cx="32" cy="41.2" rx="3.6" ry="2.6"/>
+    <path class="tongue" d="M30 47.5q2 5 4 0z"/><path class="line" d="M32 43.6v2.6M27.6 46q4.4 2.8 4.4 0q0 2.8 4.4 0"/>
+  </svg></div>
+  <p class="eyebrow">Puppi3's Creator Kit</p>
+  <h1>The kit's guides<span>.</span></h1>
+  <p class="lede">A Ghost site with its own analytics, a live stream, every post shared to the social networks, and every network's numbers in one place. These guides are for whoever sets one up and runs it.</p>
+</header>
+<main class="guides">
+  <a class="guide" href="setup-guide.html">
+    <span class="who">For installers</span>
+    <h2>Setup Guide</h2>
+    <p>From nothing to a running site: what you need, the site's folder, Docker Compose or Kubernetes (your own cluster, Amazon EKS, Google GKE), and the steps to finish by hand.</p>
+  </a>
+  <a class="guide" href="operations-guide.html">
+    <span class="who">For whoever runs a site</span>
+    <h2>Operations Guide</h2>
+    <p>Keeping it running: updating the kit, backups and putting one back, moving between machines, Docker Compose, Kubernetes and the clouds, and troubleshooting.</p>
+  </a>
+  <a class="guide" href="posting-guide.html">
+    <span class="who">For whoever posts</span>
+    <h2>Posting Guide</h2>
+    <p>Writing a post so it shares well: what goes to Bluesky, Threads, Instagram and TikTok, the tags, the phone notifications, and finishing Instagram and TikTok posts.</p>
+  </a>
+  <a class="guide" href="analytics-guide.html">
+    <span class="who">For the site's owner</span>
+    <h2>Analytics Guide</h2>
+    <p>Reading the dashboards: who visits and from where, what turns visitors into members, how each post did, the newsletter, live shows and when to post.</p>
+  </a>
+  <a class="guide" href="theme-guide.html">
+    <span class="who">For the site's owner</span>
+    <h2>Theme Guide</h2>
+    <p>What visitors see and what you change in Ghost Admin: the theme's settings, the LIVE NOW bar, the Social preview button, music links, the short links, and using another theme.</p>
+  </a>
+  <a class="guide" href="settings-reference.html">
+    <span class="who">For installers</span>
+    <h2>Settings Reference</h2>
+    <p>Every setting a site has: site.env, each part's secrets, the Kubernetes and cloud files. What each one does, its default, and what setup fills in for you.</p>
+  </a>
+</main>
+</div>
+</body>
+</html>

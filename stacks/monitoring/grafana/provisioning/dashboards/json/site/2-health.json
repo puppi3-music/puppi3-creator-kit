@@ -1,0 +1,1830 @@
+{
+  "id": null,
+  "uid": "puppi3-health",
+  "title": "puppi3 \u00b7 Health",
+  "description": "Uptime, response time, TLS, live stream, containers, disk and Traefik for @SITE_HOST@. Alerts for these go to ntfy (Alerting, folder \"@SITE_NAME@\").",
+  "tags": [
+    "puppi3",
+    "ghost"
+  ],
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "liveNow": false,
+  "refresh": "1m",
+  "schemaVersion": 41,
+  "version": 1,
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "weekStart": "",
+  "links": [
+    {
+      "title": "Overview",
+      "type": "link",
+      "url": "/d/puppi3-overview",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Health",
+      "type": "link",
+      "url": "/d/puppi3-health",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Traffic",
+      "type": "link",
+      "url": "/d/puppi3-traffic",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Growth",
+      "type": "link",
+      "url": "/d/puppi3-growth",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Members & Newsletters",
+      "type": "link",
+      "url": "/d/puppi3-members",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Content & Engagement",
+      "type": "link",
+      "url": "/d/puppi3-content",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Social",
+      "type": "link",
+      "url": "/d/puppi3-social",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Platforms",
+      "type": "link",
+      "url": "/d/puppi3-platforms",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "templating": {
+    "list": []
+  },
+  "panels": [
+    {
+      "id": 9000,
+      "type": "text",
+      "title": "",
+      "transparent": true,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 2
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**@SITE_HOST@**&nbsp;&nbsp;|&nbsp;&nbsp;[Overview](/d/puppi3-overview?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;**\u25b8 Health**&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Traffic](/d/puppi3-traffic?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Growth](/d/puppi3-growth?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Members & Newsletters](/d/puppi3-members?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Content & Engagement](/d/puppi3-content?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Social](/d/puppi3-social?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Platforms](/d/puppi3-platforms?${__url_time_range})&nbsp;&nbsp;|&nbsp;&nbsp;[Site \u2197](https://@SITE_HOST@)&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Ghost admin \u2197](https://@SITE_HOST@/ghost/)",
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        }
+      },
+      "pluginVersion": "13.0.2"
+    },
+    {
+      "id": 101,
+      "type": "stat",
+      "title": "Site",
+      "description": "Public check through Cloudflare",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "probe_success{instance=\"https://@SITE_HOST@\"}",
+          "legendFormat": "",
+          "interval": "",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN",
+                  "color": "red",
+                  "index": 0
+                },
+                "1": {
+                  "text": "UP",
+                  "color": "green",
+                  "index": 1
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 102,
+      "type": "stat",
+      "title": "Ghost backend",
+      "description": "Ghost admin API answering (not just a Cloudflare cache hit)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 4,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "probe_success{instance=\"https://@SITE_HOST@/ghost/api/admin/site/\"}",
+          "legendFormat": "",
+          "interval": "",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN",
+                  "color": "red",
+                  "index": 0
+                },
+                "1": {
+                  "text": "UP",
+                  "color": "green",
+                  "index": 1
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 103,
+      "type": "stat",
+      "title": "Uptime 24h",
+      "description": "Share of the last 24 hours the public site check (https://@SITE_HOST@ through Cloudflare, every 15 s) succeeded.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "avg_over_time(probe_success{instance=\"https://@SITE_HOST@\"}[24h])",
+          "legendFormat": "",
+          "interval": "",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 0.99
+              },
+              {
+                "color": "green",
+                "value": 0.999
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 104,
+      "type": "stat",
+      "title": "Uptime 30d",
+      "description": "Share of the last 30 days the public site check (https://@SITE_HOST@ through Cloudflare, every 15 s) succeeded.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "avg_over_time(probe_success{instance=\"https://@SITE_HOST@\"}[30d])",
+          "legendFormat": "",
+          "interval": "",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 0.99
+              },
+              {
+                "color": "green",
+                "value": 0.999
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 105,
+      "type": "stat",
+      "title": "Response time",
+      "description": "How long the public check of https://@SITE_HOST@ takes, through Cloudflare (DNS, TLS and the page).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "probe_duration_seconds{instance=\"https://@SITE_HOST@\"}",
+          "legendFormat": "",
+          "interval": "",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 106,
+      "type": "stat",
+      "title": "TLS cert expires in",
+      "description": "Certificate visitors see (Cloudflare edge)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 20,
+        "y": 2,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "(probe_ssl_earliest_cert_expiry{instance=\"https://@SITE_HOST@\"} - time()) / 86400",
+          "legendFormat": "",
+          "interval": "",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 14
+              },
+              {
+                "color": "green",
+                "value": 30
+              }
+            ]
+          },
+          "unit": "d",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 111,
+      "type": "stat",
+      "title": "Live stream server",
+      "description": "Public check of https://@LIVE_HOST@ through Cloudflare (TinyIce). Up whether or not you're streaming: the mp3 mount is always there.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "probe_success{instance=\"https://@LIVE_HOST@\"}",
+          "legendFormat": "",
+          "interval": "",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN",
+                  "color": "red",
+                  "index": 0
+                },
+                "1": {
+                  "text": "UP",
+                  "color": "green",
+                  "index": 1
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 112,
+      "type": "stat",
+      "title": "On air",
+      "description": "Whether @DJ_SOFTWARE@ is sending audio to /stream-ogg right now (the mount the site's LIVE NOW bar watches). Not TinyIce's source count: its always-on /stream-mp3 transcode counts as a source too.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 4,
+        "y": 6,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "(sum(rate(tinyice_stream_bytes_in_total{mount=\"/stream-ogg\"}[1m])) > bool 0) or vector(0)",
+          "legendFormat": "",
+          "interval": "",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": 0
+              },
+              {
+                "color": "purple",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Off air",
+                  "index": 0
+                },
+                "1": {
+                  "text": "LIVE",
+                  "index": 1
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 113,
+      "type": "stat",
+      "title": "Listeners now",
+      "description": "People listening to the live stream right now, all mounts.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 6,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "sum(tinyice_listeners_total)",
+          "legendFormat": "",
+          "interval": "",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 114,
+      "type": "stat",
+      "title": "Postiz bridge",
+      "description": "Whether Prometheus can read the bridge's /metrics (the puppy pet counter). DOWN means the bridge isn't answering: no social posts or notifications go out.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 6,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "up{job=\"puppi3-pets\"}",
+          "legendFormat": "",
+          "interval": "",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN",
+                  "color": "red",
+                  "index": 0
+                },
+                "1": {
+                  "text": "UP",
+                  "color": "green",
+                  "index": 1
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 115,
+      "type": "stat",
+      "title": "Errors (5xx, last hour)",
+      "description": "Share of requests to @SITE_HOST@'s own routes that ended in a 5xx error over the last hour (Traefik). Blank = no requests.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 6,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "(sum(increase(traefik_router_requests_total{router=~\"puppi3-[a-z-]+@file|live-status@docker|puppi3-social-preview@docker\",code=~\"5..\"}[1h])) or vector(0)) / sum(increase(traefik_router_requests_total{router=~\"puppi3-[a-z-]+@file|live-status@docker|puppi3-social-preview@docker\"}[1h]))",
+          "legendFormat": "",
+          "interval": "",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 0.01
+              },
+              {
+                "color": "red",
+                "value": 0.05
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 116,
+      "type": "stat",
+      "title": "NAS disk free (@DISK_MOUNT@)",
+      "description": "Free space on @DISK_MOUNT@, where the stacks, MySQL, Tinybird and the deploy backups live.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 20,
+        "y": 6,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "node_filesystem_avail_bytes{job=\"node\",mountpoint=\"@DISK_MOUNT@\"} / node_filesystem_size_bytes{job=\"node\",mountpoint=\"@DISK_MOUNT@\"}",
+          "legendFormat": "",
+          "interval": "",
+          "instant": true,
+          "range": false,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 0.1
+              },
+              {
+                "color": "green",
+                "value": 0.2
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 107,
+      "type": "timeseries",
+      "title": "Response time",
+      "description": "How long the public check of https://@SITE_HOST@ takes, through Cloudflare (DNS, TLS and the page).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 10,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "probe_duration_seconds{instance=\"https://@SITE_HOST@\"}",
+          "legendFormat": "site",
+          "interval": "",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        },
+        {
+          "expr": "probe_duration_seconds{instance=\"https://@SITE_HOST@/ghost/api/admin/site/\"}",
+          "legendFormat": "ghost api",
+          "interval": "",
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "s",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "auto"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 108,
+      "type": "timeseries",
+      "title": "Container CPU",
+      "description": "100% = one full CPU core. The website's containers: Ghost, MySQL, web analytics (traffic-analytics, Tinybird), the Postiz bridge, TinyIce and the docs site. Postiz itself is on the Social dashboard.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 10,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (name) (rate(container_cpu_usage_seconds_total{name=~\"website-puppi3|puppi3-db-1|puppi3-traffic-analytics-1|puppi3-tinybird-local-1|puppi3-tinybird-sync-1|postiz-ghost-bridge|tinyice|docs\"}[5m])) * 100",
+          "legendFormat": "{{name}}",
+          "interval": "",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "percent",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "auto"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 109,
+      "type": "timeseries",
+      "title": "Container memory",
+      "description": "Memory in use (working set) of the website's containers. Postiz itself is on the Social dashboard.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 10,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "container_memory_working_set_bytes{name=~\"website-puppi3|puppi3-db-1|puppi3-traffic-analytics-1|puppi3-tinybird-local-1|puppi3-tinybird-sync-1|postiz-ghost-bridge|tinyice|docs\"}",
+          "legendFormat": "{{name}}",
+          "interval": "",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "bytes",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "auto"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 110,
+      "type": "timeseries",
+      "title": "Requests by status code (Traefik)",
+      "description": "Requests per second to @SITE_HOST@'s own routes (Ghost, analytics, ActivityPub, pets, live status, draft social previews), by HTTP status code. Staging, Postiz and the bridge's webhook are left out.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 18,
+        "w": 24,
+        "h": 7
+      },
+      "targets": [
+        {
+          "expr": "sum by (code) (rate(traefik_router_requests_total{router=~\"puppi3-[a-z-]+@file|live-status@docker|puppi3-social-preview@docker\"}[5m]))",
+          "legendFormat": "{{code}}",
+          "interval": "",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "reqps",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "auto"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 117,
+      "type": "timeseries",
+      "title": "Live stream listeners",
+      "description": "Listeners per mount (TinyIce). Mounts only show while TinyIce reports them, so the chart is empty between streams.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 25,
+        "w": 24,
+        "h": 7
+      },
+      "targets": [
+        {
+          "expr": "sum by (mount) (tinyice_stream_listeners_current)",
+          "legendFormat": "{{mount}}",
+          "interval": "",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "auto"
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 118,
+      "type": "timeseries",
+      "title": "Live stream: listeners' pauses and reconnects",
+      "description": "Each time a LIVE NOW bar listener's player paused to buffer (\"Pause\") or dropped its connection and reconnected (\"Reconnect\"), counted by the theme and the bridge. Pause buffering = the browser ran out of audio; trickle = Firefox playing in bits. Reconnect dropped = the connection ended or failed; stuck = no audio for 15 s; slowstart = the first load took too long; behind = too far behind live after a stall. Many listeners at the same moment = the stream itself (see \"Coming in from @DJ_SOFTWARE@\"); one now and then = that listener's connection or device (the table beside says which).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 32,
+        "w": 14,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (why) (puppi3_live_stalls_total{job=\"puppi3-pets\"}) - (sum by (why) (puppi3_live_stalls_total{job=\"puppi3-pets\"} offset $__interval) or sum by (why) (puppi3_live_stalls_total{job=\"puppi3-pets\"}) * 0)",
+          "legendFormat": "Pause: {{why}}",
+          "interval": "",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        },
+        {
+          "expr": "sum by (why) (puppi3_live_reconnects_total{job=\"puppi3-pets\"}) - (sum by (why) (puppi3_live_reconnects_total{job=\"puppi3-pets\"} offset $__interval) or sum by (why) (puppi3_live_reconnects_total{job=\"puppi3-pets\"}) * 0)",
+          "legendFormat": "Reconnect: {{why}}",
+          "interval": "",
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": [],
+      "interval": "1m"
+    },
+    {
+      "id": 121,
+      "type": "table",
+      "title": "Pauses and reconnects, by listener",
+      "description": "In the selected range, by whether the page was in view, phone/tablet or computer, and browser. \"Background tab / locked phone\": there the player can't pause itself to build up a cushion, so a small dip is heard more easily.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 14,
+        "y": 32,
+        "w": 10,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "(sum by (tab, device, browser) (puppi3_live_stalls_total{job=\"puppi3-pets\"}) - (sum by (tab, device, browser) (puppi3_live_stalls_total{job=\"puppi3-pets\"} offset $__range) or sum by (tab, device, browser) (puppi3_live_stalls_total{job=\"puppi3-pets\"}) * 0)) > 0",
+          "legendFormat": "",
+          "interval": "",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "expr": "(sum by (tab, device, browser) (puppi3_live_reconnects_total{job=\"puppi3-pets\"}) - (sum by (tab, device, browser) (puppi3_live_reconnects_total{job=\"puppi3-pets\"} offset $__range) or sum by (tab, device, browser) (puppi3_live_reconnects_total{job=\"puppi3-pets\"}) * 0)) > 0",
+          "legendFormat": "",
+          "interval": "",
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "noValue": "None in this range",
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "hidden": {
+                  "text": "Background tab / locked phone",
+                  "index": 0
+                },
+                "shown": {
+                  "text": "Page in view",
+                  "index": 1
+                },
+                "mobile": {
+                  "text": "Phone / tablet",
+                  "index": 2
+                },
+                "computer": {
+                  "text": "Computer",
+                  "index": 3
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Pauses",
+            "desc": true
+          }
+        ]
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "device": 0,
+              "browser": 1,
+              "tab": 2,
+              "Value #A": 3,
+              "Value #B": 4
+            },
+            "renameByName": {
+              "device": "Device",
+              "browser": "Browser",
+              "tab": "Page",
+              "Value #A": "Pauses",
+              "Value #B": "Reconnects"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 119,
+      "type": "timeseries",
+      "title": "Live stream: coming in from @DJ_SOFTWARE@",
+      "description": "Audio arriving per second: /stream-ogg is what @DJ_SOFTWARE@ sends, /stream-mp3 what TinyIce makes from it for listeners (both ~steady while live). A dip or gap here while listeners paused means the pause came from the sending side (@DJ_SOFTWARE@, the home network), not the listeners.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 40,
+        "w": 14,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (mount) (rate(tinyice_stream_bytes_in_total{mount=~\"/stream-ogg|/stream-mp3\"}[$__rate_interval])) * 8",
+          "legendFormat": "{{mount}}",
+          "interval": "",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "bps",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "auto"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/stream-ogg"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF4FA3"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "/stream-mp3"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 120,
+      "type": "timeseries",
+      "title": "Live stream: skipped for slow listeners",
+      "description": "Audio TinyIce skipped because a listener fell more than its 512 KB (13 s) behind: heard as a jump, a \"record scratch\". Should stay at zero; the LIVE NOW bar reconnects before it gets there.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 14,
+        "y": 40,
+        "w": 10,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(tinyice_stream_bytes_dropped_total{mount=\"/stream-mp3\"}[$__rate_interval]))",
+          "legendFormat": "Skipped",
+          "interval": "",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "bytes",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Skipped"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    }
+  ]
+}

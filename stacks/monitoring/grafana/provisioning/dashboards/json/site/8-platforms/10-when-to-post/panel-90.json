@@ -1,0 +1,524 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 90,
+    "title": "When to post: by weekday",
+    "description": "How posts made on each weekday do against your average weekday. Each network's posts at least 3 days old, each one's main number, or the one picked in that network's dropdown above (Compared on), as it stood when the post was 3 days old (from the numbers the bridge keeps per day; older posts' totals now are worked back to day 3 with the network's usual growth), so older posts don't win just by having had longer. One model per network weighs weekday, part of the day, account growth over time and the kind of post (Reel, Photo, Short, Mix, a Ghost post sent as a newsletter or not...) together, so a day isn't credited for when, what or how big the account was. 1.5\u00d7 = half again as much as an average day, 0.5\u00d7 = half; green from 1.1\u00d7, red under 0.9\u00d7. Each cell is pulled toward 1\u00d7 by as much as the posts can't back it up (how much slots really differ is measured from all networks' posts), and a one-off hit counts for less. Confidence (how likely it really is above or below average): High (plain) and Medium (a little faded) need the cell to be surer than the surest cell gets in 95% / 80% of tables with the posts' times shuffled (at least 95% / 80%), so a table with many cells doesn't light one up by luck; Low (faded and striped; always for a single post). Each cell's tooltip (corner triangle) gives its posts, their plain median and the percentage; the Posts cell's tooltip says how many were measured at day 3. With the newest 25-50 posts per network these are hints, not rules. From the bridge (timing.json), in the site's time zone (SITE_TIMEZONE, @SITE_TIMEZONE@).",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "Network",
+                      "text": "Network",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Metric",
+                      "text": "Compared on",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Posts",
+                      "text": "Posts",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "Posts tip",
+                      "text": "Posts tip",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Mon",
+                      "text": "Mon",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "Mon tip",
+                      "text": "Mon tip",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Mon style",
+                      "text": "Mon style",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Tue",
+                      "text": "Tue",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "Tue tip",
+                      "text": "Tue tip",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Tue style",
+                      "text": "Tue style",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Wed",
+                      "text": "Wed",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "Wed tip",
+                      "text": "Wed tip",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Wed style",
+                      "text": "Wed style",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Thu",
+                      "text": "Thu",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "Thu tip",
+                      "text": "Thu tip",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Thu style",
+                      "text": "Thu style",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Fri",
+                      "text": "Fri",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "Fri tip",
+                      "text": "Fri tip",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Fri style",
+                      "text": "Fri style",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Sat",
+                      "text": "Sat",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "Sat tip",
+                      "text": "Sat tip",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Sat style",
+                      "text": "Sat style",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Sun",
+                      "text": "Sun",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "Sun tip",
+                      "text": "Sun tip",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "Sun style",
+                      "text": "Sun style",
+                      "type": "string"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "$append([], weekdays)",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/timing.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "ghost",
+                        "value": "${cmp_ghost}"
+                      },
+                      {
+                        "key": "instagram",
+                        "value": "${cmp_instagram}"
+                      },
+                      {
+                        "key": "tiktok",
+                        "value": "${cmp_tiktok}"
+                      },
+                      {
+                        "key": "threads",
+                        "value": "${cmp_threads}"
+                      },
+                      {
+                        "key": "bluesky",
+                        "value": "${cmp_bluesky}"
+                      },
+                      {
+                        "key": "youtube",
+                        "value": "${cmp_youtube}"
+                      },
+                      {
+                        "key": "soundcloud",
+                        "value": "${cmp_soundcloud}"
+                      },
+                      {
+                        "key": "mixcloud",
+                        "value": "${cmp_mixcloud}"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "sortBy",
+            "spec": {
+              "options": {
+                "sort": [
+                  {
+                    "field": "Network",
+                    "desc": false
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "organize",
+            "spec": {
+              "options": {
+                "indexByName": {
+                  "Network": 0,
+                  "Compared on": 1,
+                  "Posts": 2,
+                  "Mon": 3,
+                  "Tue": 4,
+                  "Wed": 5,
+                  "Thu": 6,
+                  "Fri": 7,
+                  "Sat": 8,
+                  "Sun": 9,
+                  "Mon tip": 10,
+                  "Mon style": 11,
+                  "Tue tip": 12,
+                  "Tue style": 13,
+                  "Wed tip": 14,
+                  "Wed style": 15,
+                  "Thu tip": 16,
+                  "Thu style": 17,
+                  "Fri tip": 18,
+                  "Fri style": 19,
+                  "Sat tip": 20,
+                  "Sat style": 21,
+                  "Sun tip": 22,
+                  "Sun style": 23,
+                  "Posts tip": 24
+                },
+                "excludeByName": {},
+                "renameByName": {}
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "table",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "cellHeight": "sm",
+          "showHeader": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "red"
+                },
+                {
+                  "value": 0.9,
+                  "color": "yellow"
+                },
+                {
+                  "value": 1.1,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "thresholds"
+            },
+            "noValue": "Not enough posts yet: a network needs 3 posts at least 3 days old",
+            "unit": "suffix:\u00d7",
+            "decimals": 2,
+            "custom": {
+              "align": "center",
+              "cellOptions": {
+                "type": "color-background",
+                "mode": "basic"
+              }
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Network"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "auto"
+                  }
+                },
+                {
+                  "id": "unit",
+                  "value": "none"
+                },
+                {
+                  "id": "decimals",
+                  "value": 0
+                },
+                {
+                  "id": "custom.align",
+                  "value": "left"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Compared on"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "auto"
+                  }
+                },
+                {
+                  "id": "unit",
+                  "value": "none"
+                },
+                {
+                  "id": "decimals",
+                  "value": 0
+                },
+                {
+                  "id": "custom.align",
+                  "value": "left"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Posts"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "auto"
+                  }
+                },
+                {
+                  "id": "unit",
+                  "value": "none"
+                },
+                {
+                  "id": "decimals",
+                  "value": 0
+                },
+                {
+                  "id": "custom.align",
+                  "value": "left"
+                },
+                {
+                  "id": "custom.tooltip.field",
+                  "value": "Posts tip"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Mon"
+              },
+              "properties": [
+                {
+                  "id": "custom.styleField",
+                  "value": "Mon style"
+                },
+                {
+                  "id": "custom.tooltip.field",
+                  "value": "Mon tip"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Tue"
+              },
+              "properties": [
+                {
+                  "id": "custom.styleField",
+                  "value": "Tue style"
+                },
+                {
+                  "id": "custom.tooltip.field",
+                  "value": "Tue tip"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Wed"
+              },
+              "properties": [
+                {
+                  "id": "custom.styleField",
+                  "value": "Wed style"
+                },
+                {
+                  "id": "custom.tooltip.field",
+                  "value": "Wed tip"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Thu"
+              },
+              "properties": [
+                {
+                  "id": "custom.styleField",
+                  "value": "Thu style"
+                },
+                {
+                  "id": "custom.tooltip.field",
+                  "value": "Thu tip"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Fri"
+              },
+              "properties": [
+                {
+                  "id": "custom.styleField",
+                  "value": "Fri style"
+                },
+                {
+                  "id": "custom.tooltip.field",
+                  "value": "Fri tip"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Sat"
+              },
+              "properties": [
+                {
+                  "id": "custom.styleField",
+                  "value": "Sat style"
+                },
+                {
+                  "id": "custom.tooltip.field",
+                  "value": "Sat tip"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Sun"
+              },
+              "properties": [
+                {
+                  "id": "custom.styleField",
+                  "value": "Sun style"
+                },
+                {
+                  "id": "custom.tooltip.field",
+                  "value": "Sun tip"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byRegexp",
+                "options": "/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)$/"
+              },
+              "properties": [
+                {
+                  "id": "noValue",
+                  "value": "\u2013"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byRegexp",
+                "options": "/ (tip|style)$/"
+              },
+              "properties": [
+                {
+                  "id": "custom.hidden",
+                  "value": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

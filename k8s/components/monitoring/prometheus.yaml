@@ -1,0 +1,127 @@
+# Prometheus, as kit/monitoring/compose.yaml's (a year's history, 8 GB at most on its 10 Gi volume). Its jobs are
+# ConfigMap prometheus-config, which k8s/up.sh writes for the site's modules: Traefik, the bridge's counters
+# (<ID_PREFIX>-pets), TinyIce, the relays' listeners (json-exporter), blackbox's public checks, and the kubelets'
+# cAdvisor (Health's and Social's pod CPU and memory) and volume stats (Health's disk), only the site's namespace kept.
+# TinyIce's admin password (its /metrics) comes from Secret icecast.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: prometheus
+spec:
+  serviceName: prometheus
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      serviceAccountName: prometheus
+      securityContext:
+        runAsUser: 65534
+        runAsGroup: 65534
+        runAsNonRoot: true
+        fsGroup: 65534
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v3.5.0
+          args:
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --storage.tsdb.path=/prometheus
+            - --storage.tsdb.retention.time=1y
+            - --storage.tsdb.retention.size=8GB
+          ports:
+            - {name: http, containerPort: 9090}
+          readinessProbe:
+            httpGet: {path: /-/ready, port: http}
+            periodSeconds: 10
+          resources:
+            requests: {cpu: 50m, memory: 256Mi}
+            limits: {memory: 2Gi}
+          volumeMounts:
+            - {name: config, mountPath: /etc/prometheus}
+            - {name: tinyice, mountPath: /etc/prometheus-secrets}
+            - {name: data, mountPath: /prometheus}
+      volumes:
+        - name: config
+          configMap:
+            name: prometheus-config
+        - name: tinyice
+          secret:
+            secretName: icecast
+            items: [{key: TINYICE_ADMIN_PASSWORD, path: tinyice-password}]
+            optional: true
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+spec:
+  selector:
+    app: prometheus
+  ports:
+    - {name: http, port: 9090, targetPort: http}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+---
+# The relays' addresses (Service tinyice-relay-pods' EndpointSlices), in the site's namespace only
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prometheus
+rules:
+  - apiGroups: [discovery.k8s.io]
+    resources: [endpointslices]
+    verbs: [get, list, watch]
+  - apiGroups: [""]
+    resources: [services, pods]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prometheus
+subjects:
+  - kind: ServiceAccount
+    name: prometheus
+---
+# The kubelets' cAdvisor and volume stats, through the API server: nodes are cluster-wide, so this is a ClusterRole.
+# k8s/up.sh names it and its binding after the site (<ID_PREFIX>-prometheus-kubelet), and --down deletes them.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus-kubelet
+rules:
+  - apiGroups: [""]
+    resources: [nodes, nodes/proxy, nodes/metrics]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus-kubelet
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus-kubelet
+subjects:
+  - kind: ServiceAccount
+    name: prometheus
+    namespace: default        # k8s/up.sh: the site's

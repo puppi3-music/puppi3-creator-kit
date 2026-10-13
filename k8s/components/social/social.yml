@@ -1,0 +1,52 @@
+# Postiz's and the bridge's routes: the postiz stack's Traefik labels (stacks/postiz/compose.yaml) as a file, with the
+# same router names (Grafana's Health matches them). A Go template on Traefik's environment: the site's profile and
+# ConfigMap "social" (POSTIZ_DOMAIN, from secrets/postiz.env, which k8s/up.sh copies there). The theme's routes to
+# the bridge (pets, clicks) are already in site.yml.
+{{- $host := env "SITE_HOST" | default "example.com" }}
+{{- $postiz := env "POSTIZ_DOMAIN" | default (printf "postiz.%s" $host) }}
+{{- $id := env "ID_PREFIX" | default "puppi3" }}
+{{- $resolver := env "TLS_RESOLVER" | default "cf" }}
+{{- $ep := env "ENTRYPOINT" | default "https" }}
+http:
+  routers:
+    postiz:
+      rule: "Host(`{{ $postiz }}`)"
+      entryPoints: [{{ $ep }}]
+      service: postiz
+      middlewares: [cloudflare-only]
+{{- if ne $resolver "none" }}
+      tls:{{ if eq $resolver "self" }} {}{{ else }}
+        certResolver: {{ $resolver }}{{ end }}
+{{- end }}
+    # Ghost's "Post published" webhook
+    postiz-ghost-bridge:
+      rule: "Host(`{{ $postiz }}`) && Path(`/ghost-webhook`)"
+      entryPoints: [{{ $ep }}]
+      service: postiz-ghost-bridge
+      priority: 100
+      middlewares: [cloudflare-only]
+{{- if ne $resolver "none" }}
+      tls:{{ if eq $resolver "self" }} {}{{ else }}
+        certResolver: {{ $resolver }}{{ end }}
+{{- end }}
+    # Draft social previews, on the site's own name, ahead of Ghost's router for these paths (under /ghost/ so the
+    # browser sends Ghost Admin's sign-in cookie)
+    {{ $id }}-social-preview:
+      rule: "Host(`{{ $host }}`) && (PathPrefix(`/ghost/social-preview/`) || PathPrefix(`/social-preview/`))"
+      entryPoints: [{{ $ep }}]
+      service: postiz-ghost-bridge
+      priority: 100
+      middlewares: [cloudflare-only]
+{{- if ne $resolver "none" }}
+      tls:{{ if eq $resolver "self" }} {}{{ else }}
+        certResolver: {{ $resolver }}{{ end }}
+{{- end }}
+  services:
+    postiz:
+      loadBalancer:
+        servers:
+          - url: "http://postiz:5000"
+    postiz-ghost-bridge:
+      loadBalancer:
+        servers:
+          - url: "http://postiz-ghost-bridge:8080"

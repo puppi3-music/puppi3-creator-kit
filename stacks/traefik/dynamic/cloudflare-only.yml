@@ -1,0 +1,49 @@
+# Cloudflare only, for the public website names (the site, postiz, live...). They're all proxied by Cloudflare,
+# but ports 80/443 are open on the server, and once its own address is known (any DNS-only name gives it away),
+# anyone could connect to it directly with the site's Host and skip Cloudflare, faking the visitor headers Ghost
+# relies on. Use it as a router middleware on every public website route (not on a service that has to stay
+# direct):
+#   traefik.http.routers.<name>.middlewares=cloudflare-only@file
+# The client's own address is checked (not X-Forwarded-For). The home network is allowed too.
+# Cloudflare's ranges: https://www.cloudflare.com/ips (checked 2026-09-28). They rarely change; when they
+# do, update this list, real-ip.yml AND forwardedHeaders.trustedIPs in ../compose.yaml.
+# A Go template (as puppi3.yml): BEHIND_CLOUDFLARE=false (instance profile, via ../compose.yaml) makes it allow
+# everyone, for a kit site that isn't behind Cloudflare; TRUSTED_EXTRA (comma-separated ranges, e.g. the
+# home network; "none", the default, = no others) is allowed besides Cloudflare.
+{{- $extra := env "TRUSTED_EXTRA" | default "none" | splitList "," }}
+http:
+  middlewares:
+    cloudflare-only:
+      ipAllowList:
+        sourceRange:
+{{- if eq (env "BEHIND_CLOUDFLARE" | default "true") "false" }}
+          - "0.0.0.0/0"
+          - "::/0"
+{{- else }}
+          - "173.245.48.0/20"
+          - "103.21.244.0/22"
+          - "103.22.200.0/22"
+          - "103.31.4.0/22"
+          - "141.101.64.0/18"
+          - "108.162.192.0/18"
+          - "190.93.240.0/20"
+          - "188.114.96.0/20"
+          - "197.234.240.0/22"
+          - "198.41.128.0/17"
+          - "162.158.0.0/15"
+          - "104.16.0.0/13"
+          - "104.24.0.0/14"
+          - "172.64.0.0/13"
+          - "131.0.72.0/22"
+          - "2400:cb00::/32"
+          - "2606:4700::/32"
+          - "2803:f800::/32"
+          - "2405:b500::/32"
+          - "2405:8100::/32"
+          - "2a06:98c0::/29"
+          - "2c0f:f248::/32"
+          # TRUSTED_EXTRA: puppi3's is the home network, as in lan-only.yml
+{{- range $extra }}{{ if ne (trim .) "none" }}
+          - "{{ trim . }}"
+{{- end }}{{ end }}
+{{- end }}

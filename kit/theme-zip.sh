@@ -1,0 +1,24 @@
+#!/bin/sh
+# Builds the kit's theme: kit/dist/puppi3-creator-kit-theme.zip from kit/theme/ (Ghost's Source + the kit's hooks,
+# kit/theme/KIT.md), checks that nothing site-specific got in, then runs Ghost's theme checker (gscan).
+set -e
+cd "$(dirname "$0")"
+ZIP=dist/puppi3-creator-kit-theme.zip
+mkdir -p dist
+rm -f "$ZIP"
+(cd theme && zip -rq "../$ZIP" . -x '*.map' -x '.gitattributes' -x '.DS_Store' -x 'KIT.md')
+# No other site's values: the addresses and names of the site the kit was built for, its NAS, its owner's email
+leaks=$(unzip -Z1 "$ZIP" | while read -r f; do
+          [ "${f%/}" = "$f" ] || continue   # folders
+          unzip -p "$ZIP" "$f" | grep -n -i -E 'puppi3\.party|butterwoof|nas\.pet|plarina|window\.puppi3|/\.puppy/' \
+            | sed "s|^|$f:|" || true
+        done)
+if [ -n "$leaks" ]; then
+  echo "theme-zip: site-specific values in the kit's theme:" >&2
+  echo "$leaks" >&2
+  exit 1
+fi
+echo "Built kit/$ZIP"
+# Ghost's theme checker needs Node.js (npx); without it the zip is still fine to upload
+if command -v npx >/dev/null; then npx -y gscan@latest --zip "$ZIP"
+else echo "theme-zip: $ZIP is ready; Ghost's theme check (gscan) skipped: it needs Node.js (npx)"; fi

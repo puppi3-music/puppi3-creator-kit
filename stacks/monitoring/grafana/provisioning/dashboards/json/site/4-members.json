@@ -1,0 +1,1565 @@
+{
+  "id": null,
+  "uid": "puppi3-members",
+  "title": "puppi3 \u00b7 Members & Newsletters",
+  "description": "Member growth, signup sources and newsletter performance",
+  "tags": [
+    "puppi3",
+    "ghost"
+  ],
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "liveNow": false,
+  "refresh": "5m",
+  "schemaVersion": 41,
+  "version": 1,
+  "time": {
+    "from": "now-90d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "weekStart": "",
+  "links": [
+    {
+      "title": "Overview",
+      "type": "link",
+      "url": "/d/puppi3-overview",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Health",
+      "type": "link",
+      "url": "/d/puppi3-health",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Traffic",
+      "type": "link",
+      "url": "/d/puppi3-traffic",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Growth",
+      "type": "link",
+      "url": "/d/puppi3-growth",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Members & Newsletters",
+      "type": "link",
+      "url": "/d/puppi3-members",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Content & Engagement",
+      "type": "link",
+      "url": "/d/puppi3-content",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Social",
+      "type": "link",
+      "url": "/d/puppi3-social",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    },
+    {
+      "title": "Platforms",
+      "type": "link",
+      "url": "/d/puppi3-platforms",
+      "icon": "dashboard",
+      "tooltip": "",
+      "tags": [],
+      "asDropdown": false,
+      "targetBlank": false,
+      "includeVars": false,
+      "keepTime": true
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "templating": {
+    "list": []
+  },
+  "panels": [
+    {
+      "id": 9000,
+      "type": "text",
+      "title": "",
+      "transparent": true,
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 2
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**@SITE_HOST@**&nbsp;&nbsp;|&nbsp;&nbsp;[Overview](/d/puppi3-overview?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Health](/d/puppi3-health?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Traffic](/d/puppi3-traffic?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Growth](/d/puppi3-growth?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;**\u25b8 Members & Newsletters**&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Content & Engagement](/d/puppi3-content?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Social](/d/puppi3-social?${__url_time_range})&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Platforms](/d/puppi3-platforms?${__url_time_range})&nbsp;&nbsp;|&nbsp;&nbsp;[Site \u2197](https://@SITE_HOST@)&nbsp;&nbsp;\u00b7&nbsp;&nbsp;[Ghost admin \u2197](https://@SITE_HOST@/ghost/)",
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        }
+      },
+      "pluginVersion": "13.0.2"
+    },
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Total members",
+      "description": "Everyone signed up to the site (free and paid), now.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 2,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS members FROM members",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "New members (selected range)",
+      "description": "Signups in the selected time range.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 2,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS new_members FROM members WHERE $__timeFilter(created_at)",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "New members (previous period)",
+      "description": "Signups in the same length of time just before the selected range (e.g. the 30 days before the last 30), to compare with the tile on its left.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 2,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS new_members FROM members WHERE created_at >= FROM_UNIXTIME(2 * $__unixEpochFrom() - $__unixEpochTo()) AND created_at < $__timeFrom()",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 204,
+      "type": "stat",
+      "title": "Signups from posts (selected range)",
+      "description": "Members whose signup Ghost attributed to a post",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 2,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS signups FROM members_created_events WHERE attribution_type = 'post' AND $__timeFilter(created_at)",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Members over time",
+      "description": "Total members at the end of each day.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT time, members FROM (\n  SELECT CAST(d AS DATETIME) AS time, SUM(n) OVER (ORDER BY d) AS members\n  FROM (SELECT DATE(created_at) AS d, COUNT(*) AS n FROM members GROUP BY d) daily\n) t\nWHERE $__timeFilter(time)\nORDER BY time",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "lineInterpolation": "stepAfter",
+            "showPoints": "auto"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": false,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "New signups per day",
+      "description": "Signups each day in the selected range.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 6,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(created_at, '1d', 0), COUNT(*) AS signups\nFROM members\nWHERE $__timeFilter(created_at)\nGROUP BY 1\nORDER BY 1",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60,
+            "lineWidth": 1,
+            "showPoints": "never"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": false,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 207,
+      "type": "table",
+      "title": "Where signups came from",
+      "description": " \"Facebook\" is mostly Instagram: Instagram often sends people through a Facebook address when they tap a link. \"Your own site\" is visits that started on @SITE_HOST@ itself (you, from Ghost Admin or previews, or someone still browsing past midnight), not a source to grow.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT IF(COALESCE(referrer_source, '') IN ('', 'Direct'), 'Direct / unknown', referrer_source) AS Source, COUNT(*) AS Signups\nFROM members_created_events\nWHERE $__timeFilter(created_at)\nGROUP BY 1\nORDER BY 2 DESC\nLIMIT 15",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Source"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Facebook": {
+                        "text": "Facebook (mostly Instagram links)",
+                        "index": 0
+                      },
+                      "@SITE_HOST@": {
+                        "text": "Your own site",
+                        "index": 1
+                      },
+                      "ig": {
+                        "text": "Instagram (tag: ig, set by Instagram)",
+                        "index": 2
+                      },
+                      "instagram": {
+                        "text": "Instagram (tag: instagram)",
+                        "index": 3
+                      },
+                      "bluesky": {
+                        "text": "Bluesky (tag: bluesky)",
+                        "index": 4
+                      },
+                      "threads": {
+                        "text": "Threads (tag: threads)",
+                        "index": 5
+                      },
+                      "tiktok": {
+                        "text": "TikTok (tag: tiktok)",
+                        "index": 6
+                      },
+                      "facebook": {
+                        "text": "Facebook (tag: facebook)",
+                        "index": 7
+                      },
+                      "x": {
+                        "text": "X (tag: x)",
+                        "index": 8
+                      },
+                      "discord": {
+                        "text": "Discord (tag: discord)",
+                        "index": 9
+                      },
+                      "youtube": {
+                        "text": "YouTube (tag: youtube)",
+                        "index": 10
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "empty",
+                      "result": {
+                        "text": "Direct / unknown"
+                      }
+                    }
+                  },
+                  {
+                    "type": "special",
+                    "options": {
+                      "match": "null",
+                      "result": {
+                        "text": "Direct / unknown"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "type": "row",
+      "id": 9102,
+      "title": "Newsletters: sends, opens and clicks",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": {
+        "x": 0,
+        "y": 23,
+        "w": 24,
+        "h": 1
+      }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Newsletters sent",
+      "description": "Newsletter emails sent, all time.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS newsletters FROM emails WHERE status = 'submitted'",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Avg newsletter open rate",
+      "description": "Opens / delivered, across newsletters sent with open tracking on.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 24,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(100 * SUM(opened_count) / NULLIF(SUM(delivered_count), 0), 1) AS open_rate FROM emails WHERE status = 'submitted' AND track_opens = 1",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 203,
+      "type": "stat",
+      "title": "Newsletter link clicks (selected range)",
+      "description": "Needs newsletter click tracking on",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 24,
+        "w": 12,
+        "h": 4
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS clicks FROM members_click_events WHERE $__timeFilter(created_at)",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Newsletter open rate by send",
+      "description": "Open rate of each newsletter (opens / delivered), for newsletters with open tracking on. Apple Mail Privacy Protection counts as opens, so it reads high.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT created_at AS time, ROUND(100 * opened_count / NULLIF(delivered_count, 0), 1) AS open_rate\nFROM emails\nWHERE status = 'submitted' AND track_opens = 1 AND $__timeFilter(created_at)\nORDER BY time",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": {
+            "lineWidth": 2,
+            "showPoints": "always",
+            "pointSize": 6,
+            "fillOpacity": 10
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": false,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 11,
+      "type": "table",
+      "title": "Newsletters",
+      "description": "The last 25 newsletters, with delivery and open numbers. Unsubscribed (2 days) = newsletter unsubscribes in the 2 days after it went out (by anyone, so a guide, not proof it was this one). Spam complaints = people who marked it as spam.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 36,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT e.created_at AS Sent, e.subject AS Subject, e.email_count AS Recipients, e.delivered_count AS Delivered,\n       e.failed_count AS Failed, e.opened_count AS Opens,\n       ROUND(100 * e.opened_count / NULLIF(e.delivered_count, 0), 1) AS `Open %`,\n       (SELECT COUNT(*) FROM members_subscribe_events s WHERE s.subscribed = 0\n          AND s.created_at >= e.created_at AND s.created_at < e.created_at + INTERVAL 2 DAY) AS `Unsubscribed (2 days)`,\n       (SELECT COUNT(*) FROM email_spam_complaint_events c WHERE c.email_id = e.id) AS `Spam complaints`\nFROM emails e\nWHERE e.status = 'submitted'\nORDER BY e.created_at DESC\nLIMIT 25",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Open %"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Spam complaints"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "text",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 209,
+      "type": "table",
+      "title": "Most-clicked newsletter links",
+      "description": "Links in newsletters, by clicks in the selected range.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 45,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT r.`to` AS Link, COUNT(*) AS Clicks\nFROM members_click_events mce\nJOIN redirects r ON r.id = mce.redirect_id\nWHERE $__timeFilter(mce.created_at)\nGROUP BY r.`to`\nORDER BY Clicks DESC\nLIMIT 25",
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 9100,
+      "type": "row",
+      "title": "Email health: unsubscribes, bounces, spam complaints",
+      "collapsed": false,
+      "gridPos": {
+        "x": 0,
+        "y": 54,
+        "w": 24,
+        "h": 1
+      },
+      "panels": []
+    },
+    {
+      "id": 210,
+      "type": "stat",
+      "title": "Newsletter unsubscribes (selected range)",
+      "description": "Times a member turned a newsletter off (themselves, or an admin, an import or Ghost after a bounce), from Ghost's members_subscribe_events.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 55,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS unsubscribes FROM members_subscribe_events WHERE subscribed = 0 AND $__timeFilter(created_at)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "orange"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "noValue": "\u2013"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "justifyMode": "center",
+        "orientation": "vertical",
+        "wideLayout": false
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 211,
+      "type": "stat",
+      "title": "Newsletter subscriptions, net (selected range)",
+      "description": "Newsletter subscribes minus unsubscribes in the range (a new member who gets the newsletter counts as a subscribe). Below 0 = the list shrank.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 55,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COALESCE(SUM(subscribed = 1) - SUM(subscribed = 0), 0) AS net FROM members_subscribe_events WHERE $__timeFilter(created_at)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "blue"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "noValue": "\u2013"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "justifyMode": "center",
+        "orientation": "vertical",
+        "wideLayout": false
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 212,
+      "type": "stat",
+      "title": "Spam complaints (selected range)",
+      "description": "People who marked a newsletter as spam (Mailgun tells Ghost, which then stops emailing them). Even a few hurt delivery for everyone: an alert goes to ntfy for each.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 55,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS complaints FROM email_spam_complaint_events WHERE $__timeFilter(created_at)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "noValue": "\u2013"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "justifyMode": "center",
+        "orientation": "vertical",
+        "wideLayout": false
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 213,
+      "type": "stat",
+      "title": "Members Ghost no longer emails",
+      "description": "Members whose email Ghost turned off (email_disabled) after a permanent bounce or a spam complaint. They stay members; they just get no email until they update their address.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 55,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS disabled FROM members WHERE email_disabled = 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "orange"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "noValue": "\u2013"
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "justifyMode": "center",
+        "orientation": "vertical",
+        "wideLayout": false
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 214,
+      "type": "timeseries",
+      "title": "Newsletter subscribes & unsubscribes per day",
+      "description": "From Ghost's members_subscribe_events: subscribes (including new members who get the newsletter) and unsubscribes, per day.",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 59,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(created_at, '1d', 0), SUM(subscribed = 1) AS subscribes, SUM(subscribed = 0) AS unsubscribes\nFROM members_subscribe_events WHERE $__timeFilter(created_at) GROUP BY 1 ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 60,
+            "lineWidth": 1,
+            "showPoints": "never"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "unsubscribes"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Unsubscribes"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "subscribes"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              },
+              {
+                "id": "displayName",
+                "value": "Subscribes"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    },
+    {
+      "id": 215,
+      "type": "table",
+      "title": "Delivery problems",
+      "description": "Newsletter emails that failed in the selected range, newest first (Mailgun's reason). Permanent = the address doesn't work (Ghost stops emailing it); temporary = Mailgun gave up retrying (a full inbox, a server down).",
+      "datasource": {
+        "type": "mysql",
+        "uid": "ghost-mysql"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 59,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "mysql",
+            "uid": "ghost-mysql"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT f.failed_at AS Failed, e.subject AS Newsletter, COALESCE(m.email, r.member_email) AS Member,\n       f.severity AS Kind, f.code AS Code, f.message AS Reason\nFROM email_recipient_failures f\nJOIN emails e ON e.id = f.email_id\nLEFT JOIN email_recipients r ON r.id = f.email_recipient_id\nLEFT JOIN members m ON m.id = f.member_id\nWHERE $__timeFilter(f.failed_at)\nORDER BY f.failed_at DESC\nLIMIT 50"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "noValue": "No failed deliveries",
+          "custom": {
+            "cellOptions": {
+              "type": "auto",
+              "wrapText": false
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Reason"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 300
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "pluginVersion": "13.0.2",
+      "links": [],
+      "transformations": []
+    }
+  ]
+}

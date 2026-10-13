@@ -1,0 +1,155 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 7,
+    "title": "vs your other ${label} posts",
+    "description": "This post against your other posts on ${label} (never other people's), judged on what ${label} ranks posts by, mostly per person reached (likes per reach, shares per view\u2026), with counts (reach, views, plays) compared at the same age. Each number ranks the post among your 20 posts nearest in time (of the same kind when there are 5), the ranks are averaged with the weights below, and the post is ranked on that among the same posts: Doing great = better overall than about 4 in 5 of them, Usual = the middle fifth. Small numbers count for less, and with few posts to compare with it stays nearer Usual. Needs 5 posts to compare with. The analytics guide explains it.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "label",
+                      "text": "Verdict",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "score",
+                      "text": "Score",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "performance",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/post.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "network",
+                        "value": "${network}"
+                      },
+                      {
+                        "key": "id",
+                        "value": "${post}"
+                      },
+                      {
+                        "key": "time",
+                        "value": "${time}"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "stat",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "/^Verdict$/"
+          },
+          "orientation": "auto",
+          "textMode": "value",
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "center",
+          "wideLayout": true,
+          "showPercentChange": false
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {
+                "type": "regex",
+                "options": {
+                  "pattern": "^Doing great.*",
+                  "result": {
+                    "color": "green",
+                    "index": 0
+                  }
+                }
+              },
+              {
+                "type": "regex",
+                "options": {
+                  "pattern": "^Above usual.*",
+                  "result": {
+                    "color": "light-green",
+                    "index": 1
+                  }
+                }
+              },
+              {
+                "type": "regex",
+                "options": {
+                  "pattern": "^Below usual.*",
+                  "result": {
+                    "color": "light-orange",
+                    "index": 2
+                  }
+                }
+              },
+              {
+                "type": "regex",
+                "options": {
+                  "pattern": "^Well below usual.*",
+                  "result": {
+                    "color": "orange",
+                    "index": 3
+                  }
+                }
+              }
+            ],
+            "noValue": "No verdict: see The post above for why",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "transparent"
+                }
+              ]
+            },
+            "color": {
+              "mode": "thresholds"
+            }
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

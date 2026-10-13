@@ -1,0 +1,156 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 704,
+    "title": "Top network",
+    "description": "The network that sent the most visitors in the time range, with all of its links added together, so the number won't match any single row of the Sources table. \"Instagram\" adds up the Sources rows Facebook (mostly Instagram links), Instagram, Instagram (tag: instagram) and Instagram (tag: ig, set by Instagram): Instagram sends most link taps through a Facebook address. Direct / unknown and Your own site (you in Ghost Admin or previews, or someone browsing past midnight) don't count.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "ghost-analytics"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "source",
+                      "text": "source",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "visits",
+                      "text": "visits",
+                      "type": "number"
+                    }
+                  ],
+                  "computed_columns": [
+                    {
+                      "selector": "((source == 'Facebook' || source == 'Instagram' || source == 'instagram' || source == 'ig') ? 'Instagram' : (source == 'bluesky' ? 'Bluesky' : (source == 'threads' ? 'Threads' : (source == 'tiktok' ? 'TikTok' : (source == 'discord' ? 'Discord' : (source == 'youtube' ? 'YouTube' : (source == 'facebook' ? 'Facebook' : (source == 'x' ? 'X' : source))))))))",
+                      "text": "Source"
+                    }
+                  ],
+                  "filterExpression": "source != '@SITE_HOST@' && source != ''",
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "data",
+                  "source": "url",
+                  "summarizeAlias": "Visitors",
+                  "summarizeBy": "Source",
+                  "summarizeExpression": "sum(visits)",
+                  "type": "json",
+                  "url": "http://tinybird-local:7181/v0/pipes/api_top_sources.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "site_uuid",
+                        "value": "@GHOST_SITE_UUID@"
+                      },
+                      {
+                        "key": "timezone",
+                        "value": "@SITE_TIMEZONE@"
+                      },
+                      {
+                        "key": "date_from",
+                        "value": "${__from:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "date_to",
+                        "value": "${__to:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "limit",
+                        "value": "50"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "sortBy",
+            "spec": {
+              "options": {
+                "sort": [
+                  {
+                    "desc": true,
+                    "field": "Visitors"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "limit",
+            "spec": {
+              "options": {
+                "limitField": 1
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "stat",
+      "version": "",
+      "spec": {
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "center",
+          "orientation": "horizontal",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "/^(Source|Visitors)$/",
+            "values": true
+          },
+          "textMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "suffix: visitors",
+            "decimals": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "purple"
+            },
+            "noValue": "\u2013"
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

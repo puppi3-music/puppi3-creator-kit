@@ -1,0 +1,941 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cellipse cx="32" cy="36" rx="18" ry="17" fill="%23E0EDF8" stroke="%231A6FB0" stroke-width="3"/%3E%3Cellipse cx="13" cy="33" rx="6.5" ry="13" transform="rotate%2822 13 33%29" fill="%231A6FB0"/%3E%3Cellipse cx="51" cy="33" rx="6.5" ry="13" transform="rotate%28-22 51 33%29" fill="%231A6FB0"/%3E%3Ccircle cx="25" cy="34" r="2.8" fill="%2314202B"/%3E%3Ccircle cx="39" cy="34" r="2.8" fill="%2314202B"/%3E%3Ccircle cx="26" cy="33" r="0.9" fill="%23fff"/%3E%3Ccircle cx="40" cy="33" r="0.9" fill="%23fff"/%3E%3Cellipse cx="32" cy="44" rx="8" ry="6" fill="%23fff"/%3E%3Cellipse cx="32" cy="41.2" rx="3.6" ry="2.6" fill="%2314202B"/%3E%3Cpath d="M30 47.5q2 5 4 0z" fill="%23F07C98"/%3E%3Cpath d="M32 43.6v2.6M27.6 46q4.4 2.8 4.4 0q0 2.8 4.4 0" fill="none" stroke="%2314202B" stroke-width="1.6" stroke-linecap="round"/%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Creator Kit Analytics Guide</title>
+<meta name="description" content="How to read a Puppi3's Creator Kit site's dashboards: visitors and where they come from, what turns them into members, how each post did, the newsletter, live shows and when to post.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#F4F6F8; --surface:#FFFFFF; --sunken:#E9EDF1; --ink:#14202B; --muted:#52606E; --rule:#D5DDE5;
+  --accent:#1A6FB0; --accent-soft:#E0EDF8;
+  --auto:#0B7F80; --auto-soft:#DDF3F2;
+  --you:#9A5B00; --you-soft:#FBEFD9;
+  --skip:#66717D; --skip-soft:#EAEDF0;
+  --code-bg:#17212B; --code-ink:#E4EAF0;
+  --display:"Unbounded", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0E141A; --surface:#151E26; --sunken:#1C2731; --ink:#E3EAF0; --muted:#9EAEBC; --rule:#2A3845;
+    --accent:#5AB0F0; --accent-soft:#132A3D;
+    --auto:#3CC7C9; --auto-soft:#12302F;
+    --you:#F2B35A; --you-soft:#352812;
+    --skip:#9AA6B2; --skip-soft:#212B34;
+    --code-bg:#0A0F14; --code-ink:#E4EAF0;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E141A; --surface:#151E26; --sunken:#1C2731; --ink:#E3EAF0; --muted:#9EAEBC; --rule:#2A3845;
+  --accent:#5AB0F0; --accent-soft:#132A3D;
+  --auto:#3CC7C9; --auto-soft:#12302F;
+  --you:#F2B35A; --you-soft:#352812;
+  --skip:#9AA6B2; --skip-soft:#212B34;
+  --code-bg:#0A0F14; --code-ink:#E4EAF0;
+}
+header.top .mark{width:64px;height:64px}
+header.top .mark svg{display:block;width:100%;height:100%}
+.mark .a{fill:var(--accent)}.mark .face{fill:#E0EDF8;stroke:var(--accent);stroke-width:3}.mark .ink{fill:#14202B}.mark .shine{fill:#fff}.mark .tongue{fill:#F07C98}.mark .line{fill:none;stroke:#14202B;stroke-width:1.6;stroke-linecap:round}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;padding-inline:16px;padding-block:0 64px}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto}
+header.top{padding-block:40px 28px;border-bottom:1px solid var(--rule);display:grid;gap:14px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,5vw,44px);line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1 .dot{color:var(--accent)}
+.lede{font-size:19px;max-width:62ch;margin:0;color:var(--ink)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--muted)}
+.layout{display:grid;grid-template-columns:230px minmax(0,1fr);min-width:0;gap:48px;padding-top:32px}
+nav.toc{min-width:0;position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:14px}
+nav.toc p{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+nav.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+nav.toc a{display:block;padding:6px 10px;border-radius:6px;color:var(--ink);text-decoration:none}
+nav.toc a:hover{background:var(--sunken)}
+main{min-width:0;max-width:72ch}
+section{padding-block:8px 28px;border-bottom:1px solid var(--rule);margin-bottom:28px}
+section:last-of-type{border-bottom:0}
+h2{font-family:var(--display);font-weight:500;font-size:clamp(21px,3vw,26px);line-height:1.2;margin:8px 0 14px;text-wrap:balance}
+h3{font-size:18px;margin:26px 0 8px}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 16px;padding-left:22px}
+li{margin-bottom:6px}
+strong{font-weight:700}
+code,.tag{font-family:var(--mono);font-size:.86em}
+code{background:var(--sunken);padding:1px 6px;border-radius:5px;overflow-wrap:anywhere}
+kbd{font-family:var(--mono);font-size:.82em;border:1px solid var(--rule);border-bottom-width:2px;border-radius:5px;padding:0 6px;background:var(--sunken);color:var(--ink)}
+.where{display:inline-block;font-family:var(--mono);font-size:12px;background:var(--accent-soft);color:var(--accent);padding:1px 8px;border-radius:999px;font-weight:600}
+.note{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;margin:0 0 18px}
+.note.warn{border-color:var(--you);background:var(--you-soft)}
+.note.tip{border-color:var(--ok);background:var(--ok-soft)}
+.note b.label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.note.warn b.label{color:var(--you)}
+.note.tip b.label{color:var(--ok)}
+.note p:last-child,.note ul:last-child{margin-bottom:0}
+
+/* Steps */
+ol.steps{list-style:none;padding:0;counter-reset:s;display:grid;gap:10px}
+ol.steps>li{counter-increment:s;display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;margin:0}
+ol.steps>li::before{content:counter(s);font-family:var(--display);font-weight:700;font-size:15px;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;margin-top:1px}
+
+/* Tables */
+.tablewrap{overflow-x:auto;margin:0 0 18px;border:1px solid var(--rule);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--rule)}
+th{font-size:12px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--sunken);font-weight:600}
+tr:last-child td{border-bottom:0}
+
+/* Code */
+.code pre{background:var(--sunken);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;margin:0 0 16px;overflow-x:auto;font-family:var(--mono);font-size:14px;line-height:1.5}
+
+.faq dt{font-weight:700;margin-top:16px}
+.faq dd{margin:4px 0 0}
+dl.gloss{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:8px 18px}
+dl.gloss dt{font-weight:700}
+dl.gloss dd{margin:0;color:var(--ink)}
+footer{max-width:72ch;margin:24px 0 0 278px;font-size:14px;color:var(--muted)}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;gap:18px}
+  nav.toc{position:static}
+  nav.toc ol{display:flex;overflow-x:auto;gap:6px;padding-bottom:6px}
+  nav.toc a{white-space:nowrap;border:1px solid var(--rule);background:var(--surface)}
+  footer{margin-left:0}
+  dl.gloss{grid-template-columns:1fr;gap:2px}
+  dl.gloss dd{margin-bottom:10px}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<style>html{color-scheme:light}body{margin:0}img{max-width:100%}</style>
+<!-- shared styles: from docs/assets/docs.css, copied in by docs/build-docs.py -->
+<style>
+/* Shared by the docs pages, on top of each page's own styles, and copied into each page by
+   docs/build-docs.py (so every guide works as a single file): the top bar with search and theme
+   switch, the contents list that follows along, search highlights, back to top. Colours come from
+   each page's variables, so light and dark mode both work. Edit this file, not the copies. */
+
+:root{--bar-h:58px}
+
+/* Headings land below the sticky bar */
+section,h3{scroll-margin-top:calc(var(--bar-h) + 18px)}
+nav.toc{top:calc(env(safe-area-inset-top,0px) + var(--bar-h) + 18px);max-height:calc(100vh - var(--bar-h) - 36px);overflow-y:auto}
+
+/* ---------- top bar ---------- */
+.docbar{position:sticky;top:0;z-index:50;margin-inline:-16px;padding:0 16px;
+  background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);
+  border-bottom:1px solid var(--rule)}
+.docbar-in{max-width:1180px;margin:0 auto;min-height:var(--bar-h);display:flex;align-items:center;gap:14px}
+.docbar .brand{font-family:var(--display);font-weight:700;font-size:15px;color:var(--ink);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.docbar .brand span{color:var(--accent)}
+.docbar .home{display:inline-flex;align-items:center;gap:6px;flex:none;font-size:13px;color:var(--muted);text-decoration:none;
+  border:1px solid var(--rule);border-radius:8px;padding:6px 10px;white-space:nowrap}
+.docbar .home svg{width:14px;height:14px;fill:currentColor}
+.docbar .home:hover{color:var(--accent);border-color:var(--accent)}
+.docbar .grow{flex:1}
+.docbar .iconbtn{font:inherit;font-size:13px;background:var(--surface);color:var(--ink);border:1px solid var(--rule);border-radius:8px;padding:6px 10px;cursor:pointer;white-space:nowrap}
+.docbar .iconbtn:hover{border-color:var(--accent)}
+
+/* ---------- search ---------- */
+.search{position:relative;width:min(420px,100%)}
+.search input{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--surface);border:1px solid var(--rule);
+  border-radius:10px;padding:8px 44px 8px 36px;outline:none;-webkit-appearance:none;appearance:none}
+.search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.search input::placeholder{color:var(--muted)}
+.search .glass{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);pointer-events:none}
+.search kbd{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:11px;color:var(--muted);
+  border:1px solid var(--rule);border-bottom-width:2px;border-radius:5px;padding:0 6px;background:var(--sunken);pointer-events:none}
+.search input:focus + kbd,.search input:not(:placeholder-shown) + kbd{display:none}
+.results{position:absolute;top:calc(100% + 8px);right:0;width:min(640px,calc(100vw - 32px));max-height:min(70vh,560px);overflow-y:auto;
+  background:var(--surface);border:1px solid var(--rule);border-radius:12px;box-shadow:0 18px 50px rgba(10,12,30,.22);padding:6px;display:none;z-index:60}
+.results.open{display:block}
+.results .hint{padding:10px 12px;font-size:14px;color:var(--muted)}
+.results .hint b{color:var(--ink)}
+.result{display:block;padding:10px 12px;border-radius:8px;color:var(--ink);text-decoration:none;border:1px solid transparent}
+.result[aria-selected="true"],.result:hover{background:var(--sunken);border-color:var(--rule)}
+.result .where{display:block;margin-bottom:3px;font-size:14.5px;font-weight:700;line-height:1.35}
+.result .snip{font-size:13.5px;color:var(--muted);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.result mark,mark.hit{background:var(--you-soft);color:inherit;border-radius:3px;padding:0 1px;box-shadow:0 0 0 1px color-mix(in srgb,var(--you) 45%,transparent)}
+
+@media (max-width:820px){
+  /* phones: name and theme on one row, search across the full width below */
+  :root{--bar-h:106px}
+  .docbar-in{flex-wrap:wrap;gap:8px 10px;padding-block:8px}
+  .docbar .brand{flex:1}
+  .docbar .home{padding:7px 8px}
+  .docbar .home span{display:none}
+  .docbar .grow{display:none}
+  .search{order:3;flex:1 1 100%;width:100%}
+  .search kbd{display:none}
+  .results{position:fixed;left:16px;right:16px;top:calc(var(--bar-h) + 6px);width:auto}
+}
+
+/* ---------- contents list that follows along ---------- */
+nav.toc a[aria-current="true"]{background:var(--accent-soft);color:var(--accent);font-weight:700}
+nav.toc ul.sub{list-style:none;margin:2px 0 6px 10px;padding:0 0 0 8px;border-left:2px solid var(--rule);display:none}
+nav.toc li.open > ul.sub{display:block}
+nav.toc ul.sub a{padding:4px 8px;font-size:13px;color:var(--muted)}
+nav.toc ul.sub a:hover{color:var(--ink)}
+nav.toc ul.sub a[aria-current="true"]{background:none;color:var(--ink);font-weight:700}
+@media (max-width:900px){ nav.toc ul.sub{display:none !important} nav.toc{max-height:none} }
+
+/* where a search result or link lands */
+.flash{animation:flash 1.6s ease-out}
+@keyframes flash{0%{background:var(--you-soft);box-shadow:0 0 0 8px var(--you-soft)}100%{background:transparent;box-shadow:0 0 0 8px transparent}}
+
+/* ---------- tables ---------- */
+/* Names in the first column break only when they can't fit a whole line: the pages' code{overflow-wrap:anywhere}
+   lets a table squeeze its first column to a letter or two per line, and that column holds the names. */
+td:first-child code{overflow-wrap:break-word;word-break:normal}
+/* the first column (names) only as wide as its longest name, the rest goes to the text */
+td:first-child{font-weight:600;width:1%;min-width:13rem}
+td:first-child code,td:first-child em{font-weight:normal}
+td{line-height:1.55}
+tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--sunken) 35%,transparent)}
+/* Lines between columns; a cell shared by several columns (colspan) runs across them and starts
+   with a tag naming the columns it covers */
+:is(td,th)+:is(td,th){border-left:1px solid var(--rule)}
+td[colspan][data-label]::before{content:attr(data-label);display:inline-block;margin-right:8px;padding:0 7px;
+  border:1px solid var(--rule);border-radius:999px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--muted);vertical-align:1px;line-height:1.6}
+/* Phones: each row becomes a card, every cell under its column name (data-label, set by docs.js) */
+@media (max-width:640px){
+  .tablewrap table,.tablewrap tbody,.tablewrap tr,.tablewrap td{display:block;width:auto}
+  .tablewrap thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .tablewrap tr{border-bottom:1px solid var(--rule);padding:6px 0}
+  .tablewrap tr:last-child{border-bottom:0}
+  .tablewrap td{border:0;padding:4px 14px;min-width:0}
+  .tablewrap td[data-label]:not(:first-child)::before{content:attr(data-label);display:block;font-family:var(--mono);font-size:11px;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+  .tablewrap :is(td,th){border-left:0}
+  .tablewrap td[colspan][data-label]::before{border:0;border-radius:0;padding:0;margin-right:0;letter-spacing:.08em}
+  .tablewrap tbody tr:nth-child(even) td{background:none}
+  .tablewrap tbody tr:nth-child(even){background:color-mix(in srgb,var(--sunken) 35%,transparent)}
+}
+
+/* ---------- small reading aids ---------- */
+tbody tr:hover td{background:color-mix(in srgb,var(--sunken) 60%,transparent)}
+h2 .anchor,h3 .anchor{opacity:0;margin-left:8px;font-size:.8em;color:var(--muted);text-decoration:none}
+h2:hover .anchor,h3:hover .anchor,.anchor:focus{opacity:1}
+.totop{position:fixed;right:18px;bottom:18px;z-index:40;font:inherit;font-size:13px;font-weight:700;background:var(--ink);color:var(--bg);
+  border:0;border-radius:999px;padding:9px 14px;cursor:pointer;box-shadow:0 8px 24px rgba(10,12,30,.25);opacity:0;pointer-events:none;transition:opacity .2s}
+.totop.show{opacity:1;pointer-events:auto}
+
+@media (prefers-reduced-motion:reduce){.flash{animation:none}.totop{transition:none}}
+@media print{.docbar,.totop{display:none}nav.toc{position:static;max-height:none}}
+
+/* ---------- the guide's puppy (the site mascot, drawn inline in each page's header) ---------- */
+header.top .pup{width:150px}
+header.top .pup svg{display:block;width:100%;height:auto}
+.pup .bg,.pup .cut{fill:var(--accent-soft)}
+.pup .tail{transform-box:fill-box;transform-origin:0% 100%}
+.pup:hover .tail{animation:pup-wag .35s ease-in-out infinite alternate}
+.pup .float{animation:pup-float 3.2s ease-in infinite;opacity:0}
+.pup .float.d1{animation-delay:1.05s}.pup .float.d2{animation-delay:2.1s}
+.pup .spin{transform-box:fill-box;transform-origin:50% 50%;animation:pup-spin 9s linear infinite}
+@keyframes pup-wag{from{transform:rotate(-12deg)}to{transform:rotate(14deg)}}
+@keyframes pup-float{0%{transform:translateY(10px);opacity:0}20%{opacity:1}100%{transform:translateY(-34px);opacity:0}}
+@keyframes pup-spin{to{transform:rotate(360deg)}}
+@media (min-width:821px){
+  /* wide screens: puppy to the right of the title, intro and meta */
+  header.top:has(.pup){grid-template-columns:minmax(0,1fr) auto;column-gap:32px}
+  header.top > *{grid-column:1}
+  header.top .pup{grid-column:2;grid-row:1 / span 4;align-self:center;width:210px}
+}
+@media (prefers-reduced-motion:reduce){.pup:hover .tail,.pup .spin{animation:none}.pup .float{animation:none;opacity:1}}
+</style>
+<!-- /shared styles -->
+</head>
+<body>
+
+<div class="wrap">
+<header class="top">
+  <div class="mark"><svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+    <ellipse class="face" cx="32" cy="36" rx="18" ry="17"/>
+    <ellipse class="a" cx="13" cy="33" rx="6.5" ry="13" transform="rotate(22 13 33)"/><ellipse class="a" cx="51" cy="33" rx="6.5" ry="13" transform="rotate(-22 51 33)"/>
+    <circle class="ink" cx="25" cy="34" r="2.8"/><circle class="ink" cx="39" cy="34" r="2.8"/><circle class="shine" cx="26" cy="33" r=".9"/><circle class="shine" cx="40" cy="33" r=".9"/>
+    <ellipse class="shine" cx="32" cy="44" rx="8" ry="6"/><ellipse class="ink" cx="32" cy="41.2" rx="3.6" ry="2.6"/>
+    <path class="tongue" d="M30 47.5q2 5 4 0z"/><path class="line" d="M32 43.6v2.6M27.6 46q4.4 2.8 4.4 0q0 2.8 4.4 0"/>
+  </svg></div>
+  
+  <div class="eyebrow">Puppi3's Creator Kit · the numbers</div>
+  <h1>Analytics Guide<span class="dot">.</span></h1>
+  <p class="lede">How to read the site's dashboards: who visits, where they come from, what makes them join, how each post did, and when to post.</p>
+  <div class="meta"><span>For: the site's owner, and anyone who looks at the numbers</span><span>No technical knowledge needed</span><span>The site itself: the <a href="theme-guide.html">Theme Guide</a></span><span>Writing posts: the <a href="posting-guide.html">Posting Guide</a></span></div>
+</header>
+
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <p>On this page</p>
+  <ol>
+    <li><a href="#start">Getting around</a></li>
+    <li><a href="#dashboards">The dashboards</a></li>
+    <li><a href="#questions">Common questions</a></li>
+    <li><a href="#reading">Reading the numbers right</a></li>
+    <li><a href="#post">One post up close</a></li>
+    <li><a href="#timing">When to post</a></li>
+    <li><a href="#limits">What the numbers can't tell you</a></li>
+    <li><a href="#faq">Something looks wrong?</a></li>
+    <li><a href="#glossary">Glossary</a></li>
+  </ol>
+</nav>
+
+<main>
+<section id="start">
+  <h2>Getting around</h2>
+  <p><span>All the numbers are in the site's own Grafana: grafana.example.com (behind Cloudflare's protection if the site is), or grafana.&lt;home domain&gt; at home, in a folder named after the site.</span> Everything here is read-only: looking around can't break or change anything. For the short version without opening Grafana, your phone gets a summary of the week every Monday morning (<a href="posting-guide.html#notifications-your-week">Posting Guide</a>).</p>
+  <h3 id="start-moving-between-dashboards">Moving between dashboards</h3>
+  <p>Every dashboard has the same links along the top, in the same places: Overview, Health, Traffic, Growth, Members, Content, Social and Platforms. The line under the title has them too, with the one you're on in bold. Both keep your time range, so "last 7 days" on Traffic is still "last 7 days" when you open Growth. Two more aren't in that list: <span class="where">Post</span> opens when you click a post (see <a href="#post">One post up close</a>), and <span class="where">Page</span> when you click a page on the site (see <a href="#post-every-post-about-a-page">Every post about one page</a>).</p>
+  <p>Hover a chart and a line follows your mouse across every chart on that dashboard, so you can see what else happened on the same day.</p>
+  <p>To jump to a section, for example Instagram on <span class="where">Platforms</span>, click <strong>Outline</strong> (the icon with lines, in the thin bar on the right edge). It lists the dashboard's sections, and clicking one scrolls straight to it. On Platforms the site comes first, then the networks in A-Z order, and the When to post tables list them A-Z too. Networks that aren't set up aren't on the page, so they aren't listed either.</p>
+  <h3 id="start-the-time-range">The time range</h3>
+  <p>The time picker at the top right (for example "Last 30 days") sets the time range for most panels. A panel whose title says <em>selected range</em> follows it, while <em>all time</em>, <em>now</em> or <em>last 30 days</em> panels ignore it. The networks' own totals on <span class="where">Platforms</span> mostly cover the last 30 days, whatever the time range.</p>
+  <ul>
+    <li><strong>Pick a few days or more</strong> for the daily charts: each bar is one day. Under a day, Ghost counts in hours and the numbers mean something slightly different (see <a href="#reading-unique-visitors">Unique visitors</a>).</li>
+    <li><strong>Compare with before</strong>: <span class="where">Members</span> puts "New members (previous period)" right next to the selected range's number, e.g. the 30 days before the last 30.</li>
+    <li>Dashboards refresh themselves (Health every minute, the rest every 5 minutes), so you can leave one open.</li>
+  </ul>
+  <h3 id="start-colours">Colours</h3>
+  <p>A colour means the same thing on every dashboard, so you can tell what a number is about before reading its title.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Colour</th><th>Means</th></tr></thead>
+    <tbody>
+      <tr><td><span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#A352CC;vertical-align:-1px;margin-right:6px"></span>Purple</td><td>Visitors and traffic (a lighter purple: pageviews)</td></tr>
+      <tr><td><span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#73BF69;vertical-align:-1px;margin-right:6px"></span>Green</td><td>Members and sign-ups</td></tr>
+      <tr><td><span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#5794F2;vertical-align:-1px;margin-right:6px"></span>Blue</td><td>Engagement: comments, newsletters, clicks; on Platforms, each network's engagement line (likes, comments, shares and saves added up)</td></tr>
+      <tr><td><span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#E535C8;vertical-align:-1px;margin-right:6px"></span>Magenta</td><td>The site (Ghost) as a network: your posts on the site, like the magenta post markers and posts-published counts, and the site's section on Platforms (its number tiles and visitors bars, as each network's section uses that network's colour)</td></tr>
+      <tr><td><span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#B28CFF;vertical-align:-1px;margin-right:6px"></span>Violet</td><td>Your social posts, like the violet post markers</td></tr>
+      <tr><td><span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#FADE2A;vertical-align:-1px;margin-right:6px"></span>Yellow</td><td>Likes, in the popup when you hover a Platforms <strong>reach &amp; engagement</strong> chart (comments and replies blue, shares and reposts plain, saves and quotes violet)</td></tr>
+      <tr><td><span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#FF4FA3;vertical-align:-1px;margin-right:6px"></span>Bright pink</td><td>The live stream</td></tr>
+      <tr><td><span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#FF9830;vertical-align:-1px;margin-right:6px"></span>Orange</td><td>Worth a look: unsubscribes, emails that bounce</td></tr>
+      <tr><td><span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#F2495C;vertical-align:-1px;margin-right:6px"></span>Red</td><td>Something wrong: errors, failures, threats</td></tr>
+      <tr><td><span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:currentColor;vertical-align:-1px;margin-right:6px"></span>Plain (the text colour)</td><td>A second number shown beside a coloured one, for comparison</td></tr>
+      <tr><td>A network's own colour</td><td>That network: Instagram pink, YouTube red, SoundCloud orange, Bluesky blue, TikTok red-pink, Mixcloud indigo, Threads grey; on Traffic, Google Search blue and Cloudflare orange. On Platforms, the network's colour is its reach, views or plays (on the site, visitors), blue is engagement, and the follower total is the plain line on its own chart; Instagram's link taps are a lighter orange. On Post, the post's numbers are in its network's colour: its main number (views, plays or visitors) on the charts, the others in shades of grey.</td></tr>
+    </tbody>
+  </table></div>
+  <p>On Growth, the <strong>Visitor → member</strong> column runs from red (few visitors joined) to green (many did).</p>
+  <p>A post's two verdicts (<a href="#post-is-it-doing-well">Is it doing well?</a>) have their own scale. <strong>vs your usual</strong>: <span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#73BF69;vertical-align:-1px;margin-right:6px"></span>Doing great, <span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#C8F2C2;vertical-align:-1px;margin-right:6px"></span>Above usual, no colour for Usual, <span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#FFB357;vertical-align:-1px;margin-right:6px"></span>Below usual, <span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#FF9830;vertical-align:-1px;margin-right:6px"></span>Well below usual ("Rank among them" on the Post dashboard uses the same colours). <strong>vs industry</strong> uses the same five steps: Well above typical, Above typical, no colour for About typical, Below typical, Well below typical.</p>
+  <h3 id="start-explanations-and-markers">Explanations and markers</h3>
+  <ul>
+    <li><strong>Every panel explains itself.</strong> Hover the <kbd>i</kbd> next to a title for what it counts and where the number comes from. This guide covers the main points; the <kbd>i</kbd> has the details.</li>
+    <li><strong>Post markers</strong>: on Overview, Traffic and Growth, dotted lines show what you posted: <strong>magenta</strong> = a post on the site (Ghost), <strong>violet</strong> = a social post. Hover the little triangle at the bottom of a line to see which post. Switch them off with the toggles at the top of the dashboard.</li>
+    <li><strong>Tables</strong>: click a column heading to sort by it. On Growth, the funnel icon on a heading filters that column.</li>
+    <li><strong>Dropdowns inside a section</strong>: some sections have their own dropdowns at the top (sort, which number to compare on, which source). They only affect that section.</li>
+  </ul>
+  <div class="note tip">
+    <b class="label">Start with Overview</b>
+    <p>Its <strong>Alerts firing now</strong> box at the top lists anything that's wrong right now: the same alerts that reach your phone through ntfy. If it's empty, everything's working and the numbers can be trusted.</p>
+  </div>
+  
+</section>
+
+<section id="dashboards">
+  <h2>The dashboards</h2>
+  <p>Each dashboard answers one kind of question.</p>
+  <p>A part the site doesn't use has no panels: without the live stream there's no On air or Live shows, a network that isn't in the site's list has no section, and Google Search and Cloudflare's numbers appear once whoever runs the site has added their keys.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Dashboard</th><th>What it answers</th><th>Look at first</th></tr></thead>
+    <tbody>
+      <tr><td><span class="where">Overview</span></td><td>Is everything OK, and how's it going in general?</td><td>Alerts firing now, Unique visitors, Total members, Posts doing well, Best posts lately</td></tr>
+      <tr><td><span class="where">Health</span></td><td>Is the site up and fast? Am I on air?</td><td>Site, Uptime, On air, Listeners now, Errors, Live stream</td></tr>
+      <tr><td><span class="where">Traffic</span></td><td>How many people visit, what do they read, and where from? Also Google Search and everything Cloudflare saw.</td><td>Unique visitors per day, Top pages, Top sources</td></tr>
+      <tr><td><span class="where">Growth</span></td><td>Which networks, links and posts bring visitors <em>and members</em>?</td><td>Visitor → member, Top network, Sources, Tagged links</td></tr>
+      <tr><td><span class="where">Members</span></td><td>Who signs up, and how is the newsletter doing?</td><td>New members vs previous period, Newsletters table, Email health</td></tr>
+      <tr><td><span class="where">Content</span></td><td>Which posts do well? Do people click through to the music? How did the live shows go?</td><td>Post performance, Where they go, Past shows</td></tr>
+      <tr><td><span class="where">Social</span></td><td>What went out, what's coming, what failed, what's waiting for me to post by hand?</td><td>Up next, Failed posts, Drafts to post in the app</td></tr>
+      <tr><td><span class="where">Platforms</span></td><td>How am I doing on the site itself and on Bluesky, Instagram, Mixcloud, SoundCloud, Threads, TikTok and YouTube? When should I post?</td><td>Each section's totals and posts table, When to post</td></tr>
+      <tr><td><span class="where">Post</span></td><td>How did this one post (social or on the site) do, compared with my usual, and did it bring people to the site?</td><td>vs your other posts, vs the industry average</td></tr>
+      <tr><td><span class="where">Page</span></td><td>Which posts, on every network, sent people to this one page on the site, and which networks brought its visitors and members?</td><td>Posts that led here, Visitors by network</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="questions">
+  <h2>Common questions</h2>
+  <h3 id="questions-did-my-post-work">Did my post work?</h3>
+  <ol class="steps">
+    <li><div>The quickest answer is the two verdict columns, <strong>vs your usual</strong> (against your own posts) and <strong>vs industry</strong> (against the published average for that network): in every posts table on <span class="where">Platforms</span>, in <strong>Recently published</strong> on <span class="where">Social</span>, and in <strong>Best posts lately</strong> on <span class="where">Overview</span>. Hover either for why. See <a href="#post-is-it-doing-well">Is it doing well?</a> for what they're based on.</div></li>
+    <li><div>On <span class="where">Growth</span>, look at <strong>What moved your traffic</strong>. A jump in visitors or members right after a marker means that post is working.</div></li>
+    <li><div>On <span class="where">Platforms</span>, each network's charts have a violet line for every post on that network, so you can see whether followers, views, plays or engagement jumped after it. The site's charts (<strong>The site (Ghost)</strong>) has them all: magenta for site posts, violet for every network's, with the network named in the popup. Hover a line to see what went out.</div></li>
+    <li><div>To see <em>when</em> in the day it happened, set the dashboard's time range (top right) to <strong>7 days or less</strong>, e.g. <strong>Last 24 hours</strong> or <strong>Last 7 days</strong>: the charts switch from <strong>per day</strong> to <strong>hour by hour</strong> by themselves (their titles say which). They then show every check the bridge makes, about once an hour, with the same post lines: the followers (subscribers on YouTube, members on the site) as they stood at each check, and on the other chart what came in since the check before (views, plays, visitors, likes and the rest), without the 7-day lines. The per-day view says <em>whether</em> a day went up; hour by hour says <em>when</em>: a step up an hour or two after a post is that post bringing people in. Hour by hour keeps the last 90 days; a time range over 7 days goes back to per day. Days from before the bridge kept every check show as one point at the end of the day (the day's last number), so the line goes a day at a time there. YouTube's minutes watched are only per day (YouTube gives them two or three days late).</div></li>
+    <li><div>For a social post, open <span class="where">Platforms</span>, find the network's posts table and click the post's row. The <span class="where">Post</span> dashboard compares it with your usual post on that network and shows what it did for the site (<a href="#post">One post up close</a>).</div></li>
+    <li><div>For an Instagram Story, see <span class="where">Platforms</span> → Instagram → <strong>Instagram posts &amp; Stories</strong>: Stories are listed with the posts, Type <em>Story</em>, with their views, reach, replies, taps, and the follows and profile visits they brought. Instagram keeps a Story's numbers only while it's up, so the bridge saves them while it can; Stories posted before that, or up for less than an hour, aren't listed. Click one for the <span class="where">Post</span> dashboard, like a post: it's compared with your other Stories, not your posts.</div></li>
+    <li><div>For a post on the site, open <span class="where">Platforms</span> → <strong>The site (Ghost)</strong> and click its row in <strong>Ghost posts</strong>, or click the link in a magenta marker's popup. The <span class="where">Post</span> dashboard compares its visitors with your usual site post at the same age and shows where they came from. <span class="where">Content</span> → <strong>Post performance</strong> (visitors, comments, signups) and Growth's <strong>Content</strong> table rank all posts side by side.</div></li>
+  </ol>
+  <h3 id="questions-where-do-visitors-come-from">Where do visitors come from?</h3>
+  <p><span class="where">Traffic</span> → <strong>Top sources</strong> gives the plain list. <span class="where">Growth</span> goes further:</p>
+  <ul>
+    <li><strong>Top network</strong>: the network that sent the most visitors, with all its links added together (Instagram's many ways in counted as one).</li>
+    <li><strong>Sources</strong>: visitors per source, next to how many of them joined.</li>
+    <li><strong>Tagged links, by network and link</strong>: your own links, split into posts and bio links. These count even when an app hides where people came from, which Instagram and TikTok often do.</li>
+    <li><strong>One source up close</strong>: pick a source in that section's dropdown to see its visitors per day next to your post markers, and what its visitors read. This shows whether posting on a network brings people from it, and for how long.</li>
+  </ul>
+  <h3 id="questions-what-turns-visitors-into-members">What turns visitors into members?</h3>
+  <p><strong>Visitor → member</strong> at the top of <span class="where">Growth</span> is the number to grow: more visitors only help if some of them join. Then look at:</p>
+  <ul>
+    <li><strong>Sources</strong>: a source with few visitors but many signups for its size is worth more of your time.</li>
+    <li><strong>Content: what people read, and what makes them join</strong>: posts that bring members are the ones to make more of. A signup counts for the page the person joined on.</li>
+    <li><span class="where">Members</span> → <strong>Where signups came from</strong> and <strong>Signups from posts</strong>.</li>
+    <li>For one page that brought members, click it (its path in Growth's <strong>Content</strong> table, or its row in Content's <strong>Top pages</strong>) for the <span class="where">Page</span> dashboard: every post that sent people there, and which networks its new members came from (<a href="#post-every-post-about-a-page">Every post about one page</a>).</li>
+  </ul>
+  <p>To find out which of your own links works best, tag it: a QR code on a flyer, an ad or a special post can carry a campaign and then gets its own row in Growth's <strong>Campaigns</strong> table. For a post, add the internal tag <span class="tag">#campaign-&lt;name&gt;</span> in Ghost (<a href="posting-guide.html#tags">Posting Guide</a>).</p>
+  <h3 id="questions-which-network-is-worth-it">Which network is worth my time?</h3>
+  <p>Look at two things together. <span class="where">Platforms</span> shows how each network's own audience reacts (followers, views, plays). <span class="where">Growth</span> shows which networks send people to the site and turn them into members. A network can be big on its own numbers and send nobody, or small and bring members: both matter, for different reasons.</p>
+  <p>On Instagram, two numbers sit in between: <strong>Profile views</strong> (people curious enough to open your profile) and <strong>Link taps</strong> (taps on the links on it, your example.com bio link among them). Both are on <span class="where">Platforms</span> → Instagram, per day. Instagram counts taps on all your profile's links together; the visits your bio link brought are in Growth's <strong>Tagged links</strong> (Instagram, bio link). Many profile views but few link taps: the profile isn't sending people on.</p>
+  <p>Threads has its own in-between number: <strong>Link clicks</strong>, taps on links in your posts, on its reach &amp; engagement chart on <span class="where">Platforms</span> → Threads. To compare networks with each other, hover each network's <strong>reach &amp; engagement</strong> chart for its <strong>engagement rate</strong>: how many of the people who saw your posts also reacted to them (<a href="#reading-trend-and-engagement">Daily lines, 7-day lines and engagement</a>). On YouTube, <strong>Where YouTube views come from</strong> (beside its per-day chart) splits the last 28 days' views by how people found them: YouTube search, suggested videos, the Shorts feed, other sites and so on.</p>
+  <h3 id="questions-who-follows-me">Who follows me, and when are they online?</h3>
+  <p><span class="where">Platforms</span> → Instagram, below the posts &amp; Stories: your followers <strong>by country</strong>, <strong>by age</strong> and <strong>by gender</strong>, and <strong>When followers are online</strong>, the average number on Instagram in each hour of the day <span>(the site's time zone)</span>. Posting an hour or so before the busiest hours gives a post the best start. Instagram gives these only from 100 followers, and checks them once a day.</p>
+  <h3 id="questions-when-should-i-post">When should I post?</h3>
+  <p><span class="where">Platforms</span> → <strong>When to post</strong>, near the bottom. It needs some reading: see <a href="#timing">When to post</a>. For Instagram, also look at <strong>When followers are online</strong> in its section (<a href="#questions-who-follows-me">Who follows me</a>).</p>
+  <h3 id="questions-hows-the-newsletter-doing">How's the newsletter doing?</h3>
+  <p><span class="where">Members</span>: the <strong>Newsletters</strong> table lists the last 25 sends with delivery, opens, unsubscribes in the 2 days after and spam complaints. <strong>Email health</strong> below it shows whether the list is growing (net subscriptions), delivery problems and members Ghost has stopped emailing. Open rates read high: see <a href="#reading-newsletter-opens">Newsletter opens</a>.</p>
+  <h3 id="questions-do-people-click-through-to-my-music">Do people click through to my music?</h3>
+  <p><span class="where">Content</span> → <strong>Links people follow off the site</strong>: clicks to YouTube, SoundCloud, Mixcloud, Bandcamp, Spotify, Apple Music and Beatport, which pages they came from and where they went. Plays inside a player embedded in a post can't be seen from the site; those are in each service's own numbers on <span class="where">Platforms</span>.</p>
+  <h3 id="questions-hows-the-live-stream-doing">How did my live show go?</h3>
+  <p><span class="where">Content</span> → <strong>Live shows</strong>: each show's length, the most listeners at once, the average, how many times people pressed play on the LIVE NOW bar, how often listeners' players paused to buffer or reconnected, and the setlist. While you're on air, <span class="where">Health</span> shows <strong>On air</strong> and <strong>Listeners now</strong>.</p>
+  <p>Listeners heard gaps? <span class="where">Health</span> → <strong>Live stream: listeners' pauses and reconnects</strong> shows each one and why. If many listeners paused at the same moment, look at <strong>Live stream: coming in from <span>the DJ software</span></strong>: a dip there means the sound left home unevenly (<span>the DJ software</span> or the home internet), not a listener problem. One pause now and then is that listener's own connection or device, and the table beside it says which (phone or computer, browser, and whether the page was in the background). <strong>Live stream: skipped for slow listeners</strong> should stay at zero.</p>
+</section>
+
+<section id="reading">
+  <h2>Reading the numbers right</h2>
+  <h3 id="reading-unique-visitors">Unique visitors</h3>
+  <p>The site counts visitors without cookies, which is kinder to visitors but means it can't recognise someone the next day. So <strong>Unique visitors</strong> adds up each day's visitors: someone who comes on 3 days counts 3 times. This is the same number Ghost Admin shows. <strong>Unique visitors per day</strong> on Traffic (the total divided by the days) is the closest it gets to "how many people".</p>
+  <h3 id="reading-source-names">Source names</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>You see</th><th>It means</th></tr></thead>
+    <tbody>
+      <tr><td>Facebook (mostly Instagram links)</td><td>Mostly Instagram. When someone taps a link in Instagram, it often goes through a Facebook address first.</td></tr>
+      <tr><td>Instagram</td><td>A visit Ghost saw coming from an Instagram address.</td></tr>
+      <tr><td>Instagram (tag: instagram), Bluesky (tag: bluesky)…</td><td>A visit through one of <em>your</em> tagged links: a bio link or a link in a post (<a href="posting-guide.html#writing-linking-your-set">Links to share</a>).</td></tr>
+      <tr><td>Instagram (tag: ig, set by Instagram)</td><td>Instagram's app added this tag itself, when someone tapped a plain <code>example.com</code> link in a profile (yours or anyone's) instead of your <code>example.com/ig</code> short link.</td></tr>
+      <tr><td>Direct / unknown</td><td>No source: typed in, a bookmark, or an app that hides where people came from.</td></tr>
+      <tr><td>Your own site</td><td>Visits that started on example.com itself: you in Ghost Admin or a preview, or someone still browsing past midnight. Not a source to grow.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Because one network turns up under several names, Growth's <strong>Top network</strong> adds them up, so its number won't match any single row of the Sources table. Growth can also hide the Direct row and the homepage with the <em>Hide/Show</em> dropdowns in those sections, to make the rest easier to compare.</p>
+  <h3 id="reading-posts-vs-bio-links">Posts vs bio links</h3>
+  <p>Every link the social sharing puts in a post is tagged as a <strong>post</strong> link (for example <code>example.com/b/…</code> on Bluesky). Your profile short links (<code>example.com/ig</code>, <code>/bsky</code>, <code>/th</code>, <code>/tk</code>, <code>/dis</code>, <code>/yt</code>) are tagged as <strong>bio</strong> links. Growth's <strong>Tagged links</strong> and <strong>Posts vs bio links</strong> show which way people came in: through a post, or by visiting your profile.</p>
+  <h3 id="reading-days-and-time-zones">Days and time zones</h3>
+  <p><span>The site's own daily charts use days in the site's time zone. Numbers the networks give per day use UTC days, which turn over at a different hour.</span> A post late in the evening can therefore land on "tomorrow" in some charts.</p>
+  <h3 id="reading-newsletter-opens">Newsletter opens</h3>
+  <p>Apple Mail opens every email by itself to protect privacy, so those count as opens and <strong>open rates read high</strong>. Compare newsletters with each other rather than with outside benchmarks. "Unsubscribed (2 days)" counts anyone who unsubscribed in the 2 days after a send, so it's a hint, not proof that this newsletter was the reason.</p>
+  <h3 id="reading-site-vs-cloudflare">Site visitors vs Cloudflare's requests</h3>
+  <p>Traffic's <strong>Everything Cloudflare answered</strong> section counts every request, including bots, feeds and search engines, so it's far higher than the visitor numbers. Use the visitor numbers for people. Cloudflare's are there to spot unusual traffic.</p>
+  <h3 id="reading-trend-and-engagement">Daily lines, 7-day lines and engagement</h3>
+  <p>Each network's section on <span class="where">Platforms</span> has a <strong>followers</strong> chart and a <strong>reach &amp; engagement</strong> chart (Instagram also has profile views &amp; link taps). On a small account one day can be twice the next for no real reason, so every per-day number is drawn twice: a <strong>thin dashed line</strong> for each day, and a <strong>bold line</strong> for its 7-day average, the trend to read. The bold line starts once there are 4 days to average.</p>
+  <ul>
+    <li><strong>Reach, views or plays</strong> (the network's colour, left scale): how many saw or played something of yours. Instagram counts accounts reached, TikTok, Threads and YouTube views, SoundCloud and Mixcloud plays.</li>
+    <li><strong>Engagement</strong> (blue, right scale): likes, comments, shares and saves added up, in each network's own words (favorites and reposts on Mixcloud, replies and quotes on Threads and Bluesky). On the site's chart (<strong>Site visitors &amp; engagement</strong>) it's what visitors did: new members, comments, clicks on links to other sites and plays on the LIVE NOW bar. Hover for each one. It has its own scale because it's usually a small part of the reach: if the two lines move together, people react about as much as before; engagement rising faster means posts are landing better, slower means more people see them but fewer join in.</li>
+    <li><strong>Engagement rate, 7-day</strong> (in the hover popup): the week's engagement as a share of the week's reach, views or plays, so it can be compared between networks and with the typical rate the popup names. Bluesky gives no views, so its chart shows engagement <strong>per 100 followers</strong> instead; the site's is per 100 visitors.</li>
+  </ul>
+  <p>Hour by hour (time ranges of 7 days or less) shows what came in at each check, with no 7-day lines and no rate: those only make sense per day. On Instagram and Threads, the hour-by-hour engagement is what all your posts gained since the last check, because those networks' own per-day totals arrive late and would look flat; so it can differ a little from the per-day line.</p>
+  <h3 id="reading-times-like-1-5x">1.5× and 0.5×</h3>
+  <p>The Post dashboard and When to post compare with your <em>usual</em>: <strong>1×</strong> = usual, <strong>1.5×</strong> = half again as much, <strong>2×</strong> = double, <strong>0.5×</strong> = half. "Usual" is the median: the middle post, so one viral hit doesn't move it much.</p>
+</section>
+
+<section id="post">
+  <h2>One post up close</h2>
+  <p>The <span class="where">Post</span> dashboard looks at a single post: a social one, or one on the site. You open it by clicking:</p>
+  <ul>
+    <li>a row in a posts table on <span class="where">Platforms</span> (the site's own posts are in <strong>The site (Ghost)</strong>),</li>
+    <li>a row in <strong>Recently published</strong> on <span class="where">Social</span>, or in <strong>Best posts lately</strong> on <span class="where">Overview</span>,</li>
+    <li>or the link in a marker's popup on Overview, Traffic or Growth (magenta for a site post, violet for a social one).</li>
+  </ul>
+  <p>The time range starts when the post went up, so everything on the page is "since posting". A violet line marks the moment, and the post's own numbers are in its network's colour, as on Platforms. The links at the top take you back to the other dashboards on their usual time range, not the post's.</p>
+  <h3 id="post-on-the-network">On the network</h3>
+  <ul>
+    <li><strong>Now</strong>: its numbers as last collected (every hour, or as often as the bridge is set to check). Instagram posts also list the follows and profile visits the post brought and its interactions (likes, comments, shares and saves together); Bluesky posts their saves.</li>
+    <li><strong>Number by number vs your usual post</strong>: each number against your typical post on the same network <em>at the same age</em>, so a new post isn't held against posts that have had weeks. In a post's first 4 days that's to the hour (5 hours after posting against others at 5 hours), from every check the bridge keeps then; after that, by days since posting. It needs at least 3 other posts measured at that age; when another post wasn't checked on exactly that day, its nearest day is used (a day either side for posts under a week old, two under four weeks, three after that). Until there are 3, the table shows only a line saying why it's empty, and the chart beside it has no "typical" line.</li>
+    <li><strong>The chart</strong>: this post's total day by day next to your typical post's. Change the number it shows with the <strong>Compare on</strong> dropdown in that section.</li>
+    <li><strong>Gained per day</strong> and <strong>Totals over time</strong>. Totals over time shows every check the bridge has made of the post since it first saw it: all of them in its first 4 days, so you see the curve of its first hours, and after that every time a number changed. An older post that suddenly takes off (the bridge's <em>take-off watch</em>, below) has all its checks kept again for a few days; the note above the chart says when. Posts from before October 2026 have one point a day before then.</li>
+    <li><strong>Take-off watch:</strong> the bridge keeps an eye on every older post's main number. When one gains, within about 4 hours or within the last day, at least 5% of what it had (and at least 10), and at least 3 times its usual gain from the week before, it keeps every check of that post for 3 days, longer while it keeps climbing. Instagram and Threads then check that post every time instead of taking turns, and your phone gets a "📈 … is taking off" notification with a button to the post's Post dashboard.</li>
+  </ul>
+  <h3 id="post-is-it-doing-well">Is it doing well?</h3>
+  <p>Every post gets two verdicts, side by side at the top of the network section and as two columns everywhere posts are listed:</p>
+  <ul>
+    <li><strong>vs your usual</strong> (on the Post dashboard: <em>vs your other &lt;network&gt; posts</em>): <strong>Doing great</strong>, <strong>Above usual</strong>, <strong>Usual</strong>, <strong>Below usual</strong> or <strong>Well below usual</strong>, against your own posts, and by how much: "Doing great · better than 9 in 10" means it beat about 9 of every 10 posts it was compared with.</li>
+    <li><strong>vs industry</strong> (<em>vs the industry average</em>): <strong>Well above typical</strong>, <strong>Above typical</strong>, <strong>About typical</strong>, <strong>Below typical</strong> or <strong>Well below typical</strong>, against the published average for that network, with both numbers: "Well above typical · 7.4% vs 3.2%".</li>
+  </ul>
+  <p><strong>vs your usual</strong> is worked out the way people who study social media numbers recommend:</p>
+  <ul>
+    <li><strong>Against your own posts, not other people's.</strong> Each post is compared with your 20 posts nearest in time on the same network (only the same kind, e.g. Reels with Reels or mixes with mixes, when there are 5 of that kind). Nearest in time, so a growing account doesn't make every new post look great.</li>
+    <li><strong>On what each network says it rewards.</strong> Every network picks which posts to show more of from a few signals; those are what's measured, with the most important counting most (the weights are in the table on the Post dashboard).</li>
+    <li><strong>Per person reached, not raw counts.</strong> 4 likes from 50 people who saw it beats 40 from 5,000. Counts like reach, views and plays are compared at the same age (days since posting), since they keep growing for days.</li>
+    <li><strong>Small numbers count for less.</strong> 2 likes out of 6 views isn't "33%, amazing": a rate from few people is pulled toward your usual one.</li>
+    <li><strong>As a ranking.</strong> Doing great = better overall than about 4 in 5 of the posts it's compared with; Usual = the middle fifth. With only a few posts to compare with it stays nearer Usual, because it can't be sure yet.</li>
+  </ul>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Network</th><th>Judged on (most important first)</th></tr></thead>
+    <tbody>
+      <tr><td>Instagram</td><td>Average watch time (Reels), sends and likes per person reached (Instagram's head, Adam Mosseri, names these three as the main signals), then reach, saves, comments and follows per person reached</td></tr>
+      <tr><td>Instagram Stories</td><td>Reach, then replies and sends per person reached, follows and profile visits (only against your other Stories)</td></tr>
+      <tr><td>TikTok</td><td>Shares per view, views, comments and likes per view. TikTok's biggest signal, how much of a video people watch, isn't given to apps like the bridge.</td></tr>
+      <tr><td>YouTube</td><td>How much of the video is watched on average, views, likes, shares and subscribers gained per view, comments per view</td></tr>
+      <tr><td>Threads</td><td>Replies per view and reposts &amp; shares per view (Threads favours conversation), views, likes per view</td></tr>
+      <tr><td>Bluesky</td><td>Reposts and replies per follower, likes and saves per follower (Bluesky gives no view counts, so followers stand in for reach)</td></tr>
+      <tr><td>SoundCloud</td><td>Plays, likes &amp; reposts per play, comments and downloads per play</td></tr>
+      <tr><td>Mixcloud</td><td>Plays, favorites per play, reposts and comments per play</td></tr>
+      <tr><td>The site (Ghost)</td><td>Visitors, sign-ups per 1,000 visitors, newsletter click rate, open rate (counts little: Apple Mail opens every email by itself)</td></tr>
+    </tbody>
+  </table></div>
+  <p>Hover the column (or see <strong>Why</strong> on the Post dashboard) for what lifted the post or held it back, e.g. "Sends per reach 3.1× usual".</p>
+  <p><strong>vs industry</strong> measures the post the way each published report does, and compares it with that report's average:</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Network</th><th>Measured as</th><th>Typical</th><th>From</th></tr></thead>
+    <tbody>
+      <tr><td>Instagram</td><td>Likes, comments, shares and saves per person reached</td><td>3.2%</td><td>Socialinsider, August 2026</td></tr>
+      <tr><td>TikTok</td><td>Likes, comments and shares per view (Socialinsider also counts saves, but TikTok doesn't share those, so a post reads a little low)</td><td>3.85%</td><td>Socialinsider, April-June 2026</td></tr>
+      <tr><td>YouTube</td><td>Likes and comments per view</td><td>1-3% (music videos), 5-8% (Shorts)</td><td>2025-26 YouTube benchmarks</td></tr>
+      <tr><td>The site (newsletters)</td><td>Click rate (opens aren't used: Apple Mail opens every email by itself)</td><td>4%</td><td>Mailchimp, media &amp; publishing</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>About typical</strong> = between two thirds and one and a half times the average (or inside the range); <strong>Above</strong> / <strong>Below</strong> = outside that; <strong>Well above</strong> / <strong>Well below</strong> = past twice the top of that band, or under half its bottom (e.g. for Instagram's 3.2%: about 2.1-4.8%, well above from 9.6%, well below under 1.1%). <strong>Too few to tell</strong> = under 50 people reached, views or recipients. <strong>Too soon</strong> = posted under 12 hours ago (rates swing a lot before then). <strong>No numbers yet</strong> = the network hasn't given the numbers it needs (reach, views, likes and so on) yet; it fills in after the next check that gets them. <strong>Not a newsletter</strong> (the site): the post wasn't emailed. Hover the cell, or look at the Post dashboard's <em>Why</em>, for the reason in words. <strong>No benchmark</strong>: Bluesky, Threads, SoundCloud, Mixcloud and Instagram Stories have no reliable published average. Socialinsider's headline numbers (Instagram 0.45%, TikTok 2.6%) are per follower, a different measure, so they're not used here. Keep in mind those averages come mostly from big brand accounts; small, engaged accounts often beat them, so <em>vs your usual</em> says more about what's working for you.</p>
+  <div class="note">
+    <b class="label">Not enough posts yet / Too soon</b>
+    <p>A post needs 5 others on the same network to be compared with. In its first 4 days it's compared hour for hour with what the others had at the same age, from 2 hours after posting. That needs 5 other posts with checks from their own first days, <span>which the bridge keeps from its first day</span>. Until there are enough, a post is left alone for its first 12 hours and then compared by days. Counts at the same age need each post's numbers per day, <span>also kept from the bridge's first day</span> (YouTube and the site's go back further), so younger posts are judged mostly on the rates until those build up.</p>
+  </div>
+  <h3 id="post-what-it-did-for-the-site">What it did for the site</h3>
+  <p>The bottom section looks at the page on example.com the post leads to: its visitors, how many came from this network, and the members who joined there. Its title names the page.</p>
+  <p>For a post on the site, the page is the post itself. Its own numbers are its visitors and page views per day, the members who signed up on it and, if it went out as a newsletter, its opens and clicks. "…of them from the newsletter" counts the visitors and members who came from the email's links.</p>
+  <p>Instagram and TikTok captions can't carry links, so for those the page is a <strong>guess</strong>: the site post whose title the caption mentions, otherwise the newest site post from the week before. If the guess is wrong, pick the right page in that section's <strong>page</strong> dropdown (your post's other links, the homepage and the latest site posts are listed). "-" means no page.</p>
+  <p>To see every other post that led to the same page, click the <strong>Visitors to the page per day</strong> chart's title and pick <em>Every post about this page</em>: that opens the <span class="where">Page</span> dashboard, below.</p>
+  <h3 id="post-every-post-about-a-page">Every post about one page</h3>
+  <p>The <span class="where">Page</span> dashboard is the Post dashboard the other way round: pick one page on example.com and it shows every post, on every network, that led to it, and what they did for it together. It opens from a page's path or title in Content's <strong>Post performance</strong> (the second link) and <strong>Top pages</strong>, Growth's <strong>Content</strong> table, and the Post dashboard's <strong>Visitors to the page per day</strong>, keeping your time range. You can also pick a page in its <strong>page</strong> dropdown at the top (the latest site posts and the homepage).</p>
+  <ul>
+    <li><strong>The tiles</strong>: how many social posts led here, the page's visitors in the time range, how many of them came from a network or the newsletter, and the members who joined on the page.</li>
+    <li><strong>Posts that led here</strong>: every one, oldest first, with its network, its main number (views, plays and so on) and its <em>vs your usual</em> verdict. <em>Links here</em> means the post links to the page; Instagram and TikTok can't carry links, so theirs are the same <strong>guesses</strong> as on the Post dashboard (shown in orange). The site post itself is listed as <em>The post itself</em>. Click a row for that post's Post dashboard.</li>
+    <li><strong>Visitors to the page per day</strong>, with a violet line for each of those posts (hover for which), so you can see which one brought a jump.</li>
+    <li><strong>Visitors by network</strong> and <strong>Members who joined there, by network</strong>: where the page's visitors and new members came from, each network's ways in added up as on Growth. Several posts on the same network can't be told apart in the site's numbers, so these are per network, not per post.</li>
+  </ul>
+</section>
+
+<section id="timing">
+  <h2>When to post</h2>
+  <p>At the bottom of <span class="where">Platforms</span>, two tables (<strong>by weekday</strong> and <strong>by time of day</strong>) show how posts made at each time do against your average, one row per network. A third, <strong>what kind of post</strong>, shows how each kind (Reel or photo, Short or video, track or mix...) does against your average kind, one row per network and kind, for the networks where you post more than one kind.</p>
+  <h3 id="timing-reading-a-cell">Reading a cell</h3>
+  <ul>
+    <li><strong>The number</strong>: <strong>1.3×</strong> on Friday means Friday posts do 30% better than your average weekday. <strong>Green</strong> from 1.1×, <strong>red</strong> under 0.9×. An empty cell had no posts.</li>
+    <li><strong>How sure it is</strong>: <strong>plain</strong> = High (at least 95% likely really better or worse), <strong>a little faded</strong> = Medium (80%+), <strong>faded and striped</strong> = Low (could easily be luck; always the case with a single post). A table has up to 11 cells, so one of them could look sure by chance alone: the bridge also shuffles your posts' times (or kinds) a couple of hundred times and sees how sure the surest cell gets then. High has to beat 95 of those 100 shuffled tables, Medium 80, so a cell isn't High just by luck. Right after the numbers change this takes a moment; until then the plain 95% / 80% apply (the <strong>Posts</strong> tooltip says which).</li>
+    <li><strong>Details</strong>: the small triangle in a cell's corner opens its tooltip: how many posts, their plain median, the percentage, and how often shuffled posts do as well.</li>
+  </ul>
+  <h3 id="timing-what-its-fair-about">What it takes into account</h3>
+  <p>It tries hard not to give a slot credit it doesn't deserve:</p>
+  <ul>
+    <li>Each post is judged by its numbers <strong>3 days after posting</strong>, so old posts don't win just by having been up longer. Posts younger than 3 days aren't in yet.</li>
+    <li>It weighs weekday, time of day, <strong>the kind of post</strong> (Reel or photo, Short or video, track or mix, a site post sent as a newsletter or not) and the <strong>account's growth</strong> over time together. If your Friday posts were also mostly Reels, Friday doesn't get the Reels' credit; the <strong>what kind of post</strong> table shows that side of it. Kinds counted: Instagram and Threads by type, YouTube Short, Video or Live, SoundCloud track or mix (20 minutes or more), Bluesky images, video, link or text (quotes count as text), TikTok short video, long video (a minute or more) or photo, Mixcloud clip or full mix (30 minutes or more), site post with or without the newsletter.</li>
+    <li>Cells with few posts are pulled toward 1×, and a one-off hit counts for less.</li>
+  </ul>
+  <p>Each network is measured on its main number (visitors for the site, views on Instagram, Threads, TikTok and YouTube, plays on SoundCloud and Mixcloud, likes on Bluesky). To use another, pick it in that network's dropdown at the top of the section. Times are <span>in the site's time zone</span>.</p>
+  <div class="note warn">
+    <b class="label">Hints, not rules</b>
+    <p>It's based on all your posts on each network that are at least 3 days old. Trust High cells, take Medium ones as a nudge, and treat Low ones as "not enough posts to say yet". The more you post at different times, the more it can tell you.</p>
+  </div>
+</section>
+
+<section id="limits">
+  <h2>What the numbers can't tell you</h2>
+  <ul>
+    <li><strong>How many different people</strong> visited over a week or a month: without cookies, the same person on different days counts again (<a href="#reading-unique-visitors">Unique visitors</a>).</li>
+    <li><strong>Plays inside an embedded player</strong> (a SoundCloud or YouTube player in a post): the site can't see inside it. They're in that service's own numbers.</li>
+    <li><strong>Where every visitor came from</strong>: apps often hide it, which is why your links carry tags. Untagged visits from apps end up as Direct / unknown.</li>
+    <li><strong>Old posts' history</strong>: the networks mostly give a post's numbers as of now, so the day-by-day history starts when the collecting began. YouTube and the site are the exceptions: YouTube's history goes back to each upload, the site's to when its analytics started (a post's visitors from before then aren't counted).</li>
+    <li><strong>Bluesky likes, reposts and replies per day before the collecting began</strong>: Bluesky gives no numbers per day, so Platforms adds up what each of your posts gained between the bridge's checks. A post the bridge first saw a day or more after it went up starts counting from then.</li>
+    <li><strong>Which link on your Instagram profile was tapped</strong>: Instagram counts taps on all of them together. Profile views and link taps go back 30 days from when the collecting began.</li>
+    <li><strong>Up-to-the-hour numbers for older Instagram and Threads posts</strong>: Platforms lists every post, but those two networks need a separate request for each post's views and reach, so older posts are refreshed in turns and can be a few hours behind. Likes and comments on Instagram are always current.</li>
+    <li><strong>Hour by hour before October 2026, or more than 90 days back</strong>: before the bridge kept every check, the hour-by-hour view (Platforms' charts with a time range of 7 days or less) has only each day's last number, and it keeps 90 days. Per day goes back further. The first check of a day, or one after a gap, can show no point: there's nothing before it to compare with. A network refreshes its own counts only so often (YouTube rounds subscribers, TikTok updates every few hours), so some lines move in steps whatever the bridge does.</li>
+    <li><strong>Deleted posts</strong>: they leave the posts tables. What was collected about them stays, and When to post still counts them.</li>
+    <li><strong>Instagram's new followers per day</strong> while the account has under 100 followers: Instagram doesn't give them.</li>
+    <li><strong>The last 2 to 3 days of Google Search</strong>: Google hasn't released them yet.</li>
+    
+  </ul>
+  <p><strong>Collected, not shown yet.</strong> The dashboards show only part of what's collected. Everything else each network offers is kept too, so a chart can be added later with its past already there. That includes the rest of each post's numbers, Instagram's daily reach split into followers and non-followers, who follows you on Threads and who Instagram reaches beyond your followers, YouTube viewers' countries, devices and ages, the searches and pages Google showed the site for each day (Google itself keeps only 16 months) and Postiz's numbers for every connected channel. Ask when you'd like one of them on a dashboard.</p>
+</section>
+
+<section id="faq">
+  <h2>Something looks wrong?</h2>
+  <dl class="faq">
+    <dt>A network's section is missing from Platforms.</dt>
+    <dd>It has no numbers yet: not set up, or every try so far has failed. The <strong>Networks not shown</strong> box at the bottom lists the hidden ones with the reason. How to connect each network: the <a href="setup-guide.html#finish-social">Setup guide</a> (for most of them, connecting the channel in Postiz and allowing every permission is all it takes).</dd>
+    <dt>A network's numbers look old, or its status panel shows an error.</dt>
+    <dd>Each section has a <strong>status</strong> panel saying when the numbers were last collected and what went wrong. Often a channel needs reconnecting in Postiz. If they stop updating, an alert ("… numbers stopped updating") comes to your phone too.</dd>
+    <dt>The site's posts on Platforms have no visitors.</dt>
+    <dd>Their status panel says why. "needs TINYBIRD_TOKEN" means the visitor counts haven't been connected yet: tell whoever maintains the site. A brand-new post gets its first numbers within the hour.</dd>
+    <dt>The charts are empty or show a single bar.</dt>
+    <dd>Pick a longer time range: daily charts need a few days.</dd>
+    <dt>"Number by number vs your usual" says there isn't enough to compare with.</dt>
+    <dd>It needs 3 other posts on that network measured at the same age. It fills in as newer posts get older.</dd>
+    <dt>The Post dashboard's site section is empty, or shows the wrong page.</dt>
+    <dd>No page was found or the guess was wrong: pick the page in that section's <strong>page</strong> dropdown.</dd>
+    <dt>A post I made by hand on Instagram shows on Social as published, but not in Postiz.</dt>
+    <dd>That's expected: Social reads Instagram's own account, since posts you finish in the app never come back to Postiz.</dd>
+    <dt>Visitors suddenly dropped to zero.</dt>
+    <dd>Check <strong>Alerts firing now</strong> on Overview: "Visitors aren't being counted" or "no page views since yesterday" means the counting broke, not that people stopped coming. Tell whoever maintains the site.</dd>
+    <dt>"Your own site" shows up as a source.</dt>
+    <dd>That's mostly you, from Ghost Admin or previews. Ignore it.</dd>
+  </dl>
+</section>
+
+<section id="glossary">
+  <h2>Glossary</h2>
+  <dl class="gloss">
+    <dt>Grafana</dt><dd>The dashboards, at the site's Grafana address.</dd>
+    <dt>Unique visitors</dt><dd>People who visited, counted once per day and added up over the time range.</dd>
+    <dt>Pageviews</dt><dd>Pages opened. One visitor reading three posts is three pageviews.</dd>
+    <dt>Bounce rate</dt><dd>The share of visits that saw only one page.</dd>
+    <dt>Member</dt><dd>Someone signed up to the site (free or paid). Members get the newsletter unless they turn it off.</dd>
+    <dt>Visitor → member</dt><dd>New members divided by unique visitors: how much of your traffic joins.</dd>
+    <dt>Source</dt><dd>Where a visit came from: another site or app, or one of your tags.</dd>
+    <dt>Tag (in a link)</dt><dd>A label added to a link (<code>?utm_source=…</code>) saying which network and kind of link it is, so a visit is counted right even when the app hides where it came from.</dd>
+    <dt>Bio link</dt><dd>A short link like <code>example.com/ig</code> for a profile.</dd>
+    <dt>Campaign</dt><dd>A name added to a link's tag, for links you want counted on their own (a flyer, an ad, a <span class="tag">#campaign-…</span> post).</dd>
+    <dt>Median / usual</dt><dd>The middle value: half your posts did better, half worse. One viral post barely moves it.</dd>
+    <dt>Reach</dt><dd>On Instagram, how many accounts saw anything of yours.</dd>
+    <dt>Engagement</dt><dd>Likes, comments, shares and saves added up: how many times people reacted, not just saw.</dd>
+    <dt>Engagement rate</dt><dd>Engagement as a share of reach, views or plays over 7 days, so networks can be compared.</dd>
+    <dt>7-day average</dt><dd>The bold line on Platforms' charts: each day's number averaged with the 6 days before it, to show the trend.</dd>
+    <dt>Marker</dt><dd>A dotted line on a chart: magenta = a site post, violet = a social post.</dd>
+    <dt>The bridge</dt><dd>The program that shares site posts to social media and also collects the networks' numbers (every hour unless set to check more often) and keeps every change.</dd>
+  </dl>
+</section>
+</main>
+</div>
+<footer>Analytics Guide · Puppi3's Creator Kit 🐾</footer>
+</div>
+<!-- shared script: from docs/assets/docs.js, copied in by docs/build-docs.py -->
+<script>
+/* Shared by the docs pages, and copied into each one by docs/build-docs.py, so every guide is a
+   single file that works on its own (send just that file and search still works):
+   a top bar (a link to the front page, the guide's name, search, theme switch), search through this page, a contents list
+   that follows along, heading links, copy buttons and "back to top". Edit this file, not the
+   copies in the pages; the pre-commit hook rebuilds them. */
+(function () {
+  'use strict';
+
+  var store = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+  };
+  var esc = function (s) {
+    return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+  };
+  var el = function (tag, attrs, html) {
+    var n = document.createElement(tag);
+    for (var k in attrs || {}) n.setAttribute(k, attrs[k]);
+    if (html != null) n.innerHTML = html;
+    return n;
+  };
+
+  /* ---------- theme: auto / light / dark ---------- */
+  var THEMES = ['auto', 'light', 'dark'];
+  var THEME_LABEL = { auto: '◐ Auto', light: '☀ Light', dark: '☾ Dark' };
+  function applyTheme(t) {
+    if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    else document.documentElement.removeAttribute('data-theme');
+  }
+  var theme = store.get('docs-theme') || 'auto';
+  applyTheme(theme);
+
+  /* ---------- top bar ---------- */
+  var bar = el('div', { class: 'docbar' });
+  var inner = el('div', { class: 'docbar-in' });
+  var h1 = document.querySelector('h1');
+  var name = (h1 ? h1.textContent : document.title).replace(/\.\s*$/, '').trim();
+  // back to the front page, only when served (the docs site): a guide sent as a file has no index next to it
+  if (/^https?:$/.test(location.protocol)) {
+    inner.appendChild(el('a', { class: 'home', href: './', title: 'All the guides', 'aria-label': 'All guides' },
+      '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.5"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.5"/>' +
+      '<rect x="1.5" y="9" width="5.5" height="5.5" rx="1.5"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.5"/></svg><span>All guides</span>'));
+  }
+  inner.appendChild(el('a', { class: 'brand', href: '#', title: 'Back to the top' }, esc(name) + '<span>.</span>'));
+  inner.appendChild(el('div', { class: 'grow' }));
+  var search = el('div', { class: 'search' });
+  search.innerHTML =
+    '<svg class="glass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>' +
+    '<input type="search" placeholder="Search this guide" autocomplete="off" spellcheck="false" role="combobox" ' +
+    'aria-autocomplete="list" aria-expanded="false" aria-controls="doc-results" aria-label="Search this guide">' +
+    '<kbd>/</kbd><div class="results" id="doc-results" role="listbox" aria-label="Search results"></div>';
+  inner.appendChild(search);
+  var themeBtn = el('button', { class: 'iconbtn', type: 'button', title: 'Colour theme' }, THEME_LABEL[theme]);
+  themeBtn.addEventListener('click', function () {
+    theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
+    applyTheme(theme);
+    store.set('docs-theme', theme === 'auto' ? null : theme);
+    themeBtn.textContent = THEME_LABEL[theme];
+  });
+  inner.appendChild(themeBtn);
+  bar.appendChild(inner);
+  document.body.insertBefore(bar, document.body.firstChild);
+
+  /* ---------- this page in parts: each section's intro, then each h3's part ---------- */
+  // readable text: spaces between table cells, list items and blocks (textContent runs them together)
+  var BLOCK = /^(P|DIV|LI|TD|TH|TR|DT|DD|H\d|BLOCKQUOTE|PRE|BR|UL|OL|TABLE|FIGCAPTION|SECTION)$/;
+  function textOf(nodes) {
+    var parts = [];
+    var walk = function (n) {
+      if (n.nodeType === 3) { parts.push(n.nodeValue); return; }
+      if (n.nodeType !== 1 || /^(SCRIPT|STYLE|BUTTON|NAV)$/.test(n.nodeName) || (n.classList && n.classList.contains('anchor'))) return;
+      var block = BLOCK.test(n.nodeName);
+      if (block) parts.push(' ');
+      for (var c = n.firstChild; c; c = c.nextSibling) walk(c);
+      if (block) parts.push(' ');
+    };
+    nodes.forEach(walk);
+    return parts.join('').replace(/\s+/g, ' ').trim();
+  }
+  function headingText(h) { var c = h.cloneNode(true); c.querySelectorAll('.anchor').forEach(function (x) { x.remove(); }); return c.textContent.replace(/\s+/g, ' ').trim(); }
+  function pageEntries() {
+    var out = [];
+    document.querySelectorAll('main section[id]').forEach(function (sec) {
+      var h2 = sec.querySelector('h2'), title = h2 ? headingText(h2) : sec.id;
+      var chunk = { id: sec.id, h: title, nodes: [] };
+      out.push(chunk);
+      Array.prototype.forEach.call(sec.childNodes, function (n) {
+        if (n === h2) return;
+        if (n.nodeType === 1 && n.nodeName === 'H3' && n.id) {
+          chunk = { id: n.id, h: title + ' › ' + headingText(n), nodes: [] };
+          out.push(chunk);
+          return;
+        }
+        chunk.nodes.push(n);
+      });
+    });
+    return out.map(function (c) { var x = textOf(c.nodes); return { id: c.id, h: c.h, x: x, hl: c.h.toLowerCase(), xl: x.toLowerCase() }; });
+  }
+  var entries = null;
+  function allEntries() { return entries || (entries = pageEntries()); }
+
+  /* ---------- search ---------- */
+  var input = search.querySelector('input'), box = search.querySelector('.results');
+  var hits = [], active = -1;
+  function terms(q) { return q.toLowerCase().split(/\s+/).filter(function (t) { return t.length > 0; }); }
+  function count(hay, t) { var n = 0, i = hay.indexOf(t); while (i !== -1 && n < 6) { n++; i = hay.indexOf(t, i + t.length); } return n; }
+  var reEsc = function (t) { return t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); };
+  // highlight the words in plain text, escaping each piece (so words never match inside &amp; and the like)
+  function markup(text, ts) {
+    var re = new RegExp(ts.map(reEsc).join('|'), 'gi'), out = '', last = 0, m;
+    while ((m = re.exec(text))) {
+      out += esc(text.slice(last, m.index)) + '<mark>' + esc(m[0]) + '</mark>';
+      last = m.index + m[0].length;
+    }
+    return out + esc(text.slice(last));
+  }
+  function snippet(e, ts) {
+    var at = -1;
+    ts.forEach(function (t) { var i = e.xl.indexOf(t); if (i !== -1 && (at === -1 || i < at)) at = i; });
+    if (at === -1) return e.x.slice(0, 150) + (e.x.length > 150 ? '…' : '');
+    var start = Math.max(0, at - 60), end = Math.min(e.x.length, at + 120);
+    return (start > 0 ? '…' : '') + e.x.slice(start, end) + (end < e.x.length ? '…' : '');
+  }
+  function run(q) {
+    var ts = terms(q);
+    if (!ts.length) { close(); return; }
+    var list = allEntries(), scored = [];
+    list.forEach(function (e) {
+      var score = 0;
+      for (var i = 0; i < ts.length; i++) {
+        var t = ts[i], inH = e.hl.indexOf(t) !== -1, n = count(e.xl, t);
+        if (!inH && !n) return;                      // every word must appear
+        if (inH) score += 12 + (new RegExp('(^|[^a-z0-9])' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(e.hl) ? 6 : 0);
+        score += Math.min(n, 5);
+      }
+      scored.push({ e: e, s: score });
+    });
+    scored.sort(function (a, b) { return b.s - a.s; });
+    hits = scored.slice(0, 20).map(function (r) { return r.e; });
+    active = hits.length ? 0 : -1;
+    render(ts);
+  }
+  function hrefFor(e, ts) { return '?q=' + encodeURIComponent(ts.join(' ')) + '#' + encodeURIComponent(e.id); }
+  function render(ts) {
+    if (!hits.length) {
+      box.innerHTML = '<div class="hint">No matches for <b>' + esc(ts.join(' ')) + '</b>. Try fewer or different words.</div>';
+    } else {
+      box.innerHTML = hits.map(function (e, i) {
+        return '<a class="result" role="option" id="doc-hit-' + i + '" aria-selected="' + (i === active) + '" href="' + esc(hrefFor(e, ts)) + '" data-i="' + i + '">' +
+          '<span class="where">' + markup(e.h, ts) + '</span><span class="snip">' + markup(snippet(e, ts), ts) + '</span></a>';
+      }).join('') + '<div class="hint">↑ ↓ to choose · Enter to open · Esc to close</div>';
+    }
+    box.classList.add('open');
+    input.setAttribute('aria-expanded', 'true');
+    input.setAttribute('aria-activedescendant', active >= 0 ? 'doc-hit-' + active : '');
+  }
+  function close() { box.classList.remove('open'); input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); }
+  function move(d) {
+    if (!hits.length) return;
+    active = (active + d + hits.length) % hits.length;
+    box.querySelectorAll('.result').forEach(function (a, i) { a.setAttribute('aria-selected', String(i === active)); });
+    var cur = box.querySelector('#doc-hit-' + active);
+    if (cur) { cur.scrollIntoView({ block: 'nearest' }); input.setAttribute('aria-activedescendant', cur.id); }
+  }
+  function open(e, ts) {
+    close();
+    // keep the address in step where allowed (pages opened from disk may refuse), then land
+    try { history.replaceState(null, '', hrefFor(e, ts)); } catch (err) {}
+    land(e.id, ts); input.blur();
+  }
+  var timer;
+  input.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(function () { run(input.value); }, 60); });
+  input.addEventListener('focus', function () { if (input.value.trim()) run(input.value); });
+  input.addEventListener('keydown', function (ev) {
+    if (ev.key === 'ArrowDown') { ev.preventDefault(); move(1); }
+    else if (ev.key === 'ArrowUp') { ev.preventDefault(); move(-1); }
+    else if (ev.key === 'Enter') { ev.preventDefault(); if (active >= 0) open(hits[active], terms(input.value)); }
+    else if (ev.key === 'Escape') { if (box.classList.contains('open')) close(); else input.blur(); }
+  });
+  box.addEventListener('click', function (ev) {
+    var a = ev.target.closest('.result'); if (!a) return;
+    if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button === 1) return;   // new tab: let the link work
+    ev.preventDefault(); open(hits[+a.getAttribute('data-i')], terms(input.value));
+  });
+  document.addEventListener('click', function (ev) { if (!search.contains(ev.target)) close(); });
+  document.addEventListener('keydown', function (ev) {
+    var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.nodeName);
+    if ((ev.key === '/' && !typing) || ((ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === 'k')) {
+      ev.preventDefault(); input.focus(); input.select();
+    }
+  });
+
+  /* ---------- landing on a result: flash the heading and mark the words in its part ---------- */
+  function clearMarks() {
+    document.querySelectorAll('mark.hit').forEach(function (m) { m.replaceWith(document.createTextNode(m.textContent)); });
+    document.querySelectorAll('main section').forEach(function (s) { s.normalize(); });
+  }
+  function partOf(target) {
+    // the heading's part: an h3 up to the next h3; a section's intro up to its first h3
+    var nodes = [], sec = target.closest('section') || target;
+    var start = target.nodeName === 'SECTION' ? sec.firstChild : target.nextSibling;
+    for (var n = start; n; n = n.nextSibling) { if (n.nodeName === 'H3' && n !== target) break; nodes.push(n); }
+    return nodes;
+  }
+  function markIn(nodes, ts) {
+    if (!ts.length) return null;
+    var re = new RegExp(ts.map(function (t) { return t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|'), 'gi'), first = null;
+    nodes.forEach(function (root) {
+      var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode: function (n) { return n.parentNode.closest('button,script,style,mark,.anchor') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; }
+      }), texts = [];
+      if (root.nodeType === 3) texts.push(root); else while (walker.nextNode()) texts.push(walker.currentNode);
+      texts.forEach(function (tn) {
+        var s = tn.nodeValue; re.lastIndex = 0; if (!re.test(s)) return; re.lastIndex = 0;
+        var frag = document.createDocumentFragment(), last = 0, m;
+        while ((m = re.exec(s))) {
+          frag.appendChild(document.createTextNode(s.slice(last, m.index)));
+          var mk = el('mark', { class: 'hit' }); mk.textContent = m[0]; frag.appendChild(mk); if (!first) first = mk;
+          last = m.index + m[0].length;
+        }
+        frag.appendChild(document.createTextNode(s.slice(last)));
+        tn.parentNode.replaceChild(frag, tn);
+      });
+    });
+    return first;
+  }
+  function land(id, ts) {
+    var target = document.getElementById(id); if (!target) return;
+    clearMarks();
+    markIn(partOf(target), ts || []);
+    var h = target.nodeName === 'SECTION' ? target.querySelector('h2') || target : target;
+    h.scrollIntoView({ block: 'start' });
+    h.classList.remove('flash'); void h.offsetWidth; h.classList.add('flash');
+  }
+  var q0 = new URLSearchParams(location.search).get('q');
+  if (q0) input.value = q0;
+  if (location.hash.length > 1) {
+    var id0 = decodeURIComponent(location.hash.slice(1));
+    requestAnimationFrame(function () { land(id0, q0 ? terms(q0) : []); });
+  }
+
+  /* ---------- heading links (#) ---------- */
+  document.querySelectorAll('main section[id] > h2, main h3[id]').forEach(function (h) {
+    var id = h.nodeName === 'H2' ? h.parentNode.id : h.id;
+    var a = el('a', { class: 'anchor', href: '#' + id, 'aria-label': 'Link to this part' }, '#');
+    h.appendChild(a);
+  });
+
+  /* ---------- contents list that follows along, with the current section's sub-headings ---------- */
+  var toc = document.querySelector('nav.toc');
+  var tocLinks = {};
+  if (toc) {
+    toc.querySelectorAll('a[href^="#"]').forEach(function (a) {
+      var id = a.getAttribute('href').slice(1), sec = document.getElementById(id);
+      if (!sec) return;
+      tocLinks[id] = a;
+      var subs = sec.querySelectorAll('h3[id]');
+      if (!subs.length) return;
+      var ul = el('ul', { class: 'sub' });
+      subs.forEach(function (h) { var li = el('li'); li.appendChild(el('a', { href: '#' + h.id }, esc(headingText(h)))); ul.appendChild(li); });
+      a.parentNode.appendChild(ul);
+    });
+    var headings = Array.prototype.slice.call(document.querySelectorAll('main section[id], main h3[id]'));
+    var ticking = false;
+    var spy = function () {
+      ticking = false;
+      var line = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bar-h')) + 40 || 100, cur = null;
+      for (var i = 0; i < headings.length; i++) { if (headings[i].getBoundingClientRect().top <= line) cur = headings[i]; else break; }
+      var sec = cur ? (cur.nodeName === 'SECTION' ? cur : cur.closest('section')) : null;
+      toc.querySelectorAll('a[aria-current]').forEach(function (a) { a.removeAttribute('aria-current'); });
+      toc.querySelectorAll('li.open').forEach(function (li) { li.classList.remove('open'); });
+      if (!sec || !tocLinks[sec.id]) return;
+      tocLinks[sec.id].setAttribute('aria-current', 'true');
+      tocLinks[sec.id].parentNode.classList.add('open');
+      if (cur.nodeName === 'H3') { var s = toc.querySelector('ul.sub a[href="#' + cur.id + '"]'); if (s) s.setAttribute('aria-current', 'true'); }
+    };
+    addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(spy); } }, { passive: true });
+    addEventListener('resize', spy);
+    spy();
+  }
+
+  /* ---------- copy buttons on code blocks ---------- */
+  document.querySelectorAll('.code').forEach(function (codeBox) {
+    var pre = codeBox.querySelector('pre');
+    if (!pre || codeBox.querySelector('button')) return;
+    var b = el('button', { type: 'button', 'aria-label': 'Copy code' }, 'Copy');
+    b.addEventListener('click', function () {
+      var reset = function () { setTimeout(function () { b.textContent = 'Copy'; }, 1500); };
+      var select = function () {
+        var r = document.createRange(); r.selectNodeContents(pre);
+        var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; reset();
+      };
+      try { navigator.clipboard.writeText(pre.innerText).then(function () { b.textContent = 'Copied'; reset(); }, select); } catch (e) { select(); }
+    });
+    codeBox.appendChild(b);
+  });
+
+  /* ---------- column names on each cell, for the phone layout (docs.css) ---------- */
+  document.querySelectorAll('.tablewrap table').forEach(function (t) {
+    // long paths in the first column may wrap after a "/" (docs.css keeps them from breaking mid-name)
+    t.querySelectorAll('td:first-child code').forEach(function (c) {
+      if (c.children.length || c.textContent.length < 30 || c.textContent.indexOf('/') === -1) return;
+      c.innerHTML = esc(c.textContent).replace(/\//g, '/<wbr>');
+    });
+    var names = Array.prototype.map.call(t.querySelectorAll('thead th'), function (th) { return th.textContent.trim(); });
+    t.querySelectorAll('tbody tr').forEach(function (tr) {
+      var col = 0;
+      Array.prototype.forEach.call(tr.children, function (td) {
+        // a cell spanning columns is labelled with all of them ("Production & Staging")
+        var label = names.slice(col, col + td.colSpan).filter(Boolean).join(' & ');
+        if (label) td.setAttribute('data-label', label);
+        col += td.colSpan;
+      });
+    });
+  });
+
+  /* ---------- back to top ---------- */
+  var up = el('button', { class: 'totop', type: 'button', 'aria-label': 'Back to top' }, '↑ Top');
+  up.addEventListener('click', function () { scrollTo({ top: 0 }); });
+  bar.querySelector('.brand').addEventListener('click', function (ev) { ev.preventDefault(); scrollTo({ top: 0 }); });
+  document.body.appendChild(up);
+  addEventListener('scroll', function () { up.classList.toggle('show', scrollY > 700); }, { passive: true });
+})();
+</script>
+<!-- /shared script -->
+</body>
+</html>

@@ -1,0 +1,68 @@
+# Self-hosted Tinybird (ClickHouse and Redis inside), as the puppi3 stack's tinybird-local. Only Traefik's GET-only
+# /.ghost/stats route reaches it from outside; the Service keeps the stack's name, which Traefik, Ghost, the bridge
+# and Grafana's datasource use.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tinybird-local
+spec:
+  serviceName: tinybird-local
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tinybird-local
+  template:
+    metadata:
+      labels:
+        app: tinybird-local
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: tinybird-local
+          # the puppi3 stack's pin (stacks/puppi3/compose.yaml: keep them in step)
+          image: tinybirdco/tinybird-local@sha256:16c661bba64b99d904d9384ac414ee7ffa9d09d12bf77a42d41885408a2d8963
+          ports:
+            - {name: http, containerPort: 7181}
+          # Its health answer can take seconds while ClickHouse starts (Compose: 5 s timeout, 120 s start period)
+          startupProbe:
+            httpGet: {path: /v0/health, port: http}
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 60   # 5 min (it's ready in under 1)
+          readinessProbe:
+            httpGet: {path: /v0/health, port: http}
+            periodSeconds: 30
+            timeoutSeconds: 5
+          resources:
+            # ~4 GiB idle on this Mac (ClickHouse, Redis, Kafka and Tinybird's servers in one container), over 3 GiB while
+            # it starts: a 3 GiB limit had it killed in a loop
+            requests: {cpu: 200m, memory: 4Gi}
+            limits: {memory: 6Gi}
+          volumeMounts:
+            - {name: clickhouse, mountPath: /var/lib/clickhouse}
+            - {name: redis, mountPath: /redis-data}
+  volumeClaimTemplates:
+    - metadata:
+        name: clickhouse
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 10Gi
+    - metadata:
+        name: redis
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tinybird-local
+spec:
+  selector:
+    app: tinybird-local
+  ports:
+    - {name: http, port: 7181, targetPort: http}

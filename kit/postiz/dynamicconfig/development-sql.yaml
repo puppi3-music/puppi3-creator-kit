@@ -1,0 +1,5 @@
+# Temporal's dynamic config for Postiz's workflows (the kit's copy of Postiz's own). Mounted by
+# kit/profiles/postiz.yaml.
+limit.maxIDLength:
+  - value: 255
+    constraints: {}

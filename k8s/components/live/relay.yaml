@@ -1,0 +1,90 @@
+# The listeners' mp3: Icecast 2 relays (k8s/images/icecast-relay/), each pulling the mp3 mount from the main
+# TinyIce and serving it on (Traefik's tinyice-mp3 route, live.yml). TinyIce's own edge relays refuse private
+# addresses, which every in-cluster one is. The relays keep nothing, so any number: scale by hand
+# (kubectl scale deployment tinyice-relay --replicas=N) or with an autoscaler. Their config is Secret
+# icecast-relay-config (k8s/up.sh: the main TinyIce's admin password, its burst size, 500 listeners each).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tinyice-relay
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tinyice-relay
+  template:
+    metadata:
+      labels:
+        app: tinyice-relay
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 100    # the image's icecast user (Alpine's package)
+        runAsGroup: 101
+      containers:
+        - name: icecast
+          image: creator-kit/icecast-relay
+          ports:
+            - {name: http, containerPort: 8080}
+          # The mounts (ConfigMap "live", from TinyIce's config by k8s/up.sh)
+          envFrom:
+            - configMapRef:
+                name: live
+          # Ready when it has the mp3, or when no DJ is on the main TinyIce's source mount (TinyIce lists the mp3 even
+          # then, sending nothing, so the relay reconnects every 10 s): listeners never land on a relay still catching
+          # up with a live show, and k8s/up.sh doesn't wait for a DJ. 127.0.0.1, not localhost: busybox wget tries ::1
+          # first and Icecast listens on IPv4.
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  wget -qO- http://127.0.0.1:8080/status-json.xsl | grep -qF "$LIVE_MP3_MOUNT\"" && exit 0
+                  wget -qO- -T 3 http://tinyice:8080/status-json.xsl | grep -qF "$LIVE_SOURCE_MOUNT\"" && exit 1
+                  exit 0
+            periodSeconds: 3
+            timeoutSeconds: 8
+          livenessProbe:
+            httpGet: {path: /status-json.xsl, port: http}
+            periodSeconds: 30
+            timeoutSeconds: 5
+          resources:
+            requests: {cpu: 50m, memory: 32Mi}
+            limits: {memory: 256Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          volumeMounts:
+            - {name: config, mountPath: /config, readOnly: true}
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: config
+          secret:
+            secretName: icecast-relay-config
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tinyice-relay
+spec:
+  selector:
+    app: tinyice-relay
+  ports:
+    - {name: http, port: 8080, targetPort: http}
+---
+# Every ready relay's own address (headless), for the bridge's LIVE_RELAYS: each relay counts as one listener on the
+# main TinyIce, so the live shows' listener numbers add up the relays' own
+apiVersion: v1
+kind: Service
+metadata:
+  name: tinyice-relay-pods
+spec:
+  clusterIP: None
+  selector:
+    app: tinyice-relay
+  ports:
+    - {name: http, port: 8080, targetPort: http}

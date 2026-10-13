@@ -1,0 +1,92 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 61,
+    "title": "Threads numbers: status",
+    "description": "When the bridge last collected them, and what went wrong if anything (a missing setting, a channel to reconnect, an API refusing)",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "Updated",
+                      "text": "Updated",
+                      "type": "timestamp"
+                    },
+                    {
+                      "selector": "Problems",
+                      "text": "Problems",
+                      "type": "string"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "$merge([{\"Updated\": updatedAt, \"Problems\": $count(errors) = 0 ? \"none\" : $join(errors, \"; \")}])",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/threads.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "table",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "cellHeight": "sm",
+          "showHeader": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "cellOptions": {
+                "type": "auto",
+                "wrapText": true
+              }
+            }
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

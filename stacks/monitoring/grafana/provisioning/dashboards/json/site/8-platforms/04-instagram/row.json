@@ -1,0 +1,302 @@
+{
+  "kind": "RowsLayoutRow",
+  "spec": {
+    "title": "Instagram",
+    "collapse": false,
+    "variables": [
+      {
+        "kind": "CustomVariable",
+        "spec": {
+          "name": "sort_instagram",
+          "query": "Newest first : Posted,Doing best first : Score,Views : Views,Reach : Reach,Likes : Likes,Comments : Comments,Shares : Shares,Saves : Saves,Follows : Follows,Avg watch : Avg watch",
+          "current": {
+            "text": "Newest first",
+            "value": "Posted"
+          },
+          "options": [
+            {
+              "selected": true,
+              "text": "Newest first",
+              "value": "Posted"
+            },
+            {
+              "selected": false,
+              "text": "Doing best first",
+              "value": "Score"
+            },
+            {
+              "selected": false,
+              "text": "Views",
+              "value": "Views"
+            },
+            {
+              "selected": false,
+              "text": "Reach",
+              "value": "Reach"
+            },
+            {
+              "selected": false,
+              "text": "Likes",
+              "value": "Likes"
+            },
+            {
+              "selected": false,
+              "text": "Comments",
+              "value": "Comments"
+            },
+            {
+              "selected": false,
+              "text": "Shares",
+              "value": "Shares"
+            },
+            {
+              "selected": false,
+              "text": "Saves",
+              "value": "Saves"
+            },
+            {
+              "selected": false,
+              "text": "Follows",
+              "value": "Follows"
+            },
+            {
+              "selected": false,
+              "text": "Avg watch",
+              "value": "Avg watch"
+            }
+          ],
+          "multi": false,
+          "includeAll": false,
+          "label": "Sort by",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "description": "The order of the Instagram posts table below: newest first, or the most of a number first (a header click still sorts it for you)",
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "CustomVariable",
+        "spec": {
+          "name": "show_instagram",
+          "query": "All kept : all,Posted in the time range : range",
+          "current": {
+            "text": "All kept",
+            "value": "all"
+          },
+          "options": [
+            {
+              "selected": true,
+              "text": "All kept",
+              "value": "all"
+            },
+            {
+              "selected": false,
+              "text": "Posted in the time range",
+              "value": "range"
+            }
+          ],
+          "multi": false,
+          "includeAll": false,
+          "label": "Show",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "description": "Every Instagram post the bridge has seen (deleted ones drop off), or only those posted in the time range picked at the top",
+          "allowCustomValue": false
+        }
+      }
+    ],
+    "layout": {
+      "kind": "GridLayout",
+      "spec": {
+        "items": [
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 0,
+              "width": 24,
+              "height": 2,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-9009"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-23"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-17"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 12,
+              "y": 2,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-18"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 18,
+              "y": 2,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-24"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 6,
+              "width": 8,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-19"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 8,
+              "y": 6,
+              "width": 8,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-25"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 16,
+              "y": 6,
+              "width": 8,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-27"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 14,
+              "width": 24,
+              "height": 14,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-26"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 28,
+              "width": 7,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-29"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 7,
+              "y": 28,
+              "width": 5,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-20"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 12,
+              "y": 28,
+              "width": 4,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-21"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 16,
+              "y": 28,
+              "width": 8,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-22"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "conditionalRendering": {
+      "kind": "ConditionalRenderingGroup",
+      "spec": {
+        "visibility": "show",
+        "condition": "and",
+        "items": [
+          {
+            "kind": "ConditionalRenderingVariable",
+            "spec": {
+              "variable": "has_instagram",
+              "operator": "equals",
+              "value": "yes"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

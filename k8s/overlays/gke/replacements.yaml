@@ -1,0 +1,7 @@
+# The site's values from ConfigMap "cloud" (k8s/up.sh makes it from <site>/cloud-gke.env; the k3d twin's from its
+# own cloud.k3d), filled in after the modules are in (k8s/up.sh puts this file in the site's kustomization). The
+# proxies read the instances from ConfigMap "cloud" themselves.
+- source: {kind: ConfigMap, name: cloud, fieldPath: data.CLOUD_SQL_SA}
+  targets:
+    - select: {kind: ServiceAccount, name: cloud-sql}
+      fieldPaths: ['metadata.annotations.[iam.gke.io/gcp-service-account]']

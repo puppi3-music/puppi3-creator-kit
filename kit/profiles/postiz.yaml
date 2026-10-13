@@ -1,0 +1,30 @@
+# Postiz and the bridge: the social profile. The bridge's code and Temporal's config from the repo (the NAS's are
+# copies deploy.sh sends to its data folder).
+services:
+  postiz:
+    profiles: [social]
+  postiz-ghost-bridge:
+    profiles: [social]
+    image: ${ID_PREFIX:-site}-ghost-bridge:local   # built here, named per site (the stack's own name is the NAS's)
+    environment:
+      GHOST_API_URL: http://${ID_PREFIX:-site}-ghost:2368
+    volumes:
+      - ./ghost-bridge:/app:ro
+  postiz-postgres:
+    profiles: [social]
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata   # a folder Postgres makes itself (on a Mac it refuses one Docker made)
+  postiz-redis:
+    profiles: [social]
+  postiz-temporal-elasticsearch:
+    profiles: [social]
+  postiz-temporal-postgres:
+    profiles: [social]
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata   # a folder Postgres makes itself (on a Mac it refuses one Docker made)
+  postiz-temporal:
+    profiles: [social]
+    volumes:
+      - ../../kit/postiz/dynamicconfig:/etc/temporal/config/dynamicconfig:ro
+  postiz-temporal-ui:
+    profiles: [social]

@@ -1,0 +1,76 @@
+# versitygw on its volume: one replica (it's one folder), the bucket made as a folder before it starts
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: s3
+spec:
+  serviceName: s3
+  replicas: 1
+  selector:
+    matchLabels:
+      app: s3
+  template:
+    metadata:
+      labels:
+        app: s3
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+      initContainers:
+        - name: bucket
+          image: busybox:1.37
+          command: [sh, -c, 'mkdir -p "/data/$S3_BUCKET"']
+          env:
+            - name: S3_BUCKET
+              valueFrom:
+                configMapKeyRef: {name: s3, key: S3_BUCKET}
+          resources:
+            requests: {cpu: 10m, memory: 8Mi}
+            limits: {memory: 32Mi}
+          volumeMounts:
+            - {name: data, mountPath: /data}
+      containers:
+        - name: versitygw
+          image: versity/versitygw:v1.8.0
+          args: [--port, ":7070", posix, /data]
+          env:
+            - name: ROOT_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef: {name: s3, key: AWS_ACCESS_KEY_ID}
+            - name: ROOT_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef: {name: s3, key: AWS_SECRET_ACCESS_KEY}
+            - name: VGW_REGION
+              valueFrom:
+                configMapKeyRef: {name: s3, key: S3_REGION}
+          ports:
+            - {name: s3, containerPort: 7070}
+          readinessProbe:
+            tcpSocket: {port: s3}
+            periodSeconds: 5
+          resources:
+            requests: {cpu: 20m, memory: 32Mi}
+            limits: {memory: 512Mi}
+          volumeMounts:
+            - {name: data, mountPath: /data}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: s3
+spec:
+  selector:
+    app: s3
+  ports:
+    - {name: s3, port: 7070, targetPort: s3}

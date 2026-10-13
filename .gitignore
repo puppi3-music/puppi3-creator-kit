@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+._*
+
+# Secrets: every .env but the examples (instances/example.env is the documented profile, no secrets); this also
+# keeps out k8s/images/built.env (build-images.sh)
+.env
+*.env
+!.env.example
+!instances/example.env
+# ...and what a stack run on its own, outside a site's folder, would keep in its own
+stacks/puppi3/ghost/config.production.json
+stacks/icecast/tinyice-data/
+
+# Sites made with kit/setup.sh: profile, secrets and data
+kit/sites/
+# ghost-admin.sh's backups when run on its own
+ghost-backups/
+# What the tools build
+kit/dist/
+kit/theme-test/node_modules/
+*.zip

@@ -1,0 +1,227 @@
+{
+  "kind": "RowsLayoutRow",
+  "spec": {
+    "title": "Mixcloud",
+    "collapse": false,
+    "variables": [
+      {
+        "kind": "CustomVariable",
+        "spec": {
+          "name": "sort_mixcloud",
+          "query": "Newest first : Posted,Doing best first : Score,Length : Length,Plays : Plays,Favorites : Favorites,Reposts : Reposts,Comments : Comments,Listeners : Listeners",
+          "current": {
+            "text": "Newest first",
+            "value": "Posted"
+          },
+          "options": [
+            {
+              "selected": true,
+              "text": "Newest first",
+              "value": "Posted"
+            },
+            {
+              "selected": false,
+              "text": "Doing best first",
+              "value": "Score"
+            },
+            {
+              "selected": false,
+              "text": "Length",
+              "value": "Length"
+            },
+            {
+              "selected": false,
+              "text": "Plays",
+              "value": "Plays"
+            },
+            {
+              "selected": false,
+              "text": "Favorites",
+              "value": "Favorites"
+            },
+            {
+              "selected": false,
+              "text": "Reposts",
+              "value": "Reposts"
+            },
+            {
+              "selected": false,
+              "text": "Comments",
+              "value": "Comments"
+            },
+            {
+              "selected": false,
+              "text": "Listeners",
+              "value": "Listeners"
+            }
+          ],
+          "multi": false,
+          "includeAll": false,
+          "label": "Sort by",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "description": "The order of the Mixcloud uploads table below: newest first, or the most of a number first (a header click still sorts it for you)",
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "CustomVariable",
+        "spec": {
+          "name": "show_mixcloud",
+          "query": "All kept : all,Posted in the time range : range",
+          "current": {
+            "text": "All kept",
+            "value": "all"
+          },
+          "options": [
+            {
+              "selected": true,
+              "text": "All kept",
+              "value": "all"
+            },
+            {
+              "selected": false,
+              "text": "Posted in the time range",
+              "value": "range"
+            }
+          ],
+          "multi": false,
+          "includeAll": false,
+          "label": "Show",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "description": "Every Mixcloud post the bridge has seen (deleted ones drop off), or only those posted in the time range picked at the top",
+          "allowCustomValue": false
+        }
+      }
+    ],
+    "layout": {
+      "kind": "GridLayout",
+      "spec": {
+        "items": [
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 0,
+              "width": 24,
+              "height": 2,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-9008"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-80"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-85"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 12,
+              "y": 2,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-86"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 18,
+              "y": 2,
+              "width": 6,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-81"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 6,
+              "width": 12,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-87"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 12,
+              "y": 6,
+              "width": 12,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-82"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 14,
+              "width": 24,
+              "height": 10,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-83"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "conditionalRendering": {
+      "kind": "ConditionalRenderingGroup",
+      "spec": {
+        "visibility": "show",
+        "condition": "and",
+        "items": [
+          {
+            "kind": "ConditionalRenderingVariable",
+            "spec": {
+              "variable": "has_mixcloud",
+              "operator": "equals",
+              "value": "yes"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

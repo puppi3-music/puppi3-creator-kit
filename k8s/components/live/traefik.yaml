@@ -1,0 +1,7 @@
+# Traefik gets the live mounts (ConfigMap "live", which k8s/up.sh makes from TinyIce's config) for live.yml's mp3 route.
+# A JSON patch that appends to its envFrom (the site's profile stays first).
+- op: add
+  path: /spec/template/spec/containers/0/envFrom/-
+  value:
+    configMapRef:
+      name: live

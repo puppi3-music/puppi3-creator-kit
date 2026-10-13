@@ -1,0 +1,94 @@
+# The main TinyIce (the icecast stack's): the DJ software's Ogg in, the mp3 transcode, the player page, its status and
+# admin. One replica (its config and history are on a ReadWriteOnce volume), Recreate.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tinyice
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: tinyice
+  template:
+    metadata:
+      labels:
+        app: tinyice
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      initContainers:
+        # The site's config the first time; after that the volume's copy (TinyIce's admin writes to it)
+        - name: config
+          image: busybox:1.37
+          command: [sh, -c, '[ -s /data/config.json ] || cp /site/config.json /data/config.json']
+          resources:
+            requests: {cpu: 10m, memory: 8Mi}
+            limits: {memory: 32Mi}
+          volumeMounts:
+            - {name: state, mountPath: /data, subPath: data}
+            - {name: site-config, mountPath: /site, readOnly: true}
+      containers:
+        - name: tinyice
+          # the icecast stack's pin (stacks/icecast/compose.yaml: keep them in step)
+          image: ghcr.io/datanoisetv/tinyice@sha256:e3118dc25b293e4b71d6472e9c6c512a01914c5624848b3756049beefa5577a5
+          ports:
+            - {name: http, containerPort: 8080}
+          readinessProbe:
+            httpGet: {path: /status-json.xsl, port: http}
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: {path: /status-json.xsl, port: http}
+            periodSeconds: 30
+            timeoutSeconds: 5
+          resources:
+            requests: {cpu: 100m, memory: 64Mi}
+            limits: {memory: 512Mi}
+          volumeMounts:
+            - {name: state, mountPath: /data, subPath: data}
+            - {name: state, mountPath: /var/lib/tinyice, subPath: lib}
+      volumes:
+        - name: state
+          persistentVolumeClaim:
+            claimName: tinyice
+        - name: site-config
+          secret:
+            secretName: tinyice-config
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tinyice
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Traefik, the relays, the bridge (LIVE_STATUS_URL's default) and Prometheus reach it by this name
+apiVersion: v1
+kind: Service
+metadata:
+  name: tinyice
+spec:
+  selector:
+    app: tinyice
+  ports:
+    - {name: http, port: 8080, targetPort: http}
+---
+# The DJ software's way in: straight to TinyIce (never through Traefik), on port 8222 as on Compose. Local keeps the
+# DJ's address (TinyIce's bans and logs see it).
+apiVersion: v1
+kind: Service
+metadata:
+  name: tinyice-source
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  selector:
+    app: tinyice
+  ports:
+    - {name: source, port: 8222, targetPort: http}

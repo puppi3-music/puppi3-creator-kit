@@ -1,0 +1,113 @@
+# The cloud's MySQL 8 (RDS, Cloud SQL), standing in: its master login is Ghost's (secrets/puppi3.env), as the cloud
+# runbook sets up
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: standin-mysql
+spec:
+  serviceName: standin-mysql
+  replicas: 1
+  selector:
+    matchLabels:
+      app: standin-mysql
+  template:
+    metadata:
+      labels:
+        app: standin-mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: puppi3, key: database__connection__password}
+          ports:
+            - {name: mysql, containerPort: 3306}
+          readinessProbe:
+            exec:
+              command: [sh, -c, 'mysqladmin ping -uroot -p"$MYSQL_ROOT_PASSWORD" --silent']
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests: {cpu: 100m, memory: 384Mi}
+            limits: {memory: 1Gi}
+          volumeMounts:
+            - {name: data, mountPath: /var/lib/mysql}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: standin-mysql
+spec:
+  selector:
+    app: standin-mysql
+  ports:
+    - {name: mysql, port: 3306, targetPort: mysql}
+---
+# The cloud's Postgres (RDS, Cloud SQL), standing in: only the master login (Secret "cloud"), no Postiz or Temporal
+# login until the postgres-logins Job (components/cloud-postgres/) makes them
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: standin-postgres
+spec:
+  serviceName: standin-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: standin-postgres
+  template:
+    metadata:
+      labels:
+        app: standin-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef: {name: cloud, key: POSTGRES_MASTER_USER}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: cloud, key: POSTGRES_MASTER_PASSWORD}
+            - {name: POSTGRES_DB, value: postgres}
+            - {name: PGDATA, value: /var/lib/postgresql/data/pgdata}
+          ports:
+            - {name: postgres, containerPort: 5432}
+          readinessProbe:
+            exec:
+              command: [sh, -c, 'pg_isready -U "$POSTGRES_USER" -q']
+            periodSeconds: 10
+          resources:
+            requests: {cpu: 50m, memory: 128Mi}
+            limits: {memory: 1Gi}
+          volumeMounts:
+            - {name: data, mountPath: /var/lib/postgresql/data}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: standin-postgres
+spec:
+  selector:
+    app: standin-postgres
+  ports:
+    - {name: postgres, port: 5432, targetPort: postgres}

@@ -1,0 +1,16 @@
+# The site's values from ConfigMap "cloud" (k8s/up.sh makes it from <site>/cloud-eks.env; the k3d twin's from its
+# own cloud.k3d), filled in after the modules are in (k8s/up.sh puts this file in the site's kustomization).
+- source: {kind: ConfigMap, name: cloud, fieldPath: data.MYSQL_HOST}
+  targets:
+    - select: {kind: Service, name: mysql}
+      fieldPaths: [spec.externalName]
+- source: {kind: ConfigMap, name: cloud, fieldPath: data.POSTGRES_HOST}
+  targets:
+    - select: {kind: Service, name: postiz-postgres}
+      fieldPaths: [spec.externalName]
+    - select: {kind: Service, name: postiz-temporal-postgres}
+      fieldPaths: [spec.externalName]
+- source: {kind: ConfigMap, name: cloud, fieldPath: data.GHOST_ROLE_ARN}
+  targets:
+    - select: {kind: ServiceAccount, name: ghost}
+      fieldPaths: ['metadata.annotations.[eks.amazonaws.com/role-arn]']

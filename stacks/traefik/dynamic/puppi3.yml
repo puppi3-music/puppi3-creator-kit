@@ -1,0 +1,171 @@
+# The site's own routes (Ghost, its analytics and stats, ActivityPub, the theme's beacons), all through
+# cloudflare-only (cloudflare-only.yml), with the visitor's real address in X-Forwarded-For (real-ip.yml). They're
+# here rather than as labels in the puppi3 stack so they can change without restarting Ghost: Traefik picks up this
+# file by itself.
+# A Go template (Traefik's file provider, with Sprig): the site's values are Traefik's environment, from the
+# instance profile (instances/CLAUDE.md) via ../compose.yaml, with neutral defaults (example.com), so it renders
+# whatever order it and Traefik's environment arrive in. A second site's Traefik (e.g. a staging copy) reads the
+# same file with that site's profile: plain http (ENTRYPOINT web, TLS_RESOLVER none; self = https on Traefik's own
+# certificate, for a kit site tried locally), its own upstreams (*_UPSTREAM),
+# and its red marks (SITE_MIDDLEWARES, ADMIN_MIDDLEWARES). Router names are <ID_PREFIX>-...: Health's router regexes
+# and the 5xx alert match them. (Still named puppi3.yml: deploy.sh doesn't delete a renamed file, and the old one
+# beside a new one would define every router twice.)
+# Priorities: Ghost 50 takes everything else on the name; the 100s (social previews, live status,
+# in the postiz and icecast stacks) and the ones below come first. Older copies of these routes as
+# labels on the puppi3 containers (priority 20 and 100) lose to these until those containers restart.
+{{- $host := env "SITE_HOST" | default "example.com" }}
+{{- $p := env "ID_PREFIX" | default "puppi3" }}
+{{- $resolver := env "TLS_RESOLVER" | default "cf" }}
+{{- $modules := env "MODULES" | default "analytics,social,live,monitoring,pets" | splitList "," }}
+{{- $ep := env "ENTRYPOINT" | default "https" }}
+{{- $siteMw := env "SITE_MIDDLEWARES" | splitList "," | compact }}
+{{- $adminMw := env "ADMIN_MIDDLEWARES" | splitList "," | compact }}
+{{- $ghost := env "GHOST_UPSTREAM" | default "http://website-puppi3:2368" }}
+{{- $analytics := env "ANALYTICS_UPSTREAM" | default "http://traffic-analytics:3000" }}
+{{- $tinybird := env "TINYBIRD_UPSTREAM" | default "http://tinybird-local:7181" }}
+{{- $bridge := env "BRIDGE_UPSTREAM" | default "http://postiz-ghost-bridge:8080" }}
+http:
+  routers:
+    {{ $p }}-ghost:
+      rule: "Host(`{{ $host }}`)"
+      entryPoints: [{{ $ep }}]
+      service: {{ $p }}-ghost
+      priority: 50
+      middlewares: [cloudflare-only, real-ip{{ range $siteMw }}, {{ . }}{{ end }}]
+{{- if ne $resolver "none" }}
+      tls:{{ if eq $resolver "self" }} {}{{ else }}
+        certResolver: {{ $resolver }}{{ end }}
+{{- end }}
+{{- if and (eq (env "HTTPS_REDIRECT") "true") (eq $ep "https") (ne $resolver "none") }}
+    # HTTPS_REDIRECT (a kit site's profile turns it on): http:// and www.<site> both go to https://<site>
+    {{ $p }}-to-https:
+      rule: "Host(`{{ $host }}`) || Host(`www.{{ $host }}`)"
+      entryPoints: [web]
+      service: noop@internal
+      priority: 50
+      middlewares: [{{ $p }}-to-site]
+    {{ $p }}-www:
+      rule: "Host(`www.{{ $host }}`)"
+      entryPoints: [https]
+      service: noop@internal
+      priority: 50
+      middlewares: [{{ $p }}-to-site]
+      tls:{{ if eq $resolver "self" }} {}{{ else }}
+        certResolver: {{ $resolver }}{{ end }}
+{{- end }}
+{{- if $adminMw }}
+    # Ghost Admin with middlewares of its own (staging's red frame: ADMIN_MIDDLEWARES), ahead of the site's router
+    {{ $p }}-ghost-admin:
+      rule: "Host(`{{ $host }}`) && PathPrefix(`/ghost/`)"
+      entryPoints: [{{ $ep }}]
+      service: {{ $p }}-ghost
+      priority: 60
+      middlewares: [cloudflare-only, real-ip{{ range $adminMw }}, {{ . }}{{ end }}]
+{{- if ne $resolver "none" }}
+      tls:{{ if eq $resolver "self" }} {}{{ else }}
+        certResolver: {{ $resolver }}{{ end }}
+{{- end }}
+{{- end }}
+{{- if has "analytics" $modules }}
+    # Visitors' page hits -> traffic-analytics, which forwards them to Tinybird.
+    # page-hit-country (page-hit-country.yml) fills in a blank country from Cloudflare's.
+    {{ $p }}-page-hits:
+      rule: "Host(`{{ $host }}`) && PathPrefix(`/.ghost/analytics`)"
+      entryPoints: [{{ $ep }}]
+      service: {{ $p }}-page-hits
+      priority: 110
+      middlewares: [cloudflare-only, real-ip, page-hit-country, {{ $p }}-page-hits-strip]
+{{- if ne $resolver "none" }}
+      tls:{{ if eq $resolver "self" }} {}{{ else }}
+        certResolver: {{ $resolver }}{{ end }}
+{{- end }}
+    # Ghost Admin's charts, from your browser -> Tinybird over the proxy network. Only token-protected
+    # GET queries to /v0/pipes are exposed; the rest of its API (admin, datasources, tokens) isn't.
+    {{ $p }}-tinybird:
+      rule: "Host(`{{ $host }}`) && PathPrefix(`/.ghost/stats/v0/pipes/`) && (Method(`GET`) || Method(`OPTIONS`))"
+      entryPoints: [{{ $ep }}]
+      service: {{ $p }}-tinybird
+      priority: 110
+      middlewares: [cloudflare-only, real-ip, {{ $p }}-tinybird-strip]
+{{- if ne $resolver "none" }}
+      tls:{{ if eq $resolver "self" }} {}{{ else }}
+        certResolver: {{ $resolver }}{{ end }}
+{{- end }}
+{{- end }}
+{{- if has "pets" $modules }}
+    # The theme's petted puppies -> the Postiz bridge, which keeps the count (Grafana's Overview shows it)
+    {{ $p }}-puppy-pets:
+      rule: "Host(`{{ $host }}`) && Path(`/.puppy/pets`) && Method(`POST`)"
+      entryPoints: [{{ $ep }}]
+      service: {{ $p }}-puppy-pets
+      priority: 110
+      middlewares: [cloudflare-only, real-ip]
+{{- if ne $resolver "none" }}
+      tls:{{ if eq $resolver "self" }} {}{{ else }}
+        certResolver: {{ $resolver }}{{ end }}
+{{- end }}
+{{- end }}
+{{- if has "social" $modules }}
+    # The theme's clicks on links to other sites and LIVE NOW bar plays -> the bridge too (stats/live.mjs counts
+    # them). /.site/click is the kit theme's path; /.puppy/click the older one, kept while any page sends it.
+    {{ $p }}-puppy-clicks:
+      rule: "Host(`{{ $host }}`) && (Path(`/.puppy/click`) || Path(`/.site/click`)) && Method(`POST`)"
+      entryPoints: [{{ $ep }}]
+      service: {{ $p }}-puppy-pets
+      priority: 110
+      middlewares: [cloudflare-only, real-ip]
+{{- if ne $resolver "none" }}
+      tls:{{ if eq $resolver "self" }} {}{{ else }}
+        certResolver: {{ $resolver }}{{ end }}
+{{- end }}
+{{- end }}
+    {{ $p }}-activitypub:
+      rule: "Host(`{{ $host }}`) && (PathPrefix(`/.ghost/activitypub/`) || Path(`/.well-known/webfinger`) || Path(`/.well-known/nodeinfo`))"
+      entryPoints: [{{ $ep }}]
+      service: ghost-activitypub
+      priority: 300
+      middlewares: [cloudflare-only, real-ip]
+{{- if ne $resolver "none" }}
+      tls:{{ if eq $resolver "self" }} {}{{ else }}
+        certResolver: {{ $resolver }}{{ end }}
+{{- end }}
+  middlewares:
+{{- if and (eq (env "HTTPS_REDIRECT") "true") (eq $ep "https") (ne $resolver "none") }}
+    {{ $p }}-to-site:
+      redirectRegex:
+        regex: '^https?://(www\.)?{{ $host | replace "." "\\." }}(.*)'
+        replacement: 'https://{{ $host }}${2}'
+        permanent: true
+{{- end }}
+    {{ $p }}-page-hits-strip:
+      stripPrefix:
+        prefixes: ["/.ghost/analytics"]
+    {{ $p }}-tinybird-strip:
+      stripPrefix:
+        prefixes: ["/.ghost/stats"]
+  services:
+    {{ $p }}-ghost:
+      loadBalancer:
+        servers:
+          - url: "{{ $ghost }}"   # puppi3's: the puppi3 stack's Ghost container, on the proxy network
+    {{ $p }}-page-hits:
+      loadBalancer:
+        servers:
+          - url: "{{ $analytics }}"   # puppi3's: the puppi3 stack's service name, on the proxy network
+    {{ $p }}-tinybird:
+      loadBalancer:
+        servers:
+          - url: "{{ $tinybird }}"   # puppi3's: the puppi3 stack's service name, on the proxy network
+    {{ $p }}-puppy-pets:
+      loadBalancer:
+        servers:
+          - url: "{{ $bridge }}"   # puppi3's: the postiz stack's bridge container, on the proxy network
+    ghost-activitypub:
+      loadBalancer:
+        passHostHeader: true
+        serversTransport: apghost
+        servers:
+          - url: "https://ap.ghost.org"
+  serversTransports:
+    apghost:
+      serverName: ap.ghost.org

@@ -1,0 +1,13 @@
+# A country for Ghost page hits whose country is blank (the page-hit-country plugin,
+# plugins-local/src/creatorkit/pagehitcountry/, loaded by the --experimental.localPlugins flag in
+# ../compose.yaml; a change to the plugin needs a Traefik restart).
+# Ghost's tracker guesses the country from the browser's time zone; a time zone with no country (UTC: privacy
+# browsers, scrapers) leaves it blank in Ghost and Grafana's Top locations. Only then does the plugin fill it
+# with Cloudflare's CF-IPCountry (from the visitor's IP; unknown and Tor stay blank). The IP isn't stored.
+# Used on the site's page-hit route only (puppi3.yml), after cloudflare-only.
+http:
+  middlewares:
+    page-hit-country:
+      plugin:
+        pagehitcountry:
+          header: CF-IPCountry

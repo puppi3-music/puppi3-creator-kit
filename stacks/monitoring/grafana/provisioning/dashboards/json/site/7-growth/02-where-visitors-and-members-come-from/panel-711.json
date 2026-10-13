@@ -1,0 +1,378 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 711,
+    "title": "Sources: Unique visitors and who joins",
+    "description": "Unique visitors per source (Ghost analytics) next to the members who signed up coming from it (Ghost records where each signup came from). A source with few visitors but a high Visitor \u2192 member rate is worth more of your time. \"Facebook\" is mostly Instagram: Instagram often sends people through a Facebook address when they tap a link. \"Your own site\" is visits that started on @SITE_HOST@ itself (you, from Ghost Admin or previews, or someone still browsing past midnight), not a source to grow. Rows marked (tag: \u2026) are visits from your own tagged links: your bio link and the links in your posts share one tag per network (Tagged links, by network and link splits them). (tag: ig, set by Instagram) is the tag Instagram's app adds to links it passes on; plain \"Instagram\" is Ghost seeing an Instagram address.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "ghost-analytics"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "source",
+                      "text": "Source",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "visits",
+                      "text": "Visitors",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "data",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://tinybird-local:7181/v0/pipes/api_top_sources.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "site_uuid",
+                        "value": "@GHOST_SITE_UUID@"
+                      },
+                      {
+                        "key": "timezone",
+                        "value": "@SITE_TIMEZONE@"
+                      },
+                      {
+                        "key": "date_from",
+                        "value": "${__from:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "date_to",
+                        "value": "${__to:date:YYYY-MM-DD}"
+                      },
+                      {
+                        "key": "limit",
+                        "value": "50"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          },
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "mysql",
+                "version": "v0",
+                "datasource": {
+                  "name": "ghost-mysql"
+                },
+                "spec": {
+                  "editorMode": "code",
+                  "format": "table",
+                  "rawQuery": true,
+                  "rawSql": "SELECT IF(COALESCE(referrer_source, '') IN ('', 'Direct'), '', referrer_source) AS Source, COUNT(*) AS Members\nFROM members_created_events WHERE $__timeFilter(created_at) GROUP BY 1"
+                }
+              },
+              "refId": "B",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "joinByField",
+            "spec": {
+              "options": {
+                "byField": "Source",
+                "mode": "outer"
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "renameByRegex",
+            "spec": {
+              "options": {
+                "regex": "^(.*) A$",
+                "renamePattern": "$1"
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "filterByValue",
+            "spec": {
+              "options": {
+                "filters": [
+                  {
+                    "config": {
+                      "id": "regex",
+                      "options": {
+                        "value": "${hide_direct:raw}"
+                      }
+                    },
+                    "fieldName": "Source"
+                  }
+                ],
+                "match": "any",
+                "type": "exclude"
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "calculateField",
+            "spec": {
+              "options": {
+                "alias": "Visitor \u2192 member",
+                "binary": {
+                  "left": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Members"
+                    }
+                  },
+                  "operator": "/",
+                  "right": {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Visitors"
+                    }
+                  }
+                },
+                "mode": "binary",
+                "replaceFields": false
+              }
+            }
+          },
+          {
+            "kind": "Transformation",
+            "group": "sortBy",
+            "spec": {
+              "options": {
+                "sort": [
+                  {
+                    "desc": true,
+                    "field": "Visitors"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "table",
+      "version": "",
+      "spec": {
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": true,
+              "displayName": "Visitors"
+            }
+          ]
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "auto"
+              },
+              "filterable": true
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Visitor \u2192 member"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "percentunit"
+                },
+                {
+                  "id": "decimals",
+                  "value": 1
+                },
+                {
+                  "id": "mappings",
+                  "value": [
+                    {
+                      "options": {
+                        "match": "nan",
+                        "result": {
+                          "text": "0%"
+                        }
+                      },
+                      "type": "special"
+                    },
+                    {
+                      "options": {
+                        "match": "null",
+                        "result": {
+                          "text": "0%"
+                        }
+                      },
+                      "type": "special"
+                    }
+                  ]
+                },
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-text"
+                  }
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "continuous-RdYlGr"
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Visitors"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "mode": "basic",
+                    "type": "gauge",
+                    "valueDisplayMode": "text"
+                  }
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "fixedColor": "purple",
+                    "mode": "fixed"
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Source"
+              },
+              "properties": [
+                {
+                  "id": "mappings",
+                  "value": [
+                    {
+                      "options": {
+                        "Facebook": {
+                          "index": 0,
+                          "text": "Facebook (mostly Instagram links)"
+                        },
+                        "bluesky": {
+                          "index": 4,
+                          "text": "Bluesky (tag: bluesky)"
+                        },
+                        "discord": {
+                          "index": 7,
+                          "text": "Discord (tag: discord)"
+                        },
+                        "facebook": {
+                          "index": 8,
+                          "text": "Facebook (tag: facebook)"
+                        },
+                        "ig": {
+                          "index": 2,
+                          "text": "Instagram (tag: ig, set by Instagram)"
+                        },
+                        "instagram": {
+                          "index": 3,
+                          "text": "Instagram (tag: instagram)"
+                        },
+                        "@SITE_HOST@": {
+                          "index": 1,
+                          "text": "Your own site"
+                        },
+                        "threads": {
+                          "index": 5,
+                          "text": "Threads (tag: threads)"
+                        },
+                        "tiktok": {
+                          "index": 6,
+                          "text": "TikTok (tag: tiktok)"
+                        },
+                        "x": {
+                          "index": 9,
+                          "text": "X (tag: x)"
+                        },
+                        "youtube": {
+                          "index": 10,
+                          "text": "YouTube (tag: youtube)"
+                        }
+                      },
+                      "type": "value"
+                    },
+                    {
+                      "options": {
+                        "match": "empty",
+                        "result": {
+                          "text": "Direct / unknown"
+                        }
+                      },
+                      "type": "special"
+                    },
+                    {
+                      "options": {
+                        "match": "null",
+                        "result": {
+                          "text": "Direct / unknown"
+                        }
+                      },
+                      "type": "special"
+                    }
+                  ]
+                },
+                {
+                  "id": "custom.width",
+                  "value": 260
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+# The gke overlay's values on k3d: the stand-ins' (components/k3d-standins/). k8s/up.sh fills in {namespace}. Not a .env:
+# .gitignore keeps *.env out of git (secrets), and these are none.
+# CLOUD: the overlay whose replacements these fill in.
+CLOUD=gke
+# the forwarders' targets, where Cloud SQL's connection names would be
+MYSQL_INSTANCE=standin-mysql.{namespace}.svc.cluster.local
+POSTGRES_INSTANCE=standin-postgres.{namespace}.svc.cluster.local
+CLOUD_SQL_SA=k3d-standin@example.iam.gserviceaccount.com
+S3_BUCKET=ghost-content
+S3_REGION=us-east-1
+# the gateway, where Cloud Storage's S3 API would be
+S3_ENDPOINT=http://s3:7070

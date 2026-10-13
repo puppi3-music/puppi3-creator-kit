@@ -1,0 +1,35 @@
+# Module monitoring: the site's own Grafana and Prometheus, as kit/monitoring/compose.yaml runs them on Compose.
+# - grafana.yaml: Grafana with the kit's datasources (kit/monitoring/grafana/, the Compose kit's own files) and the
+#   site's dashboards and alert rules, which k8s/up.sh renders (render.py --profile cloud) into a ConfigMap each
+#   (grafana-dashboard-<name>, grafana-alerting) and lists in Grafana's projected "dashboards" volume.
+# - prometheus.yaml: Prometheus, its config written by k8s/up.sh (ConfigMap prometheus-config: the jobs for the site's
+#   modules), and what it may read: the relays' addresses in the namespace, the kubelets' cAdvisor and volume stats
+#   (a ClusterRole, which up.sh names after the site).
+# - exporters.yaml: blackbox (the public checks) and json-exporter (the Icecast relays' listeners, which TinyIce sees
+#   as one listener each). No node-exporter or cAdvisor of its own: the kubelet has both jobs' numbers that matter.
+# - grants.yaml: Grafana's read-only logins (grafana_ro) on Ghost's MySQL and Postiz's Postgres, the Compose kit's
+#   grants.sh as Jobs (up.sh runs them on every up).
+# - monitoring.yml: Grafana's routes (GRAFANA_HOST, Cloudflare-only; grafana.<LAN_DOMAIN>, home network only).
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - grafana.yaml
+  - prometheus.yaml
+  - exporters.yaml
+  - grants.yaml
+configMapGenerator:
+  - name: traefik-dynamic
+    behavior: merge
+    files:
+      - monitoring.yml
+  - name: grafana-provisioning
+    files:
+      - datasources.yml=../../../kit/monitoring/grafana/datasources.yml
+      - dashboards.yml=../../../kit/monitoring/grafana/dashboards.yml
+  - name: grafana-ro-scripts
+    files:
+      - grants.sh=../../../kit/monitoring/grants.sh
+      - grafana-ro.sh=../../../stacks/puppi3/grafana-ro.sh
+  - name: json-exporter
+    files:
+      - config.yml=json-exporter.yml

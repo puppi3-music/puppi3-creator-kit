@@ -1,0 +1,429 @@
+# Postiz - self-hosted social scheduler (Threads, Instagram, Bluesky)
+# Based on the official gitroomhq/postiz-docker-compose, adapted for Traefik.
+# Its own stack: all data lives in ${DATA_DIR}/postiz/.
+# Secrets / domain come from the stack's .env.
+
+services:
+  postiz:
+    # Pinned: the bridge's photo rules (IMAGE_RULES in ghost-bridge/share/media.mjs) were checked against this
+    # version's source. To upgrade, read the release notes, change the tag, Deploy, restart postiz once
+    # Temporal is healthy, and check the Postiz calendar after the next post with photos.
+    image: ghcr.io/gitroomhq/postiz-app:v2.24.0
+    container_name: postiz
+    restart: unless-stopped
+    environment:
+      # === Required
+      MAIN_URL: "https://${POSTIZ_DOMAIN}"
+      FRONTEND_URL: "https://${POSTIZ_DOMAIN}"
+      NEXT_PUBLIC_BACKEND_URL: "https://${POSTIZ_DOMAIN}/api"
+      BACKEND_INTERNAL_URL: "http://localhost:3000"
+      JWT_SECRET: "${POSTIZ_JWT_SECRET}"
+      DATABASE_URL: "postgresql://postiz:${POSTIZ_DB_PASSWORD}@postiz-postgres:5432/postiz"
+      REDIS_URL: "redis://postiz-redis:6379"
+      TEMPORAL_ADDRESS: "postiz-temporal:7233"
+      IS_GENERAL: "true"
+      RUN_CRON: "true"
+      # Closed unless the .env says otherwise: set POSTIZ_DISABLE_REGISTRATION=false only while creating an account.
+      DISABLE_REGISTRATION: "${POSTIZ_DISABLE_REGISTRATION:-true}"
+
+      # === Storage (local; Instagram fetches images from https://<domain>/uploads/...)
+      STORAGE_PROVIDER: "local"
+      UPLOAD_DIRECTORY: "/uploads"
+      NEXT_PUBLIC_UPLOAD_DIRECTORY: "/uploads"
+
+      # === Providers you use (Bluesky needs nothing here - handle + app password in the UI)
+      THREADS_APP_ID: "${THREADS_APP_ID:-}"
+      THREADS_APP_SECRET: "${THREADS_APP_SECRET:-}"
+      # Instagram "standalone" (professional IG account, no Facebook Page needed)
+      INSTAGRAM_APP_ID: "${INSTAGRAM_APP_ID:-}"
+      INSTAGRAM_APP_SECRET: "${INSTAGRAM_APP_SECRET:-}"
+      # Instagram via Facebook Business (only if your IG is linked to a FB Page)
+      FACEBOOK_APP_ID: "${FACEBOOK_APP_ID:-}"
+      FACEBOOK_APP_SECRET: "${FACEBOOK_APP_SECRET:-}"
+      # TikTok (developers.tiktok.com app: Login Kit + Content Posting API)
+      TIKTOK_CLIENT_ID: "${TIKTOK_CLIENT_ID:-}"
+      TIKTOK_CLIENT_SECRET: "${TIKTOK_CLIENT_SECRET:-}"
+      # YouTube (Google Cloud OAuth client, "Web application"; redirect https://<POSTIZ_DOMAIN>/integrations/social/youtube)
+      YOUTUBE_CLIENT_ID: "${YOUTUBE_CLIENT_ID:-}"
+      YOUTUBE_CLIENT_SECRET: "${YOUTUBE_CLIENT_SECRET:-}"
+
+      # === Misc
+      API_LIMIT: 30
+      NX_ADD_PLUGINS: "false"
+    volumes:
+      - ${DATA_DIR:?set it in the site's profile}/postiz/config:/config
+      - ${DATA_DIR:?set it in the site's profile}/postiz/uploads:/uploads
+    # Only needed if your Traefik routes by host port (file provider, like Ghost on :8900).
+    # ports:
+    #   - "4007:5000"
+    networks:
+      - proxy
+      - postiz
+      - temporal
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.postiz.rule=Host(`${POSTIZ_DOMAIN}`)
+      - traefik.http.routers.postiz.entrypoints=https
+      - traefik.http.routers.postiz.tls.certresolver=${TLS_RESOLVER:-cf}
+      - traefik.http.routers.postiz.middlewares=cloudflare-only@file   # traefik/dynamic/cloudflare-only.yml
+      - traefik.http.services.postiz.loadbalancer.server.port=5000
+    healthcheck:
+      test: ["CMD", "node", "-e", "const r=require('http').get('http://localhost:5000/',res=>process.exit(res.statusCode<500?0:1));r.on('error',()=>process.exit(1));r.setTimeout(4000,()=>{r.destroy();process.exit(1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    depends_on:
+      postiz-postgres:
+        condition: service_healthy
+      postiz-redis:
+        condition: service_healthy
+      postiz-temporal:
+        condition: service_healthy
+
+  # Ghost "Post published" webhook -> Postiz API (Bluesky, Threads, Instagram)
+  postiz-ghost-bridge:
+    build:
+      # Relative on purpose: a stack manager that runs compose inside its own container (stacks/CLAUDE.md)
+      # wouldn't see an absolute host path here (volumes are fine - the host resolves those).
+      context: ./ghost-bridge
+      # node:22-alpine + ffmpeg (for audio clips); no Dockerfile needed
+      dockerfile_inline: |
+        FROM node:22-alpine
+        RUN apk add --no-cache ffmpeg
+    image: postiz-ghost-bridge:local
+    pull_policy: build
+    container_name: postiz-ghost-bridge
+    restart: unless-stopped
+    command: ["node", "/app/ghost-bridge.mjs"]
+    environment:
+      POSTIZ_API_URL: "http://postiz:5000/api/public/v1"
+      POSTIZ_API_KEY: "${POSTIZ_API_KEY}"
+      GHOST_WEBHOOK_SECRET: "${GHOST_WEBHOOK_SECRET:?set GHOST_WEBHOOK_SECRET in the stack .env}"  # the bridge refuses webhooks without one
+      # How posts are shared: each setting below with a ${NAME:-default} can be set in this stack's .env (a kit site:
+      # site.env, where instances/example.env explains them); unset = the default here.
+      CHANNELS: "${CHANNELS:-bluesky,threads,instagram-standalone,tiktok,tiktok-business}"  # the Postiz channel types a post goes to
+      SKIP_TAG: "${SKIP_TAG:-#nosocial}"  # add this internal tag in Ghost to skip a post
+      BIG_DROP_TAG: "${BIG_DROP_TAG:-#bigdrop}"  # internal tag for big releases: ntfy reminder to post your link-sticker Story
+      BIG_DROP_AUTO_STORY: "${BIG_DROP_AUTO_STORY:-false}"  # "true" = also auto-post a (link-less) Instagram Story
+      # Bluesky + Threads always auto-post. Instagram + TikTok:
+      IG_TIKTOK_MODE: "${IG_TIKTOK_MODE:-manual}"  # manual = Postiz draft + an ntfy notification per platform (you post it in the app)
+                                     # audio = auto-post when the post has sound, else manual; auto = always auto-post
+      AUTOPOST_TAG: "${AUTOPOST_TAG:-#autopost}"  # internal tag: auto-post Instagram/TikTok for this post
+      MANUALPOST_TAG: "${MANUALPOST_TAG:-#manualpost}"  # internal tag: draft + ntfy for this post (useful with IG_TIKTOK_MODE audio/auto)
+      STORY_TAG: "${STORY_TAG:-#story}"  # internal tag: Instagram gets a Story instead of a feed post
+      MANUAL_DRAFTS: "${MANUAL_DRAFTS:-true}"  # save Instagram/TikTok drafts in Postiz (never published)
+      DRAFT_TAG: "${DRAFT_TAG-Post in app}"  # Postiz tag on those drafts (create it once in Postiz; "" = no tag)
+      AUDIOGRAM: "${AUDIOGRAM:-true}"  # Ghost audio card -> 9:16 video (artwork + waveform + your audio)
+      CLIP_SECONDS: "${CLIP_SECONDS:-30}"  # clip length for long audio (max 90; Stories max 60). Audio up to 90s is used whole
+      CLIP_DEFAULT_START: "${CLIP_DEFAULT_START:-60}"  # where to cut long audio, unless the post has an internal tag like "#clip 12:30"
+      # ntfy phone notifications: #bigdrop "add your link Story" reminders + failure alerts
+      NTFY_URL: "${NTFY_URL:-}"      # e.g. http://<ntfy container name> (both are on the proxy network)
+      NTFY_TOPIC: "${NTFY_TOPIC:-postiz}"
+      NTFY_TOKEN: "${NTFY_TOKEN:-}"  # only if your ntfy requires auth (ntfy token add <user>)
+      NTFY_STORY_GAP: "${NTFY_STORY_GAP:-2}"    # seconds to wait after a Story notification, so it reaches the phone first
+      PHOTO_PAGE_DAYS: "${PHOTO_PAGE_DAYS:-14}" # how long a notification's "All N photos" page keeps working
+      NOTIFY_ERRORS: "${NOTIFY_ERRORS:-true}"  # ntfy notification when sharing a post fails
+      POSTIZ_ALERTS: "${POSTIZ_ALERTS:-true}"  # forward Postiz's bell notifications (publish errors, reconnects) to ntfy
+      POSTIZ_ALERTS_SUCCESS: "${POSTIZ_ALERTS_SUCCESS:-false}"  # "true" = also notify for every successful post
+      POSTIZ_PUBLIC_URL: "https://${POSTIZ_DOMAIN}"
+      ONLY_PUBLIC: "${ONLY_PUBLIC:-true}"  # skip members-only / paid posts
+      TEXT_SOURCE: "${TEXT_SOURCE:-body}"  # body = the text you write in the post (excerpt only as fallback); excerpt = Excerpt field
+      INCLUDE_TITLE: "${INCLUDE_TITLE:-false}"  # put the post title at the top of captions
+      TAG_LINKS: "${TAG_LINKS:-true}"  # post site links as short tagged links (<site>/b/<slug>...), so the dashboards credit the right network
+      CAMPAIGN_TAG: "${CAMPAIGN_TAG:-#campaign-}"  # internal tag #campaign-<name>: that post's links get the long form with &utm_campaign=<name>
+      EXCERPT_TAG: "${EXCERPT_TAG:-#useexcerpt}"  # internal tag: use the post's Excerpt (plus your hashtags) as the social text
+      SHARE_VIDEO: "${SHARE_VIDEO:-true}"  # share a Ghost-hosted .mp4 (video card) instead of the feature image
+      GALLERY: "${GALLERY:-true}"  # also share gallery card images (Bluesky grid of 4, Threads/Instagram carousel, TikTok photos)
+      MAX_IMAGES: "${MAX_IMAGES:-10}"  # at most this many images per post (feature image + gallery)
+      LISTEN_DOMAINS: "${LISTEN_DOMAINS:-youtube.com,youtu.be,soundcloud.com,on.soundcloud.com,mixcloud.com}"  # "🎧 Listen" line: earlier service wins
+      TIKTOK_METHOD: "${TIKTOK_METHOD:-UPLOAD}"  # UPLOAD = draft in your TikTok inbox; DIRECT_POST = publish directly
+      TIKTOK_PRIVACY: "${TIKTOK_PRIVACY:-SELF_ONLY}"  # only used with DIRECT_POST; unaudited TikTok apps must use SELF_ONLY
+      DRY_RUN: "${GHOST_BRIDGE_DRY_RUN:-false}"
+      # Social preview of a draft: the "Social preview" button on Ghost's post preview (the theme) opens
+      # https://<SITE_HOST>/ghost/social-preview/<uuid>/, routed here, for staff signed in to Ghost Admin only.
+      # Reads the draft with this key; never posts.
+      GHOST_API_URL: "http://website-puppi3:2368"   # Ghost directly over the proxy network, not through Cloudflare
+      GHOST_ADMIN_API_KEY: "${GHOST_ADMIN_API_KEY:-}"     # a Ghost custom integration's Admin API key; empty = off
+      # Instagram numbers for Grafana's Social dashboard (you post Instagram by hand, so Postiz doesn't see those
+      # posts): written to data/instagram.json every IG_STATS_MINUTES and served at /instagram.json, which only
+      # the Docker networks below reach (Grafana on monitoring). Account numbers come from Postiz's analytics;
+      # each post's numbers come from Instagram, with the channel's token read from Postiz's database (one
+      # SELECT, nothing written). Empty POSTIZ_DB_PASSWORD = account numbers only.
+      IG_STATS: "true"               # "false" = no Instagram numbers
+      IG_STATS_MINUTES: "${IG_STATS_MINUTES:-60}"   # minutes between checks, min 10 (all the *_STATS_MINUTES: set in .env)
+      IG_STATS_POSTS: "${IG_STATS_POSTS:-25}"       # at most this many newest posts asked each check, + as many older ones (a call each)
+      META_CALLS_PER_HOUR: "${META_CALLS_PER_HOUR:-120}"  # Instagram/Threads: fewer posts each check when the interval would go past this
+      POSTIZ_DB_HOST: "postiz-postgres"
+      POSTIZ_DB_USER: "postiz"
+      POSTIZ_DB_NAME: "postiz"
+      POSTIZ_DB_PASSWORD: "${POSTIZ_DB_PASSWORD:-}"
+      # YouTube numbers, the same way: data/youtube.json, served at /youtube.json. Postiz's YouTube analytics
+      # leave out views and subscribers, so the bridge asks YouTube itself with the channel's sign-in from
+      # Postiz's database and the same Google app as Postiz. Needs POSTIZ_DB_PASSWORD.
+      YT_STATS: "true"               # "false" = no YouTube numbers
+      YT_STATS_MINUTES: "${YT_STATS_MINUTES:-60}"
+      YOUTUBE_CLIENT_ID: "${YOUTUBE_CLIENT_ID:-}"
+      YOUTUBE_CLIENT_SECRET: "${YOUTUBE_CLIENT_SECRET:-}"
+      # SoundCloud numbers: data/soundcloud.json, served at /soundcloud.json. Postiz has no SoundCloud, so the
+      # bridge uses its own SoundCloud app (client credentials: public numbers only) for the profile SOUNDCLOUD_USER.
+      # SoundCloud has no numbers per day, so the bridge keeps each day's totals itself (history starts now).
+      SC_STATS: "true"               # "false" = no SoundCloud numbers
+      SC_STATS_MINUTES: "${SC_STATS_MINUTES:-60}"
+      SOUNDCLOUD_CLIENT_ID: "${SOUNDCLOUD_CLIENT_ID:-}"
+      SOUNDCLOUD_CLIENT_SECRET: "${SOUNDCLOUD_CLIENT_SECRET:-}"
+      SOUNDCLOUD_USER: "${SOUNDCLOUD_USER:-}"   # e.g. https://soundcloud.com/<name>
+      # More numbers (stats/stats.mjs), each in data/<name>.json, served at /<name>.json like the ones above. A stats
+      # file says what's missing when a setting isn't there; <NAME>_STATS: "false" turns one off.
+      # Bluesky: public numbers, no sign-in; the account is the Bluesky channel's in Postiz unless BLUESKY_HANDLE is set
+      BSKY_STATS: "true"             # "false" = no Bluesky numbers
+      BSKY_STATS_MINUTES: "${BSKY_STATS_MINUTES:-60}"
+      BLUESKY_HANDLE: "${BLUESKY_HANDLE:-}"
+      # Seasonal profile pictures (share/pfp.mjs): when a site outfit starts or ends (the theme's seasons.json), the phone
+      # gets the picture to put on each network in PFP_NETWORKS by hand (the first two get an "Open" button). "false" = off.
+      PFP_SEASONS: "${PFP_SEASONS:-true}"
+      PFP_NETWORKS: "${PFP_NETWORKS:-bluesky,instagram,threads,tiktok,youtube,soundcloud,mixcloud,discord}"
+      # Weekly summary (share/weekly.mjs): at WEEKLY_SUMMARY_AT ("<weekday> HH:MM", in the site's SITE_TIMEZONE)
+      # the phone gets the week before's visitors, new members, followers, best posts, most-read pages and live shows,
+      # with a button to Grafana (GRAFANA_URL below). "false" = off.
+      WEEKLY_SUMMARY: "${WEEKLY_SUMMARY:-true}"
+      WEEKLY_SUMMARY_AT: "${WEEKLY_SUMMARY_AT:-Mon 09:00}"
+      # Threads and TikTok: the channels in Postiz (account numbers through Postiz, each post's with the channel's
+      # token from Postiz's database, like Instagram's). Needs POSTIZ_DB_PASSWORD for followers and posts.
+      THREADS_STATS: "true"          # "false" = no Threads numbers
+      THREADS_STATS_MINUTES: "${THREADS_STATS_MINUTES:-60}"
+      THREADS_STATS_POSTS: "${THREADS_STATS_POSTS:-25}"
+      TIKTOK_STATS: "true"           # "false" = no TikTok numbers
+      TIKTOK_STATS_MINUTES: "${TIKTOK_STATS_MINUTES:-60}"
+      # Mixcloud: public numbers for this profile
+      MC_STATS: "true"               # "false" = no Mixcloud numbers
+      MC_STATS_MINUTES: "${MC_STATS_MINUTES:-60}"
+      MIXCLOUD_USER: "${MIXCLOUD_USER:-}"   # e.g. https://www.mixcloud.com/<name>/
+      # The site itself, as one more network beside the social ones: members, visitors per day, and each published
+      # post's visitors per day (Ghost's analytics in Tinybird, on the monitoring network), sign-ups and newsletter
+      # numbers (the Admin API key above). Without TINYBIRD_TOKEN: posts, members and newsletter numbers only.
+      GHOST_STATS: "true"            # "false" = no numbers for the site itself
+      GHOST_STATS_MINUTES: "${GHOST_STATS_MINUTES:-60}"
+      TINYBIRD_URL: "http://tinybird-local:7181"
+      TINYBIRD_TOKEN: "${TINYBIRD_TOKEN:-}"            # one that can read the pipes: TINYBIRD_STATS_TOKEN from the monitoring stack's .env (Grafana's)
+      TINYBIRD_SITE_UUID: "${TINYBIRD_SITE_UUID:-}"    # empty = Ghost's own (its /site/ answer); the site_uuid in the dashboards' Tinybird queries
+      # Cloudflare: every request it answered for the site per day (bots and cached pages too), threats, countries
+      CF_STATS: "true"               # "false" = no Cloudflare numbers
+      CF_STATS_MINUTES: "${CF_STATS_MINUTES:-60}"
+      CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN:-}"   # its own token, Zone > Analytics > Read (not Traefik's DNS one)
+      CLOUDFLARE_ZONE_ID: "${CLOUDFLARE_ZONE_ID:-}"
+      # Google Search Console: searches that show and bring people to the site (a service account's key)
+      GSC_STATS: "true"              # "false" = no Search Console numbers
+      GSC_STATS_MINUTES: "${GSC_STATS_MINUTES:-60}"
+      SEARCH_CONSOLE_KEY: "${SEARCH_CONSOLE_KEY:-}"       # the service account's JSON key, base64'd onto one line
+      SEARCH_CONSOLE_SITE: "${SEARCH_CONSOLE_SITE:-sc-domain:${SITE_HOST:?set it in the site's profile}}"
+      # Live shows: TinyIce's status every 30 s (both on the proxy network); each show's length, listeners, setlist.
+      # A kit site without the live module sets it false (kit/kit.sh), so nothing asks a TinyIce that isn't there.
+      LIVE_STATS: "${LIVE_STATS:-true}"
+      LIVE_STATUS_URL: "http://tinyice:8080/status-json.xsl"
+      LIVE_MOUNT: "${LIVE_MOUNT:-/stream-ogg}"     # the mount the DJ software sends to (a kit site: kit/kit.sh, from TinyIce's config)
+      # Links followed off the site and LIVE NOW bar plays (the theme's POST /.puppy/click, traefik/dynamic/puppi3.yml)
+      CLICK_STATS: "true"            # "false" = links followed off the site and LIVE NOW plays aren't counted
+      # Postiz's own analytics for every channel connected there (any network), kept per day in the archive only.
+      # A call per channel, so every few hours. Everything each collector above gets is also kept for good, numbers
+      # nothing shows yet too, in data/archive/<network>.json (not served).
+      POSTIZ_STATS: "true"           # "false" = no archive of Postiz's own analytics
+      POSTIZ_STATS_MINUTES: "360"    # minutes between those checks (min 60)
+      # Every post's numbers at every check, kept for good in data/stats.db (stats/store.mjs; a daily copy in data/backups/,
+      # STATS_DB_BACKUPS kept). "vs your usual" compares by the hour in a post's first POST_EARLY_HOURS; an older post
+      # taking off gets an ntfy notification (TAKEOFF_NTFY) whose button opens the Post dashboard at GRAFANA_URL.
+      # Each network's followers etc. at every check too, for ACCOUNT_CHECK_DAYS (GET /account.json?network=)
+      POST_EARLY_HOURS: "${POST_EARLY_HOURS:-96}"
+      STATS_DB_BACKUPS: "${STATS_DB_BACKUPS:-7}"
+      ACCOUNT_CHECK_DAYS: "${ACCOUNT_CHECK_DAYS:-90}"
+      TAKEOFF_NTFY: "${TAKEOFF_NTFY:-true}"
+      GRAFANA_URL: "${GRAFANA_URL:-}"
+      # The site, from its instance profile (instances/CLAUDE.md); puppi3's values when the .env doesn't set them.
+      # SITE_NAME heads the weekly summary; ID_PREFIX names the Grafana dashboards its buttons open and its /metrics
+      # counters; SITE_HOSTS are the site's names (links there aren't clicks off it), LIVE_HOSTS the stream's.
+      # The two lists default only when unset (no colon): set empty, the bridge makes them from SITE_HOST.
+      SITE_HOST: "${SITE_HOST:?set it in the site's profile}"
+      SITE_NAME: "${SITE_NAME:-}"
+      SITE_TIMEZONE: "${SITE_TIMEZONE:-Etc/UTC}"
+      ID_PREFIX: "${ID_PREFIX:-puppi3}"
+      SITE_HOSTS: "${SITE_HOSTS:-}"
+      LIVE_HOSTS: "${LIVE_HOSTS:-}"
+      # The theme's puppy pets (route, count, /pets.json, counter); NETWORKS: which networks are collected (empty = all)
+      PETS: "${PETS:-true}"
+      NETWORKS: "${NETWORKS:-}"
+    volumes:
+      # the bridge is every .mjs in this folder and its share/, pages/, stats/ (ghost-bridge.mjs imports the rest),
+      # so a new one needs no line here
+      - ${DATA_DIR:?set it in the site's profile}/postiz/ghost-bridge:/app:ro
+      - ${DATA_DIR:?set it in the site's profile}/postiz/ghost-bridge/data:/data
+    networks:
+      - proxy        # Traefik, Ghost and TinyIce's status
+      - postiz
+      - monitoring   # Grafana reads /instagram.json, /youtube.json, /soundcloud.json and the rest of the stats files
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.postiz-ghost-bridge.rule=Host(`${POSTIZ_DOMAIN}`) && Path(`/ghost-webhook`)
+      - traefik.http.routers.postiz-ghost-bridge.priority=100
+      - traefik.http.routers.postiz-ghost-bridge.entrypoints=https
+      - traefik.http.routers.postiz-ghost-bridge.tls.certresolver=${TLS_RESOLVER:-cf}
+      - traefik.http.routers.postiz-ghost-bridge.middlewares=cloudflare-only@file
+      - traefik.http.routers.postiz-ghost-bridge.service=postiz-ghost-bridge
+      # Draft social previews, on the site's own domain (ahead of Ghost's router for these paths only).
+      # Under /ghost/ so the browser sends Ghost Admin's sign-in cookie; /social-preview/ redirects there.
+      - traefik.http.routers.${ID_PREFIX:-puppi3}-social-preview.rule=Host(`${SITE_HOST:?set it in the site's profile}`) && (PathPrefix(`/ghost/social-preview/`) || PathPrefix(`/social-preview/`))
+      - traefik.http.routers.${ID_PREFIX:-puppi3}-social-preview.priority=100
+      - traefik.http.routers.${ID_PREFIX:-puppi3}-social-preview.entrypoints=https
+      - traefik.http.routers.${ID_PREFIX:-puppi3}-social-preview.tls.certresolver=${TLS_RESOLVER:-cf}
+      - traefik.http.routers.${ID_PREFIX:-puppi3}-social-preview.middlewares=cloudflare-only@file
+      - traefik.http.routers.${ID_PREFIX:-puppi3}-social-preview.service=postiz-ghost-bridge
+      - traefik.http.services.postiz-ghost-bridge.loadbalancer.server.port=8080
+    # Traefik routes to it only once healthy, so it's checked often (a wget, cheap)
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    # it stops at once, or when the post it's sharing is done (uploads take minutes)
+    stop_grace_period: 5m
+    depends_on:
+      postiz:
+        condition: service_started
+
+  postiz-postgres:
+    image: postgres:17-alpine
+    container_name: postiz-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postiz
+      POSTGRES_PASSWORD: "${POSTIZ_DB_PASSWORD}"
+      POSTGRES_DB: postiz
+    volumes:
+      - ${DATA_DIR:?set it in the site's profile}/postiz/postgres:/var/lib/postgresql/data
+    networks:
+      postiz:
+      default:
+      monitoring:
+        aliases: [postiz-db]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postiz -d postiz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  postiz-redis:
+    image: redis:7.2
+    container_name: postiz-redis
+    restart: unless-stopped
+    volumes:
+      - ${DATA_DIR:?set it in the site's profile}/postiz/redis:/data
+    networks:
+      - postiz
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # -----------------------
+  # Temporal (workflow engine Postiz uses for scheduling/publishing)
+  # -----------------------
+  postiz-temporal-elasticsearch:
+    image: elasticsearch:7.17.27
+    container_name: postiz-temporal-elasticsearch
+    restart: unless-stopped
+    environment:
+      - cluster.routing.allocation.disk.threshold_enabled=true
+      - cluster.routing.allocation.disk.watermark.low=512mb
+      - cluster.routing.allocation.disk.watermark.high=256mb
+      - cluster.routing.allocation.disk.watermark.flood_stage=128mb
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+      - xpack.security.enabled=false
+    volumes:
+      # must be owned by 1000:0 on the host (see setup steps)
+      - ${DATA_DIR:?set it in the site's profile}/postiz/temporal-elasticsearch:/usr/share/elasticsearch/data
+    networks:
+      - temporal
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS \"http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s\" || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  postiz-temporal-postgres:
+    image: postgres:16
+    container_name: postiz-temporal-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: "${TEMPORAL_DB_PASSWORD}"
+    volumes:
+      - ${DATA_DIR:?set it in the site's profile}/postiz/temporal-postgres:/var/lib/postgresql/data
+    networks:
+      - temporal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U temporal"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  postiz-temporal:
+    image: temporalio/auto-setup:1.28.1
+    container_name: postiz-temporal
+    restart: unless-stopped
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=${TEMPORAL_DB_PASSWORD}
+      - POSTGRES_SEEDS=postiz-temporal-postgres
+      - DYNAMIC_CONFIG_FILE_PATH=/etc/temporal/config/dynamicconfig/development-sql.yaml
+      - ENABLE_ES=true
+      - ES_SEEDS=postiz-temporal-elasticsearch
+      - ES_VERSION=v7
+      - TEMPORAL_NAMESPACE=default
+    volumes:
+      - ${DATA_DIR:?set it in the site's profile}/postiz/dynamicconfig:/etc/temporal/config/dynamicconfig
+    networks:
+      - temporal
+    healthcheck:
+      test: ["CMD", "temporal", "operator", "cluster", "health", "--address", "postiz-temporal:7233"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    depends_on:
+      postiz-temporal-postgres:
+        condition: service_healthy
+      postiz-temporal-elasticsearch:
+        condition: service_healthy
+
+  # Optional web UI for debugging stuck posts. LAN-local only: http://<nas-ip>:8233
+  # Remove this service if you don't want it.
+  postiz-temporal-ui:
+    image: temporalio/ui:2.34.0
+    container_name: postiz-temporal-ui
+    restart: unless-stopped
+    environment:
+      - TEMPORAL_ADDRESS=postiz-temporal:7233
+    ports:
+      - "127.0.0.1:8233:8080"
+    networks:
+      - temporal
+    depends_on:
+      postiz-temporal:
+        condition: service_healthy
+
+networks:
+  proxy:
+    external: true
+  postiz:
+  temporal:
+  monitoring:
+    external: true

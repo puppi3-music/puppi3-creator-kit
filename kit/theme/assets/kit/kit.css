@@ -1,0 +1,65 @@
+/* Puppi3's Creator Kit theme: the kit's own styles, after Source's built/screen.css (default.hbs). Source's colours
+   and fonts are used throughout (--ghost-accent-color is Ghost's "Accent color" setting). */
+
+.kit-sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* LIVE NOW bar (partials/kit/live-bar.hbs): a strip in the accent colour above the navigation, shown while the site is
+   streaming (live-bar.js toggles [hidden]): LIVE NOW, the player, then the track playing when the stream sends it
+   (long names cut short with "…"). The dot pulses once every 2 beats. */
+.live-bar { --beat: 0.5s; background: var(--ghost-accent-color, #ff1a75); color: #fff; }
+.live-bar[hidden] { display: none; }
+.live-bar__inner {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; min-height: 48px; padding-block: 6px;
+}
+.live-bar__signal {
+    display: inline-flex; align-items: center; gap: 8px; font-size: 1.3rem; font-weight: 700; line-height: 1;
+    letter-spacing: 0.08em; text-transform: uppercase;
+}
+.live-bar__dot {
+    width: 10px; height: 10px; border-radius: 50%; background: currentColor;
+    animation: kit-live-pulse calc(var(--beat) * 2) steps(2, jump-none) infinite;
+}
+@keyframes kit-live-pulse { from { opacity: 1; } to { opacity: 0.25; } }
+@media (prefers-reduced-motion: reduce) { .live-bar__dot { animation: none; } }
+/* The player comes before the track, so it stays put whether or not a track is sent */
+.live-bar__track {
+    flex: 1 1 0; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    font-size: 1.4rem; font-weight: 600; line-height: 1.2;
+}
+.live-bar__track[hidden] { display: none; }
+/* Our own controls (the <audio> itself stays hidden): a round play/pause button, then a volume slider where there's a
+   mouse (phones use their own buttons) */
+.live-bar__player { display: none; }
+.live-bar__controls { display: inline-flex; align-items: center; gap: 10px; }
+.live-bar__play {
+    display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%;
+    background: #fff; color: var(--ghost-accent-color, #ff1a75); cursor: pointer; transition: transform 0.15s;
+}
+.live-bar__play:hover { transform: scale(1.08); }
+.live-bar__play:active { transform: scale(0.94); }
+.live-bar__play:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.live-bar__play svg { width: 18px; height: 18px; }
+.live-bar__icon-pause,
+.live-bar[data-playing] .live-bar__icon-play { display: none; }
+.live-bar[data-playing] .live-bar__icon-pause { display: block; }
+.live-bar__volume { width: 96px; accent-color: #fff; cursor: pointer; }
+@media (hover: none), (pointer: coarse) { .live-bar__volume { display: none; } }
+
+/* The Social preview button on Ghost's draft previews (/p/<uuid>/, kit.js): opens what the bridge would post */
+.kit-preview-button {
+    position: fixed; right: 20px; bottom: 20px; z-index: 1000; padding: 12px 18px; border-radius: 999px;
+    background: var(--ghost-accent-color, #ff1a75); color: #fff; font-size: 1.5rem; font-weight: 700;
+    text-decoration: none; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+.kit-preview-button:hover { opacity: 0.9; }
+
+/* Music links in the footer's secondary navigation (kit.js adds the icon by address) */
+.kit-music-link { display: inline-flex; align-items: center; gap: 6px; }
+.kit-music-link svg { flex: none; width: 18px; height: 18px; }
+
+/* The author credit in the footer (partials/components/footer.hbs): its own line under "Powered by Ghost", which may
+   wrap on a phone (Source keeps that line on one) */
+.kit-credit { display: block; white-space: normal; }

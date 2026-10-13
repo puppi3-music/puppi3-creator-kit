@@ -1,0 +1,35 @@
+# An EKS cluster for the kit's eks overlay, with eksctl (you run it; Claude never does):
+#   eksctl create cluster -f k8s/clusters/eks.yaml        (about 20 minutes; change name, region, version first)
+#   kubectl apply -f k8s/clusters/eks-gp3.yaml            the gp3 StorageClass the overlay's volumes name
+#   the AWS Load Balancer Controller (its ServiceAccount is made here): see the Setup guide (kit/docs/setup-guide.html#cloud)
+#   eksctl delete cluster -f k8s/clusters/eks.yaml        when the burst is over (after k8s/migrate/to-nas.sh)
+# Then, in the same VPC (the Setup guide): RDS for MySQL 8 and for Postgres, reachable only from the nodes'
+# security group (Postgres with rds.force_ssl=0), the site's bucket, Ghost's IAM role (IRSA, for ServiceAccount
+# "ghost" in the site's namespace), and ECR for the kit's images. Their names go in <site>/cloud-eks.env.
+# Not tested here: only a real AWS account can.
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: creator-kit
+  region: us-east-1
+  version: "1.35"          # the k3d test cluster's minor (k8s/test/k3d.sh)
+iam:
+  withOIDC: true           # IRSA: Ghost's bucket role, the load balancer controller
+  serviceAccounts:
+    - metadata: {name: aws-load-balancer-controller, namespace: kube-system}
+      wellKnownPolicies: {awsLoadBalancerController: true}
+addons:
+  - name: aws-ebs-csi-driver
+    wellKnownPolicies: {ebsCSIController: true}
+  - name: vpc-cni
+  - name: coredns
+  - name: kube-proxy
+managedNodeGroups:
+  # Managed nodes, not Fargate: Fargate takes no EBS volumes or privileged pods (Temporal's Elasticsearch)
+  - name: kit
+    instanceType: m7i.xlarge   # 4 vCPU, 16 GiB: analytics + live + social + monitoring fit on two
+    desiredCapacity: 2
+    minSize: 2
+    maxSize: 3
+    volumeSize: 50
+    privateNetworking: true

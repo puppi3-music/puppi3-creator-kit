@@ -1,0 +1,14 @@
+# What stands in for a cloud's managed services on this Mac's k3d cluster (plan: "Testing EKS and GKE on k3d"), so
+# a cloud overlay's twin (k3d-eks, k3d-gke) runs the cloud's own manifests with only these swaps:
+# - databases.yaml: MySQL 8 and Postgres, each with only a master login, as RDS and Cloud SQL give (the twin's
+#   cloud.k3d points the cloud overlay's aliases or its Cloud SQL proxies at them)
+# - the in-cluster S3 gateway (components/s3-gateway/'s), with keys where EKS uses the workload's identity (Ghost
+#   reaches it through s3-storage's endpoint.yaml: the twin adds that where its cloud doesn't);
+#   k8s/up.sh makes the keys and the Postgres master login once per site (data/k8s/s3.env, standins.env)
+# The StorageClasses the clouds name (gp3, standard-rwo) are k8s/test/k3d.sh's, on k3s's local-path storage; the
+# cloud's load balancer is k3s's ServiceLB (it ignores the cloud's annotations); the registry is k3d's.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - databases.yaml
+  - ../s3-gateway/gateway.yaml

@@ -1,0 +1,13 @@
+# Module analytics: Ghost's own web analytics, as the puppi3 stack's tinybird-local, traffic-analytics and tb-setup.
+# tb-setup is a Job that leaves Tinybird's tokens in Secret "tinybird-tokens"; Ghost and traffic-analytics read it
+# (Ghost's pod waits until it exists, so Ghost starts with the tokens and is never restarted for them). Traefik's
+# routes for it (/.ghost/analytics, /.ghost/stats) are already in the site's template, by MODULES.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - tinybird.yaml
+  - tb-setup.yaml
+  - traffic-analytics.yaml
+patches:
+  - path: ghost.yaml
+    target: {kind: Deployment, name: ghost}

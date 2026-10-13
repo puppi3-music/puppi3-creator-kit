@@ -1,0 +1,17 @@
+# Ghost's images, media and files in an S3 bucket instead of its content volume (themes, settings and the rest stay
+# there), under content/images/, content/media/ and content/files/: the NAS's own layout, so they copy across as they
+# are. Ghost serves them at the same addresses as before (KitS3Storage.js: Ghost's own S3 storage, streaming instead
+# of redirecting), so links in posts don't change either way.
+# - The bucket's settings are ConfigMap "s3" (S3_BUCKET, S3_REGION), from the overlay: the in-cluster gateway's on
+#   k3d (components/s3-gateway/), the site's bucket in the clouds.
+# - Its credentials, when there are keys, are Secret "s3" (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY); with none, the
+#   AWS SDK's usual chain (IRSA on EKS).
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+patches:
+  - path: ghost.yaml
+    target: {kind: Deployment, name: ghost}
+configMapGenerator:
+  - name: ghost-s3-adapter
+    files:
+      - KitS3Storage.js

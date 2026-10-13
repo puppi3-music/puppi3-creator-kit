@@ -1,0 +1,43 @@
+# The kit's datasources, with the uids the dashboards use (stacks/monitoring/grafana/'s); Grafana fills in the
+# ${VAR}s from its environment (kit/monitoring/compose.yaml), so no login is written here.
+apiVersion: 1
+datasources:
+  - name: Prometheus
+    uid: prometheus
+    type: prometheus
+    url: http://prometheus:9090
+    isDefault: true
+  - name: Ghost
+    uid: ghost-mysql
+    type: mysql
+    url: ${GHOST_DB_HOST}:3306
+    user: grafana_ro
+    jsonData:
+      database: ${GHOST_DB_NAME}
+    secureJsonData:
+      password: ${GRAFANA_RO_PASSWORD}
+  - name: Ghost Analytics
+    uid: ghost-analytics
+    type: yesoreyeram-infinity-datasource
+    jsonData:
+      auth_method: bearerToken
+      allowedHosts:
+        - http://tinybird-local:7181
+    secureJsonData:
+      bearerToken: ${tinybird__adminToken}
+  - name: The bridge
+    uid: bridge-instagram
+    type: yesoreyeram-infinity-datasource
+    jsonData:
+      allowedHosts:
+        - http://postiz-ghost-bridge:8080
+  - name: Postiz
+    uid: postiz-pg
+    type: grafana-postgresql-datasource
+    url: postiz-postgres:5432
+    user: grafana_ro
+    jsonData:
+      database: postiz
+      sslmode: disable
+    secureJsonData:
+      password: ${GRAFANA_RO_PASSWORD}

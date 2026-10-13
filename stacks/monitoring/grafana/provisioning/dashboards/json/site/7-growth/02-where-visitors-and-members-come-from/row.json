@@ -1,0 +1,98 @@
+{
+  "kind": "RowsLayoutRow",
+  "spec": {
+    "title": "Where visitors and members come from",
+    "collapse": false,
+    "variables": [
+      {
+        "kind": "CustomVariable",
+        "spec": {
+          "name": "hide_direct",
+          "query": "Hide : ^(null)?$,Show : (?!)",
+          "current": {
+            "text": "Hide",
+            "value": "^(null)?$"
+          },
+          "options": [
+            {
+              "selected": true,
+              "text": "Hide",
+              "value": "^(null)?$"
+            },
+            {
+              "selected": false,
+              "text": "Show",
+              "value": "(?!)"
+            }
+          ],
+          "multi": false,
+          "includeAll": false,
+          "label": "Direct / unknown",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "description": "Hide the Direct / unknown row in this section's Sources table (it dwarfs the others)",
+          "allowCustomValue": true
+        }
+      }
+    ],
+    "layout": {
+      "kind": "GridLayout",
+      "spec": {
+        "items": [
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 11,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-711"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 12,
+              "y": 0,
+              "width": 12,
+              "height": 11,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-723"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 11,
+              "width": 8,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-724"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 8,
+              "y": 11,
+              "width": 16,
+              "height": 8,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-712"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

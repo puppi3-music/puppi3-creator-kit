@@ -1,0 +1,119 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 34,
+    "title": "Where YouTube views come from (last 28 days)",
+    "description": "How people found your videos over the last 28 days: YouTube search, suggested videos, the Shorts feed, other sites (your own among them)... From YouTube Analytics via the bridge, checked once a day; YouTube runs 2-3 days behind. Not affected by the dashboard's time range.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "source",
+                      "text": "Source",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "views",
+                      "text": "Views",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "$append([], sources28)",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/youtube.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET"
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "limit",
+            "spec": {
+              "options": {
+                "limitField": 10
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "barchart",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "xField": "Source",
+          "orientation": "horizontal",
+          "showValue": "always",
+          "barWidth": 0.8,
+          "groupWidth": 0.7,
+          "xTickLabelSpacing": 0,
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": false
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          },
+          "text": {
+            "valueSize": 13
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "#FF0000"
+            },
+            "min": 0,
+            "noValue": "Nothing yet: YouTube gives this once a day, 2-3 days late, and only for views in the last 28 days",
+            "custom": {
+              "fillOpacity": 60,
+              "lineWidth": 1
+            }
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+# Amazon EKS: Ghost's MySQL and Postiz's and Temporal's Postgres on RDS, Ghost's images, media and files in S3 (its
+# ServiceAccount's IAM role, IRSA: no keys stored), gp3 volumes, Traefik and the stream's source port on an NLB, the
+# kit's images from ECR (k8s/build-images.sh --registry <account>.dkr.ecr.<region>.amazonaws.com/creator-kit).
+# - The site's values (RDS endpoints, the bucket, the role) are <site>/cloud-eks.env (cloud.env.example says what);
+#   k8s/up.sh makes ConfigMap "cloud" of them and fills them in (replacements.yaml), and ConfigMap "s3" (bucket,
+#   region). RDS Postgres's master login is the site's secrets/cloud.env (POSTGRES_MASTER_USER, POSTGRES_MASTER_PASSWORD).
+# - finish/: what reaches the modules' resources too (k8s/up.sh adds it after them): gp3, the NLB, Postiz's
+#   Postgres on RDS (components/cloud-postgres/).
+# - k3d-eks is this overlay as it is, plus the k3d stand-ins (k8s/overlays/k3d-eks/).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+  - databases.yaml
+components:
+  - ../../components/s3-storage
+patches:
+  # Ghost signs in to S3 as its ServiceAccount's IAM role
+  - target: {kind: Deployment, name: ghost}
+    patch: '[{"op": "add", "path": "/spec/template/spec/serviceAccountName", "value": "ghost"}]'

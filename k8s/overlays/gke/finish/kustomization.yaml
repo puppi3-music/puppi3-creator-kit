@@ -1,0 +1,34 @@
+# The gke overlay's part that reaches the modules' resources too: k8s/up.sh adds it after the modules' components
+# (an overlay's own patches see only its own resources). A patch whose target isn't there (a module that's off)
+# does nothing.
+# - the Cloud SQL Auth Proxy as a sidecar in every pod that uses a database (cloud-sql-proxy.yaml): Ghost, Grafana
+#   and its grants Jobs, Postiz, Temporal, the bridge (it reads Postiz's database), the postgres-logins Job
+# - Postiz's and Temporal's Postgres on Cloud SQL (components/cloud-postgres/: the logins, the waits, Grafana's
+#   grants); their Services go, since the pods reach the names on their own proxy
+# - standard-rwo (pd-balanced, GKE's own StorageClass) for every volume
+# - Traefik's and the stream source's LoadBalancers as passthrough Network Load Balancers (backend services);
+#   externalTrafficPolicy Local keeps the visitor's address (cloudflare-only checks it), the DJ's too
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+components:
+  - ../../../components/cloud-postgres
+patches:
+  - target: {kind: Deployment, name: "^(ghost|grafana|postiz|postiz-temporal|postiz-ghost-bridge)$"}
+    path: cloud-sql-proxy.yaml
+  - target: {kind: Job, name: "^(grafana-ro-ghost|grafana-ro-postiz|postgres-logins)$"}
+    path: cloud-sql-proxy.yaml
+  - target: {kind: Service, name: "^(postiz-postgres|postiz-temporal-postgres)$"}
+    patch: |-
+      $patch: delete
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: unused
+  - target: {kind: PersistentVolumeClaim}
+    patch: '[{"op": "add", "path": "/spec/storageClassName", "value": "standard-rwo"}]'
+  - target: {kind: StatefulSet}
+    patch: '[{"op": "add", "path": "/spec/volumeClaimTemplates/0/spec/storageClassName", "value": "standard-rwo"}]'
+  - target: {kind: StatefulSet, name: tinybird-local}
+    patch: '[{"op": "add", "path": "/spec/volumeClaimTemplates/1/spec/storageClassName", "value": "standard-rwo"}]'
+  - target: {kind: Service, name: "^(traefik|tinyice-source)$"}
+    path: lb.yaml

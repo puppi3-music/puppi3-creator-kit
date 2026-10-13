@@ -1,0 +1,33 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 9006,
+    "title": "",
+    "description": "",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [],
+        "transformations": [],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "text",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "content": "The Threads channel in Postiz, read by the bridge ${every_threads}. Views (per day), likes, replies, reposts and quotes (30-day totals) come from Postiz's analytics; followers and each post's numbers come from Threads with the channel's token, read from Postiz's database (needs POSTIZ_DB_PASSWORD, so staging has none). Followers per day start the day the bridge began collecting.",
+          "mode": "markdown"
+        },
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": []
+        }
+      }
+    },
+    "transparent": true
+  }
+}
