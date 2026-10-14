@@ -2,14 +2,16 @@
 
 # Puppi3's Creator Kit 🐾
 
-By puppi3-music (DJ Puppi3). Free software under the [GNU AGPL-3.0](LICENSE): use it, change it and share it; if you
-run a changed copy as a website, offer its visitors your changed source code. Keep the credit line in the theme's
-footer ([LICENSE](LICENSE) says exactly what's asked).
+[![Licence: AGPL-3.0](https://img.shields.io/badge/licence-AGPL--3.0-blue)](LICENSE)
 
-Everything for a Ghost site of your own: web analytics with no third party, a live stream with a LIVE NOW bar,
-each post shared to the social networks, every network's numbers in one set of Grafana dashboards, and phone
-notifications. All of it runs on one machine with Docker Compose, behind Traefik, or on Kubernetes (your own cluster,
-Amazon EKS or Google GKE).
+A self-hosted home for your work as a creator: a Ghost website and newsletter, web analytics with no third party, a
+live stream with a LIVE NOW bar, each post shared to your social networks, every network's numbers in one set of
+Grafana dashboards, and alerts on your phone. It all runs on one machine with Docker Compose, or on Kubernetes (your
+own cluster, Amazon EKS or Google GKE).
+
+**Guides:** [Setup](kit/docs/setup-guide.html) · [Operations](kit/docs/operations-guide.html) ·
+[Theme](kit/docs/theme-guide.html) · [Posting](kit/docs/posting-guide.html) · [Analytics](kit/docs/analytics-guide.html) ·
+[Settings reference](kit/docs/settings-reference.html)
 
 The guides are web pages in `kit/docs/`: read them online at https://puppi3-music.github.io/puppi3-creator-kit/kit/docs/,
 or open `kit/docs/index.html` from your copy. (On GitHub's file view a guide shows as its source.) The `CLAUDE.md`
@@ -27,8 +29,8 @@ files and `docs/bridge-map.md` are notes for whoever works on the kit itself ([C
 
 ![Grafana's Health: the site, Ghost, the stream server, the bridge, errors and disk at a glance](kit/docs/images/health.webp)
 
-A made-up demo site (`kit/demo/demo.sh` makes it and takes these). When you publish a post, the bridge also shares it
-to your networks, and Ghost's Preview of a draft gets a Social preview button that shows what each network would get.
+*Screenshots from a made-up demo site.* Not pictured: when you publish a post, the bridge shares it to your networks,
+and Ghost's Preview of a draft gets a Social preview button that shows what each network would get.
 
 ## What you get
 
@@ -45,6 +47,20 @@ The site is always there. Each other part is a module you switch on in your site
 Phone notifications go through ntfy: [ntfy.sh](https://ntfy.sh) on a private topic that setup makes up, or your own
 ntfy server. Install the ntfy app and subscribe to that topic.
 
+## What you need
+
+- **A machine** running Linux, macOS or Windows (inside WSL2), on Intel/AMD or ARM. A home server, a NAS or a rented
+  server all work. It needs to be the machine's only kit site: its Traefik takes the web ports, and some of its
+  containers have fixed names like `traefik` and `postiz`.
+- **Docker** with Compose 2.24 or newer, and **Python 3**.
+- **Ports 80 and 443** that the internet reaches, and 8222 for streaming. Each can be another: see `HTTP_PORT` and
+  `LIVE_PORT` in the [Settings reference](kit/docs/settings-reference.html).
+- **For the theme:** `zip` and `unzip` (most Linux systems need to install them), and Node.js for its check before
+  you upload it.
+- **A domain** whose DNS you can change.
+
+On Linux, setup asks for `sudo` once, to give each service's folders to the user it runs as.
+
 ## Getting the kit
 
 ```sh
@@ -60,14 +76,6 @@ Your version is in `kit/VERSION`, and what each one changes in `kit/CHANGELOG.md
 
 The [Setup guide](kit/docs/setup-guide.html) has it all: Compose and Kubernetes, Cloudflare or not, the clouds, and every
 step to finish by hand. In short, on one machine:
-
-You need:
-- Docker with Compose 2.24 or newer, and Python 3
-- ports 80 and 443 that the internet reaches (and 8222 for streaming; each can be another, see `HTTP_PORT` and
-  `LIVE_PORT` in the [Settings reference](kit/docs/settings-reference.html))
-- Node.js, only for the theme's check before you upload it
-- the machine to itself: one kit site per Docker host (its Traefik takes the web ports, and some of its containers
-  have fixed names like `traefik` and `postiz`)
 
 **Trying it before your domain points here?** Answer *yes* to setup's first question. The site uses Traefik's own
 certificate and sends no phone alerts (its public checks would fail until the DNS is there), and setup says how to
@@ -93,19 +101,20 @@ reach it from your browser. The Setup guide's [Trying it at home first](kit/docs
    - The ntfy topic.
    - Your streaming software's stream settings.
 
-   For the Ghost numbers on the Platforms dashboard, copy `tinybird__adminToken` from
-   `data/puppi3/tinybird/tokens.env` to `TINYBIRD_TOKEN` in `secrets/postiz.env`. Then run `up -d` again.
-
    That's it: your site's up! 🐶
 
 To change a setting, edit `site.env` or a file in `secrets/` and run `kit/kit.sh <folder> up -d` again. How posts are
 shared (which networks, what posts by itself, the tags you use in Ghost) is in `site.env` too.
 Every setting, what it does and its default: [the Settings reference](kit/docs/settings-reference.html).
 
-Updating the kit, backups, moving the site between machines, Compose, Kubernetes and the clouds, and
-troubleshooting: [the Operations guide](kit/docs/operations-guide.html). For whoever posts: [the Posting
-guide](kit/docs/posting-guide.html); reading the dashboards: [the Analytics guide](kit/docs/analytics-guide.html); the theme's
-settings, the LIVE NOW bar, links to your other platforms, short links and using another theme: [the Theme guide](kit/docs/theme-guide.html).
+| Guide | For |
+|---|---|
+| [Setup](kit/docs/setup-guide.html) | Setting up a site: Compose or Kubernetes, Cloudflare or not, every step to finish by hand |
+| [Operations](kit/docs/operations-guide.html) | Updating the kit, backups, moving the site between machines or to a cloud, troubleshooting |
+| [Theme](kit/docs/theme-guide.html) | The theme's settings, the LIVE NOW bar, links to your other platforms, short links, another theme |
+| [Posting](kit/docs/posting-guide.html) | Whoever posts: tags, what each network gets, finishing Instagram and TikTok posts |
+| [Analytics](kit/docs/analytics-guide.html) | Reading the dashboards: which one answers what |
+| [Settings reference](kit/docs/settings-reference.html) | Every setting, what it does and its default |
 
 To switch a module on or off later, change `MODULES` in `site.env` and run `up -d` again. With `live` off there's no
 stream server and no LIVE NOW bar (the theme shows it only once its Live stream URL is set). Its passwords are made
@@ -149,21 +158,18 @@ The alerts cover:
 They go to your ntfy topic. A network you list in `NETWORKS` but haven't set up yet shows as an alert error until
 you do: set it up, or take it out of `NETWORKS`.
 
-## Trying it
+## Changing the kit
 
-`kit/test.sh` (Mac with Docker Desktop; ports 80, 443 and 8222 free, ffmpeg, and `npm install` in
-`kit/theme-test/`) builds a throwaway site, `kit.test`, and checks it end to end:
-- the site, the theme, a stream on the LIVE NOW bar, a page hit with its country
-- the bridge
-- Grafana's dashboards and datasources, and Prometheus
-
-Then it removes the site.
+Fixes, new networks and reports from your own site are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) says where things
+are and which check fits a change. The checks build throwaway sites on your own computer (Linux, a Mac, or Windows
+with WSL2), never on your real one. To try the kit for your own site, use setup's try-out ([Setting up a site](#setting-up-a-site)).
 
 ## Licence and credit
 
-Copyright (c) 2026 puppi3-music (DJ Puppi3). The kit is under the GNU Affero General Public License, version 3
-([LICENSE](LICENSE)), with one added term (section 7(b)): copies and changed versions keep the author credit, the
-theme footer's line "Theme: Puppi3's Creator Kit by DJ Puppi3" and the copyright line here and in LICENSE.
+Copyright (c) 2026 puppi3-music (DJ Puppi3). The kit is free software under the GNU Affero General Public License,
+version 3 ([LICENSE](LICENSE)): use it, change it and share it. If you run a changed copy as a website, offer its
+visitors your changed source code. One added term (section 7(b)): copies and changed versions keep the author credit,
+the theme footer's line "Theme: Puppi3's Creator Kit by DJ Puppi3" and the copyright line here and in LICENSE.
 
 The theme is Ghost's [Source](https://github.com/TryGhost/Source) (MIT, Copyright (c) Ghost Foundation:
 [its licence](kit/theme/LICENSE)) with the kit's additions, which are AGPL like the rest.

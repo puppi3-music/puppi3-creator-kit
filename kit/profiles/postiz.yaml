@@ -8,6 +8,11 @@ services:
     image: ${ID_PREFIX:-site}-ghost-bridge:local   # built here, named per site (the stack's own name is the NAS's)
     environment:
       GHOST_API_URL: http://${ID_PREFIX:-site}-ghost:2368
+    # Tinybird's tokens, with analytics on: tinybird__adminToken reads Ghost's own numbers for the Platforms dashboard
+    # (TINYBIRD_TOKEN in secrets/postiz.env, when set, wins)
+    env_file:
+      - path: ${DATA_DIR}/puppi3/tinybird/tokens.env
+        required: false
     volumes:
       - ./ghost-bridge:/app:ro
   postiz-postgres:

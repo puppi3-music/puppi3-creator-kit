@@ -100,11 +100,18 @@ services:
 
   # Per-container CPU and memory (Health, Social's Postiz containers)
   cadvisor:
-    image: ghcr.io/google/cadvisor:v0.53.0
+    image: ghcr.io/google/cadvisor:v0.60.6   # 0.54+ reads Docker's containerd image store (Docker 29's default)
     profiles: [monitoring]
     restart: unless-stopped
     privileged: true
     devices: [/dev/kmsg]
+    # containerd's socket where this Docker has it: the system's (Docker Desktop, Docker's own packages) or the one
+    # dockerd runs itself (some Linux installs); cAdvisor 0.54+ asks it about containers in containerd's image store
+    entrypoint:
+      - /bin/sh
+      - -c
+      - for s in /run/containerd/containerd.sock /run/docker/containerd/containerd.sock; do [ -S "$$s" ] && break; done; exec /usr/bin/entrypoint.sh --containerd="$$s" "$$@"
+      - cadvisor
     command:
       - --docker_only=true
       - --housekeeping_interval=15s
@@ -113,6 +120,9 @@ services:
     volumes:
       - /:/rootfs:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro   # the socket itself: Docker Desktop has none in its /var/run
+      # containerd's sockets (their folders: an empty one is made where there's none)
+      - /run/containerd:/run/containerd:ro
+      - /run/docker/containerd:/run/docker/containerd:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
   # The host's disk (Health's "Disk free" and its alert: the root filesystem, DISK_MOUNT in site.env for another)

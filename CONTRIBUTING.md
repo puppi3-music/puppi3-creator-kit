@@ -45,11 +45,17 @@ next to what you change, and keep it true in the same change.
 |---|---|---|
 | Any guide, setting or example | `python3 docs/build-docs.py --check` (the commit hook runs it too) | seconds |
 | The theme | `kit/theme-zip.sh` (Ghost's gscan, and no site-specific names), then the theme test: `docker compose -f kit/theme-test/compose.yaml up -d`, and `npm install` (once) and `node test.mjs` in `kit/theme-test/` (a local Ghost and a browser test; `down -v` after) | minutes |
-| The Compose kit, a stack, the bridge | `kit/test.sh` on a Mac with Docker Desktop: a throwaway site, checked end to end, then removed | several minutes |
+| The Compose kit, a stack, the bridge | `kit/test.sh`: a throwaway site, `kit.test`, checked end to end (the site, the theme, a stream, the bridge, the dashboards), then removed | several minutes |
 | Dashboards or alert rules | `python3 stacks/monitoring/grafana/style.py --check` and `ro-tables.py --check` (the hook runs both) | seconds |
 | A new file, or anything with an address or name in it | `python3 kit/scrub.py --names` (no site's own names in the kit's files; without `--names` it also runs gitleaks for secrets, in Docker) | seconds |
-| The README's screenshots (after a visible change to the theme or the dashboards) | `kit/demo/demo.sh`: a made-up demo site on a Mac with Docker Desktop, photographed and removed; writes `kit/docs/images/` | several minutes |
+| The README's screenshots (after a visible change to the theme or the dashboards) | `kit/demo/demo.sh`: a made-up demo site, photographed and removed; writes `kit/docs/images/` | several minutes |
 | Anything in `k8s/` | `k8s/test/test.sh --render-only` first; then `k8s/test/test.sh` (with `--overlay k3d-eks` or `k3d-gke` for a cloud overlay, `--migrate` for the migration) on a local k3d cluster | 1-16 min |
+
+`kit/test.sh` and `kit/demo/demo.sh` run on Linux, a Mac, or Windows inside WSL2 (Ubuntu, with the repo cloned
+into WSL's own folders, not `/mnt/c`, and Docker Desktop's WSL integration on). They need Docker, ports 80, 443 and
+8222 free (`LIVE_PORT=<another>` moves the stream's), Python 3, ffmpeg (and cwebp for the demo), and the browser:
+`npm install` and `npx playwright install --with-deps chromium` in `kit/theme-test/`. Each says what's missing. On
+Linux, setup asks for sudo once (each container's folders get their owners).
 
 None of them touch a real site, cluster or cloud account. What only a real cloud can show (its permissions, load
 balancer, database network) is for whoever runs one: say what you tried.

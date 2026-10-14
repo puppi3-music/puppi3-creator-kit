@@ -10,8 +10,8 @@ the CLAUDE.md nearest to it in the same change, and the guide that describes it 
 site, no code).
 
 ## Rules
-- Tests run locally only (`CONTRIBUTING.md`, The checks): `kit/test.sh` on Docker Desktop, `k8s/test/test.sh` on a
-  local k3d cluster. Never against a real site, cluster or cloud account; what only a real cloud can show is for
+- Tests run locally only (`CONTRIBUTING.md`, The checks): `kit/test.sh` on this computer (Linux, a Mac, WSL2),
+  `k8s/test/test.sh` on a local k3d cluster. Never against a real site, cluster or cloud account; what only a real cloud can show is for
   whoever runs one.
 - Nothing site-specific in the kit: no real addresses, accounts, home-network names or private paths, comments
   included (say `SITE_HOST`, `LAN_DOMAIN`, `example.com`, "the server"). `python3 kit/scrub.py` checks every file

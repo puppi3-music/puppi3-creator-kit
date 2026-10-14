@@ -282,7 +282,7 @@ DRY_RUN bridge as a staging copy (it previews and logs, never posts); some notes
   -> newMembers), every published post with `count.signups`/`paid_conversions`/`clicks` and `email` opens, all posts' comments
   (`totals.comments`: the Members API's `/comments/counts/` via `ghostMembers`, 50 ids a call; `history` -> newComments), clicks.json's
   `perDay` as `daily` linkClicks/livePlays and its all-time totals as `totals.linkClicks`/`livePlays` (for the hourly gains); Tinybird
-  (`TINYBIRD_URL` [http://tinybird-local:7181, monitoring network], `TINYBIRD_TOKEN` = the monitoring .env's `TINYBIRD_STATS_TOKEN`, else `tinybird__adminToken` (staging: its own Tinybird's tokens.env), `TINYBIRD_SITE_UUID` else
+  (`TINYBIRD_URL` [http://tinybird-local:7181, monitoring network], `TINYBIRD_TOKEN` = the monitoring .env's `TINYBIRD_STATS_TOKEN`, else `tinybird__adminToken` (staging: its own Tinybird's tokens.env; a kit site: its tokens.env, the kit's profile), `TINYBIRD_SITE_UUID` else
   Ghost's `/site/` `site_uuid`, `timezone=Etc/UTC`): site `api_kpis` per day from its first day with a visitor
   (`analyticsSince`), and per post `api_kpis?pathname=` one call each (`ghostPostDays`, like YouTube's: perDay
   days in stats.db with `fetched`, hourly under 30 days old then daily, 100 a poll; zero days only in a post's first
