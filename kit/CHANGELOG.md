@@ -3,6 +3,34 @@
 What each version of Puppi3's Creator Kit changes for a site already running. Your version is in `kit/VERSION`.
 How to update: the Operations guide (`kit/docs/operations-guide.html#upgrade`).
 
+## 1.2.0
+
+- Every image is at an exact version, the same on Compose and Kubernetes: Ghost 6.69.0, MySQL 8.0.46, PostgreSQL
+  17.11 (Postiz) and 16.15 (Temporal), Redis 7.2.16, Node 22.23.3 (the bridge), busybox 1.37.0, and gscan 6.6.1 for
+  the theme check. Before, `ghost:6-alpine` and the like took whatever was newest at your next pull, so a new Ghost
+  could migrate your database without anyone having tried it. From now on a new version comes with a kit update and
+  its line here. Your site: `kit/kit.sh <folder> up -d` (if your Ghost is already newer than 6.69.0, wait for the
+  next kit version instead: Ghost can't move a database back to an older version).
+- Tinybird (the `analytics` module) uses about 2 GB less memory: it ran a CSV import worker for every two CPUs
+  (about 0.5 GB each, and Ghost never imports CSV); now it runs one. On Kubernetes its pod asks for 2.5 GiB instead
+  of 4. The README and the Setup guide say how big a machine each module needs. Your site: `kit/kit.sh <folder> up
+  -d` (Tinybird restarts; Ghost's numbers wait for it a minute).
+- The Ghost stack is called `ghost` now (it was `puppi3`, the name of the site the kit came from): its files are in
+  `stacks/ghost/`, and a new site keeps Ghost's data in `data/ghost/` and its database login in `secrets/ghost.env`.
+  Your site: nothing. A site made before keeps its `data/puppi3/` and `secrets/puppi3.env`, and the kit goes on using
+  them as they are. If you run the stacks on their own (without `kit.sh`), set `GHOST_DATA_DIR` to the Ghost stack's
+  folder (the one holding `ghost/`, `db/` and `tinybird/`): its compose file stops without it, rather than starting
+  Ghost and MySQL on an empty folder. On Kubernetes the database login is Secret `ghost` (it was `puppi3`):
+  `k8s/up.sh` makes it from either file, and the old Secret can be deleted after the next `up.sh`.
+- Nothing to build any more. The bridge, and on Kubernetes the kit's four images, come ready-made for this version
+  from GitHub's registry (`ghcr.io/puppi3-music/puppi3-creator-kit/`), for Intel/AMD and ARM; the theme's zip is on
+  the version's [release](https://github.com/puppi3-music/puppi3-creator-kit/releases), so Node.js isn't needed.
+  Your site: `kit/kit.sh <folder> up -d` swaps the bridge you built for the published one (its data stays). On
+  Kubernetes, delete `k8s/images/built.env` to use the published images, or keep building your own as before. A
+  bridge you've changed yourself: `KIT_BUILD=1 kit/kit.sh <folder> up -d` builds it from your copy (CONTRIBUTING.md).
+- For contributors: `k8s/test/image-pins.py` (and the commit hook) refuse a floating tag, and an image at two
+  versions in different files.
+
 ## 1.1.1
 
 Fixes for Linux, Docker 29 and Docker Desktop.

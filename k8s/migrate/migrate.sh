@@ -37,7 +37,7 @@ TMP="$(mktemp -d "${TMPDIR:-/tmp}/kit-migrate.XXXXXX")"
 step() { echo; echo "== $*"; }
 note() { echo "   $*"; }
 # Containers' and pods' helpers (busybox everywhere: the same tar, find and stat on both sides)
-BOX=busybox:1.37
+BOX=busybox:1.37.0
 RCLONE=rclone/rclone:1.75.2
 # the owner a folder's contents have (its first entry's, else its own): what copied files get
 OWNER_SH='owner() { f=$(find "$1" -mindepth 1 -maxdepth 1 ! -name lost+found 2>/dev/null | head -n 1); stat -c %u:%g "${f:-$1}"; }'
@@ -95,7 +95,7 @@ nas_box() {
 # (a host that runs each stack on its own: one project per stack); staging's and other sites' are other projects
 on_nas0 "docker ps -a --format '{{.Names}}|{{.Label \"com.docker.compose.service\"}}|{{.Label \"com.docker.compose.project\"}}|{{.State}}'" \
     >"$TMP/containers" || die "couldn't list the containers on ${HOST:-this machine} (docker there?)"
-ctr() { awk -F'|' -v s="$1" -v p=" $NS puppi3 postiz icecast monitoring " '$2 == s && index(p, " " $3 " ") { print $1 }' "$TMP/containers" | head -n 1; }
+ctr() { awk -F'|' -v s="$1" -v p=" $NS ghost puppi3 postiz icecast monitoring " '$2 == s && index(p, " " $3 " ") { print $1 }' "$TMP/containers" | head -n 1; }
 running() { awk -F'|' -v c="$1" '$1 == c { print $4 }' "$TMP/containers" | grep -qx running; }
 GHOST_C="$(ctr ghost)"; [ -n "$GHOST_C" ] || die "no Ghost container of $NS's on ${HOST:-this machine}"
 on_nas0 "docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' $(q "$GHOST_C")" >"$TMP/ghost.env"
@@ -103,6 +103,11 @@ genv() { sed -n "s/^$1=//p" "$TMP/ghost.env" | head -n 1; }
 DB_C="$(genv database__connection__host)"; DB_NAME="$(genv database__connection__database)"
 [ -n "$DB_C" ] && [ -n "$DB_NAME" ] || die "can't tell Ghost's database from $GHOST_C's environment"
 grep -q "^$DB_C|" "$TMP/containers" || die "Ghost's MySQL, $DB_C, isn't a container there"
+# The Ghost stack's folder in the data folder, where Ghost's content is mounted from: ghost/ (puppi3/, its old name,
+# on a host that ran the stacks before kit 1.2.0, and in a kit site made before it)
+GSRC="$(on_nas0 "docker inspect -f '{{range .Mounts}}{{if eq .Destination \"/var/lib/ghost/content\"}}{{.Source}}{{end}}{{end}}' $(q "$GHOST_C")")"
+case "$GSRC" in "$DATA"/*/ghost/content) G="${GSRC#"$DATA"/}"; G="${G%/ghost/content}" ;;
+    *) die "Ghost's content (${GSRC:-not mounted}) isn't in $DATA's Ghost folder" ;; esac
 
 # ---- The cluster --------------------------------------------------------------------------------------------
 case "$OVERLAY" in
@@ -128,8 +133,8 @@ fi
 # ---- What moves --------------------------------------------------------------------------------------------
 # folder | NAS place (data folder path, or vol:<service>:<mount>) | claim | path in it | the workload using it
 {
-    for d in themes settings data; do echo "Ghost's $d|puppi3/ghost/content/$d|ghost-content|$d|deploy/ghost"; done
-    [ "$BUCKET" = 1 ] || for d in images media files; do echo "Ghost's $d|puppi3/ghost/content/$d|ghost-content|$d|deploy/ghost"; done
+    for d in themes settings data; do echo "Ghost's $d|$G/ghost/content/$d|ghost-content|$d|deploy/ghost"; done
+    [ "$BUCKET" = 1 ] || for d in images media files; do echo "Ghost's $d|$G/ghost/content/$d|ghost-content|$d|deploy/ghost"; done
     if has social; then
         echo "the bridge's data|postiz/ghost-bridge/data|postiz-ghost-bridge|.|deploy/postiz-ghost-bridge"
         echo "Postiz's config|postiz/config|postiz|config|deploy/postiz"
@@ -220,14 +225,14 @@ def ref(obj, kind, key):
 sleep = ["sleep", "86400"]
 s3 = [{"configMapRef": {"name": ref(ghost, "configMapKeyRef", "S3_BUCKET")}}] if ref(ghost, "configMapKeyRef", "S3_BUCKET") else []
 s3 += [e for e in ghost.get("envFrom", []) if re.match(r"^s3(-|$)", e.get("secretRef", {}).get("name", ""))]
-cs = [{"name": "mysql", "image": "mysql:8.0", "command": sleep,
+cs = [{"name": "mysql", "image": "mysql:8.0.46", "command": sleep,
        "env": [e for e in ghost.get("env", []) if e["name"].startswith("database__")]},
       {"name": "rclone", "image": rclone, "command": sleep, "volumeMounts": [{"name": "stage", "mountPath": "/stage"}],
        "envFrom": s3}]
 if social:
     pz = ref(wl, "secretKeyRef", "POSTIZ_DB_PASSWORD")
     if not pz: sys.exit("no workload names Postiz's database password (social module up?)")
-    cs.append({"name": "postgres", "image": "postgres:17-alpine", "command": sleep,
+    cs.append({"name": "postgres", "image": "postgres:17.11-alpine", "command": sleep,
                "envFrom": [{"secretRef": {"name": pz}}]})
 pod = {"apiVersion": "v1", "kind": "Pod",
        "metadata": {"name": "migrate", "labels": {"app.kubernetes.io/name": "creator-kit-migrate"}},
@@ -375,9 +380,9 @@ to_cloud() {
 
     if [ "$BUCKET" = 1 ]; then
         step "Ghost's images, media and files -> the bucket"
-        n=0; for d in images media files; do n=$((n + $(nas_count "puppi3/ghost/content/$d"))); done
-        nas_box "" 'cd /d/puppi3/ghost/content; set --; for d in images media files; do [ -d "$d" ] && set -- "$@" "$d"; done
-            [ $# = 0 ] && exec tar -c -T /dev/null; exec tar -c "$@"' </dev/null |
+        n=0; for d in images media files; do n=$((n + $(nas_count "$G/ghost/content/$d"))); done
+        nas_box "" 'cd "/d/$1/ghost/content"; set --; for d in images media files; do [ -d "$d" ] && set -- "$@" "$d"; done
+            [ $# = 0 ] && exec tar -c -T /dev/null; exec tar -c "$@"' "$G" </dev/null |
             tb rclone sh -c 'set -e; rm -rf /stage/content; mkdir -p /stage/content; tar -x -C /stage/content
                 '"$RCLONE_ENV"'
                 rclone sync /stage/content "b:$S3_BUCKET/content" --checksum
@@ -473,7 +478,7 @@ to_nas() {
             rclone copy "b:$S3_BUCKET/content" /stage/content --checksum' </dev/null
         for d in images media files; do
             n="$(tb rclone sh -c 'mkdir -p "/stage/content/$1"; find "/stage/content/$1" -type f | wc -l | tr -d " "' sh "$d" </dev/null)"
-            same "$d" "$n" "$(tb rclone tar -c -C "/stage/content/$d" . </dev/null | nas_write "puppi3/ghost/content/$d")"
+            same "$d" "$n" "$(tb rclone tar -c -C "/stage/content/$d" . </dev/null | nas_write "$G/ghost/content/$d")"
         done
         tb rclone rm -rf /stage/content </dev/null
     fi
@@ -503,7 +508,7 @@ to_nas() {
 
     if has analytics; then
         step "Tinybird's tokens"
-        local tokens="$DATA/puppi3/tinybird/tokens.env"
+        local tokens="$DATA/$G/tinybird/tokens.env"
         k get secret tinybird-tokens -o json | python3 -c 'import base64, json, sys
 d = json.load(sys.stdin)["data"]
 print("# Generated by tb-setup - do not edit, do not share")
@@ -514,7 +519,7 @@ for k in ("tinybird__workspaceId", "tinybird__adminToken", "TINYBIRD_TRACKER_TOK
             on_nas0 "cp -p $(q "$tokens") $(q "$backup/tokens.env") 2>/dev/null || true"
             on_nas "umask 077; mkdir -p $(q "${tokens%/*}"); cat >$(q "$tokens")" <"$TMP/tokens.env"
             note "the NAS's tokens.env now holds the cluster's: Ghost, traffic-analytics and the bridge read it only when"
-            note "they're made, so recreate them (the puppi3 and postiz stacks: docker compose up -d)"
+            note "they're made, so recreate them (the Ghost and postiz stacks: docker compose up -d)"
         fi
     fi
 

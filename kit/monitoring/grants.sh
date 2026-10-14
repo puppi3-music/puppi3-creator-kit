@@ -1,6 +1,6 @@
 #!/bin/sh
 # Grafana's read-only logins (kit/monitoring/compose.yaml runs it at every start), password RO_PASSWORD:
-#   grants.sh ghost    in the mysql image: grafana_ro on Ghost's MySQL, SELECT on stacks/puppi3/grafana-ro.sh's TABLES
+#   grants.sh ghost    in the mysql image: grafana_ro on Ghost's MySQL, SELECT on stacks/ghost/grafana-ro.sh's TABLES
 #   grants.sh postiz   in the postgres image: grafana_ro on Postiz's Postgres, SELECT on what the Social panels read
 # Waits (up to 20 minutes) for the tables: Ghost and Postiz make them at their first start.
 set -eu

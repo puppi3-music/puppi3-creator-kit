@@ -47,6 +47,7 @@ next to what you change, and keep it true in the same change.
 | The theme | `kit/theme-zip.sh` (Ghost's gscan, and no site-specific names), then the theme test: `docker compose -f kit/theme-test/compose.yaml up -d`, and `npm install` (once) and `node test.mjs` in `kit/theme-test/` (a local Ghost and a browser test; `down -v` after) | minutes |
 | The Compose kit, a stack, the bridge | `kit/test.sh`: a throwaway site, `kit.test`, checked end to end (the site, the theme, a stream, the bridge, the dashboards), then removed | several minutes |
 | Dashboards or alert rules | `python3 stacks/monitoring/grafana/style.py --check` and `ro-tables.py --check` (the hook runs both) | seconds |
+| An image's version (a compose file, k8s's YAML, a Dockerfile) | `python3 k8s/test/image-pins.py`: every image at an exact version, the same in every file (the hook runs it). A bump is one edit in all of them, with its `kit/CHANGELOG.md` line | seconds |
 | A new file, or anything with an address or name in it | `python3 kit/scrub.py --names` (no site's own names in the kit's files; without `--names` it also runs gitleaks for secrets, in Docker) | seconds |
 | The README's screenshots (after a visible change to the theme or the dashboards) | `kit/demo/demo.sh`: a made-up demo site, photographed and removed; writes `kit/docs/images/` | several minutes |
 | Anything in `k8s/` | `k8s/test/test.sh --render-only` first; then `k8s/test/test.sh` (with `--overlay k3d-eks` or `k3d-gke` for a cloud overlay, `--migrate` for the migration) on a local k3d cluster | 1-16 min |
@@ -59,6 +60,19 @@ Linux, setup asks for sudo once (each container's folders get their owners).
 
 None of them touch a real site, cluster or cloud account. What only a real cloud can show (its permissions, load
 balancer, database network) is for whoever runs one: say what you tried.
+
+A site runs the kit's published images and theme (each release's, below), so to try a changed bridge on a site of
+your own, build it from your copy: `KIT_BUILD=1 kit/kit.sh <folder> up -d` (the tests and the demo always do). A
+changed image for Kubernetes: `k8s/build-images.sh` (the Setup guide's "The images"). A changed theme:
+`kit/theme-zip.sh` builds the zip in `kit/dist/`.
+
+## Releases
+
+A release is a version tag, `v` + `kit/VERSION`, with a `## <version>` section in `kit/CHANGELOG.md` saying what it
+changes for a site already running. The tag starts `.github/workflows/release.yml`: the kit's four images for amd64
+and arm64 on GitHub's registry (`ghcr.io/puppi3-music/puppi3-creator-kit/<name>:<version>`), and a GitHub Release
+with the theme's zip and that section as its notes. It stops if the tag and `kit/VERSION` differ or the section is
+missing. Only the maintainer tags.
 
 ## Writing
 

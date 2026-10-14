@@ -29,7 +29,7 @@ configMapGenerator:
   - name: grafana-ro-scripts
     files:
       - grants.sh=../../../kit/monitoring/grants.sh
-      - grafana-ro.sh=../../../stacks/puppi3/grafana-ro.sh
+      - grafana-ro.sh=../../../stacks/ghost/grafana-ro.sh
   - name: json-exporter
     files:
       - config.yml=json-exporter.yml

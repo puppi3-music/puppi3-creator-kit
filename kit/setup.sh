@@ -92,10 +92,11 @@ SITE_HOST="$(val SITE_HOST)"; ID_PREFIX="$(val ID_PREFIX)"; LAN_DOMAIN="$(val LA
 on() { case ",$(val MODULES)," in *,"$1",*) true ;; *) false ;; esac; }
 
 # ---- secrets/<stack>.env: each stack's examples, filled in
-# secret <stack> KEY=value ...: write the stack's file once, from its examples (the stack's own, without its NAS notes;
-# the kit's, kit/examples/<stack>.env.example, as it is), then fill in the values
+# secret <stack>[:<file>] KEY=value ...: write the stack's file (secrets/<file>.env, <stack> by default) once, from its
+# examples (the stack's own, without its NAS notes; the kit's, kit/examples/<stack>.env.example, as it is), then fill in
+# the values
 secret() {
-    local stack=$1 f="$SITE_DIR/secrets/$1.env"; shift
+    local stack=${1%%:*} name=${1#*:} f; shift; f="$SITE_DIR/secrets/$name.env"
     [ -f "$f" ] && return 0
     # the stack's example with its comments, less its first line and its "Site values" part (site.env has those) and
     # NTFY_URL (site.env's, which kit.sh passes)
@@ -105,14 +106,16 @@ secret() {
       fi
       if [ -f "$KIT/examples/$stack.env.example" ]; then cat "$KIT/examples/$stack.env.example"; fi; } > "$f"
     local kv; for kv in "$@"; do setkey "$f" "${kv%%=*}" "${kv#*=}"; done
-    echo "wrote secrets/$stack.env"
+    echo "wrote secrets/$name.env"
 }
 # Let's Encrypt's account email: only for its certificates (cf, le)
 if [ ! -f "$SITE_DIR/secrets/traefik.env" ]; then
     case "$(val TLS_RESOLVER)" in cf|le) ask ACME_EMAIL "Email for Let's Encrypt" "admin@$SITE_HOST" ;; *) ACME_EMAIL="admin@$SITE_HOST" ;; esac
 fi
 secret traefik "ACME_EMAIL=${ACME_EMAIL:-}"
-secret puppi3 "database__connection__password=$(rand)" "database__connection__database=ghost"
+# The Ghost stack's folder and secrets file: ghost, or puppi3 in a site made before kit 1.2.0 (kit.sh decides the same)
+g=ghost; [ -d "$SITE_DIR/data/puppi3" ] || [ -f "$SITE_DIR/secrets/puppi3.env" ] && g=puppi3
+secret "ghost:$g" "database__connection__password=$(rand)" "database__connection__database=ghost"
 secret postiz "POSTIZ_DOMAIN=postiz.$SITE_HOST" "POSTIZ_JWT_SECRET=$(rand 48)" "POSTIZ_DB_PASSWORD=$(rand)" \
     "TEMPORAL_DB_PASSWORD=$(rand)" "POSTIZ_DISABLE_REGISTRATION=false" "GHOST_WEBHOOK_SECRET=$(rand 40)" \
     "NTFY_TOPIC=$ID_PREFIX-$(rand 12 | tr 'A-Z' 'a-z')" "SEARCH_CONSOLE_SITE=sc-domain:$SITE_HOST"
@@ -125,7 +128,7 @@ secret monitoring "GRAFANA_ADMIN_PASSWORD=$(rand 24)" "GRAFANA_RO_PASSWORD=$(ran
 umask 022
 d="$SITE_DIR/data"
 # Every data folder made here, not by Docker (which makes them root's)
-mkdir -p "$d/puppi3/ghost/content" "$d/puppi3/db" "$d/puppi3/tinybird" "$d/icecast/tinyice-data" "$d/icecast/tinyice" \
+mkdir -p "$d/$g/ghost/content" "$d/$g/db" "$d/$g/tinybird" "$d/icecast/tinyice-data" "$d/icecast/tinyice" \
     "$d/postiz/ghost-bridge/data" "$d/postiz/config" "$d/postiz/uploads" "$d/postiz/postgres" "$d/postiz/redis" \
     "$d/postiz/temporal-postgres" "$d/postiz/temporal-elasticsearch" "$d/traefik/dynamic" "$d/traefik/letsencrypt" \
     "$d/monitoring/prometheus/data" "$d/monitoring/grafana/data" "$d/monitoring/grafana/rendered"
@@ -133,7 +136,7 @@ mkdir -p "$d/puppi3/ghost/content" "$d/puppi3/db" "$d/puppi3/tinybird" "$d/iceca
 # /var/lib/ghost/content. Mail goes here (https://ghost.org/docs/config/#mail): Ghost emails staff a code at each
 # new sign-in (staffDeviceVerification; STAFF_DEVICE_VERIFICATION=false turns it off, as a try-out does: no mail
 # service yet, and Direct mail rarely arrives).
-[ -f "$d/puppi3/ghost/config.production.json" ] || cat > "$d/puppi3/ghost/config.production.json" <<JSON
+[ -f "$d/$g/ghost/config.production.json" ] || cat > "$d/$g/ghost/config.production.json" <<JSON
 {
   "server": { "port": 2368, "host": "::" },
   "mail": { "transport": "Direct" },
@@ -198,7 +201,7 @@ if [ "$(uname)" = Linux ]; then
     # writes prometheus.yml there at every run
     sudo chown -R 65534:65534 "$d/monitoring/prometheus/data" "$d/monitoring/prometheus/tinyice-password"
     sudo chown -R 472:0 "$d/monitoring/grafana/data"        # Grafana as 472
-    sudo chown -R 1002:1003 "$d/puppi3/db"                   # MySQL as the stack's user: 1002:1003
+    sudo chown -R 1002:1003 "$d/$g/db"                       # MySQL as the stack's user: 1002:1003
     sudo chown -R 1000:0 "$d/postiz/temporal-elasticsearch"  # Elasticsearch as 1000:0
 fi
 
@@ -229,8 +232,8 @@ EOF
 fi
 cat <<EOF
   2. Start it: kit/kit.sh $SITE_DIR up -d
-  3. Ghost: https://$SITE_HOST/ghost/ to make the owner account; upload the kit's theme (kit/theme-zip.sh builds
-     kit/dist/puppi3-creator-kit-theme.zip)$streamurl;
+  3. Ghost: https://$SITE_HOST/ghost/ to make the owner account; upload the kit's theme (download it:
+     https://github.com/puppi3-music/puppi3-creator-kit/releases/download/v$(cat "$KIT/VERSION")/puppi3-creator-kit-theme.zip)$streamurl;
      upload kit/redirects.yaml (Settings -> Labs -> Open -> Beta features -> Redirects).
 EOF
 if [ -n "$(val NTFY_URL)" ]; then cat <<EOF

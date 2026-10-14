@@ -1,4 +1,4 @@
-# MySQL 8 for Ghost, as the puppi3 stack's db service. Ghost signs in as database__connection__user (root, as on the
+# MySQL 8 for Ghost, as the Ghost stack's db service. Ghost signs in as database__connection__user (root, as on the
 # NAS) and makes its database itself. The Service is "mysql" (Ghost's database__connection__host).
 apiVersion: apps/v1
 kind: StatefulSet
@@ -17,11 +17,11 @@ spec:
     spec:
       containers:
         - name: mysql
-          image: mysql:8.0
+          image: mysql:8.0.46
           env:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
-                secretKeyRef: {name: puppi3, key: database__connection__password}
+                secretKeyRef: {name: ghost, key: database__connection__password}
           ports:
             - {name: mysql, containerPort: 3306}
           readinessProbe:

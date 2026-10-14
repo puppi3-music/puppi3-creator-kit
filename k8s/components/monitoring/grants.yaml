@@ -1,5 +1,5 @@
 # Grafana's read-only logins (grafana_ro), made again on every up (k8s/up.sh deletes finished Jobs first), with the
-# Compose kit's kit/monitoring/grants.sh: Ghost's MySQL gets SELECT on the tables stacks/puppi3/grafana-ro.sh lists,
+# Compose kit's kit/monitoring/grants.sh: Ghost's MySQL gets SELECT on the tables stacks/ghost/grafana-ro.sh lists,
 # Postiz's Postgres on the four its panels read. Each waits for its tables (Ghost and Postiz make them at their first
 # start); the Postiz one does nothing without the social module (MODULES).
 apiVersion: batch/v1
@@ -13,19 +13,19 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: grants
-          image: mysql:8.0
+          image: mysql:8.0.46
           command: [bash, /scripts/grants.sh, ghost]
           env:
             - {name: DB_HOST, value: mysql}
             - name: DB_USER
               valueFrom:
-                secretKeyRef: {name: puppi3, key: database__connection__user}
+                secretKeyRef: {name: ghost, key: database__connection__user}
             - name: DB_PASSWORD
               valueFrom:
-                secretKeyRef: {name: puppi3, key: database__connection__password}
+                secretKeyRef: {name: ghost, key: database__connection__password}
             - name: DB_NAME
               valueFrom:
-                secretKeyRef: {name: puppi3, key: database__connection__database}
+                secretKeyRef: {name: ghost, key: database__connection__database}
             - name: RO_PASSWORD
               valueFrom:
                 secretKeyRef: {name: monitoring, key: GRAFANA_RO_PASSWORD}
@@ -51,7 +51,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: grants
-          image: postgres:17-alpine
+          image: postgres:17.11-alpine
           command: [sh, /scripts/grants.sh, postiz]
           env:
             - name: MODULES

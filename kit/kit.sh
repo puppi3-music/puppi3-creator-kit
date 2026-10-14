@@ -3,8 +3,9 @@
 #   kit/kit.sh <site folder> up -d        (any docker compose command: ps, logs -f ghost, down, config ...)
 # The site folder (kit/setup.sh makes it):
 #   site.env          the instance profile (instances/example.env filled in)
-#   secrets/*.env     each stack's secrets (traefik, puppi3, postiz, icecast, monitoring)
-#   data/             everything the site keeps (DATA_DIR), Traefik's dynamic/ files among it
+#   secrets/*.env     each stack's secrets (traefik, ghost, postiz, icecast, monitoring)
+#   data/             everything the site keeps (DATA_DIR), Traefik's dynamic/ files among it, Ghost's in data/ghost/
+#   (a site made before kit 1.2.0 has secrets/puppi3.env and data/puppi3/: kept, and used as they are)
 # Profiles come from the profile's MODULES. Every run copies the kit's Traefik files into data/traefik/dynamic/ as
 # kit-*.yml (a site's own routes go beside them, under other names) and, with monitoring, writes Prometheus's config and
 # renders the dashboards and alert rules for the site (data/monitoring/). A first `up` starts tb-setup alone first: compose
@@ -13,7 +14,7 @@ set -euo pipefail
 
 KIT="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(dirname "$KIT")"
-[ $# -ge 2 ] || { sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+[ $# -ge 2 ] || { sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 SITE_DIR="$(cd "$1" && pwd)"; shift
 [ -f "$SITE_DIR/site.env" ] || { echo "kit.sh: no site.env in $SITE_DIR (make the site with kit/setup.sh)" >&2; exit 1; }
 
@@ -23,7 +24,19 @@ ID_PREFIX="$(val ID_PREFIX)"; MODULES="$(val MODULES)"
 [ -n "$ID_PREFIX" ] || { echo "kit.sh: set ID_PREFIX in site.env" >&2; exit 1; }
 
 export SITE_DIR DATA_DIR="$SITE_DIR/data"
-args=(-p "$ID_PREFIX" -f "$KIT/compose.yaml" --env-file "$SITE_DIR/site.env")
+# The Ghost stack's folder and secrets file: ghost, or puppi3 in a site made before kit 1.2.0 (the stack's old name),
+# so nobody has to move anything (setup.sh, k8s/up.sh and k8s/migrate/ decide the same way)
+g=ghost; [ -d "$DATA_DIR/puppi3" ] || [ -f "$SITE_DIR/secrets/puppi3.env" ] && g=puppi3
+export GHOST_DATA_DIR="$DATA_DIR/$g" GHOST_ENV_FILE="$SITE_DIR/secrets/$g.env"
+# The bridge: this kit version's published image (KIT_BRIDGE_IMAGE for another), or with KIT_BUILD=1 built from this
+# repo's code (kit/test.sh, the demo, a changed bridge: profiles/bridge-build.yaml)
+files=(-f "$KIT/compose.yaml")
+if [ "${KIT_BUILD:-}" = 1 ]; then
+    files+=(-f "$KIT/profiles/bridge-build.yaml"); export BRIDGE_IMAGE="$ID_PREFIX-ghost-bridge:local"
+else
+    export BRIDGE_IMAGE="${KIT_BRIDGE_IMAGE:-ghcr.io/puppi3-music/puppi3-creator-kit/ghost-bridge:$(cat "$KIT/VERSION")}"
+fi
+args=(-p "$ID_PREFIX" "${files[@]}" --env-file "$SITE_DIR/site.env")
 # down: every module's containers, also those of a module switched off since they were made
 for m in analytics social live monitoring; do
     case ",$MODULES,:$1" in *",$m,"*|*:down) args+=(--profile "$m") ;; esac
@@ -132,7 +145,7 @@ compose() { docker compose "${args[@]}" "$@"; }
 # A module switched off since its containers were made: up leaves them running (Compose skips services outside the
 # active profiles), so they're stopped and removed here first, with their anonymous volumes (the data stays in data/)
 if [ "${1:-}" = up ]; then
-    every=(-p "$ID_PREFIX" -f "$KIT/compose.yaml" --env-file "$SITE_DIR/site.env"
+    every=(-p "$ID_PREFIX" "${files[@]}" --env-file "$SITE_DIR/site.env"
            --profile analytics --profile social --profile live --profile monitoring)
     on_now="$(docker compose "${args[@]}" config --services 2>/dev/null)"
     off=()
@@ -161,11 +174,11 @@ site_uuid() {
     render
     docker restart "$ID_PREFIX-grafana" >/dev/null && restarted=1 && echo "kit.sh: dashboards now read this Ghost's analytics (site_uuid $uuid)"
 }
-if [ "${1:-}" = up ] && [ ! -s "$DATA_DIR/puppi3/tinybird/tokens.env" ] && case ",$MODULES," in *,analytics,*) true ;; *) false ;; esac; then
+if [ "${1:-}" = up ] && [ ! -s "$GHOST_DATA_DIR/tinybird/tokens.env" ] && case ",$MODULES," in *,analytics,*) true ;; *) false ;; esac; then
     # First start with analytics: Tinybird and tb-setup first, then the rest once its tokens are written, so Ghost is
     # created with them. (Recreating Ghost for them afterwards could stop it in its first migrations, leaving
     # Ghost's migration lock taken.)
-    tokens="$DATA_DIR/puppi3/tinybird/tokens.env"
+    tokens="$GHOST_DATA_DIR/tinybird/tokens.env"
     compose up -d tb-setup
     echo "kit.sh: waiting for tb-setup to write Tinybird's tokens..."
     for _ in $(seq 1 90); do [ -s "$tokens" ] && break; sleep 2; done

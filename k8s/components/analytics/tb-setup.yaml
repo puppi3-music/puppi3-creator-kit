@@ -18,7 +18,7 @@ spec:
       restartPolicy: OnFailure
       initContainers:
         - name: tinybird-sync
-          image: ghost:6-alpine
+          image: ghost:6.69.0-alpine
           command: [sh, -c, 'cp -rf /var/lib/ghost/current/core/server/data/tinybird/. /data/tinybird/']
           resources:
             requests: {cpu: 10m, memory: 32Mi}

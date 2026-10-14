@@ -20,7 +20,7 @@ spec:
     spec:
       initContainers:
         - name: wait
-          image: busybox:1.37
+          image: busybox:1.37.0
           command: [sh, -c, 'for s in postiz-postgres:5432 postiz-redis:6379 postiz-temporal:7233; do
             until nc -z -w 2 "${s%:*}" "${s#*:}"; do echo "waiting for $s"; sleep 2; done; done']
           resources:

@@ -1,0 +1,8 @@
+# KIT_BUILD=1 (kit.sh adds this file): the bridge built from this repo's code instead of the published image, for
+# kit/test.sh, the demo and anyone changing the bridge. Named per site; built at each up (pull_policy: build).
+services:
+  postiz-ghost-bridge:
+    build:
+      context: ../stacks/postiz/ghost-bridge   # (relative to kit/, the project's folder) Dockerfile, .dockerignore
+    image: ${ID_PREFIX:-site}-ghost-bridge:local
+    pull_policy: build

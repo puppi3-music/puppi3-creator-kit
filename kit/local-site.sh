@@ -1,6 +1,6 @@
 # Sourced by kit/test.sh and kit/demo/demo.sh: what a throwaway kit site on this computer needs, the same on Linux, a
 # Mac, or Windows inside WSL2 (with Docker Desktop, or Docker's own engine on Linux). Expects $KIT, $S, $SP and die().
-# Gives: sedi, need, port_free, hostcat, LOCAL_RANGES, FF (the stream's ffmpeg), and the EXIT trap.
+# Gives: sedi, need, port_free, hostcat, LOCAL_RANGES, FF (the stream's ffmpeg), the EXIT trap, and KIT_BUILD=1.
 
 # Windows: the kit's scripts are bash, run inside WSL2, with the repo in WSL's own filesystem: on a Windows drive
 # (/mnt/c/...) the site's folders can't keep their owners, and Postgres and MySQL refuse them
@@ -12,6 +12,8 @@ if grep -qi microsoft /proc/version 2>/dev/null; then
     case "$KIT" in /mnt/*) die "the repo is on a Windows drive ($KIT): clone it into WSL's own filesystem (e.g. ~/)" ;; esac
 fi
 docker info >/dev/null 2>&1 || die "can't reach Docker (is it running, and may this user use it?)"
+# The bridge built from this repo's code, not the published image: these try the code as it is here
+export KIT_BUILD=1
 
 # sed -i that works with both GNU sed (Linux) and BSD sed (a Mac); the file is the last argument
 sedi() { local f="${*: -1}"; sed -i.bak "$@" && rm -f "$f.bak"; }

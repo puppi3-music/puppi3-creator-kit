@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:17-alpine
+          image: postgres:17.11-alpine
           env:
             - {name: POSTGRES_USER, value: postiz}
             - {name: POSTGRES_DB, value: postiz}
@@ -74,7 +74,7 @@ spec:
     spec:
       containers:
         - name: redis
-          image: redis:7.2
+          image: redis:7.2.16
           ports:
             - {name: redis, containerPort: 6379}
           readinessProbe:

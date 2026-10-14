@@ -14,6 +14,7 @@
 #     with the track and plays /stream-mp3; the play and a link out reach the bridge as click beacons
 #   - The bridge: /health, /performance.json, a signed Ghost webhook through Traefik makes a DRY_RUN preview
 #   - The draft preview has the Social preview button; no pets route; no puppi3 in container names, routers, metrics
+#   - A site folder from before kit 1.2.0 (secrets/puppi3.env, data/puppi3/) renders with its own paths and password
 #   - Monitoring: Grafana has every rendered dashboard in the site's folder, no panel names a datasource it lacks, each
 #     datasource answers a real query (grafana_ro on Ghost's MySQL and Postiz's Postgres, Tinybird with this Ghost's
 #     site_uuid, the bridge, Prometheus with every job up), the alert rules are loaded; a render with modules and
@@ -126,7 +127,7 @@ played() { [ "$(clicks "t['play']")" -gt 0 ]; }
 wait_for "the play beacon reached the bridge" 10 played && ok "the play beacon reached the bridge"
 went_out() { [ "$(clicks "sum(t['out'].values())")" -gt 0 ]; }
 wait_for "the link out reached the bridge" 10 went_out && ok "the link out reached the bridge"
-tb_token="$(hostcat "$S/data/puppi3/tinybird/tokens.env" | sed -n 's/^tinybird__adminToken=//p')"
+tb_token="$(hostcat "$S/data/ghost/tinybird/tokens.env" | sed -n 's/^tinybird__adminToken=//p')"
 tb() { docker exec kittest-tinybird-local-1 curl -s -H "Authorization: Bearer $tb_token" --data-urlencode "q=$1" http://localhost:7181/v0/sql; }
 hit_ok() { tb "SELECT count() c FROM analytics_events WHERE JSONExtractString(payload, 'location') = 'CA' FORMAT TSV" | grep -qv '^0$'; }
 wait_for "a page hit with country CA in Tinybird" 15 hit_ok && ok "a page hit reached Tinybird, country CA from page-hit-country"
@@ -249,9 +250,18 @@ check "no puppi3 in router names" bash -c "! python3 -c \"import json; print([r[
 kit ps -a --format '{{.Name}}' >"$SP/names.txt" 2>/dev/null
 check "no puppi3 in container names" bash -c "[ -s '$SP/names.txt' ] && ! grep -q puppi3 '$SP/names.txt'"
 check "no puppi3 in the bridge's metrics" bash -c "! docker exec postiz-ghost-bridge wget -qO- http://localhost:8080/metrics | grep -q puppi3"
-# the rendered config: only the stack folder puppi3/ (in data paths; a name, like ID_PREFIX's default, not a site's)
-kit config 2>/dev/null | sed "s|$REPO|<repo>|g" | grep -n puppi3 | grep -v -E "/data/puppi3/|stacks/puppi3/" >"$SP/left.txt"
-check "no puppi3 in the rendered config (besides the stack folder)" [ ! -s "$SP/left.txt" ] || cat "$SP/left.txt"
+kit config 2>/dev/null | sed "s|$REPO|<repo>|g" | grep -n puppi3 >"$SP/left.txt"
+check "no puppi3 in the rendered config" [ ! -s "$SP/left.txt" ] || cat "$SP/left.txt"
+# A site made before kit 1.2.0 (the Ghost stack was puppi3 then): its secrets/puppi3.env and data/puppi3/ are used as
+# they are (a copy of this site's files, only rendered)
+O="$SP/old-site"; mkdir -p "$O/data/puppi3"; O="$(cd "$O" && pwd)"   # as kit.sh spells it (TMPDIR may end in /)
+cp "$S/site.env" "$O/"; cp -R "$S/secrets" "$O/"
+mv "$O/secrets/ghost.env" "$O/secrets/puppi3.env"
+"$KIT/kit.sh" "$O" config >"$SP/old-config.txt" 2>&1 || true
+pw="$(sed -n 's/^database__connection__password=//p' "$O/secrets/puppi3.env")"
+check "a site from before 1.2.0: Ghost's data stays in data/puppi3/, its secrets in secrets/puppi3.env" \
+    bash -c "grep -q '$O/data/puppi3/ghost/content' '$SP/old-config.txt' && ! grep -q '$O/data/ghost/' '$SP/old-config.txt' &&
+        grep -q 'database__connection__password: $pw' '$SP/old-config.txt'"
 
 # ---- Open to all
 echo "== BEHIND_CLOUDFLARE=false"

@@ -5,7 +5,7 @@
 name: kit-theme-test
 services:
   ghost:
-    image: ghost:6-alpine
+    image: ghost:6.69.0-alpine
     ports:
       - "127.0.0.1:2398:2368"
     environment:

@@ -5,19 +5,19 @@
 #    shared files into every guide (docs/build-docs.py), so each guide stays a single file that works on its own, and
 #    write the Settings reference again from its files (examples, compose files, setup.sh). Its checks stop the commit:
 #    a setting read but not documented, documented but not read, or a private name in a guide.
-if git diff --cached --name-only | grep -qE '^(docs/|kit/docs/|kit/examples/|kit/profiles/|kit/setup\.sh$|kit/compose\.yaml$|kit/monitoring/compose\.yaml$|instances/example\.env$|stacks/(traefik|puppi3|postiz|icecast)/(\.env\.example|compose\.yaml)$|stacks/traefik/dynamic/|k8s/examples/|k8s/overlays/[^/]+/cloud\.env\.example$)'; then
+if git diff --cached --name-only | grep -qE '^(docs/|kit/docs/|kit/examples/|kit/profiles/|kit/setup\.sh$|kit/compose\.yaml$|kit/monitoring/compose\.yaml$|instances/example\.env$|stacks/(traefik|ghost|postiz|icecast)/(\.env\.example|compose\.yaml)$|stacks/traefik/dynamic/|k8s/examples/|k8s/overlays/[^/]+/cloud\.env\.example$)'; then
   python3 docs/build-docs.py || exit 1
   git add kit/docs/settings-reference.html kit/docs/setup-guide.html kit/docs/operations-guide.html \
     kit/docs/posting-guide.html kit/docs/analytics-guide.html kit/docs/theme-guide.html
 fi
 
-# 2. Grafana: grafana_ro may read only the tables listed in stacks/puppi3/grafana-ro.sh, so a dashboard or alert rule
+# 2. Grafana: grafana_ro may read only the tables listed in stacks/ghost/grafana-ro.sh, so a dashboard or alert rule
 #    reading another one stops the commit (stacks/monitoring/grafana/ro-tables.py says which). The dashboards also
 #    keep one shared look (style.py: nav, crosshair, chart styles, colours; run it to fix). Both read the folder
 #    dashboards through parts.py beside them, so a part that's broken or left over stops the commit too. The source
 #    names no site (render.py's placeholders, @SITE_HOST@...): a render for the example profile must pass.
 G=stacks/monitoring/grafana
-if git diff --cached --name-only | grep -qE "^($G/provisioning/dashboards/|$G/alerts\.yml|$G/(parts|ro-tables)\.py|stacks/puppi3/grafana-ro\.sh)"; then
+if git diff --cached --name-only | grep -qE "^($G/provisioning/dashboards/|$G/alerts\.yml|$G/(parts|ro-tables)\.py|stacks/ghost/grafana-ro\.sh)"; then
   python3 $G/ro-tables.py --check || exit 1
 fi
 if git diff --cached --name-only | grep -qE "^($G/provisioning/dashboards/|$G/alerts\.yml|$G/[^/]+\.py|instances/example\.env)"; then
@@ -42,4 +42,11 @@ if git diff --cached --name-only | grep -qE '^(stacks/postiz/ghost-bridge/|docs/
       || { echo "$err" | grep '^pre-commit:' || echo "pre-commit: the bridge doesn't load"; exit 1; }
   fi
 fi
+
+# 4. Images: every image the kit runs is at an exact version, the same in Compose and Kubernetes
+#    (k8s/test/image-pins.py: a floating tag like ghost:6-alpine or one image at two versions stops the commit).
+if git diff --cached --name-only | grep -qiE '(^|/)(compose[^/]*\.ya?ml|dockerfile)$|^k8s/.*\.ya?ml$|^kit/profiles/|^(k8s/migrate/migrate\.sh|k8s/build-images\.sh|kit/theme-zip\.sh|k8s/test/image-pins\.py)$'; then
+  python3 k8s/test/image-pins.py >/dev/null || exit 1
+fi
+
 exit 0

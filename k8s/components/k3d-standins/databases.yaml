@@ -1,4 +1,4 @@
-# The cloud's MySQL 8 (RDS, Cloud SQL), standing in: its master login is Ghost's (secrets/puppi3.env), as the cloud
+# The cloud's MySQL 8 (RDS, Cloud SQL), standing in: its master login is Ghost's (secrets/ghost.env), as the cloud
 # runbook sets up
 apiVersion: apps/v1
 kind: StatefulSet
@@ -17,11 +17,11 @@ spec:
     spec:
       containers:
         - name: mysql
-          image: mysql:8.0
+          image: mysql:8.0.46
           env:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
-                secretKeyRef: {name: puppi3, key: database__connection__password}
+                secretKeyRef: {name: ghost, key: database__connection__password}
           ports:
             - {name: mysql, containerPort: 3306}
           readinessProbe:
@@ -72,7 +72,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:17-alpine
+          image: postgres:17.11-alpine
           env:
             - name: POSTGRES_USER
               valueFrom:

@@ -1,0 +1,6 @@
+# Only the bridge's code goes into the image (Dockerfile): every .mjs file, at any depth, and nothing else. Never
+# data/ (the bridge's history, stats.db, a site's tokens) or node_modules/.
+**
+!**/*.mjs
+data/
+node_modules/

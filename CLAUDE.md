@@ -30,7 +30,7 @@ site, no code).
 | `instances/` | `example.env`: the instance profile, every site-level setting | `instances/CLAUDE.md` |
 | `stacks/` | The services, one Compose file each, which `kit/compose.yaml` includes and `k8s/` builds from | `stacks/CLAUDE.md` |
 | `stacks/traefik/` | Traefik: the site's routes (Go templates), middlewares, the local plugins | `stacks/traefik/CLAUDE.md` |
-| `stacks/puppi3/` | Ghost, MySQL, Ghost's own analytics (Tinybird), `grafana-ro.sh` (the folder's name is the kit's, like `ID_PREFIX`'s default) | `stacks/puppi3/CLAUDE.md` |
+| `stacks/ghost/` | Ghost, MySQL, Ghost's own analytics (Tinybird), `grafana-ro.sh` (the folder's name is the kit's, like `ID_PREFIX`'s default) | `stacks/ghost/CLAUDE.md` |
 | `stacks/postiz/` | Postiz and the bridge (`ghost-bridge/`): shares each post, social previews, clicks, every network's numbers | `stacks/postiz/CLAUDE.md`, `docs/bridge-map.md` |
 | `stacks/icecast/` | TinyIce, the live stream server (compose and `.env.example` only) | `stacks/CLAUDE.md` |
 | `stacks/monitoring/grafana/` | The dashboards (`provisioning/dashboards/json/site/`, the big ones as folders of parts) and the alert rules' source `alerts.yml`, with `@SITE_HOST@`-style placeholders; `render.py` makes them for a site, `parts.py`, `style.py`, `ro-tables.py` | `stacks/monitoring/grafana/CLAUDE.md` |

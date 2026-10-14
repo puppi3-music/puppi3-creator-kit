@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """The tables of Ghost's database that the dashboards and alert rules read (MySQL queries on
-ghost-mysql), against the ones grafana_ro may read (TABLES in stacks/puppi3/grafana-ro.sh).
+ghost-mysql), against the ones grafana_ro may read (TABLES in stacks/ghost/grafana-ro.sh).
 
   python3 stacks/monitoring/grafana/ro-tables.py           list them
   python3 stacks/monitoring/grafana/ro-tables.py --check   fail if a query reads a table grafana_ro can't, or takes a dashboard
@@ -21,7 +21,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))   # stacks/monitoring/grafana/
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
 DASHBOARDS = os.path.join(HERE, 'provisioning', 'dashboards', 'json', 'site')
 ALERTS = os.path.join(HERE, 'alerts.yml')
-GRANTS = os.path.join(ROOT, 'stacks', 'puppi3', 'grafana-ro.sh')
+GRANTS = os.path.join(ROOT, 'stacks', 'ghost', 'grafana-ro.sh')
 DATASOURCE = 'ghost-mysql'
 
 

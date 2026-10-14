@@ -1,7 +1,9 @@
-# stacks/puppi3/
+# stacks/ghost/
 
 The site itself: Ghost and its database, and Ghost's own web analytics (the `analytics` module). The folder's name
-is the kit's, like `ID_PREFIX`'s default. In a kit site, Ghost's container is `<ID_PREFIX>-ghost` (`kit/profiles/puppi3.yaml`).
+is `ghost` (kit 1.2.0; `puppi3` before). In a kit site, Ghost's container is `<ID_PREFIX>-ghost` (`kit/profiles/ghost.yaml`),
+and its data is in `GHOST_DATA_DIR`, which `kit/kit.sh` sets: the site folder's `data/ghost/`, or `data/puppi3/` (with
+`secrets/puppi3.env`) in a site made before 1.2.0, used as it is so nobody has to move anything.
 
 - Ghost 6 (`config.production.json` mounted as a single file: `kit/setup.sh` writes it in the site's folder, with the
   mail settings; it applies only when Ghost restarts), MySQL 8, and with `analytics`: traffic-analytics, tinybird-local

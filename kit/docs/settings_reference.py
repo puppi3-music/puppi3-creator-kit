@@ -30,8 +30,8 @@ TOC = re.compile(r"(<!-- generated contents -->\n).*?(<!-- /generated contents -
 SECRETS = [
     ("secrets-traefik", "secrets/traefik.env", ["stacks/traefik/.env.example"],
      "Traefik's certificates.", True),
-    ("secrets-puppi3", "secrets/puppi3.env", ["stacks/puppi3/.env.example"],
-     "Ghost's database login (the Ghost stack is called puppi3 for now).", True),
+    ("secrets-ghost", "secrets/ghost.env", ["stacks/ghost/.env.example"],
+     "Ghost's database login (secrets/puppi3.env in a site made before kit 1.2.0).", True),
     ("secrets-postiz", "secrets/postiz.env", ["stacks/postiz/.env.example"],
      "The social module: Postiz, each network's developer app, and the bridge's keys and options.", True),
     ("secrets-icecast", "secrets/icecast.env", ["stacks/icecast/.env.example", "kit/examples/icecast.env.example"],
@@ -41,7 +41,7 @@ SECRETS = [
 ]
 K8S = [
     ("k8s-ghost-mail", "secrets/ghost-mail.env", ["k8s/examples/ghost-mail.env.example"],
-     "Ghost's mail on Kubernetes (on Compose it's in Ghost's config file, data/puppi3/ghost/config.production.json).", False),
+     "Ghost's mail on Kubernetes (on Compose it's in Ghost's config file, data/ghost/ghost/config.production.json).", False),
     ("k8s-cloud", "secrets/cloud.env", ["k8s/examples/cloud.env.example"],
      "The cloud database's master login (eks and gke, with the social module).", True),
     ("k8s-s3", "secrets/s3.env", ["k8s/examples/s3.env.example"],
@@ -56,6 +56,10 @@ K8S = [
 # another Traefik): never in a site's files. Each must still be read somewhere, or the check says so.
 SET_FOR_YOU = {
     "SITE_DIR": "kit.sh: the site's folder.",
+    "BRIDGE_IMAGE": "kit.sh: the bridge's image, this kit version's published one (KIT_BRIDGE_IMAGE in kit.sh's "
+                    "environment for another; KIT_BUILD=1 builds it from your copy instead).",
+    "GHOST_ENV_FILE": "kit.sh: the Ghost stack's secrets file, secrets/ghost.env (secrets/puppi3.env in a site made before "
+                      "kit 1.2.0).",
     "LIVE_MOUNT": "kit.sh and k8s/up.sh: the mount your streaming software sends to, read from TinyIce's own config, so "
                   "the bridge counts the right one.",
     "GHOST_UPSTREAM": "The kit's Traefik profile (and k8s's Traefik): where Ghost answers.",
@@ -75,10 +79,10 @@ SET_FOR_YOU = {
 PRIVATE_WORDS = re.compile(r"puppi3\.party|nas\.pet|butterwoof|Dockge|NVMe2|Toronto|Traktor", re.I)
 
 # The files that read settings, for the checks: a ${VAR} or Traefik's env "VAR" there must be documented
-READERS = ["stacks/traefik/compose.yaml", "stacks/puppi3/compose.yaml", "stacks/postiz/compose.yaml",
+READERS = ["stacks/traefik/compose.yaml", "stacks/ghost/compose.yaml", "stacks/postiz/compose.yaml",
            "stacks/icecast/compose.yaml", "kit/compose.yaml", "kit/monitoring/compose.yaml"]
 # ...and where a documented key may be read (a whole-word match outside the example files)
-USERS = ["stacks/traefik", "stacks/puppi3", "stacks/postiz", "stacks/icecast", "stacks/monitoring/grafana", "kit",
+USERS = ["stacks/traefik", "stacks/ghost", "stacks/postiz", "stacks/icecast", "stacks/monitoring/grafana", "kit",
          "k8s", "scripts"]
 
 KEY = re.compile(r"^(#)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$")
@@ -218,8 +222,8 @@ PAGE_REL = "kit/docs/settings-reference.html"
 
 def generate():
     roles = setup_roles()
-    site = [(n, [k for k in ks if k[0] != "DATA_DIR"]) for n, ks in parse("instances/example.env")]
-    site_keys = {k[0] for _, ks in site for k in ks} | {"DATA_DIR"}
+    site = [(n, [k for k in ks if k[0] not in ("DATA_DIR", "GHOST_DATA_DIR")]) for n, ks in parse("instances/example.env")]
+    site_keys = {k[0] for _, ks in site for k in ks} | {"DATA_DIR", "GHOST_DATA_DIR"}
     sources = {}
     for sid, fname, examples, about, check in SECRETS + K8S:
         groups = []
@@ -269,7 +273,9 @@ def generate():
             "and explains every other one in the file itself.</p>\n" +
             table(rows(site, known, roles)) +
             '\n  <p><code id="var-DATA_DIR">DATA_DIR</code>: where the site keeps its data. Leave it unset: '
-            "<code>kit.sh</code> sets it to the folder's <code>data/</code>.</p>")
+            "<code>kit.sh</code> sets it to the folder's <code>data/</code>. "
+            '<code id="var-GHOST_DATA_DIR">GHOST_DATA_DIR</code>: the Ghost stack\'s folder in it, which <code>kit.sh</code> '
+            "sets too: <code>data/ghost/</code> (<code>data/puppi3/</code> in a site made before kit 1.2.0).</p>")
 
     def files_body(group_ids, intro):
         body = [intro]

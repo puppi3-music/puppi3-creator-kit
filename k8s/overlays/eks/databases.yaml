@@ -1,5 +1,5 @@
 # Ghost's MySQL is RDS for MySQL 8: Service "mysql" (Ghost's database__connection__host, grafana_ro's grants) is a
-# DNS alias of its endpoint (MYSQL_HOST, cloud-eks.env). Ghost signs in with secrets/puppi3.env's login (RDS's master
+# DNS alias of its endpoint (MYSQL_HOST, cloud-eks.env). Ghost signs in with secrets/ghost.env's login (RDS's master
 # user, or one made for it) and makes its database itself.
 apiVersion: v1
 kind: Service

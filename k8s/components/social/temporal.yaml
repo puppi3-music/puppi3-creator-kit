@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:16
+          image: postgres:16.15
           env:
             - {name: POSTGRES_USER, value: temporal}
             - name: POSTGRES_PASSWORD
@@ -134,7 +134,7 @@ spec:
     spec:
       initContainers:
         - name: wait
-          image: busybox:1.37
+          image: busybox:1.37.0
           command: [sh, -c, 'for s in postiz-temporal-postgres:5432 postiz-temporal-elasticsearch:9200; do
             until nc -z -w 2 "${s%:*}" "${s#*:}"; do echo "waiting for $s"; sleep 2; done; done']
           resources:
