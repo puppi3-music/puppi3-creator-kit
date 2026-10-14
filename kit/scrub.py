@@ -5,15 +5,15 @@ is scanned for secrets too, in case it's ever made public.
 
 1. Secrets: gitleaks (in Docker, pinned below) over this repo's whole git history, and over the kit's files.
 2. Private names: puppi3.party's addresses, NAS, home network and owner (settings_reference.PRIVATE_WORDS plus
-   EXTRA below) in the kit's files, apart from the few mentions ALLOW lists on purpose. Here the kit's files are what
-   kit/export.py would write for the kit's repo (its list, the moves, kit/kit-repo/, the marked blocks left out); in
-   the kit's own repo, every file it has.
+   EXTRA below) in the kit's files, apart from the few mentions ALLOW lists on purpose. In a site's repo that sends
+   the kit (with scripts/kit-sync.py), the kit's files are those it sends; in the kit's own repo, every file it has.
 3. History: the kit's repo's every commit (here, the one beside this repo or KIT_REPO, when it's there; in the kit's
    own repo, itself): every version of every file, the commit messages (private names, as in 2), and who made each
-   commit: author and committer must both be the kit's author (the theme's package.json: GitHub's no-reply
-   address), never a personal account. gitleaks scans that history for secrets too. A finding in a commit that's
+   commit not on GitHub yet: author and committer must both be the kit's author (the theme's package.json: GitHub's
+   no-reply address), never a personal account (one already there, like a contributor's, only mustn't name a private
+   word). gitleaks scans that history for secrets too. A finding in a commit that's
    pushed already means rewriting the kit's history (and a force push), so it's caught before the push:
-   kit/publish.sh runs this after committing and pushes only when it passes.
+   a site's scripts/kit-sync.py runs this after committing there and pushes only when it passes.
 
     python3 kit/scrub.py              # both; per file, how many lines name what (exit 1 on any finding)
     python3 kit/scrub.py -v           # ...with every line
@@ -33,6 +33,7 @@ import tempfile
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GITLEAKS = "ghcr.io/gitleaks/gitleaks:v8.30.1"
+SYNC = os.path.join(REPO, "scripts", "kit-sync.py")   # only in a site's repo that sends the kit
 
 # Beyond PRIVATE_WORDS (which the guides' build uses too): the owner's names and email, the home network, the NAS's paths
 EXTRA = re.compile(r"butterkitty|plarina|192\.168\.103\.|/home/root|bookings@", re.I)
@@ -42,7 +43,8 @@ ALLOW = [
     ("kit/scrub.py", r".", "this check's own lists"),
     ("kit/docs/settings_reference.py", r"PRIVATE_WORDS", "the guides' list of private words"),
     ("kit/theme-zip.sh", r"grep -n -i -E", "the theme zip's list of private words"),
-    ("docs/build-docs.py", r"KIT_SUBS|\(\"puppi3\.party\"", "the guides' swaps of puppi3's addresses for example.com's"),
+    ("docs/build-docs.py", r"KIT_SUBS|\(\"puppi3\.party\"",
+     "the guides' swaps of a site's addresses for example.com's (in the history: before 1.2.1)"),
     ("*", r"Copyright \(c\) 2026 puppi3-music \(DJ Puppi3\)", "the copyright line"),
     ("README.md", r"^By puppi3-music \(DJ Puppi3\)", "the author credit"),
     ("*", r"github\.com/puppi3-music/puppi3-creator-kit|puppi3-music\.github\.io/puppi3-creator-kit",
@@ -55,12 +57,13 @@ ALLOW = [
 
 
 def kit_files():
-    """{path in the kit's repo: its contents}. Here, what kit/export.py would write; in the kit's own repo (which has
-    no export.py), every file it has."""
-    if os.path.isfile(os.path.join(REPO, "kit", "export.py")):
-        sys.path.insert(0, os.path.join(REPO, "kit"))
-        import export
-        return {d: export.content(d, s) for d, s in export.plan().items()}
+    """{path in the kit's repo: its contents}. In a site's repo, the kit's files it sends (scripts/kit-sync.py); in the
+    kit's own repo, every file it has."""
+    if os.path.isfile(SYNC):
+        spec = importlib.util.spec_from_file_location("kit_sync", SYNC)
+        sync = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(sync)
+        return sync.files()
     out = subprocess.run(["git", "ls-files", "-co", "--exclude-standard"], cwd=REPO,
                          capture_output=True, text=True, check=True).stdout.split("\n")
     files = {}
@@ -107,7 +110,7 @@ def names(files, verbose, where=""):
 def kit_repo():
     """The kit's repo whose history goes public: here, the one beside this repo (or KIT_REPO), when it's there; in the
     kit's own repo, itself. None when there's none yet."""
-    if not os.path.isfile(os.path.join(REPO, "kit", "export.py")):
+    if not os.path.isfile(SYNC):
         return REPO
     path = os.environ.get("KIT_REPO") or os.path.join(os.path.dirname(REPO), "puppi3-creator-kit")
     return path if os.path.isdir(os.path.join(path, ".git")) else None
@@ -125,11 +128,15 @@ def history(repo, verbose):
     email = kit_author()["email"]
     found = 0
     commits = git("rev-list", "--all").decode().split()
+    # On GitHub already: a contributor's merged commit, or GitHub's merge, is by someone else and can't change. Only
+    # what's about to be pushed must be the kit's author (a private name in any is still a finding).
+    r = subprocess.run(["git", "-C", repo, "rev-list", "refs/remotes/origin/main"], capture_output=True, text=True)
+    pushed = set(r.stdout.split()) if r.returncode == 0 else set()
     for c in commits:
         who = git("log", "-1", "--format=%an <%ae>%n%cn <%ce>", c).decode().split("\n")[:2]
         for role, ident in zip(("author", "committer"), who):
             bad = [m.group(0) for r in (words, EXTRA) for m in r.finditer(ident)]
-            if not ident.endswith(f"<{email}>") or bad:
+            if bad or c not in pushed and not ident.endswith(f"<{email}>"):
                 found += 1
                 print(f"commit {c[:8]}: its {role} is {ident}, not the kit's author <{email}>")
         msg = git("log", "-1", "--format=%B", c).decode()

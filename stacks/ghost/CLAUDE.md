@@ -15,7 +15,9 @@ and its data is in `GHOST_DATA_DIR`, which `kit/kit.sh` sets: the site folder's 
 - Restarting Ghost takes the site down for a moment: the theme, routes, redirects, code injection and theme settings
   go through its Admin API instead (`scripts/ghost-admin.sh`).
 - Site values come from the instance profile (`instances/CLAUDE.md`): `SITE_HOST` (url, tracker endpoints) and
-  `DATA_DIR` (bind mounts), required.
+  `GHOST_DATA_DIR` (this stack's bind mounts: the folder holding `ghost/`, `db/` and `tinybird/`), required, so a
+  profile without them can't start Ghost and MySQL on an empty folder. `PYTHON_CPU_COUNT=2` on tinybird-local: one
+  CSV import worker instead of one per two CPUs (about 0.5 GB each; Ghost never imports CSV).
 - `grafana-ro.sh`: Grafana's read-only MySQL login. `grafana_ro` has SELECT on only the tables in its `TABLES`, never
   users, sessions, api_keys or settings (the monitoring module's `grants.sh` uses its `--sql`).
   `stacks/monitoring/grafana/ro-tables.py --check` keeps the dashboards to that list. Restart Grafana after a grant

@@ -39,7 +39,9 @@ A site is the same folder as on Compose (`kit/setup.sh` makes it: `site.env`, `s
   `local`/`k3d-*` use k3d's own kubeconfig and refuse any other context; other overlays ask before using kubectl's
   current context.
 - `base/`: Traefik and Ghost.
-  - Traefik: the kit's image (`images/traefik/`: the Compose version + the local plugins), not root, so entrypoints
+  - Traefik: Traefik's own image at the Compose version; the local plugins `realip` and `pagehitcountry` are ConfigMap
+    `traefik-plugins` (the stack's files; `items` put each back under `/plugins-local/src/creatorkit/<name>/`, a
+    changed plugin = a new ConfigMap name = a restart, which plugins need). Not root, so entrypoints
     `web` :8000 and `https` :8443 behind a LoadBalancer Service on 80/443 (`externalTrafficPolicy: Local`, for the
     visitor's address); the Compose stack's flags otherwise (timeouts, Cloudflare's trusted ranges, the `cf`/`le`
     resolvers on a small PVC, metrics on :8082 with Service `traefik-metrics`). Routes come only from the file
@@ -234,7 +236,7 @@ A site is the same folder as on Compose (`kit/setup.sh` makes it: `site.env`, `s
   Ghost's gateway endpoint, and the `cloud-sql-proxy` sidecar's image and args; generated names' hashes ignored. test.sh runs it for every `overlays/k3d-*`.
 - `overlays/selfhosted/` (base + mysql), `overlays/local/` (selfhosted on k3d, images from its registry, plus s3-storage and s3-gateway: Ghost's files in
   a bucket, as in a cloud).
-- `build-images.sh --registry k3d|<registry> [--platform a,b] [--tag <t>]`: builds and pushes the kit's images (Traefik with the plugins, the Icecast relay, the bridge from a folder of just its `.mjs` files (never `data/`) with `stacks/postiz/ghost-bridge/Dockerfile`, tb-setup from a
+- `build-images.sh --registry k3d|<registry> [--platform a,b] [--tag <t>]`: builds and pushes the kit's three images (the Icecast relay, the bridge from a folder of just its `.mjs` files (never `data/`) with `stacks/postiz/ghost-bridge/Dockerfile`, tb-setup from a
   folder of just its two files: the stack's folder here may hold a real `tokens.env`; tag = upstream version + a hash of
   the inputs, plus `--tag`'s; `--platform` with a comma = one `docker buildx build --push` for all of them; each with
   `org.opencontainers.image.source`, GHCR's link to the kit's repo), writes `images/built.env` (git-ignored), which

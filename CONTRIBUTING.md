@@ -43,6 +43,7 @@ next to what you change, and keep it true in the same change.
 
 | What you changed | Run | Time |
 |---|---|---|
+| Anything, before a pull request | `kit/check.sh`: the checks below that need no Docker (the guides, dashboards, bridge, shell scripts) and that every path a file names is there | seconds |
 | Any guide, setting or example | `python3 docs/build-docs.py --check` (the commit hook runs it too) | seconds |
 | The theme | `kit/theme-zip.sh` (Ghost's gscan, and no site-specific names), then the theme test: `docker compose -f kit/theme-test/compose.yaml up -d`, and `npm install` (once) and `node test.mjs` in `kit/theme-test/` (a local Ghost and a browser test; `down -v` after) | minutes |
 | The Compose kit, a stack, the bridge | `kit/test.sh`: a throwaway site, `kit.test`, checked end to end (the site, the theme, a stream, the bridge, the dashboards), then removed | several minutes |
@@ -61,15 +62,16 @@ Linux, setup asks for sudo once (each container's folders get their owners).
 None of them touch a real site, cluster or cloud account. What only a real cloud can show (its permissions, load
 balancer, database network) is for whoever runs one: say what you tried.
 
-A site runs the kit's published images and theme (each release's, below), so to try a changed bridge on a site of
-your own, build it from your copy: `KIT_BUILD=1 kit/kit.sh <folder> up -d` (the tests and the demo always do). A
+A site runs the kit's published images and theme (each release's, below), so to try a changed bridge (or analytics
+setup job) on a site of your own, build them from your copy: `KIT_BUILD=1 kit/kit.sh <folder> up -d` (the tests and
+the demo always do). A
 changed image for Kubernetes: `k8s/build-images.sh` (the Setup guide's "The images"). A changed theme:
 `kit/theme-zip.sh` builds the zip in `kit/dist/`.
 
 ## Releases
 
 A release is a version tag, `v` + `kit/VERSION`, with a `## <version>` section in `kit/CHANGELOG.md` saying what it
-changes for a site already running. The tag starts `.github/workflows/release.yml`: the kit's four images for amd64
+changes for a site already running. The tag starts `.github/workflows/release.yml`: the kit's three images for amd64
 and arm64 on GitHub's registry (`ghcr.io/puppi3-music/puppi3-creator-kit/<name>:<version>`), and a GitHub Release
 with the theme's zip and that section as its notes. It stops if the tag and `kit/VERSION` differ or the section is
 missing. Only the maintainer tags.

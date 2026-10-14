@@ -1,5 +1,5 @@
 # A release of Puppi3's Creator Kit: on a version tag (v1.2.0, pushed by ./deploy.sh --kit when kit/VERSION changes),
-# the kit's four images for amd64 and arm64 on GitHub's registry (ghcr.io/puppi3-music/puppi3-creator-kit/<name>:<version>:
+# the kit's three images for amd64 and arm64 on GitHub's registry (ghcr.io/puppi3-music/puppi3-creator-kit/<name>:<version>:
 # the bridge a Compose site runs, and what k8s/up.sh uses), and a GitHub Release with the theme's zip and that
 # version's notes from kit/CHANGELOG.md. Only in the kit's own repo; anywhere else it does nothing.
 name: Release
@@ -37,7 +37,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: The kit's images (Traefik with its plugins, tb-setup, the relay, the bridge), amd64 and arm64
+      - name: The kit's images (tb-setup, the relay, the bridge), amd64 and arm64
         run: k8s/build-images.sh --registry ghcr.io/puppi3-music/puppi3-creator-kit --platform linux/amd64,linux/arm64 --tag "$VERSION"
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1   # v7.1.0, for Ghost's theme checker

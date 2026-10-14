@@ -28,13 +28,17 @@ export SITE_DIR DATA_DIR="$SITE_DIR/data"
 # so nobody has to move anything (setup.sh, k8s/up.sh and k8s/migrate/ decide the same way)
 g=ghost; [ -d "$DATA_DIR/puppi3" ] || [ -f "$SITE_DIR/secrets/puppi3.env" ] && g=puppi3
 export GHOST_DATA_DIR="$DATA_DIR/$g" GHOST_ENV_FILE="$SITE_DIR/secrets/$g.env"
-# The bridge: this kit version's published image (KIT_BRIDGE_IMAGE for another), or with KIT_BUILD=1 built from this
-# repo's code (kit/test.sh, the demo, a changed bridge: profiles/bridge-build.yaml)
+# The kit's own images (the bridge, the analytics' tb-setup): this kit version's published ones (KIT_BRIDGE_IMAGE,
+# KIT_TB_SETUP_IMAGE for others), or with KIT_BUILD=1 built from this repo's code (kit/test.sh, the demo, a changed
+# bridge: profiles/build.yaml)
 files=(-f "$KIT/compose.yaml")
 if [ "${KIT_BUILD:-}" = 1 ]; then
-    files+=(-f "$KIT/profiles/bridge-build.yaml"); export BRIDGE_IMAGE="$ID_PREFIX-ghost-bridge:local"
+    files+=(-f "$KIT/profiles/build.yaml")
+    export BRIDGE_IMAGE="$ID_PREFIX-ghost-bridge:local" TB_SETUP_IMAGE="$ID_PREFIX-tb-setup:local"
 else
-    export BRIDGE_IMAGE="${KIT_BRIDGE_IMAGE:-ghcr.io/puppi3-music/puppi3-creator-kit/ghost-bridge:$(cat "$KIT/VERSION")}"
+    published=ghcr.io/puppi3-music/puppi3-creator-kit; version="$(cat "$KIT/VERSION")"
+    export BRIDGE_IMAGE="${KIT_BRIDGE_IMAGE:-$published/ghost-bridge:$version}"
+    export TB_SETUP_IMAGE="${KIT_TB_SETUP_IMAGE:-$published/tb-setup:$version}"
 fi
 args=(-p "$ID_PREFIX" "${files[@]}" --env-file "$SITE_DIR/site.env")
 # down: every module's containers, also those of a module switched off since they were made

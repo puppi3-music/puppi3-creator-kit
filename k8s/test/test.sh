@@ -22,7 +22,7 @@
 #     the Jobs with a proxy finishing, Postiz's and Temporal's logins made, every volume on standard-rwo
 #   - Cloudflare-only: a visitor from outside Cloudflare's ranges gets 403; from a trusted address the site loads
 #     through Traefik (https on its own certificate: TLS_RESOLVER=self); with BEHIND_CLOUDFLARE=false, from anywhere
-#   - Traefik runs the kit's image, its plugins load, no router or middleware in error, the dashboard on
+#   - Traefik runs its own image, the kit's plugins (a ConfigMap) load, no router or middleware in error, the dashboard on
 #     traefik.<LAN_DOMAIN>
 #   - Ghost's mail settings from the site's secrets/ghost-mail.env
 #   - Ghost with the kit's theme (uploaded through the Admin API) and a post; killing the Ghost and MySQL pods brings
@@ -182,7 +182,7 @@ if [ "$OVERLAY" = k3d-gke ]; then
     check "...the bridge reads Postiz's database through its proxy" eval 'k exec deploy/postiz-ghost-bridge -c bridge -- node -e "require(\"net\").connect(5432,\"postiz-postgres\").on(\"connect\",()=>process.exit(0)).on(\"error\",()=>process.exit(1))"'
     check "every volume is on standard-rwo, and bound" sc_bound standard-rwo
 fi
-check "Traefik runs the kit's image" grep -q "image: k3d-creator-kit-registry:5111/creator-kit/traefik:" "$S/data/k8s/rendered.yaml"
+check "Traefik runs its own image (the kit's plugins from a ConfigMap)" grep -q "image: traefik:v" "$S/data/k8s/rendered.yaml"
 
 echo "== Cloudflare-only"
 check "a visitor from outside Cloudflare gets 403" [ "$(code "${CF[@]}" https://kit.test/)" = 403 ]

@@ -1,5 +1,5 @@
 # Postiz and the bridge: the social profile. The bridge is the kit's published image, its code inside (kit.sh sets
-# BRIDGE_IMAGE to this kit version's; KIT_BUILD=1 builds it here instead: bridge-build.yaml); Temporal's config from the
+# BRIDGE_IMAGE to this kit version's; KIT_BUILD=1 builds it here instead: build.yaml); Temporal's config from the
 # repo. (The NAS's stack builds a base and mounts the code, a copy deploy.sh sends to its data folder.)
 services:
   postiz:

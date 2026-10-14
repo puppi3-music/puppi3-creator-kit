@@ -400,7 +400,7 @@ rel() { python3 -c 'import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2
         done
     else
         # the release's, published for this kit version (.github/workflows/release.yml)
-        for name in traefik tb-setup icecast-relay ghost-bridge; do
+        for name in tb-setup icecast-relay ghost-bridge; do
             echo "  - name: creator-kit/$name"
             echo "    newName: $KIT_IMAGES/$name"
             echo "    newTag: \"$KIT_VERSION\""

@@ -3,6 +3,7 @@
 # Puppi3's Creator Kit 🐾
 
 [![Licence: AGPL-3.0](https://img.shields.io/badge/licence-AGPL--3.0-blue)](LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/puppi3-music/puppi3-creator-kit?label=release)](https://github.com/puppi3-music/puppi3-creator-kit/releases)
 
 A self-hosted home for your work as a creator: a Ghost website and newsletter, web analytics with no third party, a
 live stream with a LIVE NOW bar, each post shared to your social networks, every network's numbers in one set of
@@ -11,11 +12,8 @@ own cluster, Amazon EKS or Google GKE).
 
 **Guides:** [Setup](kit/docs/setup-guide.html) · [Operations](kit/docs/operations-guide.html) ·
 [Theme](kit/docs/theme-guide.html) · [Posting](kit/docs/posting-guide.html) · [Analytics](kit/docs/analytics-guide.html) ·
-[Settings reference](kit/docs/settings-reference.html)
-
-The guides are web pages in `kit/docs/`: read them online at https://puppi3-music.github.io/puppi3-creator-kit/kit/docs/,
-or open `kit/docs/index.html` from your copy. (On GitHub's file view a guide shows as its source.) The `CLAUDE.md`
-files and `docs/bridge-map.md` are notes for whoever works on the kit itself ([CONTRIBUTING](CONTRIBUTING.md)).
+[Settings reference](kit/docs/settings-reference.html) (online at
+[puppi3-music.github.io/puppi3-creator-kit](https://puppi3-music.github.io/puppi3-creator-kit/kit/docs/))
 
 ## What it looks like
 
@@ -47,15 +45,18 @@ The site is always there. Each other part is a module you switch on in your site
 Phone notifications go through ntfy: [ntfy.sh](https://ntfy.sh) on a private topic that setup makes up, or your own
 ntfy server. Install the ntfy app and subscribe to that topic.
 
+Every image runs at an exact version (Ghost 6.69.0, MySQL 8.0.46, ...), so nothing changes under you until you update
+the kit. The kit's own images and its theme come ready-made with each release, for Intel/AMD and ARM: there's nothing
+to build.
+
 ## What you need
 
 - **A machine** running Linux, macOS or Windows (inside WSL2), on Intel/AMD or ARM. A home server, a NAS or a rented
-  server all work. Only one site per machine is allowed: its Traefik takes the web ports, and some of its
-  containers have fixed names like `traefik` and `postiz`.
+  server all work. One kit site per machine: its Traefik takes the web ports, and some of its containers have fixed
+  names like `traefik` and `postiz`.
 - **Docker** with Compose 2.24 or newer, and **Python 3**.
 - **Ports 80 and 443** that the internet reaches, and 8222 for streaming. Each can be another: see `HTTP_PORT` and
   `LIVE_PORT` in the [Settings reference](kit/docs/settings-reference.html).
-- **Nothing to build:** the kit's own images and its theme come ready-made with each release.
 - **A domain** whose DNS you can change.
 
 On Linux, setup asks for `sudo` once, to give each service's folders to the user it runs as.
@@ -79,28 +80,18 @@ and 50 GB of free disk. On a Mac or Windows, Docker Desktop's own settings must 
 Resources). Disk grows with what you upload, Prometheus's history (up to 10 GB, then it drops the oldest) and your
 visitors' page hits (small). The [Setup guide](kit/docs/setup-guide.html#before-how-big) has the detail.
 
-## Getting the kit
+## Setting up a site
 
 ```sh
 git clone https://github.com/puppi3-music/puppi3-creator-kit.git
 cd puppi3-creator-kit
 ```
 
-Or **Code → Download ZIP** on GitHub, and unzip it. With git, an update is one `git pull`; with a ZIP, you download
-the new one and move your site's folder across (the [Operations guide](kit/docs/operations-guide.html#upgrade) says how).
-Your version is in `kit/VERSION`, and what each one changes in `kit/CHANGELOG.md`.
-
-## Setting up a site
-
-The [Setup guide](kit/docs/setup-guide.html) has it all: Compose and Kubernetes, Cloudflare or not, the clouds, and every
-step to finish by hand. In short, on one machine:
-
-**Trying it before your domain points here?** Answer *yes* to setup's first question. The site uses Traefik's own
-certificate and sends no phone alerts (its public checks would fail until the DNS is there), and setup says how to
-reach it from your browser. The Setup guide's [Trying it at home first](kit/docs/setup-guide.html#tryout) has the rest.
+(Or **Code → Download ZIP** on GitHub, and unzip it.) The [Setup guide](kit/docs/setup-guide.html) has every step:
+Compose and Kubernetes, Cloudflare or not, the clouds. In short, on one machine:
 
 1. **Make the site's folder:** `kit/setup.sh kit/sites/mysite`. It asks for the address, the name, the modules and a
-   few more things. Then it writes the folder:
+   few more things, then writes the folder:
    - `site.env`: your answers, with every other setting explained in it.
    - `secrets/`: random passwords, and the place for your API keys.
    - `data/`: everything the site keeps.
@@ -109,35 +100,26 @@ reach it from your browser. The Setup guide's [Trying it at home first](kit/docs
    volumes (the [Operations guide](kit/docs/operations-guide.html#backup) says how to back up both).
 2. **Start it:** `kit/kit.sh kit/sites/mysite up -d`. The first start downloads the images and takes a few minutes.
    `kit.sh` takes any `docker compose` command: `ps`, `logs -f`, `down`.
-3. **Finish by hand:** setup prints the steps for your modules. In short:
+3. **Finish by hand:** setup prints the steps for your modules:
    - DNS for the site, `live.`, `postiz.` and `grafana.`.
    - Ghost's owner account.
-   - The theme: `puppi3-creator-kit-theme.zip` from [the kit's release](https://github.com/puppi3-music/puppi3-creator-kit/releases) for your version
-     (`kit/VERSION`), which you upload in Ghost Admin.
-   - The redirects file.
-   - Your Postiz account and networks.
-   - The Ghost webhook to the bridge.
-   - The ntfy topic.
+   - The theme: `puppi3-creator-kit-theme.zip` from [the release](https://github.com/puppi3-music/puppi3-creator-kit/releases)
+     for your version (`kit/VERSION`), uploaded in Ghost Admin.
+   - The short links: `kit/redirects.yaml`, uploaded in Ghost Admin.
+   - Your Postiz account and networks, and the Ghost webhook to the bridge.
+   - The ntfy topic on your phone.
    - Your streaming software's stream settings.
 
-   That's it: your site's up! 🐶
+That's it: your site's up! 🐶
+
+**Trying it before your domain points here?** Answer *yes* to setup's first question. The site uses Traefik's own
+certificate and sends no phone alerts (its public checks would fail until the DNS is there), and setup says how to
+reach it from your browser. The Setup guide's [Trying it at home first](kit/docs/setup-guide.html#tryout) has the rest.
 
 To change a setting, edit `site.env` or a file in `secrets/` and run `kit/kit.sh <folder> up -d` again. How posts are
-shared (which networks, what posts by itself, the tags you use in Ghost) is in `site.env` too.
-Every setting, what it does and its default: [the Settings reference](kit/docs/settings-reference.html).
-
-| Guide | For |
-|---|---|
-| [Setup](kit/docs/setup-guide.html) | Setting up a site: Compose or Kubernetes, Cloudflare or not, every step to finish by hand |
-| [Operations](kit/docs/operations-guide.html) | Updating the kit, backups, moving the site between machines or to a cloud, troubleshooting |
-| [Theme](kit/docs/theme-guide.html) | The theme's settings, the LIVE NOW bar, links to your other platforms, short links, another theme |
-| [Posting](kit/docs/posting-guide.html) | Whoever posts: tags, what each network gets, finishing Instagram and TikTok posts |
-| [Analytics](kit/docs/analytics-guide.html) | Reading the dashboards: which one answers what |
-| [Settings reference](kit/docs/settings-reference.html) | Every setting, what it does and its default |
-
-To switch a module on or off later, change `MODULES` in `site.env` and run `up -d` again. With `live` off there's no
-stream server and no LIVE NOW bar (the theme shows it only once its Live stream URL is set). Its passwords are made
-anyway, so switching it on later needs only the DNS name for the stream and the theme's Live stream URL.
+shared (which networks, what posts by itself, the tags you use in Ghost) is in `site.env` too. To switch a module on or
+off later, change `MODULES` and run `up -d` again: with `live` off there's no stream server and no LIVE NOW bar, and
+its passwords are made anyway, so switching it on later needs only its DNS name and the theme's Live stream URL.
 
 ## On Kubernetes
 
@@ -159,28 +141,49 @@ With `monitoring` on, Grafana is at `https://grafana.<your site>` (behind Cloudf
 `http://grafana.<LAN_DOMAIN>` at home. Sign in as `admin` with `GRAFANA_ADMIN_PASSWORD` from
 `secrets/monitoring.env`.
 
-The dashboards and alert rules come with the kit, made for your site each time `kit.sh` runs. Your names, your
-addresses and your time zone go in, and anything for a module or network you switched off is left out. So don't
-edit them in Grafana: changes there don't stay.
+The dashboards and alert rules come with the kit, made for your site each time `kit.sh` runs: your names, your
+addresses and your time zone go in, and anything for a module or network you switched off is left out. So don't edit
+them in Grafana: changes there don't stay.
 
-The alerts cover:
-- the site or the live stream going down
-- errors
-- a nearly full disk
-- visitors no longer being counted
-- spam complaints
-- failed newsletters
-- stuck social posts
-- a network's numbers going stale
+The alerts cover the site or the live stream going down, errors, a nearly full disk, visitors no longer being
+counted, spam complaints, failed newsletters, stuck social posts and a network's numbers going stale. They go to your
+ntfy topic. A network you list in `NETWORKS` but haven't set up yet shows as an alert error until you do: set it up,
+or take it out of `NETWORKS`.
 
-They go to your ntfy topic. A network you list in `NETWORKS` but haven't set up yet shows as an alert error until
-you do: set it up, or take it out of `NETWORKS`.
+## Updating
+
+Your version is in `kit/VERSION`, and [`kit/CHANGELOG.md`](kit/CHANGELOG.md) says what each one changes for a running site:
+read it first, and take a backup (a newer Ghost moves its database forward for good). Then:
+
+```sh
+git pull
+kit/kit.sh kit/sites/mysite pull --ignore-buildable
+kit/kit.sh kit/sites/mysite up -d
+```
+
+If the theme or the short links changed, upload the new ones in Ghost Admin. The [Operations
+guide](kit/docs/operations-guide.html#upgrade) has the details: a ZIP copy, Kubernetes, new settings and going back.
+
+## The guides
+
+| Guide | For |
+|---|---|
+| [Setup](kit/docs/setup-guide.html) | Setting up a site: Compose or Kubernetes, Cloudflare or not, every step to finish by hand |
+| [Operations](kit/docs/operations-guide.html) | Updating the kit, backups, moving the site between machines or to a cloud, troubleshooting |
+| [Theme](kit/docs/theme-guide.html) | The theme's settings, the LIVE NOW bar, links to your other platforms, short links, another theme |
+| [Posting](kit/docs/posting-guide.html) | Whoever posts: tags, what each network gets, finishing Instagram and TikTok posts |
+| [Analytics](kit/docs/analytics-guide.html) | Reading the dashboards: which one answers what |
+| [Settings reference](kit/docs/settings-reference.html) | Every setting, what it does and its default |
+
+They're web pages in `kit/docs/`: read them [online](https://puppi3-music.github.io/puppi3-creator-kit/kit/docs/), or
+open `kit/docs/index.html` from your copy (GitHub's file view shows a guide as its source).
 
 ## Changing the kit
 
 Fixes, new networks and reports from your own site are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) says where things
 are and which check fits a change. The checks build throwaway sites on your own computer (Linux, a Mac, or Windows
-with WSL2), never on your real one. To try the kit for your own site, use setup's try-out ([Setting up a site](#setting-up-a-site)).
+with WSL2), never on your real one. The `CLAUDE.md` files and `docs/bridge-map.md` are working notes for whoever
+changes the kit, people and coding assistants alike.
 
 ## Licence and credit
 

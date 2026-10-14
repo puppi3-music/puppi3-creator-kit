@@ -15,6 +15,13 @@ the checks' own word lists, the guides' swaps); then the repo's whole history th
 file, the messages, author and committer both the theme's author). `--names` skips Docker, `-v` prints each line. It
 only reports; a mention meant to stay goes in `ALLOW` with its reason.
 
+`check.sh [--here <repo>]`: the checks that need no Docker, in seconds: `check_refs.py` (every repo path a file names
+is in the repo, every Traefik plugin a file loads is there: one missing turns them all off; `ALLOW` for a mention
+that's fine), the guides' build, the dashboards' checks and a render for the example profile, the bridge's modules,
+every shell script's syntax. A site repo that sends the kit runs it on the kit's copy with `--here` itself, so a path
+only that site has counts as missing. A site's own notes for a folder may be in a `CLAUDE.site.md` beside its
+CLAUDE.md (never in the kit's repo).
+
 **For any creator.** The kit is for artists, podcasters, writers, makers and musicians alike: keep its words neutral
 ("streaming software", "the featured link", "your other platforms", made-up creators in examples). A site's own
 wording goes in its `site.env` (the bridge's `FEATURED_*` lines).
@@ -140,9 +147,11 @@ to move anything. Nothing of a site goes in
   dashboard is at `traefik.<LAN_DOMAIN>`). The bridge is the published image with its code inside
   (`BRIDGE_IMAGE`, which kit.sh sets to `ghcr.io/puppi3-music/puppi3-creator-kit/ghost-bridge:<kit/VERSION>`,
   `KIT_BRIDGE_IMAGE` for another; `build: !reset null`, `pull_policy: missing`, `volumes: !override` with only its
-  `data/`, `user: root` as the stack's base runs it, since its data folder is whoever made the site's). `KIT_BUILD=1`
-  adds `profiles/bridge-build.yaml` (a second `-f`, after the includes): built from `stacks/postiz/ghost-bridge/`'s
-  Dockerfile (its `.dockerignore` keeps the build to the `.mjs` files, never `data/`) as `<ID_PREFIX>-ghost-bridge:local`
+  `data/`, `user: root` as the stack's base runs it, since its data folder is whoever made the site's). tb-setup the
+  same (`TB_SETUP_IMAGE`, `KIT_TB_SETUP_IMAGE`; kit 1.2.1: a site's own build kept its old version over an update).
+  `KIT_BUILD=1` adds `profiles/build.yaml` (a second `-f`, after the includes): both built from this repo, the bridge
+  from `stacks/postiz/ghost-bridge/`'s Dockerfile (its `.dockerignore` keeps the build to the `.mjs` files, never
+  `data/`), tb-setup from `stacks/ghost/tinybird/`, as `<ID_PREFIX>-ghost-bridge:local` and `<ID_PREFIX>-tb-setup:local`
   (named per site: a fixed name would replace another site's or the NAS stack's image), `pull_policy: build`;
   `local-site.sh` sets it for the test and the demo, k8s's test for its fake NAS. Traefik's `HTTPS_REDIRECT` (default true) turns on `kit-site.yml`'s
   http->https and www->site routers.
@@ -190,7 +199,10 @@ to move anything. Nothing of a site goes in
   social preview shot: it needs Postiz with real networks connected. Needs the same ports as test.sh (`LIVE_PORT`
   too), ffmpeg with `gradients` (4.4+), cwebp.
 - `VERSION` and `CHANGELOG.md`: the kit's version and what each one changes for a running site (the Operations
-  guide's update section, and ZIP users, read them). A release bumps both.
+  guide's update section, and ZIP users, read them). A release bumps both, and is the tag `v<VERSION>` on the kit's
+  repo (`CONTRIBUTING.md`, Releases): `.github/workflows/release.yml` builds the three images for amd64 and arm64 onto
+  GHCR (`k8s/build-images.sh --platform ... --tag <VERSION>`) and a GitHub Release with the theme's zip and the
+  changelog section as its notes (Actions pinned by commit). Only the maintainer tags.
 
 ## The kit's theme (`theme/`)
 

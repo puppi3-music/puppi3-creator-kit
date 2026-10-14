@@ -32,6 +32,10 @@ services:
     profiles: [analytics]
   tb-setup:
     profiles: [analytics]
+    # this kit version's published image (kit.sh sets it; KIT_BUILD=1 builds it here instead: build.yaml)
+    build: !reset null
+    image: ${TB_SETUP_IMAGE:?run through kit/kit.sh}
+    pull_policy: missing
     environment:
       # tokens.env to the site folder's owner: compose reads it (env_file) as the user who runs kit.sh
       TOKENS_OWNER_FROM_FOLDER: "true"

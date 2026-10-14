@@ -1,0 +1,14 @@
+# KIT_BUILD=1 (kit.sh adds this file): the kit's two Compose images built from this repo's code instead of the
+# release's published ones, for kit/test.sh, the demo and anyone changing them. Named per site (a fixed name would
+# replace another site's); built at each up (pull_policy: build).
+services:
+  postiz-ghost-bridge:
+    build:
+      context: ../stacks/postiz/ghost-bridge   # (relative to kit/, the project's folder) Dockerfile, .dockerignore
+    image: ${ID_PREFIX:-site}-ghost-bridge:local
+    pull_policy: build
+  tb-setup:
+    build:
+      context: ../stacks/ghost/tinybird        # its dockerfile and setup.sh
+    image: ${ID_PREFIX:-site}-tb-setup:local
+    pull_policy: build
