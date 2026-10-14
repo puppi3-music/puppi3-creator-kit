@@ -269,7 +269,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
     <li><a href="#finish">Finish by hand</a></li>
     <li><a href="#k8s">Kubernetes</a></li>
     <li><a href="#cloud">EKS or GKE</a></li>
-    <li><a href="#test">Trying it first</a></li>
+    <li><a href="#test">Checking that the kit works</a></li>
     <li><a href="#after">Changing things later</a></li>
   </ol>
 </nav>
@@ -287,8 +287,8 @@ header.top .pup svg{display:block;width:100%;height:auto}
   <div class="tablewrap"><table>
     <thead><tr><th>For</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td>Everyone</td><td>A domain whose DNS you control; the kit itself (<code>git clone https://github.com/puppi3-music/puppi3-creator-kit.git</code>, or the ZIP from GitHub); Python 3; an email address (Let's Encrypt writes to it about your certificates); Node.js only for the theme's check before you upload it</td></tr>
-      <tr><td>Compose</td><td>Docker with Compose 2.24 or newer, on a machine that ports 80 and 443 reach from the internet (and 8222, with the <code>live</code> module, for your streaming software). Those are the only ports it opens to others (Temporal's admin page, with <code>social</code>, is on <code>127.0.0.1:8233</code>, this machine only); one that's taken can be another (<code>HTTP_PORT</code>, <code>HTTPS_PORT</code>, <code>LIVE_PORT</code> in <code>site.env</code>; Let's Encrypt's <code>le</code> needs 443 itself). <b>One kit site per Docker host</b>: its Traefik takes the web ports, and some of its containers have fixed names (<code>traefik</code>, <code>tinyice</code>, <code>postiz</code>...), so <code>kit.sh</code> stops if another container already has one.</td></tr>
+      <tr><td>Everyone</td><td>A domain whose DNS you control; the kit itself (<code>git clone https://github.com/puppi3-music/puppi3-creator-kit.git</code>, or the ZIP from GitHub); Python 3; an email address (Let's Encrypt writes to it about your certificates); for the theme, <code>zip</code> and <code>unzip</code> to build it (most Linux systems need to install them) and Node.js only for its check before you upload it</td></tr>
+      <tr><td>Compose</td><td>Docker with Compose 2.24 or newer, on a machine running Linux, macOS or Windows (inside WSL2, with the kit in WSL's own folders rather than on the Windows drive), Intel/AMD or ARM, that ports 80 and 443 reach from the internet (and 8222, with the <code>live</code> module, for your streaming software). Those are the only ports it opens to others (Temporal's admin page, with <code>social</code>, is on <code>127.0.0.1:8233</code>, this machine only); one that's taken can be another (<code>HTTP_PORT</code>, <code>HTTPS_PORT</code>, <code>LIVE_PORT</code> in <code>site.env</code>; Let's Encrypt's <code>le</code> needs 443 itself). <b>One kit site per Docker host</b>: its Traefik takes the web ports, and some of its containers have fixed names (<code>traefik</code>, <code>tinyice</code>, <code>postiz</code>...), so <code>kit.sh</code> stops if another container already has one.</td></tr>
       <tr><td>Kubernetes</td><td><code>kubectl</code> pointed at the cluster, a default StorageClass, a way for a Service of type LoadBalancer to get an outside address, a registry the cluster pulls from, and Docker on your own machine to build the kit's four images</td></tr>
       <tr><td><code>social</code></td><td>A developer app for each network you post to (Postiz's docs say how for each one); later, optional keys for SoundCloud, Cloudflare and Search Console numbers</td></tr>
       <tr><td><code>live</code></td><td>Software that streams Ogg to an Icecast server (butt, Mixxx, ffmpeg and most broadcasting and DJ apps do)</td></tr>
@@ -356,7 +356,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
 kit/kit.sh kit/sites/mysite logs -f ghost # one part's log
 kit/kit.sh kit/sites/mysite down          # stop it (the data stays)</pre></div>
   <p>Open <code>https://&lt;your site&gt;/</code>: Ghost's welcome page means it works. Then <a href="#finish">finish by hand</a>.</p>
-  <div class="note"><b class="label">On Linux</b><p>Setup asks for sudo once to give the stream server, Prometheus and Grafana their folders (each runs as its own user).</p></div>
+  <div class="note"><b class="label">On Linux</b><p>Setup asks for sudo once to give each part its folders: the stream server, Prometheus, Grafana, the database (MySQL) and Postiz's search engine each run as their own user, and can't write to a folder that's yours.</p></div>
   <p>If it stops with <b>port is already allocated</b>, something else on the machine has that port: stop it, or give the kit another one (<code>HTTP_PORT</code>, <code>HTTPS_PORT</code>, <code>LIVE_PORT</code> in <code>site.env</code>) and start again.</p>
 </section>
 
@@ -367,7 +367,6 @@ kit/kit.sh kit/sites/mysite down          # stop it (the data stays)</pre></div>
     <li><b>Reaching it:</b> your browser needs to find the site's names on your computer. Add a line to your hosts file (<code>/etc/hosts</code> on a Mac or Linux) with every name setup listed, such as <code>127.0.0.1 example.com www.example.com live.example.com postiz.example.com grafana.example.com</code>. The home-network names (<code>grafana.localhost</code> and the like) need nothing: browsers send <code>*.localhost</code> to your own machine. The browser warns about the certificate once (it's Traefik's own, not a real one). From a terminal: <code>curl -k --resolve example.com:443:127.0.0.1 https://example.com/</code>.</li>
     <li><b>What works:</b> Ghost and its admin (setup turns off its sign-in codes by email for a try-out, as there's no mail service yet; turn them back on with the real thing: <a href="#finish-ghost">Mail first</a>), the theme, the short links, the analytics (your own visits are counted), Grafana, Postiz and its sign-up.</li>
     <li><b>What waits for the real thing:</b> certificates from Let's Encrypt, Ghost's webhook to the bridge (Ghost sends it only to a public address), the networks' sign-ins, and your phone's alerts. Grafana's public checks can't reach a name only your computer knows, so Health shows the site, Ghost's backend, the live stream and the certificate as down or empty, and the "is down" and "Ghost isn't answering" alerts fire in Grafana (not on your phone: a try-out has no notifications). That's expected.</li>
-    <li><b>On a Mac or Windows:</b> Health's container and disk tiles stay empty (they read the Linux host, which Docker Desktop hides).</li>
   </ul>
   <p>When the domain is ready: point its DNS here, set <code>TLS_RESOLVER</code> (and <code>BEHIND_CLOUDFLARE</code>) for the real certificates and <code>NTFY_URL</code> for phone alerts in <code>site.env</code>, give Ghost its mail and set <code>staffDeviceVerification</code> back to <code>true</code> in <code>data/puppi3/ghost/config.production.json</code>, and start again (<code>up -d --force-recreate ghost</code> for Ghost's file).</p>
   <p>To try it and keep nothing: <code>kit/kit.sh &lt;folder&gt; down -v</code>, then delete the folder. Docker keeps what it downloaded and built (several GB of images) and a few unnamed volumes; to free that space too:</p>
@@ -394,7 +393,6 @@ docker image prune -a      # every image no container uses: also other projects'
     <li>In Ghost, Settings, Integrations, the Custom tab, add a custom integration. Its Admin API key goes in <code>GHOST_ADMIN_API_KEY</code> (the Social preview button). Give it a webhook: event <b>Post published</b>, address <code>https://postiz.&lt;your site&gt;/ghost-webhook</code>, secret = <code>GHOST_WEBHOOK_SECRET</code> from <code>secrets/postiz.env</code>. Ghost sends it only to a public address: <code>postiz.&lt;your site&gt;</code> must resolve to one from the server (so not a home-network address, even if your home DNS gives one).</li>
     <li>To see what it would post before anything goes out: <code>GHOST_BRIDGE_DRY_RUN=true</code> in <code>secrets/postiz.env</code>. The bridge then posts nothing, and logs and previews what it would; set it back to <code>false</code> when you're happy. While it's on, its phone notifications are off too, unless you also set <code>DRY_RUN_NTFY=true</code>.</li>
     <li>If you use the manual drafts (the default for Instagram and TikTok), make a tag called <b>Post in app</b> once in Postiz's post editor, or change <code>DRAFT_TAG</code> in <code>site.env</code>.</li>
-    <li>Compose with <code>analytics</code>: for the site's own numbers on the Platforms dashboard, copy <code>tinybird__adminToken</code> from <code>data/puppi3/tinybird/tokens.env</code> to <code>TINYBIRD_TOKEN</code> in <code>secrets/postiz.env</code>. (Kubernetes does this itself.)</li>
     <li>Start again (<code>kit/kit.sh &lt;folder&gt; up -d</code> or <code>k8s/up.sh &lt;folder&gt; &lt;overlay&gt;</code>), then publish a test post with the internal tag <code>#nosocial</code> to see that nothing goes out, and a real one when you're ready.</li>
   </ol>
   <p>Whoever posts: the <a href="posting-guide.html">Posting guide</a>. How posts are shared (which networks, what posts by itself, the tags) is set in <code>site.env</code>; the defaults post Bluesky and Threads by themselves and make Instagram and TikTok drafts with a phone notification for each.</p>
@@ -404,7 +402,7 @@ docker image prune -a      # every image no container uses: also other projects'
   <p>In your streaming software, an Icecast stream: server <code>live.&lt;your site&gt;</code>, or the server's own address when the site is behind Cloudflare (which doesn't pass this port), port 8222 (or your <code>LIVE_PORT</code>), mount <code>/stream-ogg</code>, user <code>source</code>, password <code>TINYICE_SOURCE_PASSWORD</code> from <code>secrets/icecast.env</code>, format Ogg (Vorbis or Opus, either works). It goes straight to the stream server, not through Traefik (which would drop the audio). On Kubernetes, port 8222 is the <code>tinyice-source</code> Service's own outside address.</p>
   <p>TinyIce's admin page is <code>http://tinyice.&lt;home domain&gt;</code>, from home, with <code>TINYICE_ADMIN_USER</code> and <code>TINYICE_ADMIN_PASSWORD</code>.</p>
   <h3 id="finish-grafana">Grafana</h3>
-  <p><code>https://grafana.&lt;your site&gt;</code>, or <code>http://grafana.&lt;home domain&gt;</code> at home: user <code>admin</code>, password <code>GRAFANA_ADMIN_PASSWORD</code> in <code>secrets/monitoring.env</code>. The dashboards are made for your site each time the site starts, so changes made in Grafana don't stay. A network in <code>NETWORKS</code> that isn't set up yet shows as an alert error until you set it up or take it out. On Docker Desktop (a Mac or Windows), Health's container and disk tiles stay empty: they need a Linux host. Reading the dashboards: the <a href="analytics-guide.html">Analytics guide</a>.</p>
+  <p><code>https://grafana.&lt;your site&gt;</code>, or <code>http://grafana.&lt;home domain&gt;</code> at home: user <code>admin</code>, password <code>GRAFANA_ADMIN_PASSWORD</code> in <code>secrets/monitoring.env</code>. The dashboards are made for your site each time the site starts, so changes made in Grafana don't stay. A network in <code>NETWORKS</code> that isn't set up yet shows as an alert error until you set it up or take it out. Reading the dashboards: the <a href="analytics-guide.html">Analytics guide</a>.</p>
 </section>
 
 <section id="k8s">
@@ -468,14 +466,14 @@ UP_TIMEOUT=1200 k8s/up.sh kit/sites/mysite selfhosted</pre></div>
 </section>
 
 <section id="test">
-  <h2>Trying it first</h2>
-  <p>On a Mac with Docker Desktop, the kit can build a throwaway site and check every part end to end, then remove it:</p>
+  <h2>Checking that the kit works</h2>
+  <p>For whoever changes the kit (to try it for your own site, use the <a href="#tryout">try-out</a> instead): on your own computer, Linux, a Mac or Windows inside WSL2, the kit can build a throwaway site, check every part end to end, then remove it. It never touches a real site.</p>
   <div class="code"><pre>kit/test.sh                               # Compose: the site kit.test
 k8s/test/test.sh                          # Kubernetes, on a k3d cluster it makes (local overlay)
 k8s/test/test.sh --overlay k3d-eks        # the eks overlay, with stand-ins for RDS and S3
 k8s/test/test.sh --overlay k3d-gke        # the gke overlay, with stand-ins for Cloud SQL and Cloud Storage
 k8s/test/test.sh --render-only            # every overlay rendered and checked, no cluster (a minute)</pre></div>
-  <p>The Compose test needs ports 80, 443, 8222 free (<code>LIVE_PORT=&lt;another&gt; kit/test.sh</code> for the stream's) and ffmpeg; the Kubernetes ones also need <code>k3d</code>, <code>kubeconform</code> and 12 GB of memory for Docker. <code>--keep</code> leaves the site up to look around.</p>
+  <p>The Compose test needs ports 80, 443, 8222 free (<code>LIVE_PORT=&lt;another&gt; kit/test.sh</code> for the stream's), ffmpeg, Python 3, Node.js 20 or newer and a browser for it (<code>npm install</code> and <code>npx playwright install --with-deps chromium</code> in <code>kit/theme-test/</code>); it says what's missing; the Kubernetes ones also need <code>k3d</code>, <code>kubeconform</code> and 12 GB of memory for Docker. <code>--keep</code> leaves the site up to look around.</p>
 </section>
 
 <section id="after">

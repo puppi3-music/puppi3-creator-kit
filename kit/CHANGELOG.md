@@ -3,6 +3,28 @@
 What each version of Puppi3's Creator Kit changes for a site already running. Your version is in `kit/VERSION`.
 How to update: the Operations guide (`kit/docs/operations-guide.html#upgrade`).
 
+## 1.1.1
+
+Fixes for Linux, Docker 29 and Docker Desktop.
+
+- On Linux, a site set up by a user other than root now starts. Setup gives the database (MySQL), Postiz's search
+  engine and Prometheus's data the owners they run as, and leaves Prometheus's folder to you so `kit.sh` can write
+  its settings there. Tinybird's tokens file is now yours too, so the analytics start. Your site, if it's on Linux
+  and stopped on its first start: `sudo chown -R $(id -u):$(id -g) data/monitoring/prometheus`, then
+  `kit/setup.sh <folder>` again (it keeps your files and settings), then `kit/kit.sh <folder> up -d --build`.
+- Health's container panels (CPU and memory per container) work again with Docker 29 and Docker Desktop, whose
+  newer image store the old cAdvisor couldn't read. Your site: `kit/kit.sh <folder> up -d`.
+- Health's disk tile works on a Mac or Windows: setup now sets `DISK_MOUNT=/var/lib/docker` there. Your site, on
+  Docker Desktop: add that line to `site.env`, then `kit/kit.sh <folder> up -d`.
+- No more copying Tinybird's token: the bridge reads it itself, so Ghost's own numbers reach the Platforms dashboard.
+  Your site: `kit/kit.sh <folder> up -d`. A `TINYBIRD_TOKEN` you copied into `secrets/postiz.env` can stay, or be
+  emptied.
+- On Linux, a renamed stream mount (in TinyIce's admin) now reaches the bridge when TinyIce's settings file isn't
+  yours. Your site: nothing.
+- `kit/theme-zip.sh` says when `zip` or `unzip` is missing.
+- For contributors: `kit/test.sh` and `kit/demo/demo.sh` run on Linux, a Mac or Windows inside WSL2
+  (CONTRIBUTING.md).
+
 ## 1.1.0
 
 The kit speaks to any creator, not only DJs.

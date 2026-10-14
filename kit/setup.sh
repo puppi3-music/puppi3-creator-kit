@@ -82,6 +82,9 @@ if [ ! -f "$SITE_DIR/site.env" ]; then
     [ -n "$chans" ] && setkey "$SITE_DIR/site.env" CHANNELS "${chans#,}"
     setkey "$SITE_DIR/site.env" GRAFANA_HOST "grafana.$SITE_HOST"
     setkey "$SITE_DIR/site.env" GRAFANA_URL "https://grafana.$SITE_HOST"
+    # Docker Desktop (a Mac, Windows): its machine's / is a kind node-exporter skips, so Health's disk tile reads the
+    # disk Docker keeps its data on
+    docker info -f '{{.OperatingSystem}}' 2>/dev/null | grep -q 'Docker Desktop' && setkey "$SITE_DIR/site.env" DISK_MOUNT /var/lib/docker
     echo "wrote site.env"
 fi
 val() { sed -n "s/^$1=//p" "$SITE_DIR/site.env" | tail -1; }
@@ -191,8 +194,12 @@ EOF
 # On Linux each image's user must own its folders (Ghost's image sees to its own)
 if [ "$(uname)" = Linux ]; then
     sudo chown -R 1000:1000 "$d/icecast"        # TinyIce as 1000:1000
-    sudo chown -R 65534:65534 "$d/monitoring/prometheus"   # Prometheus as nobody
+    # Prometheus as nobody: its data, and the password file it reads (600); the folder stays this user's, as kit.sh
+    # writes prometheus.yml there at every run
+    sudo chown -R 65534:65534 "$d/monitoring/prometheus/data" "$d/monitoring/prometheus/tinyice-password"
     sudo chown -R 472:0 "$d/monitoring/grafana/data"        # Grafana as 472
+    sudo chown -R 1002:1003 "$d/puppi3/db"                   # MySQL as the stack's user: 1002:1003
+    sudo chown -R 1000:0 "$d/postiz/temporal-elasticsearch"  # Elasticsearch as 1000:0
 fi
 
 # What's left by hand, for the modules that are on

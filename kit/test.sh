@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# The Compose kit's test, on this Mac (Docker Desktop), never on the NAS: makes a throwaway site (kit/sites/kit-test,
+# The Compose kit's test, on this computer (Linux, a Mac, or Windows inside WSL2), never on a real site's machine: makes
+# a throwaway site (kit/sites/kit-test,
 # kit.test, ID_PREFIX kittest) with kit/setup.sh, starts it with kit/kit.sh, checks it end to end, and removes it.
 #   kit/test.sh           (--keep: leave the site running afterwards; kit/kit.sh kit/sites/kit-test down -v removes it)
-# Needs ports 80, 443 and 8222 free (LIVE_PORT=<another> for the stream's, e.g. beside the k3d test cluster), ffmpeg, and kit/theme-test's npm install (Playwright).
+# Needs ports 80, 443 and 8222 free (LIVE_PORT=<another> for the stream's, e.g. beside the k3d test cluster), ffmpeg,
+# python3, and kit/theme-test's npm install and Playwright's Chromium (kit/local-site.sh checks them all).
 # Checks:
 #   - Cloudflare-only: a visitor from outside Cloudflare's ranges gets 403; from a trusted address the site loads
 #     through Traefik (https on Traefik's own certificate: TLS_RESOLVER=self); with BEHIND_CLOUDFLARE=false, from anywhere
@@ -23,7 +25,7 @@ KIT="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(dirname "$KIT")"
 S="$KIT/sites/kit-test"
 KEEP=0; [ "${1:-}" = --keep ] && KEEP=1
-SP="${TMPDIR:-/tmp}/kit-test.$$"; mkdir -p "$SP"
+SP="${TMPDIR:-/tmp}/kit-test.$$"
 
 fails=0
 ok()   { echo "ok   $*"; }
@@ -31,35 +33,16 @@ fail() { echo "FAIL $*"; fails=$((fails + 1)); }
 check() { local what=$1; shift; if "$@"; then ok "$what"; else fail "$what"; fi; }
 die()  { echo "kit/test.sh: $*" >&2; exit 1; }
 
-[ "$(uname)" = Darwin ] || die "this test is for the Mac's Docker Desktop"
-[ -e "$S" ] && die "$S is already there (a kept test site?): kit/kit.sh $S down -v && rm -rf $S"
-command -v ffmpeg >/dev/null || die "needs ffmpeg (brew install ffmpeg)"
-[ -d "$KIT/theme-test/node_modules/playwright" ] || die "needs Playwright: (cd kit/theme-test && npm install)"
-LP="${LIVE_PORT:-8222}"
-for port in 80 443 "$LP"; do
-    lsof -nP -iTCP:$port -sTCP:LISTEN >/dev/null 2>&1 && die "port $port is in use"
-done
-nets_before="$(docker network ls --format '{{.Name}}' | grep -xE 'proxy|monitoring' || true)"
-
-cleanup() {
-    pkill -f "icecast://source:.*@127.0.0.1:$LP/stream-ogg" 2>/dev/null
-    if [ "$KEEP" = 1 ]; then echo "kept: $S (kit/kit.sh $S down -v && rm -rf $S)"; else
-        "$KIT/kit.sh" "$S" down -v --remove-orphans >/dev/null 2>&1
-        rm -rf "$S"
-        for n in proxy monitoring; do
-            grep -qx "$n" <<<"$nets_before" || docker network rm "$n" >/dev/null 2>&1
-        done
-    fi
-    rm -rf "$SP"
-}
-trap cleanup EXIT
+. "$KIT/local-site.sh"
+need ffmpeg ffmpeg ffmpeg
+mkdir -p "$SP"
 
 R=(--resolve kit.test:443:127.0.0.1 --resolve kit.test:80:127.0.0.1 --resolve www.kit.test:443:127.0.0.1 --resolve live.kit.test:443:127.0.0.1
    --resolve postiz.kit.test:443:127.0.0.1 -k -s)
 CF=(-H 'CF-Connecting-IP: 203.0.113.7' -H 'CF-IPCountry: CA')
 code() { curl "${R[@]}" -o /dev/null -w '%{http_code}' "$@"; }
 kit() { "$KIT/kit.sh" "$S" "$@"; }
-profile() { sed -i '' "s|^$1=.*|$1=$2|" "$S/site.env"; }
+profile() { sedi "s|^$1=.*|$1=$2|" "$S/site.env"; }
 bridge() { docker exec postiz-ghost-bridge wget -qO- "http://localhost:8080$1"; }
 wait_for() { local what=$1 n=$2; shift 2; for _ in $(seq 1 "$n"); do "$@" && return 0; sleep 2; done; fail "$what (gave up waiting)"; return 1; }
 
@@ -69,7 +52,7 @@ TRYOUT=yes SITE_HOST=kit.test SITE_NAME="Kit Test" ID_PREFIX=kittest BEHIND_CLOU
     MODULES=analytics,social,live,monitoring NETWORKS=ghost,instagram,youtube,soundcloud,bluesky,threads,tiktok,mixcloud \
     STAFF_DEVICE_VERIFICATION=false "$KIT/setup.sh" "$S" --yes >/dev/null || die "setup.sh failed"
 echo "LIVE_PORT=$LP" >> "$S/site.env"
-sed -i '' 's/^GHOST_BRIDGE_DRY_RUN=.*/GHOST_BRIDGE_DRY_RUN=true/' "$S/secrets/postiz.env"
+sedi 's/^GHOST_BRIDGE_DRY_RUN=.*/GHOST_BRIDGE_DRY_RUN=true/' "$S/secrets/postiz.env"
 kit up -d >"$SP/up.log" 2>&1 || { tail -20 "$SP/up.log"; die "kit.sh up failed"; }
 ghost_up() { docker exec traefik wget -qO /dev/null --header 'X-Forwarded-Proto: https' http://kittest-ghost:2368/ghost/api/admin/site/ 2>/dev/null; }
 wait_for "Ghost answers Traefik" 90 ghost_up
@@ -88,8 +71,8 @@ check "the alert rules have no ntfy contact point (NTFY_URL empty)" \
 
 echo "== Cloudflare-only"
 check "a visitor from outside Cloudflare gets 403" [ "$(code "${CF[@]}" https://kit.test/)" = 403 ]
-# Docker Desktop's own addresses (where this Mac's requests come from) trusted like Cloudflare's
-profile TRUSTED_EXTRA "192.168.65.0/24,172.16.0.0/12"
+# where this computer's requests come from (Docker Desktop's machine, or a Docker network's gateway) trusted like Cloudflare's
+profile TRUSTED_EXTRA "$LOCAL_RANGES"
 kit up -d traefik >/dev/null 2>&1
 site_cf() { [ "$(code "${CF[@]}" https://kit.test/)" = 200 ]; }
 wait_for "the site loads through Traefik from a trusted address" 30 site_cf && ok "the site loads through Traefik from a trusted address"
@@ -124,6 +107,7 @@ pw="$(sed -n 's/^TINYICE_SOURCE_PASSWORD=//p' "$S/secrets/icecast.env")"
 ffmpeg -nostdin -loglevel error -re -f lavfi -i "sine=frequency=440:sample_rate=44100" -t 120 -ac 2 -c:a vorbis \
     -strict -2 -content_type audio/ogg -metadata artist=Kit -metadata title="Test Tone" -f ogg \
     "icecast://source:$pw@127.0.0.1:$LP/stream-ogg" >"$SP/ffmpeg.log" 2>&1 &
+FF=$!
 live_up() { curl "${R[@]}" "${CF[@]}" https://kit.test/live-status.json | grep -q '/stream-ogg"'; }
 wait_for "TinyIce shows /stream-ogg" 15 live_up && ok "/live-status.json shows the stream"
 node "$KIT/theme-test/kit-site.mjs" "$slug" "$uuid" >"$SP/browser.json" 2>"$SP/browser.err" || cat "$SP/browser.err"
@@ -142,11 +126,13 @@ played() { [ "$(clicks "t['play']")" -gt 0 ]; }
 wait_for "the play beacon reached the bridge" 10 played && ok "the play beacon reached the bridge"
 went_out() { [ "$(clicks "sum(t['out'].values())")" -gt 0 ]; }
 wait_for "the link out reached the bridge" 10 went_out && ok "the link out reached the bridge"
-tb_token="$(sed -n 's/^tinybird__adminToken=//p' "$S/data/puppi3/tinybird/tokens.env")"
+tb_token="$(hostcat "$S/data/puppi3/tinybird/tokens.env" | sed -n 's/^tinybird__adminToken=//p')"
 tb() { docker exec kittest-tinybird-local-1 curl -s -H "Authorization: Bearer $tb_token" --data-urlencode "q=$1" http://localhost:7181/v0/sql; }
 hit_ok() { tb "SELECT count() c FROM analytics_events WHERE JSONExtractString(payload, 'location') = 'CA' FORMAT TSV" | grep -qv '^0$'; }
 wait_for "a page hit with country CA in Tinybird" 15 hit_ok && ok "a page hit reached Tinybird, country CA from page-hit-country"
 check "bridge /health" [ "$(bridge /health)" = ok ]
+check "the bridge has Tinybird's token (Ghost's numbers on Platforms, no copying by hand)" \
+    [ -n "$(docker exec postiz-ghost-bridge printenv tinybird__adminToken 2>/dev/null)" ]
 bridge /performance.json | grep -q '"summary"' && ok "bridge /performance.json" || fail "bridge /performance.json"
 secret="$(sed -n 's/^GHOST_WEBHOOK_SECRET=//p' "$S/secrets/postiz.env")"
 python3 -c "import json; p=json.load(open('$SP/post.json'))['posts'][0]; open('$SP/hook.json','w').write(json.dumps({'post':{'current':p}}))"
@@ -155,7 +141,8 @@ sig="$(printf '%s%s' "$(cat "$SP/hook.json")" "$ts" | openssl dgst -sha256 -hmac
 hook="$(code "${CF[@]}" -X POST -H 'Content-Type: application/json' -H "X-Ghost-Signature: sha256=$sig, t=$ts" \
     --data-binary @"$SP/hook.json" https://postiz.kit.test/ghost-webhook)"
 check "a signed Ghost webhook through Traefik is accepted (202)" [ "$hook" = 202 ]
-preview() { ls "$S/data/postiz/ghost-bridge/data/previews/" 2>/dev/null | grep -q .; }
+preview() { ls "$S/data/postiz/ghost-bridge/data/previews/" 2>/dev/null | grep -q . ||
+    docker run --rm -v "$S/data/postiz/ghost-bridge/data:/d:ro" alpine ls /d/previews 2>/dev/null | grep -q .; }
 wait_for "the DRY_RUN share wrote a preview" 30 preview && ok "the DRY_RUN share wrote a preview"
 
 # ---- Monitoring
@@ -221,13 +208,8 @@ prom() { q "{\"refId\":\"A\",\"datasource\":{\"uid\":\"prometheus\"},\"expr\":\"
 jobs_up() { v="$(prom 'count(up{job=~\"kittest-pets|traefik|tinyice|cadvisor|node\"} == 1)')"; [ "${v%%.*}" = 5 ]; }
 wait_for "Prometheus: the bridge, Traefik, TinyIce, cAdvisor and node-exporter up" 60 jobs_up && ok "Prometheus scrapes the bridge, Traefik, TinyIce, cAdvisor and node-exporter"
 cpu() { has_val "$(prom 'count(container_memory_working_set_bytes{name=\"kittest-ghost\"})')"; }
-# cAdvisor can't read containerd's image store (Docker Desktop's default: "failed to identify the read-write layer"),
-# only Docker's own overlay2, as on a Linux host
-if docker info -f '{{.DriverStatus}}' 2>/dev/null | grep -q containerd.snapshotter; then
-    echo "skip cAdvisor's containers: Docker uses containerd's image store here, which cAdvisor can't read"
-else
-    wait_for "cAdvisor sees the site's containers (Health's container panels)" 30 cpu && ok "cAdvisor sees the site's containers"
-fi
+# (with Docker's own overlay2 store and with containerd's, Docker 29's and Docker Desktop's default: cAdvisor 0.54+)
+wait_for "cAdvisor sees the site's containers (Health's container panels)" 30 cpu && ok "cAdvisor sees the site's containers"
 probe() { has_val "$(prom 'probe_success{instance=\"https://kit.test\"}')"; }
 wait_for "blackbox checks the site" 45 probe && ok "blackbox checks the site (it can't reach kit.test from inside: no DNS)"
 want_rules="$(sed -n "/^groups:/,\$p" "$R_DIR/alerting/kittest.yml" | grep -c "^      - uid:")"

@@ -38,9 +38,11 @@ export NTFY_URL="$(val NTFY_URL)"
 case ",$MODULES," in
     *,live,*)
         ice="$DATA_DIR/icecast/tinyice-data/config.json"
-        if [ -r "$ice" ]; then
-            LIVE_MOUNT="$(python3 -c 'import json,sys; t=[t for t in json.load(open(sys.argv[1])).get("transcoders") or []
-if t.get("enabled", True) and t.get("format") == "mp3"]; print(t[0]["input_mount"] if t else "")' "$ice" 2>/dev/null)"
+        if [ -f "$ice" ]; then
+            # (on Linux it's TinyIce's user's, 600: a container reads it when this user can't)
+            LIVE_MOUNT="$({ cat "$ice" 2>/dev/null || docker run --rm -v "$(dirname "$ice"):/d:ro" alpine cat /d/config.json 2>/dev/null; } |
+                python3 -c 'import json,sys; t=[t for t in json.load(sys.stdin).get("transcoders") or []
+if t.get("enabled", True) and t.get("format") == "mp3"]; print(t[0]["input_mount"] if t else "")' 2>/dev/null)"
             [ -n "$LIVE_MOUNT" ] && export LIVE_MOUNT
         fi ;;
     *) export LIVE_STATS=false ;;

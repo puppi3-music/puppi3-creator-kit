@@ -3,6 +3,9 @@
 # kit/theme/KIT.md), checks that nothing site-specific got in, then runs Ghost's theme checker (gscan).
 set -e
 cd "$(dirname "$0")"
+for t in zip unzip; do
+  command -v $t >/dev/null || { echo "theme-zip: needs $t (on Linux: sudo apt install zip unzip)" >&2; exit 1; }
+done
 ZIP=dist/puppi3-creator-kit-theme.zip
 mkdir -p dist
 rm -f "$ZIP"

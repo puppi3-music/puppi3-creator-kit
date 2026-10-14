@@ -32,3 +32,6 @@ services:
     profiles: [analytics]
   tb-setup:
     profiles: [analytics]
+    environment:
+      # tokens.env to the site folder's owner: compose reads it (env_file) as the user who runs kit.sh
+      TOKENS_OWNER_FROM_FOLDER: "true"
