@@ -23,7 +23,7 @@ spec:
       initContainers:
         # The site's config the first time; after that the volume's copy (TinyIce's admin writes to it)
         - name: config
-          image: busybox:1.37
+          image: busybox:1.37.0
           command: [sh, -c, '[ -s /data/config.json ] || cp /site/config.json /data/config.json']
           resources:
             requests: {cpu: 10m, memory: 8Mi}

@@ -1,4 +1,4 @@
-# Ghost's analytics settings, as the puppi3 stack's: tb-setup's tokens (envFrom, not optional, so the pod waits for the
+# Ghost's analytics settings, as the Ghost stack's: tb-setup's tokens (envFrom, not optional, so the pod waits for the
 # Secret and Ghost starts with them), and where the tracker, Ghost and Ghost Admin's charts reach Tinybird.
 # A JSON patch that appends (a strategic merge puts new variables first, before SITE_HOST, which $(SITE_HOST) needs).
 - op: add

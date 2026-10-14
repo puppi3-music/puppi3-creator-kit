@@ -47,7 +47,7 @@ spec:
             - {name: GHOST_DB_HOST, value: mysql}
             - name: GHOST_DB_NAME
               valueFrom:
-                secretKeyRef: {name: puppi3, key: database__connection__database}
+                secretKeyRef: {name: ghost, key: database__connection__database}
             - name: GRAFANA_RO_PASSWORD
               valueFrom:
                 secretKeyRef: {name: monitoring, key: GRAFANA_RO_PASSWORD}

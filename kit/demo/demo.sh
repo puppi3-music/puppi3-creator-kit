@@ -96,7 +96,7 @@ echo "== a month of visits"
 GP="$(sed -n 's/^GRAFANA_ADMIN_PASSWORD=//p' "$S/secrets/monitoring.env")"
 # one real visit first (the browser), so the made-up ones copy a real event's shape
 node "$KIT/demo/shots.mjs" visit "$slug" >/dev/null || die "the first visit failed"
-tb_token="$(hostcat "$S/data/puppi3/tinybird/tokens.env" | sed -n 's/^tinybird__adminToken=//p')"
+tb_token="$(hostcat "$S/data/ghost/tinybird/tokens.env" | sed -n 's/^tinybird__adminToken=//p')"
 tb() { docker exec -i demo-tinybird-local-1 curl -s -H "Authorization: Bearer $tb_token" "$@"; }
 one() { tb --data-urlencode "q=SELECT * FROM analytics_events LIMIT 1 FORMAT JSON" http://localhost:7181/v0/sql >"$SP/event.json"; \
     python3 -c "import json,sys; sys.exit(0 if json.load(open('$SP/event.json'))['data'] else 1)" 2>/dev/null; }

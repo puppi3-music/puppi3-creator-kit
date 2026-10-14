@@ -1,20 +1,27 @@
-# Postiz and the bridge: the social profile. The bridge's code and Temporal's config from the repo (the NAS's are
-# copies deploy.sh sends to its data folder).
+# Postiz and the bridge: the social profile. The bridge is the kit's published image, its code inside (kit.sh sets
+# BRIDGE_IMAGE to this kit version's; KIT_BUILD=1 builds it here instead: bridge-build.yaml); Temporal's config from the
+# repo. (The NAS's stack builds a base and mounts the code, a copy deploy.sh sends to its data folder.)
 services:
   postiz:
     profiles: [social]
   postiz-ghost-bridge:
     profiles: [social]
-    image: ${ID_PREFIX:-site}-ghost-bridge:local   # built here, named per site (the stack's own name is the NAS's)
+    build: !reset null
+    image: ${BRIDGE_IMAGE:?run through kit/kit.sh}
+    pull_policy: missing
+    # as root, as the stack's own image runs it: its data/ is the site folder's, whoever made it (the image's own
+    # user, node, is for Kubernetes, where the volume's group is set for it)
+    user: root
     environment:
       GHOST_API_URL: http://${ID_PREFIX:-site}-ghost:2368
     # Tinybird's tokens, with analytics on: tinybird__adminToken reads Ghost's own numbers for the Platforms dashboard
     # (TINYBIRD_TOKEN in secrets/postiz.env, when set, wins)
     env_file:
-      - path: ${DATA_DIR}/puppi3/tinybird/tokens.env
+      - path: ${GHOST_DATA_DIR}/tinybird/tokens.env
         required: false
-    volumes:
-      - ./ghost-bridge:/app:ro
+    # only its data: the code is in the image
+    volumes: !override
+      - ${DATA_DIR:?run through kit/kit.sh}/postiz/ghost-bridge/data:/data
   postiz-postgres:
     profiles: [social]
     environment:

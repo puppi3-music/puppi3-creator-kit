@@ -1,6 +1,6 @@
 # stacks/
 
-One Compose file per service group: `traefik/`, `puppi3/` (Ghost, MySQL, analytics), `postiz/` (Postiz and the
+One Compose file per service group: `traefik/`, `ghost/` (Ghost, MySQL, analytics; `puppi3/` before kit 1.2.0), `postiz/` (Postiz and the
 bridge), `icecast/` (the stream), and `monitoring/grafana/` (the dashboards and alert rules, which `kit/monitoring/`'s
 Grafana and k8s's monitoring module load). Each folder with more than a compose file has its own CLAUDE.md.
 

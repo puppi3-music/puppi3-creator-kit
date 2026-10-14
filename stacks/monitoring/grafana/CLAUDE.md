@@ -89,7 +89,7 @@ other seven (Page included), and everything the dashboards share (files, gotchas
   dashboard ("JSON.parse: bad escaped character"): regexes there go without backslashes (`[.]`, as the bridge's `sources`).
 - Infinity's `a ? b : c ? d : e` doesn't chain: parenthesise each nested branch.
 - Infinity frames come A-Z: an `organize` transformation sets the column order wherever it matters.
-- MySQL: `grafana_ro` may read only the tables in `TABLES` of `stacks/puppi3/grafana-ro.sh` (`stacks/puppi3/CLAUDE.md`).
+- MySQL: `grafana_ro` may read only the tables in `TABLES` of `stacks/ghost/grafana-ro.sh` (`stacks/ghost/CLAUDE.md`).
   `stacks/monitoring/grafana/ro-tables.py --check` (pre-commit hook) fails when a ghost-mysql query in the dashboards
   or alert rules reads a table not listed (a new one: add it, rerun the script; else "query failed"). Variables in MySQL SQL go only as `"${x:percentencode}"`
   (URL-encoded in a double-quoted literal: never a raw `"` or `\`), decoded in the query by a `WITH v AS (SELECT REPLACE(...))`

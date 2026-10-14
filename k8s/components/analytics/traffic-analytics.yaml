@@ -1,4 +1,4 @@
-# Visitors' page hits (Traefik's /.ghost/analytics route, through page-hit-country) -> Tinybird, as the puppi3 stack's
+# Visitors' page hits (Traefik's /.ghost/analytics route, through page-hit-country) -> Tinybird, as the Ghost stack's
 # traffic-analytics. Its salts (the daily visitor hashes) on a small volume, so one replica and Recreate.
 apiVersion: apps/v1
 kind: Deployment
@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: traffic-analytics
-          # the puppi3 stack's version (stacks/puppi3/compose.yaml: keep them in step)
+          # the Ghost stack's version (stacks/ghost/compose.yaml: keep them in step)
           image: ghost/traffic-analytics:1.0.336
           # tb-setup's tokens (the pod waits for the Secret)
           envFrom:

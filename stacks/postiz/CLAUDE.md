@@ -181,6 +181,9 @@ DRY_RUN bridge as a staging copy (it previews and logs, never posts); some notes
   explanation: analytics guide `#post-is-it-doing-well`.
 
 ## Per-post history (`data/stats.db`)
+- `ghost-bridge/Dockerfile` (+ `.dockerignore`: only the `.mjs` files): the bridge with its code inside, which the kit
+  publishes and Kubernetes runs; the NAS's stack keeps its `dockerfile_inline` base with the code mounted (the same
+  Node: `image-pins.py`). deploy.sh sends both files with the stack; the NAS doesn't use them.
 - Per-post history: `data/stats.db` (`stats/store.mjs`, SQLite via `node:sqlite`, works in node:22-alpine >= 22.13 with an
   ExperimentalWarning; `storeFor(dataDir)`; all SQL there, plain enough for PostgreSQL: BIGINT ms, JSON in TEXT, ON CONFLICT):
   `checks` (every check in a post's first `POST_EARLY_HOURS` [96] and during a take-off, else only changes: `recordChecks`;

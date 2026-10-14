@@ -287,14 +287,32 @@ header.top .pup svg{display:block;width:100%;height:auto}
   <div class="tablewrap"><table>
     <thead><tr><th>For</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td>Everyone</td><td>A domain whose DNS you control; the kit itself (<code>git clone https://github.com/puppi3-music/puppi3-creator-kit.git</code>, or the ZIP from GitHub); Python 3; an email address (Let's Encrypt writes to it about your certificates); for the theme, <code>zip</code> and <code>unzip</code> to build it (most Linux systems need to install them) and Node.js only for its check before you upload it</td></tr>
+      <tr><td>Everyone</td><td>A domain whose DNS you control; the kit itself (<code>git clone https://github.com/puppi3-music/puppi3-creator-kit.git</code>, or the ZIP from GitHub); Python 3; an email address (Let's Encrypt writes to it about your certificates). Nothing to build: the kit's own images and its theme come ready-made with each release (to change the theme yourself: <code>zip</code>, <code>unzip</code>, and Node.js for its check)</td></tr>
       <tr><td>Compose</td><td>Docker with Compose 2.24 or newer, on a machine running Linux, macOS or Windows (inside WSL2, with the kit in WSL's own folders rather than on the Windows drive), Intel/AMD or ARM, that ports 80 and 443 reach from the internet (and 8222, with the <code>live</code> module, for your streaming software). Those are the only ports it opens to others (Temporal's admin page, with <code>social</code>, is on <code>127.0.0.1:8233</code>, this machine only); one that's taken can be another (<code>HTTP_PORT</code>, <code>HTTPS_PORT</code>, <code>LIVE_PORT</code> in <code>site.env</code>; Let's Encrypt's <code>le</code> needs 443 itself). <b>One kit site per Docker host</b>: its Traefik takes the web ports, and some of its containers have fixed names (<code>traefik</code>, <code>tinyice</code>, <code>postiz</code>...), so <code>kit.sh</code> stops if another container already has one.</td></tr>
-      <tr><td>Kubernetes</td><td><code>kubectl</code> pointed at the cluster, a default StorageClass, a way for a Service of type LoadBalancer to get an outside address, a registry the cluster pulls from, and Docker on your own machine to build the kit's four images</td></tr>
+      <tr><td>Kubernetes</td><td><code>kubectl</code> pointed at the cluster, a default StorageClass, a way for a Service of type LoadBalancer to get an outside address, and a way for its nodes to reach GitHub's registry (ghcr.io) for the kit's own images</td></tr>
       <tr><td><code>social</code></td><td>A developer app for each network you post to (Postiz's docs say how for each one); later, optional keys for SoundCloud, Cloudflare and Search Console numbers</td></tr>
       <tr><td><code>live</code></td><td>Software that streams Ogg to an Icecast server (butt, Mixxx, ffmpeg and most broadcasting and DJ apps do)</td></tr>
       <tr><td>Phone notifications</td><td>The ntfy app; <a href="https://ntfy.sh">ntfy.sh</a> works, or your own ntfy server</td></tr>
     </tbody>
   </table></div>
+  <h3 id="before-how-big">How big a machine</h3>
+  <p>Measured on the kit's test site (Docker Desktop on a Mac, kit 1.2.0) with every module on, at rest and while it streams, takes page hits and makes social previews. Memory barely moves between the two: most of it is held from the start.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Part</th><th>Memory</th><th>Disk for its images</th><th>What takes it</th></tr></thead>
+    <tbody>
+      <tr><td>The site</td><td>0.7 GB</td><td>2.5 GB</td><td>MySQL about 0.4 GB, Ghost 0.2 GB, Traefik under 0.1 GB</td></tr>
+      <tr><td><code>analytics</code></td><td>2.5 GB, 3 GB when busy</td><td>10 GB</td><td>Tinybird (a ClickHouse database with Tinybird's servers around it) about 2.2 GB all the time; traffic-analytics 0.3 GB</td></tr>
+      <tr><td><code>social</code></td><td>2.5 GB, 3 GB when busy</td><td>11 GB</td><td>Postiz 1.4 to 2 GB; Temporal's Elasticsearch 0.6 GB; Temporal, the databases and the bridge the rest</td></tr>
+      <tr><td><code>live</code></td><td>under 0.1 GB</td><td>0.1 GB</td><td>TinyIce; each listener adds a little</td></tr>
+      <tr><td><code>monitoring</code></td><td>1.9 GB</td><td>2.5 GB</td><td>cAdvisor about 1.2 GB on Docker Desktop (less on Linux, where it sees fewer containers), Grafana 0.5 to 0.7 GB, Prometheus 0.1 GB</td></tr>
+      <tr><td><b>Everything</b></td><td><b>7.5 GB, 8 GB when busy</b></td><td><b>about 26 GB</b></td><td></td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><b>Memory:</b> the site alone runs on a 2 GB machine. With everything on, 10 GB at least, 12 to 16 GB to be comfortable, plus what the machine's own system needs. On a Mac or Windows, Docker Desktop runs everything inside its own machine: give it that much under Settings, Resources (its default is often 8 GB, too tight with every module on).</li>
+    <li><b>Disk:</b> about 1 GB for the site's folder at the start, plus the images above. It grows with what you upload (images, audio, video: usually the most), Prometheus's history (a year, at most 10 GB: then it drops the oldest), Tinybird's page hits and Postiz's uploads (small). 50 GB free covers everything for a long time.</li>
+    <li><b>Kubernetes:</b> each pod asks for less than this and may use up to its limit (Tinybird 2.5 GiB, up to 4 GiB); two nodes of 4 CPUs and 16 GB hold everything, which is what the cluster recipes make.</li>
+  </ul>
   <h3 id="before-cloudflare-or-not">Cloudflare or not</h3>
   <p>The kit works with or without Cloudflare in front of the site.</p>
   <ul>
@@ -368,10 +386,10 @@ kit/kit.sh kit/sites/mysite down          # stop it (the data stays)</pre></div>
     <li><b>What works:</b> Ghost and its admin (setup turns off its sign-in codes by email for a try-out, as there's no mail service yet; turn them back on with the real thing: <a href="#finish-ghost">Mail first</a>), the theme, the short links, the analytics (your own visits are counted), Grafana, Postiz and its sign-up.</li>
     <li><b>What waits for the real thing:</b> certificates from Let's Encrypt, Ghost's webhook to the bridge (Ghost sends it only to a public address), the networks' sign-ins, and your phone's alerts. Grafana's public checks can't reach a name only your computer knows, so Health shows the site, Ghost's backend, the live stream and the certificate as down or empty, and the "is down" and "Ghost isn't answering" alerts fire in Grafana (not on your phone: a try-out has no notifications). That's expected.</li>
   </ul>
-  <p>When the domain is ready: point its DNS here, set <code>TLS_RESOLVER</code> (and <code>BEHIND_CLOUDFLARE</code>) for the real certificates and <code>NTFY_URL</code> for phone alerts in <code>site.env</code>, give Ghost its mail and set <code>staffDeviceVerification</code> back to <code>true</code> in <code>data/puppi3/ghost/config.production.json</code>, and start again (<code>up -d --force-recreate ghost</code> for Ghost's file).</p>
+  <p>When the domain is ready: point its DNS here, set <code>TLS_RESOLVER</code> (and <code>BEHIND_CLOUDFLARE</code>) for the real certificates and <code>NTFY_URL</code> for phone alerts in <code>site.env</code>, give Ghost its mail and set <code>staffDeviceVerification</code> back to <code>true</code> in <code>data/ghost/ghost/config.production.json</code>, and start again (<code>up -d --force-recreate ghost</code> for Ghost's file).</p>
   <p>To try it and keep nothing: <code>kit/kit.sh &lt;folder&gt; down -v</code>, then delete the folder. Docker keeps what it downloaded and built (several GB of images) and a few unnamed volumes; to free that space too:</p>
 <div class="code"><pre>docker volume rm $(docker volume ls -q --filter label=com.docker.compose.project=&lt;short name&gt;)
-docker image rm &lt;short name&gt;-ghost-bridge:local &lt;short name&gt;-tb-setup
+docker image rm ghcr.io/puppi3-music/puppi3-creator-kit/ghost-bridge:$(cat kit/VERSION) &lt;short name&gt;-tb-setup
 docker image prune -a      # every image no container uses: also other projects' (it asks first)</pre></div>
 </section>
 
@@ -380,9 +398,9 @@ docker image prune -a      # every image no container uses: also other projects'
   <p>What only you can do, in this order. Setup printed the same list with your names in it. On Kubernetes it's the same, except where it says so.</p>
   <h3 id="finish-ghost">Ghost</h3>
   <ol>
-    <li><b>Mail first.</b> Ghost emails staff a code each time they sign in on a new device, and members their sign-in links. Its own way of sending rarely arrives, so give it a mail service (any with SMTP). On Compose: the <code>mail</code> part of <code>data/puppi3/ghost/config.production.json</code> (<a href="https://ghost.org/docs/config/#mail">Ghost's docs</a>), then <code>kit/kit.sh &lt;folder&gt; up -d --force-recreate ghost</code>. On Kubernetes: <code>secrets/ghost-mail.env</code> (<a href="settings-reference.html#k8s-ghost-mail">its settings</a>).</li>
+    <li><b>Mail first.</b> Ghost emails staff a code each time they sign in on a new device, and members their sign-in links. Its own way of sending rarely arrives, so give it a mail service (any with SMTP). On Compose: the <code>mail</code> part of <code>data/ghost/ghost/config.production.json</code> (<a href="https://ghost.org/docs/config/#mail">Ghost's docs</a>), then <code>kit/kit.sh &lt;folder&gt; up -d --force-recreate ghost</code>. On Kubernetes: <code>secrets/ghost-mail.env</code> (<a href="settings-reference.html#k8s-ghost-mail">its settings</a>).</li>
     <li>Make the owner account at <code>https://&lt;your site&gt;/ghost/</code>, then set Ghost's own time zone (Settings, General, Timezone) to the site's: Ghost keeps its own, for its dates and its scheduled posts.</li>
-    <li>The theme: <code>kit/theme-zip.sh</code> builds <code>kit/dist/puppi3-creator-kit-theme.zip</code>. Upload it in Settings, Design &amp; branding, Customize, Change theme. With <code>live</code>, set the theme's <b>Live stream URL</b> (Design &amp; branding, Customize, the Theme tab) to <code>https://live.&lt;your site&gt;/stream-mp3</code>: the LIVE NOW bar shows only once it's set. The theme's other settings, links to your other platforms in the footer and the short links: the <a href="theme-guide.html">Theme guide</a>.</li>
+    <li>The theme: download <code>puppi3-creator-kit-theme.zip</code> from <a href="https://github.com/puppi3-music/puppi3-creator-kit/releases">the kit's release</a> for your version (<code>kit/VERSION</code>; changed the theme? <code>kit/theme-zip.sh</code> builds it, in <code>kit/dist/</code>). Upload it in Settings, Design &amp; branding, Customize, Change theme. With <code>live</code>, set the theme's <b>Live stream URL</b> (Design &amp; branding, Customize, the Theme tab) to <code>https://live.&lt;your site&gt;/stream-mp3</code>: the LIVE NOW bar shows only once it's set. The theme's other settings, links to your other platforms in the footer and the short links: the <a href="theme-guide.html">Theme guide</a>.</li>
     <li>Short links: upload <code>kit/redirects.yaml</code> in Settings, Labs (under Advanced: Open, Beta features), Redirects (the bio links like <code>/ig</code>, and the tagged links the bridge posts).</li>
   </ol>
   <h3 id="finish-social">Social</h3>
@@ -418,11 +436,11 @@ docker image prune -a      # every image no container uses: also other projects'
       <tr><td><code>local</code>, <code>k3d-eks</code>, <code>k3d-gke</code></td><td>Not for a real site: a throwaway cluster on your own machine, for <a href="#test">trying things</a>: <code>k8s/test/k3d.sh up</code> makes one (k3d, with a registry at <code>localhost:5111</code>), then <code>k8s/build-images.sh --registry k3d</code> and <code>k8s/up.sh &lt;folder&gt; local</code></td></tr>
     </tbody>
   </table></div>
-  <h3 id="k8s-images">Build the images</h3>
-  <p>Four of the images are the kit's own (Traefik with the kit's plugins, the analytics setup job, the stream relay, the bridge); the rest come from Docker Hub. Build and push them to your registry once, and again after an update of the kit. A cloud has its own registry (<a href="#cloud">below</a>); on a home cluster, any registry its nodes can pull from (k3s and k3d can run one of their own: see their docs on registries).</p>
+  <h3 id="k8s-images">The images</h3>
+  <p>Four of the images are the kit's own (Traefik with the kit's plugins, the analytics setup job, the stream relay, the bridge); the rest come from Docker Hub. Each release publishes the kit's for Intel/AMD and ARM, at <code>ghcr.io/puppi3-music/puppi3-creator-kit/&lt;name&gt;:&lt;version&gt;</code>, and <code>up.sh</code> uses those for your version (<code>kit/VERSION</code>): nothing to build.</p>
+  <p>Changed one of them (the bridge's code, Traefik's plugins), or want them in a registry of your own? Build and push them there; <code>up.sh</code> then uses those instead, until you delete <code>k8s/images/built.env</code>:</p>
   <div class="code"><pre>docker login &lt;registry&gt;
-PLATFORM=linux/amd64 k8s/build-images.sh --registry &lt;registry&gt;/creator-kit</pre></div>
-  <p><code>PLATFORM</code> is the nodes' kind of processor (<code>linux/arm64</code> for ARM nodes). It writes <code>k8s/images/built.env</code>, which <code>up.sh</code> reads.</p>
+k8s/build-images.sh --registry &lt;registry&gt;/creator-kit --platform linux/amd64   # linux/arm64 for ARM nodes; both, comma-separated</pre></div>
   <h3 id="k8s-up">Up</h3>
   <div class="code"><pre>k8s/up.sh kit/sites/mysite selfhosted --render   # only writes what it would apply: data/k8s/rendered.yaml
 UP_TIMEOUT=1200 k8s/up.sh kit/sites/mysite selfhosted</pre></div>
@@ -434,13 +452,13 @@ UP_TIMEOUT=1200 k8s/up.sh kit/sites/mysite selfhosted</pre></div>
 
 <section id="cloud">
   <h2>EKS or GKE</h2>
-  <p>A cloud site needs a few things made once with the cloud's own tools: the cluster, the databases (Ghost's MySQL, and Postgres for Postiz with <code>social</code>), a private bucket for Ghost's images and files, and a registry. Their addresses go in <code>cloud-eks.env</code> or <code>cloud-gke.env</code> in the site's folder; the comments in each overlay's example say what each line is. The cloud costs money for as long as these exist, so tear them down when you're done.</p>
+  <p>A cloud site needs a few things made once with the cloud's own tools: the cluster, the databases (Ghost's MySQL, and Postgres for Postiz with <code>social</code>), and a private bucket for Ghost's images and files (a registry only if you build the kit's images yourself: <a href="#k8s-images">the images</a>). Their addresses go in <code>cloud-eks.env</code> or <code>cloud-gke.env</code> in the site's folder; the comments in each overlay's example say what each line is. The cloud costs money for as long as these exist, so tear them down when you're done.</p>
   <h3 id="cloud-amazon-eks">Amazon EKS</h3>
   <ul>
     <li><b>Cluster</b>: <code>eksctl create cluster -f k8s/clusters/eks.yaml</code> (check its name, region and node size first), then <code>kubectl apply -f k8s/clusters/eks-gp3.yaml</code> and the AWS Load Balancer Controller (Helm chart <code>eks/aws-load-balancer-controller</code>, with the ServiceAccount the cluster file made).</li>
     <li><b>Databases</b>: RDS for MySQL 8 and RDS for Postgres 17 in the cluster's network, on its private subnets, reachable only from the nodes' security group. Postgres's parameter group needs <code>rds.force_ssl=0</code> (Postiz connects without TLS; the traffic stays in the network).</li>
     <li><b>Bucket</b>: a private S3 bucket, and an IAM role for ServiceAccount <code>ghost</code> in your namespace (IRSA) that may read, write and delete its objects and list it. No key is stored anywhere.</li>
-    <li><b>Registry</b>: ECR repositories <code>creator-kit/traefik</code>, <code>tb-setup</code>, <code>icecast-relay</code>, <code>ghost-bridge</code>.</li>
+    <li><b>Registry</b>, only for images you build yourself: ECR repositories <code>creator-kit/traefik</code>, <code>tb-setup</code>, <code>icecast-relay</code>, <code>ghost-bridge</code>.</li>
   </ul>
   <p>Then <code>cp k8s/overlays/eks/cloud.env.example &lt;folder&gt;/cloud-eks.env</code> and fill it in.</p>
   <h3 id="cloud-google-gke">Google GKE</h3>
@@ -448,17 +466,17 @@ UP_TIMEOUT=1200 k8s/up.sh kit/sites/mysite selfhosted</pre></div>
     <li><b>Cluster</b>: <code>PROJECT=&lt;project&gt; REGION=&lt;region&gt; k8s/clusters/gke.sh up</code> (one zone, two nodes, Workload Identity on).</li>
     <li><b>Databases</b>: Cloud SQL for MySQL 8 and for Postgres 17, and a Google service account with the Cloud SQL Client role, tied to Kubernetes ServiceAccount <code>cloud-sql</code> in your namespace. Pods reach the databases through the Cloud SQL Auth Proxy beside them.</li>
     <li><b>Bucket</b>: a private Cloud Storage bucket, a service account that may use only it, and an HMAC key for it (Ghost uses Cloud Storage's S3-compatible side).</li>
-    <li><b>Registry</b>: an Artifact Registry Docker repository.</li>
+    <li><b>Registry</b>, only for images you build yourself: an Artifact Registry Docker repository.</li>
   </ul>
   <p>Then <code>cp k8s/overlays/gke/cloud.env.example &lt;folder&gt;/cloud-gke.env</code> and fill it in.</p>
   <h3 id="cloud-the-site-s-secrets">The site's secrets for a cloud</h3>
   <ul>
-    <li><code>secrets/puppi3.env</code>: Ghost's login on the cloud's MySQL (its master user and password, and the database's name).</li>
+    <li><code>secrets/ghost.env</code> (<code>secrets/puppi3.env</code> in a site made before kit 1.2.0): Ghost's login on the cloud's MySQL (its master user and password, and the database's name).</li>
     <li><code>secrets/cloud.env</code>: Postgres's master login (<code>POSTGRES_MASTER_USER</code>, <code>POSTGRES_MASTER_PASSWORD</code>); a job makes Postiz's own logins with it.</li>
     <li><code>secrets/s3.env</code> (GKE only): the HMAC key.</li>
     <li><code>secrets/ghost-mail.env</code>: Ghost's mail.</li>
   </ul>
-  <p>The examples are in <code>k8s/examples/</code>, and the <a href="settings-reference.html#k8s">Settings reference</a> lists every line. Then build the images (<code>PLATFORM=linux/amd64</code>) and <code>k8s/up.sh &lt;folder&gt; eks --render</code> (or <code>gke</code>), and up.</p>
+  <p>The examples are in <code>k8s/examples/</code>, and the <a href="settings-reference.html#k8s">Settings reference</a> lists every line. Then (the kit's images are the release's: building your own only for a changed kit, <a href="#k8s-images">the images</a>) <code>k8s/up.sh &lt;folder&gt; eks --render</code> (or <code>gke</code>), and up.</p>
   <h3 id="cloud-test-before-the-dns">Test before the DNS</h3>
   <p>Before pointing the domain at the cloud, check it through its own address: put yours in <code>TRUSTED_EXTRA</code> (behind Cloudflare, nothing else gets in), then</p>
   <div class="code"><pre>curl -k --connect-to example.com:443:&lt;traefik's EXTERNAL-IP&gt;:443 -sI https://example.com/</pre></div>

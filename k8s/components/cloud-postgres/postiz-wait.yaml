@@ -3,7 +3,7 @@
   path: /spec/template/spec/initContainers/-
   value:
     name: wait-for-login
-    image: postgres:17-alpine
+    image: postgres:17.11-alpine
     command: [sh, -c, 'until psql "$DATABASE_URL" -qtAc "SELECT 1" >/dev/null 2>&1; do echo "waiting for the postiz login"; sleep 3; done']
     envFrom:
       - secretRef: {name: postiz-env}

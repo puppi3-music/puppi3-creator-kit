@@ -55,7 +55,10 @@ wording goes in its `site.env` (the bridge's `FEATURED_*` lines).
 - `examples/`: the kit-only parts of a site's secrets files (`icecast.env.example`, `monitoring.env.example`).
 
 A kit site is a folder (`kit/sites/<name>/`, git-ignored, or anywhere): `site.env` (the instance profile),
-`secrets/<stack>.env` (each stack's secrets), `data/` (everything it keeps: `DATA_DIR`). Nothing of a site goes in
+`secrets/<stack>.env` (each stack's secrets), `data/` (everything it keeps: `DATA_DIR`; Ghost's stack in `data/ghost/`,
+`GHOST_DATA_DIR`). A site made before kit 1.2.0 has the Ghost stack's old name, `secrets/puppi3.env` and `data/puppi3/`:
+`kit.sh`, `setup.sh`, `k8s/up.sh` and `k8s/migrate/` keep using those (`g=puppi3` when either is there), so nobody has
+to move anything. Nothing of a site goes in
 `stacks/`: a stack run on its own reads its folder's `.env`, so one there could end up as another site's.
 
 - `setup.sh <folder> [--yes]`: makes the folder, asking for the few values. First whether it's a try-out (`TRYOUT=yes`:
@@ -106,7 +109,7 @@ A kit site is a folder (`kit/sites/<name>/`, git-ignored, or anywhere): `site.en
   `monitoring` set in the file itself). `compose.yaml`: Prometheus, Grafana 13.2.3 (Infinity plugin; the site's
   folder = `SITE_NAME`; routed at `GRAFANA_HOST`, Cloudflare-only, and `grafana.<LAN_DOMAIN>`, lan-only), cAdvisor,
   node-exporter (Health's disk: `/`, `DISK_MOUNT` for another), blackbox (the public checks), and two one-shot jobs
-  (`grants.sh`) that make `grafana_ro` at every start: Ghost's MySQL with `stacks/puppi3/grafana-ro.sh --sql`'s grants,
+  (`grants.sh`) that make `grafana_ro` at every start: Ghost's MySQL with `stacks/ghost/grafana-ro.sh --sql`'s grants,
   Postiz's Postgres with SELECT on `Post`, `Integration`, `Tags`, `TagsPosts` (each waits for all its tables: Postiz
   makes them one by one). cAdvisor mounts Docker's socket itself (Docker Desktop has none in its `/var/run`) and
   `/run/containerd` and `/run/docker/containerd` (folders, not sockets: a missing one is made empty): from 0.54 it
@@ -122,20 +125,26 @@ A kit site is a folder (`kit/sites/<name>/`, git-ignored, or anywhere): `site.en
   `bridge-instagram`, `postiz-pg`), logins as `${VAR}` from Grafana's environment (Tinybird's admin token from
   tokens.env), so no secret is in a file; the panels' hosts (`tinybird-local`, `postiz-ghost-bridge`) are the kit's
   service names too, so they aren't swapped. `grafana/dashboards.yml`: the provider.
-- `compose.yaml`: `include:`s `stacks/{traefik,puppi3,postiz,icecast}/compose.yaml`, each with its
-  `secrets/<stack>.env` (include `env_file`) and merged with `profiles/<stack>.yaml`. Profiles never go into the stack
+- `compose.yaml`: `include:`s `stacks/{traefik,ghost,postiz,icecast}/compose.yaml`, each with its
+  `secrets/<stack>.env` (include `env_file`; Ghost's is `GHOST_ENV_FILE`, which kit.sh sets) and merged with `profiles/<stack>.yaml`. Profiles never go into the stack
   files (each also runs on its own, without `--profile`, and would skip the services). The profile files also hold the
   kit's differences from a stack run on its own, with relative paths resolving in the stack's folder: Ghost as `<ID_PREFIX>-ghost`
   (`GHOST_UPSTREAM`, `GHOST_API_URL` follow) with the image's own user (`user: !reset null`), tokens.env from
-  `DATA_DIR` (`env_file: !override`; tb-setup gives it to the folder's owner, `TOKENS_OWNER_FROM_FOLDER`, since compose
+  `GHOST_DATA_DIR` (`env_file: !override`; tb-setup gives it to the folder's owner, `TOKENS_OWNER_FROM_FOLDER`, since compose
   reads it as the user who runs kit.sh); the bridge reads the same file (`env_file`, so
   `tinybird__adminToken` gives the Platforms dashboard Ghost's numbers with no copying into `TINYBIRD_TOKEN`), the bridge's code and Traefik's plugins from the repo, Temporal's config from
   `postiz/dynamicconfig/`, Postgres in a `pgdata` subfolder (on a Mac it refuses a bind-mounted folder's root, "wrong
   ownership"). A new service in a module stack needs its profile line here. Host ports: only Traefik's web ports
   (`HTTP_PORT`, `HTTPS_PORT`) and TinyIce's (`LIVE_PORT`), each `!override`; Ghost's 8900, traffic-analytics' 8901 and
   Traefik's dashboard port are `!reset` (on a rented server they'd skip Traefik, Cloudflare-only and its firewall: the
-  dashboard is at `traefik.<LAN_DOMAIN>`). The bridge's image is `<ID_PREFIX>-ghost-bridge:local` (the stack's own
-  name is the NAS's: a fixed one would replace another site's or the NAS stack's image on the same machine). Traefik's `HTTPS_REDIRECT` (default true) turns on `kit-site.yml`'s
+  dashboard is at `traefik.<LAN_DOMAIN>`). The bridge is the published image with its code inside
+  (`BRIDGE_IMAGE`, which kit.sh sets to `ghcr.io/puppi3-music/puppi3-creator-kit/ghost-bridge:<kit/VERSION>`,
+  `KIT_BRIDGE_IMAGE` for another; `build: !reset null`, `pull_policy: missing`, `volumes: !override` with only its
+  `data/`, `user: root` as the stack's base runs it, since its data folder is whoever made the site's). `KIT_BUILD=1`
+  adds `profiles/bridge-build.yaml` (a second `-f`, after the includes): built from `stacks/postiz/ghost-bridge/`'s
+  Dockerfile (its `.dockerignore` keeps the build to the `.mjs` files, never `data/`) as `<ID_PREFIX>-ghost-bridge:local`
+  (named per site: a fixed name would replace another site's or the NAS stack's image), `pull_policy: build`;
+  `local-site.sh` sets it for the test and the demo, k8s's test for its fake NAS. Traefik's `HTTPS_REDIRECT` (default true) turns on `kit-site.yml`'s
   http->https and www->site routers.
 - `local-site.sh`: sourced by `test.sh` and `demo/demo.sh`, so both run the same on Linux, a Mac, or Windows inside
   WSL2 (bash there; stops on Git Bash, or on a repo under `/mnt/`, a Windows drive, where folders can't keep their
@@ -156,7 +165,8 @@ A kit site is a folder (`kit/sites/<name>/`, git-ignored, or anywhere): `site.en
   Ogg to TinyIce, a muted browser (`theme-test/kit-site.mjs`: looks like a visitor's Chrome, or Ghost's tracker skips
   it) for the LIVE NOW bar, plays, beacons and a page hit (country from page-hit-country: the browser says UTC), the
   bridge's health, performance and a signed webhook's DRY_RUN preview, and no puppi3 in routers, containers,
-  metrics or the rendered config besides the stack folder `puppi3/` (a name, like ID_PREFIX's default). Made as a
+  metrics or the rendered config; an old-layout copy of the site (`secrets/puppi3.env`, `data/puppi3/`) rendering with
+  its own paths and password. Made as a
   try-out (`TRYOUT=yes`, all eight networks); checks only 80, 443 and the stream's port are on the host, http:// and
   www. redirect, no ntfy contact point, the switched-off render's `deleteRules`, and at the end `live` switched off on
   the running site (TinyIce's container, Prometheus's job and Grafana's rule all go). Needs ports 80, 443 and 8222 free

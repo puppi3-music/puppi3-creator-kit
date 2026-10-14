@@ -61,6 +61,8 @@ set -uo pipefail
 K8S="$(cd "$(dirname "$0")/.." && pwd)"
 REPO="$(dirname "$K8S")"
 KIT="$REPO/kit"
+# the fake NAS (Compose, --migrate) builds the bridge from this repo's code, as the cluster's images are built here
+export KIT_BUILD=1
 S="$KIT/sites/k8s-test"
 N="$KIT/sites/k8s-test-nas"
 KEEP=0; OVERLAY=local; MIGRATE=0; RENDER_ONLY=0
@@ -92,7 +94,7 @@ mem=$(( $(docker info --format '{{.MemTotal}}') / 1073741824 ))
 made_cluster=0
 cleanup() { rm -rf "$S" "$SP"; }
 if [ "$RENDER_ONLY" = 1 ]; then
-    [ -f "$K8S/images/built.env" ] || die "--render-only renders with the images built last: run k8s/build-images.sh (or a full test) once"
+    :   # renders with the images built last (k8s/images/built.env), or without one this version's published ones
 else
     if ! k3d cluster list -o json | grep -q '"name": *"creator-kit"'; then
         for port in 9080 9443 5111; do lsof -nP -iTCP:$port -sTCP:LISTEN >/dev/null 2>&1 && die "port $port is in use"; done
@@ -242,7 +244,7 @@ check "a resized image (size/w600) is made, $(get "$w600" "$SP/w600.jpg") $(widt
 check "players get byte ranges of a sound (206)" eval '[ "$(get "$snd" "$SP/part.bin" -H "Range: bytes=0-99")" = 206 ] && [ "$(wc -c <"$SP/part.bin" | tr -d " ")" = 100 ]'
 admin POST /posts/ -H 'Content-Type: application/json' \
     -d "{\"posts\":[{\"title\":\"A post with a picture\",\"status\":\"published\",\"feature_image\":\"$img\"}]}" >/dev/null
-DBN="$(sed -n 's/^database__connection__database=//p' "$S/secrets/puppi3.env")"
+DBN="$(sed -n 's/^database__connection__database=//p' "$S/secrets/ghost.env")"
 stored="$(k exec "$MYSQL-0" -- sh -c "mysql -uroot -p\"\$MYSQL_ROOT_PASSWORD\" -N -e \"SELECT feature_image FROM \\\`$DBN\\\`.posts WHERE title = 'A post with a picture'\"" 2>/dev/null)"
 check "a post keeps it as ${stored:-nothing} (as on the NAS: the files can move either way)" eval '[ "$stored" = "__GHOST_URL__${img#https://kit.test}" ]'
 
@@ -384,7 +386,8 @@ wait_for "Grafana has the site's $want_rules alert rules" 15 rules_ok && ok "Gra
 sed -e 's/^MODULES=.*/MODULES=analytics,social,monitoring/' "$S/site.env" >"$SP/off.env"
 python3 "$REPO/stacks/monitoring/grafana/render.py" --profile cloud --site "$SP/off.env" --site "$S/secrets/monitoring.env" \
     "$REPO/stacks/monitoring/grafana/provisioning/dashboards/json" "$SP/off" >/dev/null 2>&1
-check "a render with live off leaves out its panels and rules" eval '! grep -lE "tinyice_|icecast_relay|live-down" "$SP"/off/dashboards/*.json "$SP"/off/alerting/*.yml'
+# (the rules only: deleteRules at the end names the dropped ones on purpose, so Grafana removes them)
+check "a render with live off leaves out its panels and rules" eval '! grep -lE "tinyice_|icecast_relay" "$SP"/off/dashboards/*.json && ! sed "/^deleteRules:/,\$d" "$SP"/off/alerting/*.yml | grep -qE "tinyice_|icecast_relay|live-down"'
 
 echo "== live stream"
 # A source like the streaming software's: Ogg straight to TinyIce's own port (8222), never through Traefik
@@ -495,7 +498,7 @@ k rollout status deploy/postiz-ghost-bridge --timeout=300s >/dev/null
 check "a new bridge pod keeps its data" eval 'bridge test -s /data/live.json'
 
 echo "== names"
-check "no puppi3 in the cluster's names" [ -z "$(k get all,configmap,secret,pvc -o name | grep -i puppi3 | grep -v '^secret/puppi3-')" ]
+check "no puppi3 in the cluster's names" [ -z "$(k get all,configmap,secret,pvc -o name | grep -i puppi3)" ]
 check "no puppi3 in router names" [ -z "$(api routers | grep -io '"name":"[^"]*puppi3[^"]*"')" ]
 
 echo "== BEHIND_CLOUDFLARE=false"
@@ -513,12 +516,12 @@ if [ "$MIGRATE" = 1 ]; then
     # the rest made but stopped. Reached as fake-nas: through a fake ssh, and a sudo that wants the password (which
     # comes from a fake Keychain): the stream after it must reach the command untouched.
     mkdir -p "$N" "$SP/bin"
-    # the NAS's Ghost as new as the cluster's (to-nas.sh refuses a database to an older Ghost: it can't migrate down)
-    docker pull -q ghost:6-alpine >/dev/null
+    # the NAS's Ghost the cluster's version (to-nas.sh refuses a database to an older Ghost: it can't migrate down)
+    docker pull -q "$(sed -n 's/^ *image: \(ghost:[^ ]*\).*/\1/p' "$K8S/base/ghost.yaml")" >/dev/null
     cp -R "$S/site.env" "$S/secrets" "$N/"
     rsync -a --exclude /k8s "$S/data/" "$N/data/"
     # (kit.sh would otherwise start Tinybird for its tokens, and wait for Ghost's site_uuid)
-    echo "tinybird__workspaceId=none" >"$N/data/puppi3/tinybird/tokens.env"
+    echo "tinybird__workspaceId=none" >"$N/data/ghost/tinybird/tokens.env"
     mkdir -p "$N/data/monitoring"; echo "GHOST_SITE_UUID=none" >"$N/data/monitoring/ghost.env"
     { "$KIT/kit.sh" "$N" up -d --no-deps db postiz-postgres postiz-temporal-postgres prometheus \
         && "$KIT/kit.sh" "$N" up --no-start --no-deps ghost tinybird-local traffic-analytics postiz postiz-temporal \
@@ -558,8 +561,8 @@ EOF
     check "...each NAS command through sudo, with the password ($(wc -l <"$SP/sudo.log" | tr -d ' ') calls)" [ -s "$SP/sudo.log" ]
     nas_titles="$(nsql "SELECT title FROM posts WHERE type = 'post'" | sort | paste -sd'|' -)"
     check "the NAS's MySQL has the posts ($nas_titles)" [ "$nas_titles" = "$t0" ]
-    check "...the bucket's picture, the same bytes" cmp -s "$SP/img-before.bin" "$N/data/puppi3/ghost/content/${img#https://kit.test/content/}"
-    check "...the kit's theme" [ -s "$N/data/puppi3/ghost/content/themes/puppi3-creator-kit-theme/package.json" ]
+    check "...the bucket's picture, the same bytes" cmp -s "$SP/img-before.bin" "$N/data/ghost/ghost/content/${img#https://kit.test/content/}"
+    check "...the kit's theme" [ -s "$N/data/ghost/ghost/content/themes/puppi3-creator-kit-theme/package.json" ]
     check "...TinyIce's config with the renamed mounts" grep -q '/dj-input.ogg' "$N/data/icecast/tinyice-data/config.json"
     check "...the bridge's data" [ -s "$N/data/postiz/ghost-bridge/data/live.json" ]
     check "...what the NAS had, kept aside" eval 'ls "$N/data/.migrate-backups/"*/"$DBN.sql.gz" >/dev/null'

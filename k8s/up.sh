@@ -8,12 +8,16 @@
 # cloud's databases and bucket). Moving a site's data between the NAS and a cluster: k8s/migrate/. local uses k3d's own kubeconfig
 # and refuses any other cluster; the rest use kubectl's current context, after asking (--yes: don't ask).
 # Each run writes the site's kustomization to <site>/data/k8s/: the overlay, a component per module in MODULES,
-# ConfigMap "site" from site.env (and "ghost", Ghost's few values), a Secret per secrets/<stack>.env, the images from k8s/images/built.env
-# (k8s/build-images.sh). The namespace is the site's ID_PREFIX. With monitoring, the first up asks Ghost for its
+# ConfigMap "site" from site.env (and "ghost", Ghost's few values), a Secret per secrets/<stack>.env, the kit's images:
+# this version's published ones, or k8s/images/built.env's (k8s/build-images.sh). The namespace is the site's ID_PREFIX. With monitoring, the first up asks Ghost for its
 # site_uuid afterwards and runs once more (the dashboards' Tinybird queries pass it).
 set -euo pipefail
 
 K8S="$(cd "$(dirname "$0")" && pwd)"
+# The kit's own images, as each release publishes them (k8s/build-images.sh's k8s/images/built.env, when there is one,
+# is used instead)
+KIT_IMAGES=ghcr.io/puppi3-music/puppi3-creator-kit
+KIT_VERSION="$(cat "$K8S/../kit/VERSION")"
 [ $# -ge 2 ] || { sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 SITE_DIR="$(cd "$1" && pwd)"; shift
 [ -f "$SITE_DIR/site.env" ] || { echo "no site.env in $SITE_DIR (kit/setup.sh makes it)" >&2; exit 1; }
@@ -361,7 +365,9 @@ rel() { python3 -c 'import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2
     fi
     echo "secretGenerator:"
     for f in "$SITE_DIR"/secrets/*.env; do
-        echo "  - name: $(basename "$f" .env)"
+        # (a site made before kit 1.2.0 has the Ghost stack's as secrets/puppi3.env: Secret ghost all the same)
+        sec="$(basename "$f" .env)"; [ "$sec" != puppi3 ] || sec=ghost
+        echo "  - name: $sec"
         echo "    envs: [$(rel "$f")]"
     done
     if [ -n "$S3_KEYS" ]; then
@@ -384,12 +390,20 @@ rel() { python3 -c 'import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2
             echo "    envs: [$n.env]"
         done
     fi
+    echo "images:"
     if [ -f "$K8S/images/built.env" ]; then
-        echo "images:"
+        # built here (k8s/build-images.sh): a changed kit, or a registry of your own
         grep -v '^#' "$K8S/images/built.env" | while IFS='=' read -r name ref; do
             echo "  - name: creator-kit/$name"
             echo "    newName: ${ref%:*}"
             echo "    newTag: ${ref##*:}"
+        done
+    else
+        # the release's, published for this kit version (.github/workflows/release.yml)
+        for name in traefik tb-setup icecast-relay ghost-bridge; do
+            echo "  - name: creator-kit/$name"
+            echo "    newName: $KIT_IMAGES/$name"
+            echo "    newTag: \"$KIT_VERSION\""
         done
     fi
 } > "$OUT/kustomization.yaml"
@@ -397,7 +411,7 @@ printf 'apiVersion: v1\nkind: Namespace\nmetadata:\n  name: %s\n' "$NS" > "$OUT/
 # it holds the Secrets: readable by you only
 (umask 077; kubectl kustomize --load-restrictor LoadRestrictionsNone "$OUT" > "$OUT/rendered.yaml"); chmod 600 "$OUT/rendered.yaml"
 if grep -q 'image: creator-kit/' "$OUT/rendered.yaml"; then
-    echo "the kit's images aren't built: k8s/build-images.sh --registry <k3d or yours>" >&2; exit 1
+    echo "an image of the kit's has no address (k8s/images/built.env is missing one: k8s/build-images.sh again)" >&2; exit 1
 fi
 [ "$RENDER" = 1 ] && { echo "rendered: $OUT/rendered.yaml"; exit 0; }
 

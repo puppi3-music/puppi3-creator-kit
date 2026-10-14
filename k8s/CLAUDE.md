@@ -9,7 +9,9 @@ A site is the same folder as on Compose (`kit/setup.sh` makes it: `site.env`, `s
 - `up.sh <site> <overlay> [--render] | <site> --down`: writes the site's kustomization to `<site>/data/k8s/` on every
   run (the overlay; a component per module in `MODULES` that has one, others noted and left out; ConfigMap `site` from
   `site.env`; ConfigMap `ghost` with only `SITE_HOST` and `STAFF_DEVICE_VERIFICATION`, so other profile changes don't
-  restart Ghost; a Secret per `secrets/<stack>.env`, named after the stack; the images from `images/built.env`),
+  restart Ghost; a Secret per `secrets/<stack>.env`, named after the stack (`secrets/puppi3.env`, a site's from before
+  kit 1.2.0, is Secret `ghost` all the same); the kit's images: `images/built.env`'s when there is one, else this
+  version's published ones, `ghcr.io/puppi3-music/puppi3-creator-kit/<name>:<kit/VERSION>`),
   renders it to `rendered.yaml` (`--load-restrictor LoadRestrictionsNone`: the base reads `stacks/traefik/dynamic/`),
   applies it to namespace `<ID_PREFIX>`, deletes the generated ConfigMaps/Secrets the apply no longer named (their
   names carry a hash), and waits (5 min; `UP_TIMEOUT=<s>` for a first slow image pull) until every Job has finished and every Deployment and StatefulSet is ready (Jobs are
@@ -46,14 +48,14 @@ A site is the same folder as on Compose (`kit/setup.sh` makes it: `site.env`, `s
     files to it (`behavior: merge`). Traefik reads the mounted ConfigMap folder without doubling (checked). Its
     environment is the `site` ConfigMap plus `GHOST_UPSTREAM=http://ghost:2368`; the other upstreams' defaults are
     already the Services' names (`traffic-analytics`, `tinybird-local`, `postiz-ghost-bridge`), so keep those names.
-  - Ghost: `ghost:6-alpine`, 1 replica, `Recreate`, settings as environment (no `config.production.json`), MySQL at
+  - Ghost: `ghost:<version>-alpine` (the Compose stack's exact version), 1 replica, `Recreate`, settings as environment (no `config.production.json`), MySQL at
     Service `mysql` (an init container waits for it), content on PVC `ghost-content`; mail (`mail__*`, as the NAS's
     config file's `mail`) from the site's optional `secrets/ghost-mail.env` (Secret `ghost-mail`, envFrom, optional:
     without it Ghost's Direct mail; `examples/ghost-mail.env.example`); probes ask
     `/ghost/api/admin/site/` with `X-Forwarded-Proto: https`.
-- `components/mysql/`: MySQL 8 StatefulSet + Service `mysql`, root's password from Secret `puppi3`.
+- `components/mysql/`: MySQL 8 StatefulSet (the Compose stack's exact version) + Service `mysql`, root's password from Secret `ghost`.
 - `components/analytics/` (module `analytics`): `tinybird-local` StatefulSet (the stack's digest; ClickHouse and Redis
-  volumes; ~4 GiB idle and more while starting, so request 4Gi, limit 6Gi: 3Gi was OOM-killed in a loop; startup
+  volumes; `PYTHON_CPU_COUNT=2`, as the stack: one CSV import worker instead of half the node's CPUs, ~0.5 GB each; ~2.2 GB idle, 2.75 GB at most, so request 2560Mi, limit 4Gi (with five workers 3Gi was OOM-killed in a loop); startup
   probe with a 5 s timeout, as Compose's), `traffic-analytics` Deployment (salts on a small PVC), and `tb-setup` as a
   Job: init containers copy Ghost's schema files out of Ghost's image and run the stack's `setup.sh` with
   `TB_SETUP_EXIT=1`, then `save-tokens` puts the tokens into Secret `tinybird-tokens` with a server-side apply through
@@ -88,7 +90,7 @@ A site is the same folder as on Compose (`kit/setup.sh` makes it: `site.env`, `s
   container waits for Postgres, Redis and Temporal, Compose's depends_on; probes are Compose's node check, any answer
   under 500), its Postgres and Redis (`databases.yaml`), Temporal (`temporal.yaml`: auto-setup, its Postgres and
   Elasticsearch, the dynamic config from `kit/postiz/dynamicconfig/`; no Temporal UI; its health check asks the pod's
-  address, it doesn't listen on localhost), and the bridge (`bridge.yaml`: the kit's image `images/ghost-bridge/` with
+  address, it doesn't listen on localhost), and the bridge (`bridge.yaml`: the kit's image, `stacks/postiz/ghost-bridge/Dockerfile`, with
   the code inside, node user, 1 replica, Recreate, 300 s to stop, `data/` on PVC `postiz-ghost-bridge`, readiness
   `/health`). Every Service keeps the stack's name, so the addresses in the stack's environment work unchanged.
   **Postiz's and the bridge's settings come from the stack itself:** `up.sh` runs `docker compose config` on
@@ -108,7 +110,7 @@ A site is the same folder as on Compose (`kit/setup.sh` makes it: `site.env`, `s
   Unset (Compose, the NAS) it counts as before.
 - `components/monitoring/` (module `monitoring`): Grafana 13.2.3 (Deployment, Recreate, PVC; the Infinity plugin;
   the Compose kit's own `kit/monitoring/grafana/{datasources,dashboards}.yml`, their `${VAR}` logins from its
-  environment: Secrets `monitoring`, `puppi3`, ConfigMap `site`; `tinybird-tokens` with analytics, as the bridge),
+  environment: Secrets `monitoring`, `ghost`, ConfigMap `site`; `tinybird-tokens` with analytics, as the bridge),
   Prometheus v3.5.0 (StatefulSet, 10 Gi, a year or 8 GB), blackbox (the public checks), json-exporter (the relays'
   `/status-json.xsl` as `icecast_relay_listeners{mount}`) and the Compose kit's `grants.sh` as Jobs `grafana-ro-ghost`
   and `grafana-ro-postiz` (grafana_ro, on every up). `up.sh` renders the dashboards with
@@ -196,11 +198,12 @@ A site is the same folder as on Compose (`kit/setup.sh` makes it: `site.env`, `s
   `to-nas.sh <site> <overlay> --to ...` (both `migrate.sh`; `-n` checks and prints the steps, `-y` doesn't ask,
   `--no-start` leaves the NAS's apps stopped). The user runs them: Claude never points them at the real NAS or a real
   cluster. The Docker host side is the stacks' containers (found by Compose service in the projects `<ID_PREFIX>`,
-  `puppi3`, `postiz`, `icecast`, `monitoring`: the kit's Compose and stacks run one project each alike; a
-  `puppi3-staging` project never) and the data folder (`DATA_DIR`): over ssh with `sudo -k -S` (the password line first, the
+  `ghost` or `puppi3` (its name before kit 1.2.0), `postiz`, `icecast`, `monitoring`: the kit's Compose and stacks
+  run one project each alike; a `puppi3-staging` project never) and the data folder (`DATA_DIR`; Ghost's folder in it,
+  `ghost/` or `puppi3/`, is read from where Ghost's container mounts `/var/lib/ghost/content`): over ssh with `sudo -k -S` (the password line first, the
   stream after it: sudo reads it a byte at a time; never sent when sudo needs none), the password from Keychain item
   `<ID_PREFIX>-nas` or asked; or this machine's Docker (the test). Every file
-  operation there runs in a throwaway `busybox:1.37` with the data folder at `/d` (the same tar, find, stat on a Mac).
+  operation there runs in a throwaway `busybox:1.37.0` with the data folder at `/d` (the same tar, find, stat on a Mac).
   The cluster side: pod `migrate` (MySQL's, Postgres's and rclone's clients) built from Ghost's Deployment: its
   service account (IRSA), hosts file and sidecars (the Cloud SQL proxy), its `database__*` env, Secret `postiz`,
   ConfigMap/Secret `s3`; and a busybox pod per volume (`migrate-<claim>`) with the volume's workload scaled to 0
@@ -219,14 +222,24 @@ A site is the same folder as on Compose (`kit/setup.sh` makes it: `site.env`, `s
   copied mounts). to-nas keeps what the NAS had in `<data folder>/.migrate-backups/<stamp>/` (databases as `.sql.gz`,
   folders moved, volumes as `.tar`), stops and starts the NAS's Ghost (it's the move home), writes `tokens.env` if the
   cluster's differ (then Ghost etc. need recreating: the user's). Never Cloudflare.
+- `test/image-pins.py`: every image the kit names (compose files, the kit's profiles, k8s's YAML, the Dockerfiles'
+  `FROM` with their `ARG` defaults, `migrate.sh`'s images, `build-images.sh`'s Alpine, `theme-zip.sh`'s gscan) is at an
+  exact version (three numbers, two for PostgreSQL, or a digest), and one image's major version and variant is at one
+  version everywhere (postgres 16 and 17-alpine are two). Not the kit's own builds (`creator-kit/...`, `:local`) or
+  names from a variable. A site's repo may list folders in `.image-pins` at its top (`skip`, or `own`: exact but its
+  own versions, like a staging copy). The commit hook runs it. A version bump is one edit in every file at once, with
+  its `kit/CHANGELOG.md` line.
 - `test/twin-diff.py <cloud render> <twin render>`: a twin may differ from its cloud's render only by the stand-ins'
   resources, ConfigMaps `cloud`/`s3`, Secrets' contents, ExternalNames and ServiceAccounts' annotations (values),
   Ghost's gateway endpoint, and the `cloud-sql-proxy` sidecar's image and args; generated names' hashes ignored. test.sh runs it for every `overlays/k3d-*`.
 - `overlays/selfhosted/` (base + mysql), `overlays/local/` (selfhosted on k3d, images from its registry, plus s3-storage and s3-gateway: Ghost's files in
   a bucket, as in a cloud).
-- `build-images.sh --registry k3d|<registry>`: builds and pushes the kit's images (Traefik with the plugins, the Icecast relay, the bridge from a folder of just its `.mjs` files (never `data/`), tb-setup from a
+- `build-images.sh --registry k3d|<registry> [--platform a,b] [--tag <t>]`: builds and pushes the kit's images (Traefik with the plugins, the Icecast relay, the bridge from a folder of just its `.mjs` files (never `data/`) with `stacks/postiz/ghost-bridge/Dockerfile`, tb-setup from a
   folder of just its two files: the stack's folder here may hold a real `tokens.env`; tag = upstream version + a hash of
-  the inputs), writes `images/built.env` (git-ignored), which `up.sh` turns into Kustomize `images:`. `k3d` pushes to
+  the inputs, plus `--tag`'s; `--platform` with a comma = one `docker buildx build --push` for all of them; each with
+  `org.opencontainers.image.source`, GHCR's link to the kit's repo), writes `images/built.env` (git-ignored), which
+  `up.sh` turns into Kustomize `images:`. The release runs it for GHCR (both architectures, `--tag <VERSION>`; tried
+  into k3d's registry: one index per image with amd64 and arm64, 71 s). `k3d` pushes to
   `localhost:5111` and the cluster pulls `k3d-creator-kit-registry:5111`.
 - `test/k3d.sh up|down|env`: cluster `creator-kit` (k3s pinned, 1 server + 2 agents, k3s's Traefik disabled, registry
   on :5111, the site's ports on 9080/9443, the stream source on 8222, StorageClasses `gp3` and `standard-rwo` on local-path, made again by
@@ -239,11 +252,11 @@ A site is the same folder as on Compose (`kit/setup.sh` makes it: `site.env`, `s
   restarted, a page hit as Ghost's tracker sends it reaching Tinybird with page-hit-country's CA, the GET-only stats
   route answering and Tinybird's other API not), monitoring (Grafana on both names, the 10 dashboards in the site's folder, a real query through each datasource, every Prometheus job up, Health's pod memory by workload and disk from the volumes, the alert rules; with one listener on a relay, Health's listeners say 1), social (Postiz on `postiz.<SITE_HOST>`, Cloudflare-only; the webhook (401 unsigned), the theme's clicks (204) and the social preview reaching the bridge; the bridge's Tinybird tokens; with one listener on a relay its live shows say 1, not the relays; a new bridge pod keeping `data/`), live (ffmpeg to 8222, `/live-status.json`, a 320 kbps mp3 from a relay through Traefik
   that's really the tone (pitch from zero crossings), the source reconnecting with another tone heard through the relays, a
-  relay pod killed, TinyIce's admin 403 public and open on `tinyice.<LAN_DOMAIN>`), the Ghost and MySQL pods killed and back with their data, no puppi3 in names (Secret `puppi3-*` is Phase E's stack rename), `BEHIND_CLOUDFLARE=false` open,
-  and Ghost's pod untouched by that change. `--migrate` then: a fake NAS (`kit/sites/k8s-test-nas`: this site's profile, secrets and setup files on Compose, `ghost:6-alpine` pulled to match the cluster's; databases and Prometheus running, the rest made but stopped; a fake ssh, a sudo that wants a password, a fake Keychain), to-nas.sh, checks there, `up.sh --down`, a fresh up of the other twin, to-cloud.sh, checks in the cluster (posts, site_uuid, theme, the picture's bytes, page hits, TinyIce's renamed mounts, the bridge's data, older Prometheus samples, Postiz, grafana_ro). Requests go through `curl --connect-to kit.test:443:127.0.0.1:9443`, so the
+  relay pod killed, TinyIce's admin 403 public and open on `tinyice.<LAN_DOMAIN>`), the Ghost and MySQL pods killed and back with their data, no puppi3 in names, `BEHIND_CLOUDFLARE=false` open,
+  and Ghost's pod untouched by that change. `--migrate` then: a fake NAS (`kit/sites/k8s-test-nas`: this site's profile, secrets and setup files on Compose, the base's Ghost image pulled to match the cluster's; databases and Prometheus running, the rest made but stopped; a fake ssh, a sudo that wants a password, a fake Keychain), to-nas.sh, checks there, `up.sh --down`, a fresh up of the other twin, to-cloud.sh, checks in the cluster (posts, site_uuid, theme, the picture's bytes, page hits, TinyIce's renamed mounts, the bridge's data, older Prometheus samples, Postiz, grafana_ro). Requests go through `curl --connect-to kit.test:443:127.0.0.1:9443`, so the
   Host stays `kit.test`. Deletes the cluster only if it made it.
 - `test/test.sh --render-only`: only the first checks (setup.sh's site, every overlay rendered and kubeconform'd, the
-  twins' diff), no cluster, no image build (it renders with `images/built.env` as it is); ~40 s, cleans up.
+  twins' diff), no cluster, no image build (it renders with `images/built.env` as it is, or without one the published images); ~40 s, cleans up.
 - The `test-k8s` skill (`.claude/skills/test-k8s/`) is how Claude runs these: which run fits which change (render
   check first, then the overlay(s) the change reaches; `--migrate` for `migrate/`), watching the log and the pods
   while it runs, and `kc.sh`, a kubectl that only ever talks to `k3d-creator-kit` (never plain `kubectl`).

@@ -23,7 +23,7 @@ spec:
       initContainers:
         # MySQL first: Ghost exits when it can't reach it, and a crash loop only slows its start
         - name: wait-for-db
-          image: busybox:1.37
+          image: busybox:1.37.0
           command: [sh, -c, 'until nc -z -w 2 "$DB_HOST" 3306; do echo "waiting for $DB_HOST"; sleep 3; done']
           env:
             - name: DB_HOST
@@ -33,7 +33,7 @@ spec:
             limits: {memory: 32Mi}
       containers:
         - name: ghost
-          image: ghost:6-alpine
+          image: ghost:6.69.0-alpine
           # Mail (staff sign-in codes, members' links): Ghost's mail__* settings from the site's secrets/ghost-mail.env,
           # if it has one (else Ghost's Direct mail, which rarely arrives). Modules append theirs (analytics: tb-setup's
           # tokens; s3-storage: the bucket's keys).
@@ -52,13 +52,13 @@ spec:
               value: mysql
             - name: database__connection__user
               valueFrom:
-                secretKeyRef: {name: puppi3, key: database__connection__user}
+                secretKeyRef: {name: ghost, key: database__connection__user}
             - name: database__connection__password
               valueFrom:
-                secretKeyRef: {name: puppi3, key: database__connection__password}
+                secretKeyRef: {name: ghost, key: database__connection__password}
             - name: database__connection__database
               valueFrom:
-                secretKeyRef: {name: puppi3, key: database__connection__database}
+                secretKeyRef: {name: ghost, key: database__connection__database}
             # Ghost emails staff a code at each new sign-in; STAFF_DEVICE_VERIFICATION=false in site.env turns it off
             - name: security__staffDeviceVerification
               valueFrom:

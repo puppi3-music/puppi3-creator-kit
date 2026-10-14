@@ -9,7 +9,7 @@ services:
     user: !reset null
     # tb-setup's tokens from the site's data folder (the stack reads ./tinybird/, the NAS's own folder)
     env_file: !override
-      - path: ${DATA_DIR}/puppi3/tinybird/tokens.env
+      - path: ${GHOST_DATA_DIR}/tinybird/tokens.env
         required: false
     environment:
       # the database by a name no other stack on proxy has (the NAS uses its container name, puppi3-db-1)
@@ -24,7 +24,7 @@ services:
     profiles: [analytics]
     ports: !reset []   # only through Traefik's page-hits route
     env_file: !override
-      - path: ${DATA_DIR}/puppi3/tinybird/tokens.env
+      - path: ${GHOST_DATA_DIR}/tinybird/tokens.env
         required: false
   tinybird-local:
     profiles: [analytics]

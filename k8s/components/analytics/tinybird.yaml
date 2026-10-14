@@ -1,4 +1,4 @@
-# Self-hosted Tinybird (ClickHouse and Redis inside), as the puppi3 stack's tinybird-local. Only Traefik's GET-only
+# Self-hosted Tinybird (ClickHouse and Redis inside), as the Ghost stack's tinybird-local. Only Traefik's GET-only
 # /.ghost/stats route reaches it from outside; the Service keeps the stack's name, which Traefik, Ghost, the bridge
 # and Grafana's datasource use.
 apiVersion: apps/v1
@@ -19,8 +19,12 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
         - name: tinybird-local
-          # the puppi3 stack's pin (stacks/puppi3/compose.yaml: keep them in step)
+          # the Ghost stack's pin (stacks/ghost/compose.yaml: keep them in step)
           image: tinybirdco/tinybird-local@sha256:16c661bba64b99d904d9384ac414ee7ffa9d09d12bf77a42d41885408a2d8963
+          # Its CSV import workers (~0.5 GB each, unused by Ghost) number half the node's CPUs: 2 keeps one (the
+          # Ghost stack's setting)
+          env:
+            - {name: PYTHON_CPU_COUNT, value: "2"}
           ports:
             - {name: http, containerPort: 7181}
           # Its health answer can take seconds while ClickHouse starts (Compose: 5 s timeout, 120 s start period)
@@ -34,10 +38,10 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 5
           resources:
-            # ~4 GiB idle on this Mac (ClickHouse, Redis, Kafka and Tinybird's servers in one container), over 3 GiB while
-            # it starts: a 3 GiB limit had it killed in a loop
-            requests: {cpu: 200m, memory: 4Gi}
-            limits: {memory: 6Gi}
+            # ~2.2 GB idle with one CSV worker (ClickHouse, Redis, Kafka and Tinybird's servers in one container), 2.75 GB
+            # at most in kit/test.sh (2026-10-14; ~4.3 GB idle with five workers, when a 3 GiB limit had it killed in a loop)
+            requests: {cpu: 200m, memory: 2560Mi}
+            limits: {memory: 4Gi}
           volumeMounts:
             - {name: clickhouse, mountPath: /var/lib/clickhouse}
             - {name: redis, mountPath: /redis-data}

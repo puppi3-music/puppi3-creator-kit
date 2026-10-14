@@ -1,6 +1,6 @@
 services:
   ghost:
-    image: ghost:6-alpine
+    image: ghost:6.69.0-alpine
     container_name: website-puppi3
     restart: unless-stopped
     user: 1002:1003
@@ -29,11 +29,11 @@ services:
       # Your browser in Ghost Admin -> Tinybird (via Traefik, read-only pipe queries only)
       tinybird__stats__endpointBrowser: https://${SITE_HOST:?set it in the site's profile}/.ghost/stats
     volumes:
-      # Only your data + config; Ghost's code comes from the image so upgrades work. DATA_DIR = the folder
-      # holding the stacks' folders (instances/example.env); the default is the NAS's, so a .env without it
-      # can't move a mount.
-      - ${DATA_DIR:?set it in the site's profile}/puppi3/ghost/content:/var/lib/ghost/content
-      - ${DATA_DIR:?set it in the site's profile}/puppi3/ghost/config.production.json:/var/lib/ghost/config.production.json
+      # Only your data + config; Ghost's code comes from the image so upgrades work. GHOST_DATA_DIR = this
+      # stack's data folder (instances/example.env; kit.sh sets it): no default, so a profile without it stops
+      # here instead of starting Ghost and MySQL on an empty folder.
+      - ${GHOST_DATA_DIR:?set it in the site's profile}/ghost/content:/var/lib/ghost/content
+      - ${GHOST_DATA_DIR:?set it in the site's profile}/ghost/config.production.json:/var/lib/ghost/config.production.json
     depends_on:
       db:
         condition: service_started
@@ -47,13 +47,13 @@ services:
       default: null
       proxy: null
   db:
-    image: mysql:8.0
+    image: mysql:8.0.46
     restart: unless-stopped
     user: 1002:1003
     environment:
       MYSQL_ROOT_PASSWORD: ${database__connection__password:-example}
     volumes:
-      - ${DATA_DIR:?set it in the site's profile}/puppi3/db:/var/lib/mysql
+      - ${GHOST_DATA_DIR:?set it in the site's profile}/db:/var/lib/mysql
     # Receives page hits from visitors at <SITE_HOST>/.ghost/analytics/*
     # and forwards them to Tinybird
     networks:
@@ -89,6 +89,10 @@ services:
     image: tinybirdco/tinybird-local@sha256:16c661bba64b99d904d9384ac414ee7ffa9d09d12bf77a42d41885408a2d8963
     restart: unless-stopped
     stop_grace_period: 10s
+    # Its CSV import workers (~0.5 GB each, unused by Ghost) number half the CPUs Python sees: 2 keeps one, and
+    # Tinybird uses ~2 GB instead of ~5 on a 10-CPU machine
+    environment:
+      PYTHON_CPU_COUNT: 2
     # No host port: Traefik reaches it over the proxy network, so only the GET-only route below
     # is exposed (a host port would open its whole API, admin and tokens included, to the LAN)
     volumes:
@@ -114,7 +118,7 @@ services:
   # Copies the Tinybird schema files that ship inside the Ghost image, then idles
   # (stays "running" so a stack manager shows the stack as active)
   tinybird-sync:
-    image: ghost:6-alpine
+    image: ghost:6.69.0-alpine
     user: root
     entrypoint:
       - sh
@@ -156,7 +160,7 @@ services:
       # Absolute, never ./tinybird: a stack manager that runs compose inside its own container turns a relative
       # mount into a path inside that container, which the host then creates empty, so tokens.env would land where
       # env_file (./tinybird/tokens.env) never looks (stacks/CLAUDE.md)
-      - ${DATA_DIR:?set it in the site's profile}/puppi3/tinybird:/out
+      - ${GHOST_DATA_DIR:?set it in the site's profile}/tinybird:/out
     depends_on:
       tinybird-local:
         condition: service_healthy

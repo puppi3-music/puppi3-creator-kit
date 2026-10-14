@@ -28,7 +28,7 @@ services:
     restart: unless-stopped
     # Tinybird's admin token for the Ghost Analytics datasource (tb-setup writes it; kit.sh starts Grafana after)
     env_file:
-      - path: ${DATA_DIR}/puppi3/tinybird/tokens.env
+      - path: ${GHOST_DATA_DIR}/tinybird/tokens.env
         required: false
     environment:
       GF_INSTALL_PLUGINS: yesoreyeram-infinity-datasource
@@ -67,24 +67,24 @@ services:
       - traefik.http.services.${ID_PREFIX}-grafana.loadbalancer.server.port=3000
 
   # Grafana's read-only logins (grafana_ro), made again at every start: Ghost's MySQL gets SELECT on the tables
-  # stacks/puppi3/grafana-ro.sh lists, Postiz's Postgres on the four its panels read. They wait for Ghost's and
+  # stacks/ghost/grafana-ro.sh lists, Postiz's Postgres on the four its panels read. They wait for Ghost's and
   # Postiz's own tables, then exit.
   grafana-ro-ghost:
-    image: mysql:8.0
+    image: mysql:8.0.46
     profiles: [monitoring]
     restart: "no"
     entrypoint: [bash, /grants.sh, ghost]
     environment:
       DB_HOST: ${ID_PREFIX}-db
       DB_USER: ${database__connection__user:-root}
-      DB_PASSWORD: ${database__connection__password:?secrets/puppi3.env}
+      DB_PASSWORD: ${database__connection__password:?secrets/ghost.env}
       DB_NAME: ${database__connection__database:-ghost}
       RO_PASSWORD: ${GRAFANA_RO_PASSWORD}
     volumes:
       - ./grants.sh:/grants.sh:ro
-      - ../../stacks/puppi3/grafana-ro.sh:/grafana-ro.sh:ro
+      - ../../stacks/ghost/grafana-ro.sh:/grafana-ro.sh:ro
   grafana-ro-postiz:
-    image: postgres:17-alpine
+    image: postgres:17.11-alpine
     profiles: [monitoring]
     restart: "no"
     entrypoint: [sh, /grants.sh, postiz]

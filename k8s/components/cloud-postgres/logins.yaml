@@ -13,7 +13,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: logins
-          image: postgres:17-alpine
+          image: postgres:17.11-alpine
           command:
             - sh
             - -c

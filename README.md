@@ -50,16 +50,34 @@ ntfy server. Install the ntfy app and subscribe to that topic.
 ## What you need
 
 - **A machine** running Linux, macOS or Windows (inside WSL2), on Intel/AMD or ARM. A home server, a NAS or a rented
-  server all work. It needs to be the machine's only kit site: its Traefik takes the web ports, and some of its
+  server all work. Only one site per machine is allowed: its Traefik takes the web ports, and some of its
   containers have fixed names like `traefik` and `postiz`.
 - **Docker** with Compose 2.24 or newer, and **Python 3**.
 - **Ports 80 and 443** that the internet reaches, and 8222 for streaming. Each can be another: see `HTTP_PORT` and
   `LIVE_PORT` in the [Settings reference](kit/docs/settings-reference.html).
-- **For the theme:** `zip` and `unzip` (most Linux systems need to install them), and Node.js for its check before
-  you upload it.
+- **Nothing to build:** the kit's own images and its theme come ready-made with each release.
 - **A domain** whose DNS you can change.
 
 On Linux, setup asks for `sudo` once, to give each service's folders to the user it runs as.
+
+### How big a machine
+
+Measured on the kit's own test site, with every module on, at rest and while it streams, takes page hits and makes
+social previews:
+
+| Part | Memory | Disk for its images |
+|---|---|---|
+| The site (Ghost, MySQL, Traefik) | 0.7 GB | 2.5 GB |
+| `analytics` (Tinybird holds about 2.2 GB all the time) | 2.5 GB, 3 GB when busy | 10 GB |
+| `social` (Postiz and its Temporal) | 2.5 GB, 3 GB when busy | 11 GB |
+| `live` | under 0.1 GB | 0.1 GB |
+| `monitoring` | 1.9 GB | 2.5 GB |
+| **Everything** | **7.5 GB, 8 GB when busy** | **about 26 GB** |
+
+So the site alone runs on a 2 GB machine, and everything wants 10 GB of memory or more (12 to 16 GB is comfortable)
+and 50 GB of free disk. On a Mac or Windows, Docker Desktop's own settings must give it that much memory (Settings,
+Resources). Disk grows with what you upload, Prometheus's history (up to 10 GB, then it drops the oldest) and your
+visitors' page hits (small). The [Setup guide](kit/docs/setup-guide.html#before-how-big) has the detail.
 
 ## Getting the kit
 
@@ -94,7 +112,8 @@ reach it from your browser. The Setup guide's [Trying it at home first](kit/docs
 3. **Finish by hand:** setup prints the steps for your modules. In short:
    - DNS for the site, `live.`, `postiz.` and `grafana.`.
    - Ghost's owner account.
-   - The theme: `kit/theme-zip.sh` builds it, and you upload it in Ghost Admin.
+   - The theme: `puppi3-creator-kit-theme.zip` from [the kit's release](https://github.com/puppi3-music/puppi3-creator-kit/releases) for your version
+     (`kit/VERSION`), which you upload in Ghost Admin.
    - The redirects file.
    - Your Postiz account and networks.
    - The Ghost webhook to the bridge.
@@ -123,11 +142,10 @@ anyway, so switching it on later needs only the DNS name for the stream and the 
 ## On Kubernetes
 
 The same folder runs on a cluster: your own (`selfhosted`), Amazon EKS (`eks`) or Google GKE (`gke`). You need
-`kubectl` pointed at the cluster and a registry for the kit's four own images:
+`kubectl` pointed at the cluster; the kit's own images come from GitHub's registry, for Intel/AMD and ARM nodes alike:
 
 ```sh
 kit/setup.sh kit/sites/mysite                                    # the same folder as for Compose
-PLATFORM=linux/amd64 k8s/build-images.sh --registry <registry>/creator-kit
 k8s/up.sh kit/sites/mysite selfhosted                            # asks before using the cluster kubectl points at
 ```
 

@@ -284,20 +284,19 @@ header.top .pup svg{display:block;width:100%;height:auto}
   <div class="note"><b class="label">From a ZIP</b><p>No git? Download the new ZIP, unzip it beside the old copy, and move your site's folder (<code>kit/sites/mysite</code>) into the new one; then run the commands below from the new copy, without <code>git pull</code>. Keep the old copy until the site runs well: it's your way back (going back is the same move the other way, with the backup). Where the steps below use <code>git diff</code>, compare the two copies instead: <code>diff -rq old/kit/theme new/kit/theme</code> and <code>diff old/kit/redirects.yaml new/kit/redirects.yaml</code> for the theme and short links, <code>diff</code> of their <code>instances/example.env</code> and <code>stacks/*/.env.example</code> for the settings.</p></div>
   <h3 id="upgrade-compose">On Docker Compose</h3>
 <div class="code"><pre>git pull
-kit/kit.sh kit/sites/mysite pull --ignore-buildable   # newer images (Ghost 6's latest, the databases' fixes)
-kit/kit.sh kit/sites/mysite up -d                     # recreates what changed; builds the bridge</pre></div>
+kit/kit.sh kit/sites/mysite pull --ignore-buildable   # the images this version names (the changelog says which changed)
+kit/kit.sh kit/sites/mysite up -d                     # recreates what changed</pre></div>
   <p>Ghost may take a minute or two to start the first time after a new version, while it updates its database. Don't stop it meanwhile: a Ghost stopped in the middle of that leaves its database locked (<a href="#trouble-ghost-won-t-start">the fix</a>).</p>
   <h3 id="upgrade-kubernetes">On Kubernetes</h3>
 <div class="code"><pre>git pull
-PLATFORM=linux/amd64 k8s/build-images.sh --registry &lt;registry&gt;/creator-kit
 k8s/up.sh kit/sites/mysite &lt;overlay&gt; --render            # look first, if you like
 k8s/up.sh kit/sites/mysite &lt;overlay&gt;</pre></div>
-  <p>The kit's own four images get a new tag whenever what goes into them changes, so the cluster picks them up. <code>up.sh</code> waits until every part is ready again and stops with the reason if one isn't.</p>
+  <p>The kit's own four images are this version's published ones, so the cluster picks up the new ones by themselves (if you build them yourself instead, run <code>k8s/build-images.sh</code> again first: <a href="setup-guide.html#k8s-images">the Setup guide</a>). <code>up.sh</code> waits until every part is ready again and stops with the reason if one isn't.</p>
   <h3 id="upgrade-theme-and-short-links">The theme and the short links</h3>
   <p>See whether the update changed them:</p>
 <div class="code"><pre>git diff --stat &lt;the version you noted&gt; HEAD -- kit/theme kit/redirects.yaml</pre></div>
   <ul>
-    <li><b>The theme</b> changed: <code>kit/theme-zip.sh</code>, then upload <code>kit/dist/puppi3-creator-kit-theme.zip</code> in Ghost (Settings, Design, Change theme). Its settings, like the Live stream URL, stay as they were.</li>
+    <li><b>The theme</b> changed: download <code>puppi3-creator-kit-theme.zip</code> from <a href="https://github.com/puppi3-music/puppi3-creator-kit/releases">the new version's release</a> and upload it in Ghost (Settings, Design, Change theme). Its settings, like the Live stream URL, stay as they were.</li>
     <li><b>The short links</b> changed: upload <code>kit/redirects.yaml</code> again (Settings, Labs (under Advanced: Open, Beta features), Redirects). If you've added your own lines to it, keep your copy and add the new lines to it.</li>
   </ul>
   <h3 id="upgrade-new-settings">New settings</h3>
@@ -319,7 +318,7 @@ k8s/up.sh kit/sites/mysite &lt;overlay&gt;</pre></div>
 kit/kit.sh kit/sites/mysite stop
 tar -czpf "$B/folder.tar.gz" -C kit/sites mysite
 for v in $(docker volume ls -q --filter label=com.docker.compose.project=$ID); do
-  docker run --rm -v $v:/v:ro -v "$B":/b busybox:1.37 tar -czf /b/$v.tgz -C /v .
+  docker run --rm -v $v:/v:ro -v "$B":/b busybox:1.37.0 tar -czf /b/$v.tgz -C /v .
 done
 kit/kit.sh kit/sites/mysite up -d</pre></div>
   <p>On Linux, run the <code>tar</code> line with <code>sudo</code>: each part of the site owns its own folders, and the backup has to read them and keep their owners.</p>
@@ -329,9 +328,10 @@ kit/kit.sh kit/sites/mysite up -d</pre></div>
 kit/kit.sh kit/sites/mysite exec -T db sh -c \
   'exec mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --single-transaction --no-tablespaces ghost' | gzip &gt; "$B/ghost.sql.gz"
 kit/kit.sh kit/sites/mysite exec -T postiz-postgres pg_dump -U postiz postiz | gzip &gt; "$B/postiz.sql.gz"   # with social
-tar -czf "$B/ghost-content.tar.gz" -C kit/sites/mysite/data/puppi3/ghost content
-(cd kit/sites/mysite &amp;&amp; tar -czf "$B/settings.tar.gz" site.env secrets data/puppi3/ghost/config.production.json \
-  $(ls data/puppi3/tinybird/tokens.env 2&gt;/dev/null))   # the settings, Ghost's mail login, the analytics' tokens</pre></div>
+tar -czf "$B/ghost-content.tar.gz" -C kit/sites/mysite/data/ghost/ghost content
+(cd kit/sites/mysite &amp;&amp; tar -czf "$B/settings.tar.gz" site.env secrets data/ghost/ghost/config.production.json \
+  $(ls data/ghost/tinybird/tokens.env 2&gt;/dev/null))   # the settings, Ghost's mail login, the analytics' tokens</pre></div>
+  <p>A site made before kit 1.2.0 keeps Ghost's files in <code>data/puppi3/</code> instead of <code>data/ghost/</code> (the kit uses whichever the site has): write <code>puppi3</code> for <code>ghost</code> in those paths.</p>
   <p>The warning about a password on the command line is MySQL's own, and harmless here: it's the container's own password, inside the container. Ghost's database is called <code>ghost</code> unless you changed <code>database__connection__database</code>. These copies don't include the analytics or the dashboards' history: take a stopped backup now and then for those.</p>
   <h3 id="backup-restore">Putting a backup back</h3>
   <p>On the same machine or a new one, with this repo at the same version as when the backup was made. The short name stays the same (it names the volumes):</p>
@@ -341,7 +341,7 @@ docker volume rm $(docker volume ls -q --filter label=com.docker.compose.project
 tar -xzpf "$B/folder.tar.gz" -C kit/sites                                    # sudo on Linux
 kit/kit.sh kit/sites/mysite create                                           # makes the empty volumes
 for f in "$B"/${ID}_*.tgz; do v=$(basename "$f" .tgz)
-  docker run --rm -v $v:/v -v "$B":/b busybox:1.37 tar -xzf /b/$v.tgz -C /v
+  docker run --rm -v $v:/v -v "$B":/b busybox:1.37.0 tar -xzf /b/$v.tgz -C /v
 done
 kit/kit.sh kit/sites/mysite up -d</pre></div>
   <p>From a nightly copy instead, put the database back into a running site:</p>
@@ -388,7 +388,7 @@ kubectl -n $NS exec deploy/ghost -c ghost -- tar -czf - -C /var/lib/ghost conten
 <div class="code"><pre>mkdir -p kit/sites/mysite-k8s/data/icecast/tinyice-data
 cp -Rp kit/sites/mysite/site.env kit/sites/mysite/secrets kit/sites/mysite-k8s/
 cp -p kit/sites/mysite/data/icecast/tinyice-data/config.json kit/sites/mysite-k8s/data/icecast/tinyice-data/</pre></div>
-    Keep <code>ID_PREFIX</code> as it is: the scripts find the site by it on both sides. Add <code>secrets/ghost-mail.env</code> (Ghost's mail, from the <code>mail</code> part of <code>data/puppi3/ghost/config.production.json</code>, one setting per line). For EKS or GKE, add the cloud's file and secrets as the <a href="setup-guide.html#cloud">setup guide</a> says. Behind Cloudflare, use <code>TLS_RESOLVER=cf</code>: it gets certificates from anywhere.</div></li>
+    Keep <code>ID_PREFIX</code> as it is: the scripts find the site by it on both sides. Add <code>secrets/ghost-mail.env</code> (Ghost's mail, from the <code>mail</code> part of <code>data/ghost/ghost/config.production.json</code>, one setting per line). For EKS or GKE, add the cloud's file and secrets as the <a href="setup-guide.html#cloud">setup guide</a> says. Behind Cloudflare, use <code>TLS_RESOLVER=cf</code>: it gets certificates from anywhere.</div></li>
     <li><div><b>The empty site up</b>, a day or so before: build the images and run <code>k8s/up.sh kit/sites/mysite-k8s &lt;overlay&gt;</code>. Check it through the cluster's own address (<a href="setup-guide.html#cloud-test-before-the-dns">how</a>) while the Compose site keeps serving.</div></li>
     <li><div><b>Freeze.</b> From now until the DNS points at the cluster: no edits or new posts in Ghost Admin, nothing scheduled to publish, no live show. Anything written on the Compose side after the copy starts stays behind.</div></li>
     <li><div><b>Move.</b> A dry run, then the real one. The data folder is the Compose site's <code>data/</code>, here or on another machine:
@@ -457,7 +457,7 @@ kubectl -n mysite logs &lt;pod&gt; --previous      # why it stopped, if it resta
 kit/kit.sh kit/sites/mysite restart ghost</pre></div>
     If it then complains about the database itself, put the backup from before the update back.</dd>
     <dt>No mail from Ghost (no sign-in codes, no members' links)</dt>
-    <dd>Ghost's mail settings: the <code>mail</code> part of <code>data/puppi3/ghost/config.production.json</code> on Compose (then <code>up -d --force-recreate ghost</code>), <code>secrets/ghost-mail.env</code> on Kubernetes. Ghost's log shows the mail service's answer when you ask for a code.</dd>
+    <dd>Ghost's mail settings: the <code>mail</code> part of <code>data/ghost/ghost/config.production.json</code> on Compose (then <code>up -d --force-recreate ghost</code>), <code>secrets/ghost-mail.env</code> on Kubernetes. Ghost's log shows the mail service's answer when you ask for a code.</dd>
     <dt>No visitor numbers in Ghost's Analytics</dt>
     <dd><code>analytics</code> in <code>MODULES</code>, and <code>tinybird-local</code> and <code>traffic-analytics</code> running? Ad blockers hide some visitors.</dd>
   </dl>
@@ -507,9 +507,9 @@ kit/kit.sh kit/sites/mysite restart ghost</pre></div>
       <tr><td><code>kit/kit.sh &lt;folder&gt; pull --ignore-buildable</code></td><td>Newer images, used at the next <code>up -d</code></td></tr>
       <tr><td><code>k8s/up.sh &lt;folder&gt; &lt;overlay&gt; [--render]</code></td><td>Put the site on the cluster, or apply changes (<code>--render</code>: only write what it would apply)</td></tr>
       <tr><td><code>k8s/up.sh &lt;folder&gt; --down</code></td><td>Delete the site from the cluster, volumes and all</td></tr>
-      <tr><td><code>k8s/build-images.sh --registry &lt;registry&gt;</code></td><td>Build and push the kit's four images</td></tr>
+      <tr><td><code>k8s/build-images.sh --registry &lt;registry&gt;</code></td><td>Build and push the kit's four images yourself (a changed kit; otherwise each release's are used)</td></tr>
       <tr><td><code>k8s/migrate/to-cloud.sh</code>, <code>to-nas.sh</code></td><td>Move the site's data Compose → Kubernetes, and back (<code>-n</code>: a dry run)</td></tr>
-      <tr><td><code>kit/theme-zip.sh</code></td><td>Build the theme's zip for Ghost</td></tr>
+      <tr><td><code>kit/theme-zip.sh</code></td><td>Build the theme's zip for Ghost from your copy (each release has one ready)</td></tr>
       <tr><td><code>GHOST_URL=https://&lt;site&gt; GHOST_ADMIN_TOKEN=&lt;token&gt; scripts/ghost-admin.sh theme kit/dist/puppi3-creator-kit-theme.zip</code></td><td>Send the theme (or <code>redirects</code>, <code>routes</code>, <code>injection</code>, <code>theme-settings</code>) to Ghost from the command line instead of Ghost Admin, backing up what it replaces. The token is your Staff access token (Settings, Staff, your profile). <code>scripts/ghost-admin.sh</code> alone lists its commands</td></tr>
     </tbody>
   </table></div>

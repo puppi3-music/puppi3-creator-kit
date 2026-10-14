@@ -23,5 +23,5 @@ if [ -n "$leaks" ]; then
 fi
 echo "Built kit/$ZIP"
 # Ghost's theme checker needs Node.js (npx); without it the zip is still fine to upload
-if command -v npx >/dev/null; then npx -y gscan@latest --zip "$ZIP"
+if command -v npx >/dev/null; then npx -y gscan@6.6.1 --zip "$ZIP"
 else echo "theme-zip: $ZIP is ready; Ghost's theme check (gscan) skipped: it needs Node.js (npx)"; fi
