@@ -24,7 +24,7 @@ as `kit-*.yml` (`puppi3.yml` as `kit-site.yml`), beside the site's own `lan-only
   no route here uses it). If it fails to load, only routers using it 404.
 - The plugins' module path is `creatorkit/<name>`: the folder under `plugins-local/src/`, each `go.mod` and
   `.traefik.yml`, and the `--experimental.localPlugins.*.moduleName` flags in `compose.yaml`, k8s's
-  `base/traefik.yaml` and its image's Dockerfile (`k8s/images/traefik/`) must agree. Plugins load at Traefik's start:
+  `base/traefik.yaml` (with its ConfigMap's `items`, in `base/kustomization.yaml`'s `traefik-plugins`) must agree. Plugins load at Traefik's start:
   a plugin change needs a Traefik restart; a new one goes in (compose flag + plugin + its dynamic file, restart)
   before any route uses it (dynamic files apply at once).
 - Both entrypoints have `respondingTimeouts.readTimeout=900` (Traefik v3 cuts a request still arriving at 60 s): big

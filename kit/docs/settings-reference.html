@@ -284,7 +284,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
   </ul>
   <p>After a change, start the site again and the parts that use the setting are recreated:</p>
   <div class="code"><pre>kit/kit.sh &lt;folder&gt; up -d          # Docker Compose
-k8s/up.sh &lt;folder&gt; &lt;overlay&gt;        # Kubernetes (local, eks, gke, ...)</pre></div>
+k8s/up.sh &lt;folder&gt; &lt;overlay&gt;       # Kubernetes (local, eks, gke, ...)</pre></div>
   <div class="note"><b class="label">Two exceptions</b>
     <p>TinyIce's passwords and Ghost's mail on Compose are written once, by setup, into files of their own (<code>data/icecast/tinyice-data/config.json</code>, hashed, and <code>data/ghost/ghost/config.production.json</code>). Change those in TinyIce's admin page and in Ghost's config file.</p>
   </div>
@@ -477,6 +477,7 @@ k8s/up.sh &lt;folder&gt; &lt;overlay&gt;        # Kubernetes (local, eks, gke, .
 <tbody>
 <tr><td><code id="var-SITE_DIR">SITE_DIR</code></td><td>kit.sh: the site's folder.</td></tr>
 <tr><td><code id="var-BRIDGE_IMAGE">BRIDGE_IMAGE</code></td><td>kit.sh: the bridge's image, this kit version's published one (KIT_BRIDGE_IMAGE in kit.sh's environment for another; KIT_BUILD=1 builds it from your copy instead).</td></tr>
+<tr><td><code id="var-TB_SETUP_IMAGE">TB_SETUP_IMAGE</code></td><td>kit.sh: the analytics setup job's image, this kit version's published one (KIT_TB_SETUP_IMAGE in kit.sh's environment for another; KIT_BUILD=1 builds it from your copy instead).</td></tr>
 <tr><td><code id="var-GHOST_ENV_FILE">GHOST_ENV_FILE</code></td><td>kit.sh: the Ghost stack's secrets file, secrets/ghost.env (secrets/puppi3.env in a site made before kit 1.2.0).</td></tr>
 <tr><td><code id="var-LIVE_MOUNT">LIVE_MOUNT</code></td><td>kit.sh and k8s/up.sh: the mount your streaming software sends to, read from TinyIce's own config, so the bridge counts the right one.</td></tr>
 <tr><td><code id="var-GHOST_UPSTREAM">GHOST_UPSTREAM</code></td><td>The kit's Traefik profile (and k8s's Traefik): where Ghost answers.</td></tr>

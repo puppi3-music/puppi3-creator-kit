@@ -1,5 +1,6 @@
 # Traefik, the kit's ingress on Kubernetes too: cloudflare-only, real-ip and page-hit-country have to keep working, which
-# a cloud's own load balancer can't do. The kit's image (k8s/images/traefik/) has the local plugins in it. Routes come
+# a cloud's own load balancer can't do. Traefik's own image, at the Compose stack's version; the kit's local plugins come
+# from ConfigMap traefik-plugins (base/kustomization.yaml), mounted where Traefik looks for them. Routes come
 # only from its file provider (the traefik-dynamic ConfigMap: the stacks' templates plus each module's own), so there
 # are no CRDs or cluster roles to install. Service addresses there are the Services' names (ghost, traffic-analytics,
 # tinybird-local, postiz-ghost-bridge), as on Compose.
@@ -26,7 +27,7 @@ spec:
         fsGroup: 65532
       containers:
         - name: traefik
-          image: creator-kit/traefik
+          image: traefik:v3.7.13   # the same as stacks/traefik/compose.yaml (k8s/test/image-pins.py)
           args:
             - --ping=true
             - --api.dashboard=true
@@ -89,6 +90,8 @@ spec:
             - {name: dynamic, mountPath: /dynamic, readOnly: true}
             - {name: acme, mountPath: /letsencrypt}
             - {name: tmp, mountPath: /tmp}
+            # ./plugins-local from Traefik's working folder (/), as Compose mounts it
+            - {name: plugins, mountPath: /plugins-local/src/creatorkit, readOnly: true}
       volumes:
         - name: dynamic
           configMap:
@@ -98,6 +101,16 @@ spec:
             claimName: traefik-acme
         - name: tmp
           emptyDir: {}
+        - name: plugins
+          configMap:
+            name: traefik-plugins
+            items:
+              - {key: realip.go, path: realip/realip.go}
+              - {key: realip.go.mod, path: realip/go.mod}
+              - {key: realip.traefik.yml, path: realip/.traefik.yml}
+              - {key: pagehitcountry.go, path: pagehitcountry/pagehitcountry.go}
+              - {key: pagehitcountry.go.mod, path: pagehitcountry/go.mod}
+              - {key: pagehitcountry.traefik.yml, path: pagehitcountry/.traefik.yml}
 ---
 # Let's Encrypt's account and certificates (TLS_RESOLVER le or cf)
 apiVersion: v1

@@ -55,12 +55,6 @@ build() {
     printf '%s=%s\n' "$name" "$pull/$name:$tag" >> "$out"
 }
 
-# Traefik: the Compose stack's version, with the local plugins
-tv="$(sed -n 's/^ *image: traefik:\([^ ]*\).*/\1/p' "$REPO/stacks/traefik/compose.yaml")"
-build traefik "$REPO/stacks/traefik" "$K8S/images/traefik/Dockerfile" \
-    "$tv-$(hash k8s/images/traefik stacks/traefik/plugins-local/src/creatorkit/realip stacks/traefik/plugins-local/src/creatorkit/pagehitcountry)" \
-    "TRAEFIK_VERSION=$tv"
-
 # tb-setup: the ghost stack's own (Tinybird's CLI and setup.sh), as Compose builds it. From a folder of just those
 # two: the stack's folder on this machine may hold a tokens.env, which mustn't go to the build.
 tbv="$(sed -n 's/.*tinybird==\([0-9.]*\).*/\1/p' "$REPO/stacks/ghost/tinybird/dockerfile")"

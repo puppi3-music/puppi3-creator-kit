@@ -49,4 +49,6 @@ if git diff --cached --name-only | grep -qiE '(^|/)(compose[^/]*\.ya?ml|dockerfi
   python3 k8s/test/image-pins.py >/dev/null || exit 1
 fi
 
+# 5. A site that keeps the kit in its own repo adds its own checks in pre-commit.site (never the kit's).
+[ -x .githooks/pre-commit.site ] && exec .githooks/pre-commit.site
 exit 0

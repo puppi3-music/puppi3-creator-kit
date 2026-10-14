@@ -58,6 +58,8 @@ SET_FOR_YOU = {
     "SITE_DIR": "kit.sh: the site's folder.",
     "BRIDGE_IMAGE": "kit.sh: the bridge's image, this kit version's published one (KIT_BRIDGE_IMAGE in kit.sh's "
                     "environment for another; KIT_BUILD=1 builds it from your copy instead).",
+    "TB_SETUP_IMAGE": "kit.sh: the analytics setup job's image, this kit version's published one (KIT_TB_SETUP_IMAGE "
+                      "in kit.sh's environment for another; KIT_BUILD=1 builds it from your copy instead).",
     "GHOST_ENV_FILE": "kit.sh: the Ghost stack's secrets file, secrets/ghost.env (secrets/puppi3.env in a site made before "
                       "kit 1.2.0).",
     "LIVE_MOUNT": "kit.sh and k8s/up.sh: the mount your streaming software sends to, read from TinyIce's own config, so "

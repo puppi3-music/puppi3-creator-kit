@@ -353,7 +353,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
     <li><code>secrets/</code>: one file per part, with random passwords filled in and a comment on each line. The keys from outside services go here later.</li>
     <li><code>data/</code>: everything the site keeps (databases, images, Grafana, the stream server's settings), with the config files the parts need to start.</li>
   </ul>
-  <p>Inside, each part has its folder and its secrets file by its name in the kit: <code>traefik</code>, <code>postiz</code> (Postiz and the bridge), <code>icecast</code> (the stream server), <code>monitoring</code>, and <code>puppi3</code>, which is Ghost and its database (the kit was first made for DJ Puppi3's own site, and the name stayed).</p>
+  <p>Inside, each part has its folder and its secrets file by its name in the kit: <code>traefik</code>, <code>postiz</code> (Postiz and the bridge), <code>icecast</code> (the stream server), <code>monitoring</code>, and <code>ghost</code>, Ghost and its database (a site made before kit 1.2.0 has it as <code>puppi3</code>, the name of the site the kit came from, and keeps it).</p>
   <p>Running setup again on the same folder keeps what's there and only adds what's missing. Every setting, its default and which file it's in: the <a href="settings-reference.html">Settings reference</a>.</p>
 </section>
 
@@ -389,7 +389,7 @@ kit/kit.sh kit/sites/mysite down          # stop it (the data stays)</pre></div>
   <p>When the domain is ready: point its DNS here, set <code>TLS_RESOLVER</code> (and <code>BEHIND_CLOUDFLARE</code>) for the real certificates and <code>NTFY_URL</code> for phone alerts in <code>site.env</code>, give Ghost its mail and set <code>staffDeviceVerification</code> back to <code>true</code> in <code>data/ghost/ghost/config.production.json</code>, and start again (<code>up -d --force-recreate ghost</code> for Ghost's file).</p>
   <p>To try it and keep nothing: <code>kit/kit.sh &lt;folder&gt; down -v</code>, then delete the folder. Docker keeps what it downloaded and built (several GB of images) and a few unnamed volumes; to free that space too:</p>
 <div class="code"><pre>docker volume rm $(docker volume ls -q --filter label=com.docker.compose.project=&lt;short name&gt;)
-docker image rm ghcr.io/puppi3-music/puppi3-creator-kit/ghost-bridge:$(cat kit/VERSION) &lt;short name&gt;-tb-setup
+docker image rm ghcr.io/puppi3-music/puppi3-creator-kit/{ghost-bridge,tb-setup}:$(cat kit/VERSION)
 docker image prune -a      # every image no container uses: also other projects' (it asks first)</pre></div>
 </section>
 
@@ -400,7 +400,7 @@ docker image prune -a      # every image no container uses: also other projects'
   <ol>
     <li><b>Mail first.</b> Ghost emails staff a code each time they sign in on a new device, and members their sign-in links. Its own way of sending rarely arrives, so give it a mail service (any with SMTP). On Compose: the <code>mail</code> part of <code>data/ghost/ghost/config.production.json</code> (<a href="https://ghost.org/docs/config/#mail">Ghost's docs</a>), then <code>kit/kit.sh &lt;folder&gt; up -d --force-recreate ghost</code>. On Kubernetes: <code>secrets/ghost-mail.env</code> (<a href="settings-reference.html#k8s-ghost-mail">its settings</a>).</li>
     <li>Make the owner account at <code>https://&lt;your site&gt;/ghost/</code>, then set Ghost's own time zone (Settings, General, Timezone) to the site's: Ghost keeps its own, for its dates and its scheduled posts.</li>
-    <li>The theme: download <code>puppi3-creator-kit-theme.zip</code> from <a href="https://github.com/puppi3-music/puppi3-creator-kit/releases">the kit's release</a> for your version (<code>kit/VERSION</code>; changed the theme? <code>kit/theme-zip.sh</code> builds it, in <code>kit/dist/</code>). Upload it in Settings, Design &amp; branding, Customize, Change theme. With <code>live</code>, set the theme's <b>Live stream URL</b> (Design &amp; branding, Customize, the Theme tab) to <code>https://live.&lt;your site&gt;/stream-mp3</code>: the LIVE NOW bar shows only once it's set. The theme's other settings, links to your other platforms in the footer and the short links: the <a href="theme-guide.html">Theme guide</a>.</li>
+    <li>The theme: download <code>puppi3-creator-kit-theme.zip</code> from <a href="https://github.com/puppi3-music/puppi3-creator-kit/releases">the kit's release</a> for your version (<code>kit/VERSION</code>; changed the theme? <code>kit/theme-zip.sh</code> builds it, in <code>kit/dist/</code>). Upload it in Settings, Design &amp; branding, Customize, Change theme, Upload theme, then Activate. With <code>live</code>, set the theme's <b>Live stream URL</b> (Design &amp; branding, Customize, the Theme tab) to <code>https://live.&lt;your site&gt;/stream-mp3</code>: the LIVE NOW bar shows only once it's set. The theme's other settings, links to your other platforms in the footer and the short links: the <a href="theme-guide.html">Theme guide</a>.</li>
     <li>Short links: upload <code>kit/redirects.yaml</code> in Settings, Labs (under Advanced: Open, Beta features), Redirects (the bio links like <code>/ig</code>, and the tagged links the bridge posts).</li>
   </ol>
   <h3 id="finish-social">Social</h3>
@@ -437,8 +437,8 @@ docker image prune -a      # every image no container uses: also other projects'
     </tbody>
   </table></div>
   <h3 id="k8s-images">The images</h3>
-  <p>Four of the images are the kit's own (Traefik with the kit's plugins, the analytics setup job, the stream relay, the bridge); the rest come from Docker Hub. Each release publishes the kit's for Intel/AMD and ARM, at <code>ghcr.io/puppi3-music/puppi3-creator-kit/&lt;name&gt;:&lt;version&gt;</code>, and <code>up.sh</code> uses those for your version (<code>kit/VERSION</code>): nothing to build.</p>
-  <p>Changed one of them (the bridge's code, Traefik's plugins), or want them in a registry of your own? Build and push them there; <code>up.sh</code> then uses those instead, until you delete <code>k8s/images/built.env</code>:</p>
+  <p>Three of the images are the kit's own (the analytics setup job, the stream relay, the bridge); the rest come from Docker Hub. Traefik is Traefik's own image, with the kit's two plugins handed to it as a ConfigMap. Each release publishes the kit's for Intel/AMD and ARM, at <code>ghcr.io/puppi3-music/puppi3-creator-kit/&lt;name&gt;:&lt;version&gt;</code>, and <code>up.sh</code> uses those for your version (<code>kit/VERSION</code>): nothing to build.</p>
+  <p>Changed one of them (the bridge's code, say), or want them in a registry of your own? Build and push them there; <code>up.sh</code> then uses those instead, until you delete <code>k8s/images/built.env</code>:</p>
   <div class="code"><pre>docker login &lt;registry&gt;
 k8s/build-images.sh --registry &lt;registry&gt;/creator-kit --platform linux/amd64   # linux/arm64 for ARM nodes; both, comma-separated</pre></div>
   <h3 id="k8s-up">Up</h3>
@@ -458,7 +458,7 @@ UP_TIMEOUT=1200 k8s/up.sh kit/sites/mysite selfhosted</pre></div>
     <li><b>Cluster</b>: <code>eksctl create cluster -f k8s/clusters/eks.yaml</code> (check its name, region and node size first), then <code>kubectl apply -f k8s/clusters/eks-gp3.yaml</code> and the AWS Load Balancer Controller (Helm chart <code>eks/aws-load-balancer-controller</code>, with the ServiceAccount the cluster file made).</li>
     <li><b>Databases</b>: RDS for MySQL 8 and RDS for Postgres 17 in the cluster's network, on its private subnets, reachable only from the nodes' security group. Postgres's parameter group needs <code>rds.force_ssl=0</code> (Postiz connects without TLS; the traffic stays in the network).</li>
     <li><b>Bucket</b>: a private S3 bucket, and an IAM role for ServiceAccount <code>ghost</code> in your namespace (IRSA) that may read, write and delete its objects and list it. No key is stored anywhere.</li>
-    <li><b>Registry</b>, only for images you build yourself: ECR repositories <code>creator-kit/traefik</code>, <code>tb-setup</code>, <code>icecast-relay</code>, <code>ghost-bridge</code>.</li>
+    <li><b>Registry</b>, only for images you build yourself: ECR repositories <code>creator-kit/tb-setup</code>, <code>icecast-relay</code>, <code>ghost-bridge</code>.</li>
   </ul>
   <p>Then <code>cp k8s/overlays/eks/cloud.env.example &lt;folder&gt;/cloud-eks.env</code> and fill it in.</p>
   <h3 id="cloud-google-gke">Google GKE</h3>

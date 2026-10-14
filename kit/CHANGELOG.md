@@ -3,6 +3,20 @@
 What each version of Puppi3's Creator Kit changes for a site already running. Your version is in `kit/VERSION`.
 How to update: the Operations guide (`kit/docs/operations-guide.html#upgrade`).
 
+## 1.2.1
+
+- On Kubernetes, Traefik runs Traefik's own image (`traefik:v3.7.13`, as on Compose), with the kit's two plugins
+  (real visitor addresses, the visitor's country) from a ConfigMap instead of an image of the kit's. The kit
+  publishes three images now (tb-setup, the stream relay, the bridge), and a changed plugin needs only `k8s/up.sh`,
+  no image build. Your site: `k8s/up.sh <folder> <overlay>` (Traefik restarts once; a few seconds without the
+  site). On Compose: nothing.
+- On Compose, the analytics' setup job (tb-setup) is the release's published image too, like the bridge, instead of
+  one each site built: nothing at all is built on a site now, and an update brings its new version (a site's own build
+  kept the old one). Your site: `kit/kit.sh <folder> up -d`. The image your site built before can go:
+  `docker image rm <short name>-tb-setup`.
+- The guides: tidied for this version (the Operations guide's Kubernetes troubleshooting, Ghost's versions when moving
+  a site, where Ghost's theme upload is), and the README reordered, with an Updating section.
+
 ## 1.2.0
 
 - Every image is at an exact version, the same on Compose and Kubernetes: Ghost 6.69.0, MySQL 8.0.46, PostgreSQL
