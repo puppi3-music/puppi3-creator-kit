@@ -70,13 +70,14 @@ social previews:
 | Part | Memory | Disk for its images |
 |---|---|---|
 | The site (Ghost, MySQL, Traefik) | 0.7 GB | 2.5 GB |
-| `analytics` (Tinybird holds about 1.8 GB all the time) | 2 GB, 2.2 GB when busy | 10 GB |
-| `social` (Postiz and its Temporal) | 2.5 GB, 3 GB when busy | 11 GB |
+| `analytics` (Tinybird holds about 2 GB all the time) | 2.2 GB to 2.7 GB | 10 GB |
+| `social` (Postiz and its Temporal) | 1.8 GB, 2.4 GB when busy | 10 GB |
 | `live` | under 0.1 GB | 0.1 GB |
-| `monitoring` | 1.9 GB | 2.5 GB |
-| **Everything** | **7 GB, 7.5 GB when busy** | **about 26 GB** |
+| `monitoring` | 0.7 GB | 2.5 GB |
+| **Everything** | **about 6 GB, 7 GB when busy** | **about 25 GB** |
 
-So the site alone runs on a 2 GB machine, and everything wants 10 GB of memory or more (12 to 16 GB is comfortable)
+So the site alone runs on a 2 GB machine, and everything wants 8 GB of memory for a small or medium site (up to about
+5,000 page views a day), 12 GB for a large one (about 20,000 a day, whose year of analytics Tinybird holds more of),
 and 50 GB of free disk. On a Mac or Windows, Docker Desktop's own settings must give it that much memory (Settings,
 Resources). Disk grows with what you upload, Prometheus's history (up to 10 GB, then it drops the oldest) and your
 visitors' page hits (small). One such machine served 20 page views a second (1.7 million a day) without strain; a

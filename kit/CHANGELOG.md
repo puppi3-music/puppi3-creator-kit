@@ -55,7 +55,9 @@ Prometheus keeps about a quarter as many series from it, so it also uses less me
 
 Measured with up to 20 page views a second and a year of history: what that takes, and that Ghost Admin's 12-month
 analytics stop working after a year of about 20,000 page views a day (a limit inside Tinybird, the same on any
-machine). The Setup guide's "How big a machine".
+machine). The Setup guide's "How big a machine" now also sizes a small, medium and large site: with every module
+on, 8 GB of memory for up to about 5,000 page views a day, 12 GB for about 20,000 (with the two changes above; it
+said 10 GB at least, 12 GB to 16 GB to be comfortable).
 
 **Your site:** nothing.
 

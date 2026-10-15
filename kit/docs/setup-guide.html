@@ -304,28 +304,38 @@ header.top .pup svg{display:block;width:100%;height:auto}
     </tbody>
   </table></div>
   <h3 id="before-how-big">How big a machine</h3>
-  <p>Measured on the kit's test site (Docker Desktop on a Mac, kit 1.2.0; analytics kit 1.2.2) with every module on, at rest and while it streams, takes page hits and makes social previews. Memory barely moves between the two: most of it is held from the start.</p>
+  <p><b>By site size.</b> With every module on, pick by how busy the site is (measured on a Mac with 16 GB for Docker, kit 1.2.4, with a year of made-up page views in the analytics). Everything but the analytics stays the same size whatever the site's size. The analytics module keeps every page view in Tinybird, a database that Ghost Admin's Analytics reads; Tinybird holds more while it reads a long history, and that's what grows:</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Size</th><th>Page views a day</th><th>Highest memory measured</th><th>Give Docker</th><th>Ghost Admin's Analytics</th></tr></thead>
+    <tbody>
+      <tr><td>Small</td><td>up to 1,000</td><td>about 6.5 GB (Tinybird 2 GB to 2.8 GB)</td><td>8 GB</td><td>every range in under 0.2 s</td></tr>
+      <tr><td>Medium</td><td>about 5,000</td><td>about 6.5 GB (Tinybird 2 GB to 2.8 GB)</td><td>8 GB</td><td>every range in under 0.8 s</td></tr>
+      <tr><td>Large</td><td>about 20,000</td><td>9 GB to 10 GB (Tinybird 5 GB to 8.6 GB)</td><td>12 GB</td><td>up to six months in under 2 s; the 12-month and all-time views stop with an error</td></tr>
+    </tbody>
+  </table></div>
+  <p>The highest numbers are short jumps (gone by the next sample, 30 s later: Tinybird taking in new page views or answering a query), so a run catches some and misses others: they're rounded up here. Between them, Tinybird holds 2 GB to 2.5 GB for a small or medium site and about 3 GB for a large one. The large site's highest jumps reached 5.8 GB and 8.6 GB in two runs; with the rest of the site that's 9 GB to 10 GB.</p>
+  <p><b>Where it goes, by module.</b> Turning a module off saves its row. Measured on the kit's test site (Docker Desktop on a Mac, kit 1.2.4) with every module on, at rest, and ("when busy") while it streams, takes page hits and makes social previews. Page traffic barely moves it: most of it is held from the start. What does move it is the analytics history, above.</p>
   <div class="tablewrap"><table>
     <thead><tr><th>Part</th><th>Memory</th><th>Disk for its images</th><th>What takes it</th></tr></thead>
     <tbody>
       <tr><td>The site</td><td>0.7 GB</td><td>2.5 GB</td><td>MySQL about 0.4 GB, Ghost 0.2 GB, Traefik under 0.1 GB</td></tr>
-      <tr><td><code>analytics</code></td><td>2 GB, 2.2 GB when busy</td><td>10 GB</td><td>Tinybird (a ClickHouse database with Tinybird's servers around it) about 1.8 GB all the time; traffic-analytics 0.3 GB</td></tr>
-      <tr><td><code>social</code></td><td>2.5 GB, 3 GB when busy</td><td>11 GB</td><td>Postiz 1.4 to 2 GB; Temporal's Elasticsearch 0.6 GB; Temporal, the databases and the bridge the rest</td></tr>
+      <tr><td><code>analytics</code></td><td>2.2 GB to 2.7 GB</td><td>10 GB</td><td>Tinybird (a ClickHouse database with Tinybird's servers around it) 1.9 GB to 2.4 GB all the time; traffic-analytics 0.3 GB</td></tr>
+      <tr><td><code>social</code></td><td>1.8 GB, 2.4 GB when busy</td><td>10 GB</td><td>Postiz 1.4 GB to 2 GB; Temporal and its Postgres 0.3 GB; Postiz's database, Redis and the bridge the rest</td></tr>
       <tr><td><code>live</code></td><td>under 0.1 GB</td><td>0.1 GB</td><td>TinyIce; each listener adds a little</td></tr>
-      <tr><td><code>monitoring</code></td><td>1.9 GB</td><td>2.5 GB</td><td>cAdvisor about 1.2 GB on Docker Desktop (less on Linux, where it sees fewer containers), Grafana 0.5 to 0.7 GB, Prometheus 0.1 GB</td></tr>
-      <tr><td><b>Everything</b></td><td><b>7 GB, 7.5 GB when busy</b></td><td><b>about 26 GB</b></td><td></td></tr>
+      <tr><td><code>monitoring</code></td><td>0.7 GB</td><td>2.5 GB</td><td>Grafana 0.3 GB to 0.6 GB, Prometheus 0.1 GB, cAdvisor and the other exporters under 0.1 GB</td></tr>
+      <tr><td><b>Everything</b></td><td><b>about 6 GB, 7 GB when busy</b></td><td><b>about 25 GB</b></td><td></td></tr>
     </tbody>
   </table></div>
   <ul>
-    <li><b>Memory:</b> the site alone runs on a 2 GB machine. With everything on, 10 GB at least, 12 to 16 GB to be comfortable, plus what the machine's own system needs. On a Mac or Windows, Docker Desktop runs everything inside its own machine: give it that much under Settings, Resources (its default is often 8 GB, too tight with every module on).</li>
+    <li><b>Memory:</b> the site alone runs on a 2 GB machine, however busy. With everything on, it depends on the site's size (above): 8 GB for a small or medium site, 12 GB for a large one, plus what the machine's own system needs. On a Mac or Windows, Docker Desktop runs everything inside its own machine: give it that much under Settings, Resources (its default is often 8 GB: enough for a small or medium site, too tight for a large one). Anything else in Docker, a test cluster say, needs room on top.</li>
     <li><b>Disk:</b> about 1 GB for the site's folder at the start, plus the images above. It grows with what you upload (images, audio, video: usually the most), Prometheus's history (a year, at most 10 GB: then it drops the oldest), Tinybird's page hits and Postiz's uploads (small). Each container's log stops at 50 MB (the oldest lines go). 50 GB free covers everything for a long time.</li>
     <li><b>Kubernetes:</b> each pod asks for less than this and may use up to its limit (Tinybird 2 GiB, up to 4 GiB); two nodes of 4 CPUs and 16 GB hold everything, which is what the cluster recipes make.</li>
   </ul>
   <p><b>How busy a site one machine holds</b> (measured on a Mac with 16 GB for Docker, kit 1.2.3, with no Cloudflare cache in front, so every page view reached Ghost):</p>
   <ul>
-    <li><b>Visitors:</b> 20 page views a second, about 1.7 million a day, with everything on. Ghost used 0.3 GB and pages took under 0.1 s; the whole site went from 6.6 GB to 7.5 GB. That's far more than most creators' sites see, so a busy day doesn't need a bigger machine, or Kubernetes.</li>
-    <li><b>A year of analytics:</b> with a year of 2,000 page views a day, Ghost Admin's Analytics answered for every range in under 0.2 s. With a year of 20,000 a day (7.7 million), a week to six months still worked (about 1 s), but the 12-month and all-time views stopped with an error: each of Tinybird's queries may use 2 GB, and those need a little more. That limit is Tinybird's own, the same on any machine and on Kubernetes, so more memory doesn't change it. A site that busy reads its year in shorter ranges.</li>
-    <li><b>Disk for the analytics:</b> about 1.2 GB for those 7.7 million page views.</li>
+    <li><b>Visitors:</b> 20 page views a second, about 1.7 million a day, with everything on. Ghost used 0.3 GB and pages took under 0.1 s; the whole site took about 0.9 GB more than at rest. That's far more than most creators' sites see, so a busy day doesn't need a bigger machine, or Kubernetes.</li>
+    <li><b>A large site's year of analytics:</b> with a year of 20,000 page views a day (7.3 to 7.7 million), the 12-month and all-time views stopped with an error: each of Tinybird's queries may use 2 GB, and those need a little more. (Tinybird as a whole may use more than 2 GB: the 2 GB is per query.) That limit is Tinybird's own, the same on any machine and on Kubernetes, so more memory doesn't change it. A site that busy reads its year in shorter ranges.</li>
+    <li><b>Disk for the analytics:</b> 1.2 GB to 1.9 GB for a large site's year (7.3 to 7.7 million page views).</li>
   </ul>
   <h3 id="before-cloudflare-or-not">Cloudflare or not</h3>
   <p>The kit works with or without Cloudflare in front of the site.</p>
