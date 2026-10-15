@@ -1,0 +1,30 @@
+# The kit's checks on every push and pull request: kit/check.sh, the ones that need no Docker (every path a file names
+# is there, the guides' build, the dashboards' checks and a render, the dashboard scripts' and the bridge's tests,
+# every shell script's syntax). Only in the kit's own repo; anywhere else it does nothing.
+name: Check
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    if: github.repository == 'puppi3-music/puppi3-creator-kit'
+    runs-on: ubuntu-24.04   # its Python 3 (3.12) runs the Python checks
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
+
+      # the Node the bridge's image runs (its Dockerfile's NODE_VERSION), so the tests load it as the bridge does
+      - name: The bridge's Node version
+        id: node
+        run: echo "version=$(sed -n 's/^ARG NODE_VERSION=//p' stacks/postiz/ghost-bridge/Dockerfile)" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1   # v7.1.0
+        with:
+          node-version: ${{ steps.node.outputs.version }}
+
+      - name: kit/check.sh
+        run: kit/check.sh
