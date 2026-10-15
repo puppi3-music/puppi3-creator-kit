@@ -90,9 +90,9 @@ services:
       # Relative on purpose: a stack manager that runs compose inside its own container (stacks/CLAUDE.md)
       # wouldn't see an absolute host path here (volumes are fine - the host resolves those).
       context: ./ghost-bridge
-      # node:22.23.3-alpine + ffmpeg (for audio clips); no Dockerfile needed
+      # node:24.22.0-alpine + ffmpeg (for audio clips); no Dockerfile needed
       dockerfile_inline: |
-        FROM node:22.23.3-alpine
+        FROM node:24.22.0-alpine
         RUN apk add --no-cache ffmpeg
     image: postiz-ghost-bridge:local
     pull_policy: build

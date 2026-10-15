@@ -7,6 +7,17 @@ From 1.2.2 on, each change has a `###` heading saying what it does, a short para
 (what to run, if anything) and **Restarts:** (what goes down, and for how long), each its own paragraph. The release workflow joins wrapped
 lines, since GitHub's release notes break wherever the text does.
 
+## 1.3.2 (not released yet)
+
+### The social bridge runs on Node 24
+
+The bridge moves from Node 22.23.3 to Node 24.22.0. Node 22 only gets fixes until April 2027; Node 24 gets them until
+April 2028. Nothing it does changes, and its log no longer warns that SQLite is experimental.
+
+**Your site:** `kit/kit.sh <folder> up -d` (Compose) or `k8s/up.sh <folder> <overlay>` (Kubernetes).
+
+**Restarts:** the bridge, a few seconds: publish nothing in Ghost meanwhile. The site stays up.
+
 ## 1.3.1
 
 **All of it at once:** with nothing scheduled in Postiz, `kit/kit.sh <folder> up -d --remove-orphans`, then
