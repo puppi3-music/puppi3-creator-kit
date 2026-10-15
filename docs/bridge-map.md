@@ -5,6 +5,7 @@ For Claude: which file of `stacks/postiz/ghost-bridge/` has what, so you can ope
 Not deployed and not a guide. Kept current by the pre-commit hook (`.githooks/bridge-check.mjs`): every module needs
 a `### \`<path>\`` heading here, and every name on an `- Exports:` line must still be exported. Update this file when
 you add, move or rename a module or an export it lists. No line numbers here: they'd go stale on every edit.
+The tests are beside the folder, in `stacks/postiz/ghost-bridge-test/` (`stacks/postiz/CLAUDE.md` says what each covers).
 
 ## Where to look
 
