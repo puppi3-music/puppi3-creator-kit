@@ -1,10 +1,17 @@
 # Postiz and the bridge: the social profile. The bridge is the kit's published image, its code inside (kit.sh sets
 # BRIDGE_IMAGE to this kit version's; KIT_BUILD=1 builds it here instead: build.yaml); Temporal's config from the
 # repo. (The NAS's stack builds a base and mounts the code, a copy deploy.sh sends to its data folder.)
+# Each container's log is kept to 5 files of 10 MB (as Kubernetes does), then the oldest goes (Docker keeps all of
+# it otherwise: at 20 page views a second traffic-analytics alone logs about 2.5 GB a day)
+x-logging: &logs
+  driver: json-file
+  options: {max-size: 10m, max-file: "5"}
 services:
   postiz:
+    logging: *logs
     profiles: [social]
   postiz-ghost-bridge:
+    logging: *logs
     profiles: [social]
     build: !reset null
     image: ${BRIDGE_IMAGE:?run through kit/kit.sh}
@@ -23,20 +30,26 @@ services:
     volumes: !override
       - ${DATA_DIR:?run through kit/kit.sh}/postiz/ghost-bridge/data:/data
   postiz-postgres:
+    logging: *logs
     profiles: [social]
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata   # a folder Postgres makes itself (on a Mac it refuses one Docker made)
   postiz-redis:
+    logging: *logs
     profiles: [social]
   postiz-temporal-elasticsearch:
+    logging: *logs
     profiles: [social]
   postiz-temporal-postgres:
+    logging: *logs
     profiles: [social]
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata   # a folder Postgres makes itself (on a Mac it refuses one Docker made)
   postiz-temporal:
+    logging: *logs
     profiles: [social]
     volumes:
       - ../../kit/postiz/dynamicconfig:/etc/temporal/config/dynamicconfig:ro
   postiz-temporal-ui:
+    logging: *logs
     profiles: [social]

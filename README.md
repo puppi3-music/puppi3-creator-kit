@@ -79,7 +79,9 @@ social previews:
 So the site alone runs on a 2 GB machine, and everything wants 10 GB of memory or more (12 to 16 GB is comfortable)
 and 50 GB of free disk. On a Mac or Windows, Docker Desktop's own settings must give it that much memory (Settings,
 Resources). Disk grows with what you upload, Prometheus's history (up to 10 GB, then it drops the oldest) and your
-visitors' page hits (small). The [Setup guide](kit/docs/setup-guide.html#before-how-big) has the detail.
+visitors' page hits (small). One such machine served 20 page views a second (1.7 million a day) without strain; a
+site that busy all year can't see its 12-month analytics (Tinybird's own limit), only shorter ranges. The
+[Setup guide](kit/docs/setup-guide.html#before-how-big) has the detail.
 
 ## Setting up a site
 

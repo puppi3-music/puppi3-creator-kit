@@ -7,6 +7,26 @@ From 1.2.2 on, each change has a `###` heading saying what it does, a short para
 (what to run, if anything) and **Restarts:** (what goes down, and for how long), each its own paragraph. The release workflow joins wrapped
 lines, since GitHub's release notes break wherever the text does.
 
+## 1.2.4 (not released yet)
+
+### Containers' logs stop growing at 50 MB each
+
+Docker kept every line a container logged, for as long as the container lived. Ghost's analytics log every page
+view: at 20 page views a second that's about 2.5 GB a day, until the disk fills. Each container now keeps 5 files of
+10 MB and drops the oldest. Kubernetes already did this.
+
+**Your site:** `kit/kit.sh <folder> up -d`. Each container is made again, and its old log goes with it.
+
+**Restarts:** every container, once: about a minute without the site.
+
+### The Setup guide says how busy a site one machine holds
+
+Measured with up to 20 page views a second and a year of history: what that takes, and that Ghost Admin's 12-month
+analytics stop working after a year of about 20,000 page views a day (a limit inside Tinybird, the same on any
+machine). The Setup guide's "How big a machine".
+
+**Your site:** nothing.
+
 ## 1.2.3
 
 Security fixes from a review of the kit.

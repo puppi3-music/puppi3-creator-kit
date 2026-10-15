@@ -149,7 +149,10 @@ to move anything. Nothing of a site goes in
   reads it as the user who runs kit.sh); the bridge reads the same file (`env_file`, so
   `tinybird__adminToken` gives the Platforms dashboard Ghost's numbers with no copying into `TINYBIRD_TOKEN`), the bridge's code and Traefik's plugins from the repo, Temporal's config from
   `postiz/dynamicconfig/`, Postgres in a `pgdata` subfolder (on a Mac it refuses a bind-mounted folder's root, "wrong
-  ownership"). A new service in a module stack needs its profile line here. Host ports: only Traefik's web ports
+  ownership"). A new service in a module stack needs its profile line here, with `logging: *logs` (each file's
+  `x-logging` anchor: json-file, 5 x 10 MB as the kubelet keeps; Docker keeps every line otherwise, and
+  traffic-analytics logs every page hit; `monitoring/compose.yaml` has its own; not in the stacks, where it would
+  recreate the NAS's Ghost). Host ports: only Traefik's web ports
   (`HTTP_PORT`, `HTTPS_PORT`) and TinyIce's (`LIVE_PORT`, on `LIVE_BIND` when set: that port is all of TinyIce,
   admin sign-in too, over plain http; the Setup guide's Live says to firewall it), each `!override`; Ghost's 8900, traffic-analytics' 8901 and
   Traefik's dashboard port are `!reset` (on a rented server they'd skip Traefik, Cloudflare-only and its firewall: the
