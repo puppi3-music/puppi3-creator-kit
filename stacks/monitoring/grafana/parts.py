@@ -131,9 +131,12 @@ def changes(d, folder):
             have |= {os.path.relpath(os.path.join(base, f), folder) for f in files if f.endswith('.json')}
     written = []
     for rel, text in want.items():
-        path = os.path.join(folder, rel)
-        if rel not in have or open(path, encoding='utf-8').read() != text:
+        if rel not in have:
             written.append(rel)
+            continue
+        with open(os.path.join(folder, rel), encoding='utf-8') as fh:
+            if fh.read() != text:
+                written.append(rel)
     return written, sorted(have - set(want))
 
 
