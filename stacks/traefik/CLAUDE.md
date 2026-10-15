@@ -20,6 +20,11 @@ as `kit-*.yml` (`puppi3.yml` as `kit-site.yml`), beside the site's own `lan-only
   `CF-IPCountry` (not XX/T1); bodies over 64 KB, non-JSON or unreadable pass as they came; if it fails, page hits 404
   and the site is fine. Yaegi (Traefik's Go interpreter) loses `m[k], _ = f()` and mixes up embedded-interface
   methods, so avoid both. Traffic's Top locations shows a blank country as "Unknown".
+- Each plugin has its tests beside it (`<name>_test.go`: `go test` in its folder; `kit/check.sh` runs them with
+  gofmt and go vet, and the commit hook when a plugin changed). Yaegi never loads a `_test.go`, and k8s's ConfigMap
+  lists each plugin's files by name, so they never reach Traefik. realip's: who's believed (only Cloudflare's
+  ranges), spoofed headers, IPv6, another proxy's header; pagehitcountry's: when it fills the country, everything it
+  leaves alone, a body over 64 KB whole.
 - `plugins-local/src/creatorkit/stagingbar/`: puts its `html` option before `</head>` of text/html responses and drops
   Accept-Encoding so pages arrive unpacked: a staging copy's marks (a middleware in a dynamic file of that site's own;
   no route here uses it). If it fails to load, only routers using it 404.

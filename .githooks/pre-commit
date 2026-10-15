@@ -50,6 +50,13 @@ if git diff --cached --name-only | grep -qE '^(stacks/postiz/ghost-bridge(-test)
   fi
 fi
 
+# 3b. Traefik's plugins (stacks/traefik/plugins-local/src/<module>/): each one's tests, gofmt and go vet (with Go).
+for m in $(git diff --cached --name-only | sed -n 's#^\(stacks/traefik/plugins-local/src/[^/]*/[^/]*\)/.*#\1#p' | sort -u); do
+  [ -f "$m/go.mod" ] && command -v go >/dev/null 2>&1 || continue
+  out=$(cd "$m" && f=$(gofmt -l .) && { [ -z "$f" ] || { echo "not gofmt'd: $f"; false; }; } && go vet ./... 2>&1 &&
+    go test -count=1 ./... 2>&1) || { echo "$out" | tail -40; echo "pre-commit: $m's checks failed"; exit 1; }
+done
+
 # 4. Images: every image the kit runs is at an exact version, the same in Compose and Kubernetes
 #    (k8s/test/image-pins.py: a floating tag like ghost:6-alpine or one image at two versions stops the commit).
 if git diff --cached --name-only | grep -qiE '(^|/)(compose[^/]*\.ya?ml|dockerfile)$|^k8s/.*\.ya?ml$|^kit/profiles/|^(k8s/migrate/migrate\.sh|k8s/build-images\.sh|kit/theme-zip\.sh|k8s/test/image-pins\.py)$'; then

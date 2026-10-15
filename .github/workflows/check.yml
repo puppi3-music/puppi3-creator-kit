@@ -1,6 +1,6 @@
 # The kit's checks on every push and pull request: kit/check.sh, the ones that need no Docker (every path a file names
 # is there, the guides' build, the dashboards' checks and a render, the dashboard scripts' and the bridge's tests,
-# every shell script's syntax). Only in the kit's own repo; anywhere else it does nothing.
+# the Traefik plugins' tests, every shell script's syntax). Only in the kit's own repo; anywhere else it does nothing.
 name: Check
 
 on:
@@ -25,6 +25,12 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1   # v7.1.0
         with:
           node-version: ${{ steps.node.outputs.version }}
+
+      # the Go the plugins name (their go.mod); Traefik runs them in its own interpreter, which follows that Go
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e   # v7.0.0
+        with:
+          go-version-file: stacks/traefik/plugins-local/src/creatorkit/realip/go.mod
+          cache: false
 
       - name: kit/check.sh
         run: kit/check.sh
