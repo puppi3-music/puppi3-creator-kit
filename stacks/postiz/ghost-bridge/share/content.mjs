@@ -247,7 +247,8 @@ function withLinks(text, { url, listen, identifier, campaign }) {
     if (!/^https?:$/.test(u.protocol) || (!href.trim() || href.startsWith('#'))) return label;
     const addr = u.host === site ? tagLink(u.toString(), identifier, campaign) : u.toString();
     if (!label.trim()) return addr;
-    if (bare(label) === bare(u.toString()) || (listen && bare(listen.url) === bare(u.toString()))) return label;
+    // (the featured link is kept cleaned: compared with this one cleaned too, ?si= and all dropped)
+    if (bare(label) === bare(u.toString()) || (listen && bare(listen.url) === bare(cleanLink(new URL(u))))) return label;
     return `${label} (${addr})`;
   }).replace(/[\uE000-\uE002]/g, '');
 }
