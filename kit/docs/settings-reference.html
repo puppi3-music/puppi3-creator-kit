@@ -314,6 +314,7 @@ k8s/up.sh &lt;folder&gt; &lt;overlay&gt;       # Kubernetes (local, eks, gke, ..
 <tr><td><code id="var-NTFY_URL">NTFY_URL</code> <span class="pill you">setup asks</span></td><td><code>https://ntfy.sh</code></td><td>ntfy server for phone notifications and alerts (e.g. https://ntfy.sh, with a private topic in the bridge's secrets); empty = none (a site tried out before it's public: its checks would fail and alert)</td></tr>
 <tr><td><code id="var-DISK_MOUNT">DISK_MOUNT</code> <span class="pill skip">optional</span> <span class="pill auto">setup fills it in</span></td><td><code>/</code></td><td>The disk the site's data is on, as the host mounts it, for Health's "Disk free" tile and its alert (monitoring); empty = the root filesystem. On Docker Desktop (a Mac, Windows) kit/setup.sh sets /var/lib/docker: the root of its own Linux machine is a kind the disk check can't read</td></tr>
 <tr><td><code id="var-HTTP_PORT">HTTP_PORT</code> <span class="pill skip">optional</span> <br><code id="var-HTTPS_PORT">HTTPS_PORT</code> <span class="pill skip">optional</span> <br><code id="var-LIVE_PORT">LIVE_PORT</code> <span class="pill skip">optional</span></td><td><code>80</code> <br><code>443</code> <br><code>8222</code></td><td>The host's ports, for a machine where one is taken already (a kit site only): the web ones (Let's Encrypt's le certificates need 443 itself) and the live stream's, which the streaming software sends to</td></tr>
+<tr><td><code id="var-LIVE_BIND">LIVE_BIND</code> <span class="pill skip">optional</span> <br><code id="var-LIVE_SOURCE_RANGES">LIVE_SOURCE_RANGES</code> <span class="pill skip">optional</span></td><td><span class="none">empty</span> <br><span class="none">empty</span></td><td>Who reaches the live stream's port. The streaming software sends there straight to the stream server, past Traefik, so the port also answers the stream server's admin sign-in, over plain http (the source password crosses unencrypted). Compose: <a href="#var-LIVE_BIND"><code>LIVE_BIND</code></a> is the one host address it listens on (empty = every address; 127.0.0.1 when the streaming software runs on this machine, a home or VPN address to stream only from there); a firewall rule keeping the port to your own addresses does the rest. Kubernetes: <a href="#var-LIVE_SOURCE_RANGES"><code>LIVE_SOURCE_RANGES</code></a>, comma-separated ranges its load balancer lets in (empty = everyone)</td></tr>
 <tr><td><code id="var-HTTPS_REDIRECT">HTTPS_REDIRECT</code> <span class="pill skip">optional</span></td><td><code>true</code></td><td>http:// and www.&lt;site&gt; go to https://&lt;site&gt; (a kit site only; with certificates: <a href="#var-TLS_RESOLVER"><code>TLS_RESOLVER</code></a> cf, le or self)</td></tr>
 <tr><td><code id="var-CHANNELS">CHANNELS</code> <span class="pill skip">optional</span> <span class="pill auto">setup fills it in</span></td><td><code>bluesky,threads,instagram-standalone,tiktok,tiktok-business</code></td><td>The Postiz channel types a post goes to (Postiz's names for them)</td></tr>
 <tr><td><code id="var-ONLY_PUBLIC">ONLY_PUBLIC</code> <span class="pill skip">optional</span></td><td><code>true</code></td><td>Only public posts are shared (members-only and paid posts are skipped)</td></tr>
@@ -395,13 +396,8 @@ k8s/up.sh &lt;folder&gt; &lt;overlay&gt;       # Kubernetes (local, eks, gke, ..
 <tr><td><code id="var-GRAFANA_RO_PASSWORD">GRAFANA_RO_PASSWORD</code> <span class="pill auto">setup makes it</span></td><td><span class="none">empty</span></td><td>Grafana's read-only login to Ghost's MySQL and Postiz's Postgres (made at every start)</td></tr>
 <tr><td><code id="var-NTFY_TOPIC">NTFY_TOPIC</code> <span class="pill auto">setup fills it in</span></td><td><span class="none">empty</span></td><td>Where the alerts go: <a href="#var-NTFY_URL"><code>NTFY_URL</code></a>'s topic (the bridge's notifications use the same one)</td></tr>
 </tbody></table></div>
-</section>
-
-<section id="k8s">
-  <h2>Kubernetes only</h2>
-  <p>On Kubernetes, <code>k8s/up.sh</code> makes a Secret from each file in <code>secrets/</code>, named after it, so these sit beside the ones above. The cloud overlays also read <code>cloud-&lt;overlay&gt;.env</code> from the site's folder.</p>
-  <h3 id="k8s-ghost-mail">secrets/ghost-mail.env</h3>
-  <p>Ghost's mail on Kubernetes (on Compose it's in Ghost's config file, data/ghost/ghost/config.production.json). Made from <code>k8s/examples/ghost-mail.env.example</code>.</p>
+  <h3 id="secrets-ghost-mail">secrets/ghost-mail.env</h3>
+  <p>Ghost's mail, on Compose and Kubernetes alike (you make this one: copy the example). Made from <code>kit/examples/ghost-mail.env.example</code>.</p>
 <div class="tablewrap"><table>
 <thead><tr><th>Setting</th><th>Example or default</th><th>What it's for</th></tr></thead>
 <tbody>
@@ -410,6 +406,11 @@ k8s/up.sh &lt;folder&gt; &lt;overlay&gt;       # Kubernetes (local, eks, gke, ..
 <tr><td><code id="var-mail__options__host">mail__options__host</code> <br><code id="var-mail__options__port">mail__options__port</code> <br><code id="var-mail__options__secure">mail__options__secure</code> <br><code id="var-mail__options__requireTLS">mail__options__requireTLS</code></td><td><code>smtp.example.com</code> <br><code>587</code> <br><code>false</code> <br><code>true</code></td><td>The provider's SMTP server and port; secure=true for port 465, false with requireTLS=true for 587</td></tr>
 <tr><td><code id="var-mail__options__auth__user">mail__options__auth__user</code> <br><code id="var-mail__options__auth__pass">mail__options__auth__pass</code></td><td><span class="none">empty</span> <br><span class="none">empty</span></td><td>The provider's SMTP login</td></tr>
 </tbody></table></div>
+</section>
+
+<section id="k8s">
+  <h2>Kubernetes only</h2>
+  <p>On Kubernetes, <code>k8s/up.sh</code> makes a Secret from each file in <code>secrets/</code>, named after it, so these sit beside the ones above. The cloud overlays also read <code>cloud-&lt;overlay&gt;.env</code> from the site's folder.</p>
   <h3 id="k8s-cloud">secrets/cloud.env</h3>
   <p>The cloud database's master login (eks and gke, with the social module). Made from <code>k8s/examples/cloud.env.example</code>.</p>
 <div class="tablewrap"><table>

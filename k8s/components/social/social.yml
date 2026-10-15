@@ -9,11 +9,12 @@
 {{- $ep := env "ENTRYPOINT" | default "https" }}
 http:
   routers:
+    # real-ip: Postiz's sign-in limits see the visitor's real address
     postiz:
       rule: "Host(`{{ $postiz }}`)"
       entryPoints: [{{ $ep }}]
       service: postiz
-      middlewares: [cloudflare-only]
+      middlewares: [cloudflare-only, real-ip]
 {{- if ne $resolver "none" }}
       tls:{{ if eq $resolver "self" }} {}{{ else }}
         certResolver: {{ $resolver }}{{ end }}

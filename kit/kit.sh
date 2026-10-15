@@ -77,7 +77,7 @@ if case ",$MODULES," in *,monitoring,*) true ;; *) false ;; esac; then
     host="$(val SITE_HOST)"; live="$(val LIVE_HOST)"; live="${live:-live.$host}"
     mon="$DATA_DIR/monitoring"
     mkdir -p "$mon/prometheus/data" "$mon/grafana/data" "$mon/grafana/rendered"
-    prom_before="$(cksum < "$mon/prometheus/prometheus.yml" 2>/dev/null || true)"
+    prom_before="$({ cksum < "$mon/prometheus/prometheus.yml"; } 2>/dev/null || true)"
     {
         echo "# Written by kit/kit.sh at every run (edit kit.sh, not this): what Prometheus reads for this site"
         echo "global: { scrape_interval: 15s, evaluation_interval: 15s }"
@@ -144,6 +144,45 @@ for n in proxy monitoring; do
         echo "kit.sh: note: the Docker network $n was already here (not made by the kit); this site joins it." >&2
     fi
 done
+
+# lan-only.yml (the site's own; kit/setup.sh wrote it) letting in an address every connection may arrive from, which
+# makes the home-network-only pages (Traefik's dashboard, TinyIce's admin, Grafana at home) open to anyone who reaches
+# the ports: a Docker network's gateway (where Docker's own relay hands over connections, e.g. any over IPv6 on a
+# server with an IPv6 address), or on Docker Desktop its 192.168.65.1, which every connection comes from there
+lan_check() {
+    local f="$DATA_DIR/traefik/dynamic/lan-only.yml" gws="" n desktop=0
+    [ -f "$f" ] || return 0
+    for n in proxy monitoring; do gws="$gws $(docker network inspect -f '{{range .IPAM.Config}}{{.Gateway}} {{end}}' "$n" 2>/dev/null)"; done
+    docker info -f '{{.OperatingSystem}}' 2>/dev/null | grep -q 'Docker Desktop' && desktop=1
+    python3 - "$f" "$desktop" $gws <<'PY' || true
+import ipaddress, re, sys
+f, desktop, gws = sys.argv[1], sys.argv[2] == "1", sys.argv[3:]
+nets = []
+for c in re.findall(r'"([0-9A-Fa-f:.]+/[0-9]+)"', open(f).read()):
+    try: nets.append(ipaddress.ip_network(c, strict=False))
+    except ValueError: pass
+def lets_in(a):
+    try: a = ipaddress.ip_address(a)
+    except ValueError: return None
+    return next((n for n in nets if n.version == a.version and a in n), None)
+say = lambda s: print(s, file=sys.stderr)
+if desktop:
+    n = lets_in("192.168.65.1")
+    if n: say(f"kit.sh: note: on Docker Desktop every connection looks like it comes from 192.168.65.1, which lan-only.yml lets in ({n}):\n"
+              "  the home-network-only pages answer anyone who reaches this machine's ports. Fine on a computer at home;\n"
+              "  don't forward ports 80/443 to it from your router (the Setup guide, \"The home-network-only names\").")
+else:
+    for g in (g for g in gws if "." in g):   # IPv4: Docker relays IPv6 into IPv4-only networks, from their gateway
+        n = lets_in(g)
+        if n:
+            say(f"kit.sh: warning: lan-only.yml lets in {g}, a Docker network's gateway ({n}). Connections Docker relays itself\n"
+                "  (any over IPv6, on a server with an IPv6 address) arrive from there, so the internet can reach the\n"
+                "  home-network-only pages (Traefik's dashboard, TinyIce's admin, Grafana). Take that range out of\n"
+                f"  {f} (the Setup guide, \"The home-network-only names\").")
+            break
+PY
+}
+[ "${1:-}" = up ] && lan_check
 
 compose() { docker compose "${args[@]}" "$@"; }
 # A module switched off since its containers were made: up leaves them running (Compose skips services outside the

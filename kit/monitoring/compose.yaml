@@ -52,12 +52,13 @@ services:
     networks: [default, monitoring, proxy]
     labels:
       - traefik.enable=true
-      # The public name (GRAFANA_HOST), Cloudflare only, behind Grafana's own sign-in
+      # The public name (GRAFANA_HOST), Cloudflare only, behind Grafana's own sign-in; real-ip so Grafana's sign-in
+      # limits see the visitor's real address, not one put in front of X-Forwarded-For
       - traefik.http.routers.${ID_PREFIX}-grafana.rule=Host(`${GRAFANA_HOST:?set GRAFANA_HOST in site.env}`)
       - traefik.http.routers.${ID_PREFIX}-grafana.entrypoints=https
       - traefik.http.routers.${ID_PREFIX}-grafana.tls=true
       - traefik.http.routers.${ID_PREFIX}-grafana.tls.certresolver=${TLS_RESOLVER:-le}
-      - traefik.http.routers.${ID_PREFIX}-grafana.middlewares=cloudflare-only@file
+      - traefik.http.routers.${ID_PREFIX}-grafana.middlewares=cloudflare-only@file,real-ip@file
       - traefik.http.routers.${ID_PREFIX}-grafana.service=${ID_PREFIX}-grafana
       # ...and grafana.<LAN_DOMAIN> on the home network
       - traefik.http.routers.${ID_PREFIX}-grafana-lan.rule=Host(`grafana.${LAN_DOMAIN:-localhost}`)

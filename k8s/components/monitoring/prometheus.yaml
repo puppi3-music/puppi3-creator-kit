@@ -102,7 +102,8 @@ subjects:
   - kind: ServiceAccount
     name: prometheus
 ---
-# The kubelets' cAdvisor and volume stats, through the API server: nodes are cluster-wide, so this is a ClusterRole.
+# The kubelets' cAdvisor and volume stats, read from each kubelet directly: nodes are cluster-wide, so this is a
+# ClusterRole. Never nodes/proxy: even get on it lets a token run commands in any pod through the kubelet.
 # k8s/up.sh names it and its binding after the site (<ID_PREFIX>-prometheus-kubelet), and --down deletes them.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -110,8 +111,11 @@ metadata:
   name: prometheus-kubelet
 rules:
   - apiGroups: [""]
-    resources: [nodes, nodes/proxy, nodes/metrics]
+    resources: [nodes]
     verbs: [get, list, watch]
+  - apiGroups: [""]
+    resources: [nodes/metrics]
+    verbs: [get]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

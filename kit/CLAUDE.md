@@ -59,7 +59,10 @@ wording goes in its `site.env` (the bridge's `FEATURED_*` lines).
   reads (git grep outside the examples), private names (`PRIVATE_WORDS`). So a new setting needs a commented line in
   its example; the comments there are the reference's text: plain words, one comment block per group of keys, a
   blank line after a file's header.
-- `examples/`: the kit-only parts of a site's secrets files (`icecast.env.example`, `monitoring.env.example`).
+- `examples/`: the kit-only parts of a site's secrets files (`icecast.env.example`, `monitoring.env.example`), and
+  `ghost-mail.env.example`, a file of its own the site's owner copies to `secrets/ghost-mail.env` (Ghost's `mail__*`;
+  Compose's Ghost reads it through `profiles/ghost.yaml`'s `env_file`, Kubernetes' as Secret `ghost-mail`), so the SMTP
+  password is in `secrets/` (600), never in `config.production.json` (644: Ghost's user must read it on Linux).
 
 A kit site is a folder (`kit/sites/<name>/`, git-ignored, or anywhere): `site.env` (the instance profile),
 `secrets/<stack>.env` (each stack's secrets), `data/` (everything it keeps: `DATA_DIR`; Ghost's stack in `data/ghost/`,
@@ -84,7 +87,9 @@ to move anything. Nothing of a site goes in
   makes them root's); Ghost's `config.production.json` (it replaces the image's own, so it repeats what that sets:
   listen on `::`, the content path; `STAFF_DEVICE_VERIFICATION=false` for tests); TinyIce's `config.json`, set up
   (`/stream-ogg` -> `/stream-mp3` transcoder, puppi3's burst sizes, bcrypt passwords; the plain ones in
-  `secrets/icecast.env`), else TinyIce waits for its web setup page; the site's own `lan-only.yml`;
+  `secrets/icecast.env`), else TinyIce waits for its web setup page; the site's own `lan-only.yml` (private ranges
+  less `172.16.0.0/12`, Docker's own: a connection Docker relays itself, e.g. any over IPv6 to an IPv4-only network,
+  arrives from its network's gateway, so that range let the internet onto the home-network-only names);
   on Linux (sudo, once) each image's user gets its folders: TinyIce 1000, Prometheus's `data/` and password file
   nobody (not its folder: kit.sh writes `prometheus.yml` there as the user), Grafana 472, MySQL the stack's 1002:1003,
   Postiz's Elasticsearch 1000:0 (Docker Desktop hides owners, so only Linux shows a miss: kit/test.sh there);
@@ -100,7 +105,9 @@ to move anything. Nothing of a site goes in
   stops if a container with one of the stacks' fixed names (`traefik`, `tinyice`, `postiz*`) belongs to another
   project (one kit site per Docker host), and stops and removes (`rm -s -f -v`) the containers of a module switched
   off since (Compose's `up` leaves services outside the active profiles running); makes `proxy`/`monitoring` with the label `creatorkit.site` and notes one
-  that was there already; copies the kit's Traefik files into `data/traefik/dynamic/`
+  that was there already; on `up`, `lan_check` warns when the site's `lan-only.yml` lets in an IPv4 gateway of
+  `proxy`/`monitoring` (Docker's relay hands connections over from there), or on Docker Desktop `192.168.65.1` (every
+  connection's address there: the names can't be home-only, fine unless 80/443 are forwarded to it); copies the kit's Traefik files into `data/traefik/dynamic/`
   as `kit-*.yml` (`puppi3.yml` as `kit-site.yml`; never staging.yml, staging-bar.yml or the NAS's lan-only.yml);
   without `live` it exports `LIVE_STATS=false` (the bridge's live-show polling;
   the shell's value wins over site.env's), with it `LIVE_MOUNT` = the source mount from TinyIce's `config.json` (its mp3
@@ -114,7 +121,8 @@ to move anything. Nothing of a site goes in
   restarts Grafana once too, and when Prometheus's jobs changed it sends Prometheus a HUP (it reloads its config).
 - `monitoring/`: the monitoring module, kit-only (not in `stacks/`: a server may run its own Prometheus and Grafana already; profile
   `monitoring` set in the file itself). `compose.yaml`: Prometheus, Grafana 13.2.3 (Infinity plugin; the site's
-  folder = `SITE_NAME`; routed at `GRAFANA_HOST`, Cloudflare-only, and `grafana.<LAN_DOMAIN>`, lan-only), cAdvisor,
+  folder = `SITE_NAME`; routed at `GRAFANA_HOST`, Cloudflare-only then real-ip (its sign-in limits count by address), and
+  `grafana.<LAN_DOMAIN>`, lan-only), cAdvisor,
   node-exporter (Health's disk: `/`, `DISK_MOUNT` for another), blackbox (the public checks), and two one-shot jobs
   (`grants.sh`) that make `grafana_ro` at every start: Ghost's MySQL with `stacks/ghost/grafana-ro.sh --sql`'s grants,
   Postiz's Postgres with SELECT on `Post`, `Integration`, `Tags`, `TagsPosts` (each waits for all its tables: Postiz
@@ -137,12 +145,13 @@ to move anything. Nothing of a site goes in
   files (each also runs on its own, without `--profile`, and would skip the services). The profile files also hold the
   kit's differences from a stack run on its own, with relative paths resolving in the stack's folder: Ghost as `<ID_PREFIX>-ghost`
   (`GHOST_UPSTREAM`, `GHOST_API_URL` follow) with the image's own user (`user: !reset null`), tokens.env from
-  `GHOST_DATA_DIR` (`env_file: !override`; tb-setup gives it to the folder's owner, `TOKENS_OWNER_FROM_FOLDER`, since compose
+  `GHOST_DATA_DIR` and the optional `secrets/ghost-mail.env` (`env_file: !override`; tb-setup gives it to the folder's owner, `TOKENS_OWNER_FROM_FOLDER`, since compose
   reads it as the user who runs kit.sh); the bridge reads the same file (`env_file`, so
   `tinybird__adminToken` gives the Platforms dashboard Ghost's numbers with no copying into `TINYBIRD_TOKEN`), the bridge's code and Traefik's plugins from the repo, Temporal's config from
   `postiz/dynamicconfig/`, Postgres in a `pgdata` subfolder (on a Mac it refuses a bind-mounted folder's root, "wrong
   ownership"). A new service in a module stack needs its profile line here. Host ports: only Traefik's web ports
-  (`HTTP_PORT`, `HTTPS_PORT`) and TinyIce's (`LIVE_PORT`), each `!override`; Ghost's 8900, traffic-analytics' 8901 and
+  (`HTTP_PORT`, `HTTPS_PORT`) and TinyIce's (`LIVE_PORT`, on `LIVE_BIND` when set: that port is all of TinyIce,
+  admin sign-in too, over plain http; the Setup guide's Live says to firewall it), each `!override`; Ghost's 8900, traffic-analytics' 8901 and
   Traefik's dashboard port are `!reset` (on a rented server they'd skip Traefik, Cloudflare-only and its firewall: the
   dashboard is at `traefik.<LAN_DOMAIN>`). The bridge is the published image with its code inside
   (`BRIDGE_IMAGE`, which kit.sh sets to `ghcr.io/puppi3-music/puppi3-creator-kit/ghost-bridge:<kit/VERSION>`,

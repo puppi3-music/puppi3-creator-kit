@@ -388,7 +388,7 @@ kubectl -n $NS exec deploy/ghost -c ghost -- tar -czf - -C /var/lib/ghost conten
 <div class="code"><pre>mkdir -p kit/sites/mysite-k8s/data/icecast/tinyice-data
 cp -Rp kit/sites/mysite/site.env kit/sites/mysite/secrets kit/sites/mysite-k8s/
 cp -p kit/sites/mysite/data/icecast/tinyice-data/config.json kit/sites/mysite-k8s/data/icecast/tinyice-data/</pre></div>
-    Keep <code>ID_PREFIX</code> as it is: the scripts find the site by it on both sides. Add <code>secrets/ghost-mail.env</code> (Ghost's mail, from the <code>mail</code> part of <code>data/ghost/ghost/config.production.json</code>, one setting per line). For EKS or GKE, add the cloud's file and secrets as the <a href="setup-guide.html#cloud">setup guide</a> says. Behind Cloudflare, use <code>TLS_RESOLVER=cf</code>: it gets certificates from anywhere.</div></li>
+    Keep <code>ID_PREFIX</code> as it is: the scripts find the site by it on both sides. Bring <code>secrets/ghost-mail.env</code> (Ghost's mail); a site that still has its mail in the <code>mail</code> part of <code>data/ghost/ghost/config.production.json</code> moves it there first, one setting per line. For EKS or GKE, add the cloud's file and secrets as the <a href="setup-guide.html#cloud">setup guide</a> says. Behind Cloudflare, use <code>TLS_RESOLVER=cf</code>: it gets certificates from anywhere.</div></li>
     <li><div><b>The empty site up</b>, a day or so before: run <code>k8s/up.sh kit/sites/mysite-k8s &lt;overlay&gt;</code>. Check it through the cluster's own address (<a href="setup-guide.html#cloud-test-before-the-dns">how</a>) while the Compose site keeps serving.</div></li>
     <li><div><b>Freeze.</b> From now until the DNS points at the cluster: no edits or new posts in Ghost Admin, nothing scheduled to publish, no live show. Anything written on the Compose side after the copy starts stays behind.</div></li>
     <li><div><b>Move.</b> A dry run, then the real one. The data folder is the Compose site's <code>data/</code>, here or on another machine:
@@ -457,7 +457,7 @@ kubectl -n mysite logs &lt;pod&gt; --previous      # why it stopped, if it resta
 kit/kit.sh kit/sites/mysite restart ghost</pre></div>
     If it then complains about the database itself, put the backup from before the update back.</dd>
     <dt>No mail from Ghost (no sign-in codes, no members' links)</dt>
-    <dd>Ghost's mail settings: the <code>mail</code> part of <code>data/ghost/ghost/config.production.json</code> on Compose (then <code>up -d --force-recreate ghost</code>), <code>secrets/ghost-mail.env</code> on Kubernetes. Ghost's log shows the mail service's answer when you ask for a code.</dd>
+    <dd>Ghost's mail settings: <code>secrets/ghost-mail.env</code> (then <code>kit/kit.sh &lt;folder&gt; up -d</code> or <code>k8s/up.sh</code>). A site set up before kit 1.2.3 may have them in the <code>mail</code> part of <code>data/ghost/ghost/config.production.json</code> instead (then <code>up -d --force-recreate ghost</code>): better moved to <code>secrets/ghost-mail.env</code>, which only you can read. Ghost's log shows the mail service's answer when you ask for a code.</dd>
     <dt>No visitor numbers in Ghost's Analytics</dt>
     <dd><code>analytics</code> in <code>MODULES</code>, and <code>tinybird-local</code> and <code>traffic-analytics</code> running? Ad blockers hide some visitors.</dd>
   </dl>
@@ -476,7 +476,7 @@ kit/kit.sh kit/sites/mysite restart ghost</pre></div>
   <h3 id="trouble-live">Live</h3>
   <dl class="faq">
     <dt>The streaming software can't connect</dt>
-    <dd>Behind Cloudflare, stream to the server's own address, not the site's name: Cloudflare doesn't pass port 8222. Port 8222 forwarded to the server, mount <code>/stream-ogg</code>, user <code>source</code>, <code>TINYICE_SOURCE_PASSWORD</code>, format Ogg.</dd>
+    <dd>Behind Cloudflare, stream to the server's own address, not the site's name: Cloudflare doesn't pass port 8222. Port 8222 forwarded to the server, mount <code>/stream-ogg</code>, user <code>source</code>, <code>TINYICE_SOURCE_PASSWORD</code>, format Ogg. If you kept the port to your own addresses (a firewall rule, <code>LIVE_BIND</code> or <code>LIVE_SOURCE_RANGES</code>), check the address you're streaming from is one of them.</dd>
     <dt>Streaming, but no LIVE NOW bar</dt>
     <dd>The theme's Live stream URL must be set (<code>https://live.&lt;your site&gt;/stream-mp3</code>). <code>https://live.&lt;your site&gt;/live-status.json</code> lists the stream while you're on.</dd>
   </dl>

@@ -34,7 +34,8 @@ spec:
       containers:
         - name: ghost
           image: ghost:6.69.0-alpine
-          # Mail (staff sign-in codes, members' links): Ghost's mail__* settings from the site's secrets/ghost-mail.env,
+          # Mail (staff sign-in codes, members' links): Ghost's mail__* settings from the site's secrets/ghost-mail.env
+          # (kit/examples/ghost-mail.env.example; Compose's Ghost reads the same file),
           # if it has one (else Ghost's Direct mail, which rarely arrives). Modules append theirs (analytics: tb-setup's
           # tokens; s3-storage: the bucket's keys).
           envFrom:

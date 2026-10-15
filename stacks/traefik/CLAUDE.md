@@ -10,7 +10,8 @@ as `kit-*.yml` (`puppi3.yml` as `kit-site.yml`), beside the site's own `lan-only
 - The https entrypoint trusts forwarded headers only from Cloudflare (`forwardedHeaders.trustedIPs`, the same list:
   keep it, cloudflare-only.yml and real-ip.yml in step). Cloudflare keeps a visitor's own X-Forwarded-For in front and
   Ghost takes the leftmost, so the site's routers also use `real-ip@file` (`dynamic/real-ip.yml`, local plugin
-  `plugins-local/src/creatorkit/realip/`): X-Forwarded-For and X-Real-Ip become `CF-Connecting-IP` when the client is
+  `plugins-local/src/creatorkit/realip/`), and so do Postiz's and the kit's Grafana's public routers (their sign-in
+  limits count by address; Kubernetes' `social.yml` and `monitoring.yml` the same): X-Forwarded-For and X-Real-Ip become `CF-Connecting-IP` when the client is
   in Cloudflare's ranges, else the client's own address. It's on the site's main router, so if it fails to load the
   site 404s.
 - `dynamic/page-hit-country.yml`: the page-hit route only, after real-ip (local plugin

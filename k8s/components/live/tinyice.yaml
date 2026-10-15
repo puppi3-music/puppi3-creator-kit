@@ -80,7 +80,8 @@ spec:
     - {name: http, port: 8080, targetPort: http}
 ---
 # The streaming software's way in: straight to TinyIce (never through Traefik), on port 8222 as on Compose. Local keeps the
-# streamer's address (TinyIce's bans and logs see it).
+# streamer's address (TinyIce's bans and logs see it). All of TinyIce answers here, admin sign-in too, over plain http:
+# the site's LIVE_SOURCE_RANGES (k8s/up.sh, as loadBalancerSourceRanges) keeps it to the streamer's addresses.
 apiVersion: v1
 kind: Service
 metadata:

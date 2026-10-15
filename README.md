@@ -55,8 +55,9 @@ to build.
   server all work. One kit site per machine: its Traefik takes the web ports, and some of its containers have fixed
   names like `traefik` and `postiz`.
 - **Docker** with Compose 2.24 or newer, and **Python 3**.
-- **Ports 80 and 443** that the internet reaches, and 8222 for streaming. Each can be another: see `HTTP_PORT` and
-  `LIVE_PORT` in the [Settings reference](kit/docs/settings-reference.html).
+- **Ports 80 and 443** that the internet reaches, and 8222 for streaming (best kept to the addresses you stream from:
+  the Setup guide's Live). Each can be another: see `HTTP_PORT` and `LIVE_PORT` in the
+  [Settings reference](kit/docs/settings-reference.html).
 - **A domain** whose DNS you can change.
 
 On Linux, setup asks for `sudo` once, to give each service's folders to the user it runs as.

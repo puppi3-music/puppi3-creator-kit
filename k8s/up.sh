@@ -185,18 +185,20 @@ if has monitoring; then
         echo "scrape_configs:"
         echo "  - { job_name: prometheus, static_configs: [{ targets: [localhost:9090] }] }"
         echo "  - { job_name: traefik, static_configs: [{ targets: ['traefik-metrics:8082'] }] }"
-        echo "  # the kubelets, through the API server: cAdvisor's pod CPU and memory, the volumes' free space; the site's only"
+        # Straight to each kubelet (the node's address, port 10250), not through the API server's nodes/proxy: that
+        # right would also let this token run commands in any pod through the kubelet. The kubelet asks the API server
+        # whether the token may read nodes/metrics. Its serving certificate is usually its own, signed by no CA a pod
+        # has, hence insecure_skip_verify (the token still goes only to the cluster's own nodes, from service discovery).
+        echo "  # the kubelets: cAdvisor's pod CPU and memory, the volumes' free space; the site's only"
         for job in cadvisor kubelet; do
             if [ $job = cadvisor ]; then path=/metrics/cadvisor; keep='container_cpu_usage_seconds_total|container_memory_working_set_bytes'
             else path=/metrics; keep='kubelet_volume_stats_(available|capacity)_bytes'; fi
             echo "  - job_name: $job"
             echo "    scheme: https"
-            echo "    tls_config: { ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt }"
+            echo "    metrics_path: $path"
+            echo "    tls_config: { insecure_skip_verify: true }"
             echo "    authorization: { credentials_file: /var/run/secrets/kubernetes.io/serviceaccount/token }"
             echo "    kubernetes_sd_configs: [{ role: node }]"
-            echo "    relabel_configs:"
-            echo "      - { target_label: __address__, replacement: 'kubernetes.default.svc:443' }"
-            echo "      - { source_labels: [__meta_kubernetes_node_name], target_label: __metrics_path__, replacement: '/api/v1/nodes/\${1}/proxy$path' }"
             echo "    metric_relabel_configs:"
             echo "      - { source_labels: [__name__], regex: '$keep', action: keep }"
             echo "      - { source_labels: [namespace], regex: '$NS', action: keep }"
@@ -323,6 +325,12 @@ rel() { python3 -c 'import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2
             "    patch: '[{\"op\": \"replace\", \"path\": \"/metadata/name\", \"value\": \"$cr\"}]'"
             "  - target: {kind: ClusterRoleBinding, name: prometheus-kubelet}"
             "    patch: '[{\"op\": \"replace\", \"path\": \"/metadata/name\", \"value\": \"$cr\"}, {\"op\": \"replace\", \"path\": \"/roleRef/name\", \"value\": \"$cr\"}, {\"op\": \"replace\", \"path\": \"/subjects/0/namespace\", \"value\": \"$NS\"}]'")
+    fi
+    # LIVE_SOURCE_RANGES: only those addresses reach the streaming software's port (all of TinyIce, its admin too)
+    if has live && [ -n "$(val LIVE_SOURCE_RANGES)" ]; then
+        ranges="$(python3 -c 'import json,sys; print(json.dumps([r.strip() for r in sys.argv[1].split(",") if r.strip()]))' "$(val LIVE_SOURCE_RANGES)")"
+        patches+=("  - target: {kind: Service, name: tinyice-source}"
+            "    patch: '[{\"op\": \"add\", \"path\": \"/spec/loadBalancerSourceRanges\", \"value\": $ranges}]'")
     fi
     if [ ${#patches[@]} -gt 0 ]; then echo "patches:"; printf '%s\n' "${patches[@]}"; fi
     echo "configMapGenerator:"

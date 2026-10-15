@@ -1,6 +1,7 @@
 # Home network only, for the *.<LAN_DOMAIN> names (Traefik's dashboard, TinyIce's admin): private addresses only.
 # On a cluster the visitor's address survives only through a LoadBalancer with externalTrafficPolicy: Local (the
-# traefik Service); a site with its own ranges patches this file in its kustomization.
+# traefik Service); a site with its own ranges patches this file in its kustomization. Unlike Compose's (kit/setup.sh)
+# it keeps 172.16.0.0/12: no Docker port publishing sits in front here, so a 172.x address is a real private one.
 http:
   middlewares:
     lan-only:
