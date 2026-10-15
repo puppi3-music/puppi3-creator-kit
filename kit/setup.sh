@@ -130,7 +130,7 @@ d="$SITE_DIR/data"
 # Every data folder made here, not by Docker (which makes them root's)
 mkdir -p "$d/$g/ghost/content" "$d/$g/db" "$d/$g/tinybird" "$d/icecast/tinyice-data" "$d/icecast/tinyice" \
     "$d/postiz/ghost-bridge/data" "$d/postiz/config" "$d/postiz/uploads" "$d/postiz/postgres" "$d/postiz/redis" \
-    "$d/postiz/temporal-postgres" "$d/postiz/temporal-elasticsearch" "$d/traefik/dynamic" "$d/traefik/letsencrypt" \
+    "$d/postiz/temporal-postgres" "$d/traefik/dynamic" "$d/traefik/letsencrypt" \
     "$d/monitoring/prometheus/data" "$d/monitoring/grafana/data" "$d/monitoring/grafana/rendered"
 # Ghost's config file, replacing the image's own, so it says what that does: listen on all addresses, content in
 # /var/lib/ghost/content. Direct mail until the site has secrets/ghost-mail.env (its mail__* settings win over this
@@ -207,7 +207,6 @@ if [ "$(uname)" = Linux ]; then
     sudo chown -R 65534:65534 "$d/monitoring/prometheus/data" "$d/monitoring/prometheus/tinyice-password"
     sudo chown -R 472:0 "$d/monitoring/grafana/data"        # Grafana as 472
     sudo chown -R 1002:1003 "$d/$g/db"                       # MySQL as the stack's user: 1002:1003
-    sudo chown -R 1000:0 "$d/postiz/temporal-elasticsearch"  # Elasticsearch as 1000:0
 fi
 
 # What's left by hand, for the modules that are on

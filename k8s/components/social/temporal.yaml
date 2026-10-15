@@ -1,5 +1,5 @@
-# Temporal, the workflow engine Postiz schedules and publishes with (the postiz stack's postiz-temporal, its Postgres
-# and Elasticsearch), with the stack's Service names (Postiz's TEMPORAL_ADDRESS is postiz-temporal:7233). The
+# Temporal, the workflow engine Postiz schedules and publishes with (the postiz stack's postiz-temporal and its
+# Postgres, which also holds its searchable records), with the stack's Service names (Postiz's TEMPORAL_ADDRESS is postiz-temporal:7233). The
 # password is the site's TEMPORAL_DB_PASSWORD (Secret "postiz"). No Temporal UI here (on Compose it's an optional
 # debugging page on the NAS's localhost): kubectl port-forward to postiz-temporal does the same job with its CLI.
 apiVersion: apps/v1
@@ -57,64 +57,6 @@ spec:
   ports:
     - {name: postgres, port: 5432, targetPort: postgres}
 ---
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: postiz-temporal-elasticsearch
-spec:
-  serviceName: postiz-temporal-elasticsearch
-  replicas: 1
-  selector:
-    matchLabels:
-      app: postiz-temporal-elasticsearch
-  template:
-    metadata:
-      labels:
-        app: postiz-temporal-elasticsearch
-    spec:
-      securityContext:
-        fsGroup: 0           # the image's user is 1000:0 (Compose: the data folder owned by 1000:0)
-      containers:
-        - name: elasticsearch
-          image: elasticsearch:7.17.27
-          env:
-            - {name: cluster.routing.allocation.disk.threshold_enabled, value: "true"}
-            - {name: cluster.routing.allocation.disk.watermark.low, value: 512mb}
-            - {name: cluster.routing.allocation.disk.watermark.high, value: 256mb}
-            - {name: cluster.routing.allocation.disk.watermark.flood_stage, value: 128mb}
-            - {name: discovery.type, value: single-node}
-            - {name: ES_JAVA_OPTS, value: -Xms256m -Xmx256m}
-            - {name: xpack.security.enabled, value: "false"}
-          ports:
-            - {name: http, containerPort: 9200}
-          readinessProbe:
-            httpGet: {path: "/_cluster/health?wait_for_status=yellow&timeout=5s", port: http}
-            periodSeconds: 10
-            timeoutSeconds: 10
-          resources:
-            requests: {cpu: 100m, memory: 512Mi}
-            limits: {memory: 1Gi}
-          volumeMounts:
-            - {name: data, mountPath: /usr/share/elasticsearch/data}
-  volumeClaimTemplates:
-    - metadata:
-        name: data
-      spec:
-        accessModes: [ReadWriteOnce]
-        resources:
-          requests:
-            storage: 5Gi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: postiz-temporal-elasticsearch
-spec:
-  selector:
-    app: postiz-temporal-elasticsearch
-  ports:
-    - {name: http, port: 9200, targetPort: http}
----
 # auto-setup makes its schema and the default namespace at every start, then runs the server
 apiVersion: apps/v1
 kind: Deployment
@@ -135,7 +77,7 @@ spec:
       initContainers:
         - name: wait
           image: busybox:1.37.0
-          command: [sh, -c, 'for s in postiz-temporal-postgres:5432 postiz-temporal-elasticsearch:9200; do
+          command: [sh, -c, 'for s in postiz-temporal-postgres:5432; do
             until nc -z -w 2 "${s%:*}" "${s#*:}"; do echo "waiting for $s"; sleep 2; done; done']
           resources:
             requests: {cpu: 10m, memory: 8Mi}
@@ -152,9 +94,9 @@ spec:
                 secretKeyRef: {name: postiz, key: TEMPORAL_DB_PASSWORD}
             - {name: POSTGRES_SEEDS, value: postiz-temporal-postgres}
             - {name: DYNAMIC_CONFIG_FILE_PATH, value: /etc/temporal/config/dynamicconfig/development-sql.yaml}
-            - {name: ENABLE_ES, value: "true"}
-            - {name: ES_SEEDS, value: postiz-temporal-elasticsearch}
-            - {name: ES_VERSION, value: v7}
+            # searchable records in Postgres too; auto-setup's sample fields out (the postiz stack says why)
+            - {name: ENABLE_ES, value: "false"}
+            - {name: SKIP_ADD_CUSTOM_SEARCH_ATTRIBUTES, value: "true"}
             - {name: TEMPORAL_NAMESPACE, value: default}
           ports:
             - {name: grpc, containerPort: 7233}

@@ -336,30 +336,6 @@ services:
   # -----------------------
   # Temporal (workflow engine Postiz uses for scheduling/publishing)
   # -----------------------
-  postiz-temporal-elasticsearch:
-    image: elasticsearch:7.17.27
-    container_name: postiz-temporal-elasticsearch
-    restart: unless-stopped
-    environment:
-      - cluster.routing.allocation.disk.threshold_enabled=true
-      - cluster.routing.allocation.disk.watermark.low=512mb
-      - cluster.routing.allocation.disk.watermark.high=256mb
-      - cluster.routing.allocation.disk.watermark.flood_stage=128mb
-      - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms256m -Xmx256m
-      - xpack.security.enabled=false
-    volumes:
-      # must be owned by 1000:0 on the host (see setup steps)
-      - ${DATA_DIR:?set it in the site's profile}/postiz/temporal-elasticsearch:/usr/share/elasticsearch/data
-    networks:
-      - temporal
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS \"http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s\" || exit 1"]
-      interval: 10s
-      timeout: 10s
-      retries: 10
-      start_period: 60s
-
   postiz-temporal-postgres:
     image: postgres:16.15
     container_name: postiz-temporal-postgres
@@ -389,9 +365,11 @@ services:
       - POSTGRES_PWD=${TEMPORAL_DB_PASSWORD}
       - POSTGRES_SEEDS=postiz-temporal-postgres
       - DYNAMIC_CONFIG_FILE_PATH=/etc/temporal/config/dynamicconfig/development-sql.yaml
-      - ENABLE_ES=true
-      - ES_SEEDS=postiz-temporal-elasticsearch
-      - ES_VERSION=v7
+      # Its searchable records (Postiz finds a post's scheduled job by postId) in this Postgres too, not Elasticsearch
+      # (~0.7 GB). Postgres has 3 searchable text fields and Postiz adds 2 at start, so auto-setup's own samples
+      # (2 of them) stay out
+      - ENABLE_ES=false
+      - SKIP_ADD_CUSTOM_SEARCH_ATTRIBUTES=true
       - TEMPORAL_NAMESPACE=default
     volumes:
       - ${DATA_DIR:?set it in the site's profile}/postiz/dynamicconfig:/etc/temporal/config/dynamicconfig
@@ -405,8 +383,6 @@ services:
       start_period: 30s
     depends_on:
       postiz-temporal-postgres:
-        condition: service_healthy
-      postiz-temporal-elasticsearch:
         condition: service_healthy
 
   # Optional web UI for debugging stuck posts. LAN-local only: http://<nas-ip>:8233

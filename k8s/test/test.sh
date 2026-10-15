@@ -43,7 +43,8 @@
 #   - both mounts renamed in the running TinyIce's config (as its admin would): k8s/up.sh takes the new names, a stream
 #     to the new source mount reaches listeners of the new mp3 mount, from a relay
 #   - social: Postiz through Traefik on postiz.<SITE_HOST> (Cloudflare-only, real-ip); the webhook, the theme's clicks and the social preview
-#     reach the bridge; the bridge has Tinybird's tokens; with listeners on the relays, its live shows count the
+#     reach the bridge; Postiz's search fields in Temporal's Postgres (no Elasticsearch) and its running-job search;
+#     the bridge has Tinybird's tokens; with listeners on the relays, its live shows count the
 #     listeners, not the relays; a new bridge pod keeps its data
 #   - monitoring: Grafana on grafana.<SITE_HOST> (Cloudflare-only, real-ip) and grafana.<LAN_DOMAIN>, every dashboard
 #     rendered with render.py --profile cloud in the site's folder, no panel naming a datasource Grafana lacks, a real
@@ -299,6 +300,14 @@ sys.exit(not all("cloudflare-only@file" in r.get(n, {}).get("middlewares", []) f
          or "real-ip@file" not in r.get("postiz@file", {}).get("middlewares", []))'; }
 check "...and its routes, the webhook's and the social preview's are Cloudflare-only (Postiz's with real-ip)" cf_routers
 check "Ghost's webhook reaches the bridge (unsigned: 401)" [ "$(code "${CF[@]}" -X POST -d '{}' https://postiz.kit.test/ghost-webhook)" = 401 ]
+# Temporal keeps its searchable records in its Postgres (no Elasticsearch): Postiz added its two fields at start
+tmp() { k exec deploy/postiz-temporal -c temporal -- sh -c 'temporal --address "$(hostname -i):7233" "$@"' sh "$@"; }
+pz_fields() { local l; l="$(tmp operator search-attribute list -n default 2>/dev/null)" || return 1
+  grep -q '^ *postId  *Text' <<<"$l" && grep -q '^ *organizationId  *Text' <<<"$l"; }
+wait_for "Postiz's search fields in Temporal" 30 pz_fields && ok "Postiz added its search fields (postId, organizationId) to Temporal"
+check "...and Temporal answers Postiz's search for a post's running job" \
+    tmp workflow list -n default --query 'postId="kit-test" AND ExecutionStatus="Running"'
+check "...with no Elasticsearch" eval '! k get statefulset postiz-temporal-elasticsearch >/dev/null 2>&1'
 check "the theme's clicks reach the bridge" [ "$(code "${CF[@]}" -X POST "https://kit.test/.site/click?kind=out&to=https%3A%2F%2Fexample.com%2F&from=%2F")" = 204 ]
 preview() { curl "${R[@]}" "${CF[@]}" https://kit.test/ghost/social-preview/00000000-0000-0000-0000-000000000000/; }
 check "the social preview route reaches the bridge (off without an Admin API key)" eval 'preview | grep -q "Social previews are off"'

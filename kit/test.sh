@@ -149,6 +149,16 @@ check "a signed Ghost webhook through Traefik is accepted (202)" [ "$hook" = 202
 preview() { ls "$S/data/postiz/ghost-bridge/data/previews/" 2>/dev/null | grep -q . ||
     docker run --rm -v "$S/data/postiz/ghost-bridge/data:/d:ro" alpine ls /d/previews 2>/dev/null | grep -q .; }
 wait_for "the DRY_RUN share wrote a preview" 30 preview && ok "the DRY_RUN share wrote a preview"
+# Temporal's searchable records in its Postgres (no Elasticsearch): Postiz added its two fields at start, and its
+# search for a post's running job answers
+tmp() { docker exec postiz-temporal temporal --address postiz-temporal:7233 "$@"; }
+pz_fields() { local l; l="$(tmp operator search-attribute list -n default 2>/dev/null)" || return 1
+  grep -q '^ *postId  *Text' <<<"$l" && grep -q '^ *organizationId  *Text' <<<"$l"; }
+wait_for "Postiz's search fields in Temporal" 30 pz_fields && ok "Postiz added its search fields (postId, organizationId) to Temporal"
+check "Temporal answers Postiz's search for a post's running job" \
+    tmp workflow list -n default --query 'postId="kit-test" AND ExecutionStatus="Running"'
+check "no Elasticsearch: Temporal keeps its records in Postgres" \
+    bash -c "! docker ps --format '{{.Names}}' | grep -q elasticsearch"
 
 # ---- Monitoring
 echo "== Grafana and Prometheus"

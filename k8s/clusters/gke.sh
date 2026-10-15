@@ -2,8 +2,7 @@
 # A GKE Standard cluster for the kit's gke overlay, with gcloud (you run it; Claude never does):
 #   PROJECT=<project> k8s/clusters/gke.sh up      (about 10 minutes; REGION, NAME, VERSION change the defaults)
 #   PROJECT=<project> k8s/clusters/gke.sh down    when the burst is over (after k8s/migrate/to-nas.sh)
-# Standard, not Autopilot: Autopilot refuses Temporal's Elasticsearch's privileged start and wants every pod's
-# resources fitted to its rules. Workload Identity is on, so the Cloud SQL proxies act as the site's
+# Standard, not Autopilot: Autopilot wants every pod's resources fitted to its rules. Workload Identity is on, so the Cloud SQL proxies act as the site's
 # Google service account with no key stored. standard-rwo (pd-balanced), the overlay's StorageClass, is GKE's own.
 # Then (the Setup guide, kit/docs/setup-guide.html#cloud): Cloud SQL for MySQL 8 and for Postgres, the site's bucket and its HMAC key, the Google
 # service account with the Cloud SQL Client role and its Workload Identity binding for Kubernetes service account

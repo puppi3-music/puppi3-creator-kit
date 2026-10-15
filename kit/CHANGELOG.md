@@ -19,6 +19,27 @@ view: at 20 page views a second that's about 2.5 GB a day, until the disk fills.
 
 **Restarts:** every container, once: about a minute without the site.
 
+### Temporal keeps its records in Postgres: no more Elasticsearch
+
+With the social module, Temporal (Postiz's scheduler) kept the records Postiz searches in Elasticsearch, which held
+about 0.7 GB of memory. Temporal now keeps them in the Postgres it already had, and Elasticsearch is gone.
+
+Postiz finds a post's scheduled job by searching those records, so it can cancel or change it. Jobs scheduled before
+the update aren't in the new records: they still run, but Postiz can't find them, so editing or deleting a scheduled
+post wouldn't stop its old version going out. Update when nothing is scheduled in Postiz (or after the last one has
+gone out), or schedule those posts again afterwards.
+
+Postiz adds the two fields it searches by when it starts, so it starts again after Temporal.
+
+**Your site:** with nothing scheduled in Postiz, `kit/kit.sh <folder> up -d --remove-orphans` (`--remove-orphans`
+removes the old Elasticsearch container), then `kit/kit.sh <folder> restart postiz`. Its data folder,
+`data/postiz/temporal-elasticsearch`, can be deleted after. On Kubernetes, `k8s/up.sh` as usual, then
+`kubectl -n <ID_PREFIX> rollout restart deployment postiz`, and
+`kubectl -n <ID_PREFIX> delete statefulset,service postiz-temporal-elasticsearch` and its volume,
+`kubectl -n <ID_PREFIX> delete pvc data-postiz-temporal-elasticsearch-0`.
+
+**Restarts:** Temporal, and Postiz with it: under a minute without scheduling. The site stays up.
+
 ### cAdvisor holds about 20 MB instead of about 1 GB
 
 With the monitoring module, cAdvisor measured how much disk every container's files take, and held 0.7 to 1.1 GB of

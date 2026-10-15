@@ -1,4 +1,4 @@
-# Google GKE (Standard, not Autopilot: Temporal's Elasticsearch and the pods' sizes, plan step 11): Ghost's MySQL and
+# Google GKE (Standard, not Autopilot: the pods' sizes, plan step 11): Ghost's MySQL and
 # Postiz's and Temporal's Postgres on Cloud SQL, reached through the Cloud SQL Auth Proxy as a sidecar in each pod
 # that uses them (its Google service account through Workload Identity: no database address opened), Ghost's images,
 # media and files in Cloud Storage through its S3 API (an HMAC key: the same s3-storage adapter as everywhere),
