@@ -1,6 +1,6 @@
 # Module social: Postiz and the Ghost -> social bridge, as the postiz stack runs them.
-# - postiz: the scheduler; databases.yaml: its Postgres and Redis; temporal.yaml: Temporal with its Postgres and
-#   Elasticsearch. Every Service keeps the stack's name, so the addresses in its environment work as they are.
+# - postiz: the scheduler; databases.yaml: its Postgres and Redis; temporal.yaml: Temporal with its Postgres.
+#   Every Service keeps the stack's name, so the addresses in its environment work as they are.
 # - bridge.yaml: the bridge, its code in the kit's image (k8s/images/ghost-bridge/), its history on a volume.
 # - Postiz's and the bridge's settings: Secrets postiz-env and postiz-ghost-bridge-env, which k8s/up.sh renders from
 #   the stack's own environment lists (docker compose config, with the site's profile and secrets/postiz.env), so

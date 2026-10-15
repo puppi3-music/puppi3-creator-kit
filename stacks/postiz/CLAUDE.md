@@ -24,7 +24,7 @@ DRY_RUN bridge as a staging copy (it previews and logs, never posts); some notes
   check stops the build when a default there differs from compose's). `DRAFT_TAG` is `${DRAFT_TAG-…}`: empty = no tag.
   Staging's bridge reads the same variables with the same defaults. The collectors' `<NAME>_STATS` switches and
   `POSTIZ_STATS*` stay fixed (`NETWORKS` picks networks per site).
-- postiz: Postiz (pinned `v2.24.0`: the bridge's photo rules were checked against it), Postgres, Redis, Temporal (+ Postgres, Elasticsearch), `postiz-ghost-bridge`
+- postiz: Postiz (pinned `v2.24.0`: the bridge's photo rules were checked against it), Postgres, Redis, Temporal (+ Postgres, which also holds its searchable records: `ENABLE_ES=false` and `SKIP_ADD_CUSTOM_SEARCH_ATTRIBUTES=true`, unlike Postiz's own compose file; Elasticsearch held ~0.7 GB. Postgres has 3 searchable text fields, Postiz adds `postId` and `organizationId` at start and finds a post's running job by `postId`; jobs scheduled before the kit 1.2.4 switch aren't found by that search), `postiz-ghost-bridge`
   (`ghost-bridge/`: 23 modules in folders by purpose. Before opening bridge modules, read `docs/bridge-map.md` (which
   file has what, exports, import rules); keep it current when files or exports change (pre-commit checks it). Top level:
   `ghost-bridge.mjs` (start-up, routes, webhook), `config.mjs` (settings, log, posted/custom.json), `services.mjs`

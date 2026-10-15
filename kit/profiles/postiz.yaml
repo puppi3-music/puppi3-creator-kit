@@ -37,9 +37,6 @@ services:
   postiz-redis:
     logging: *logs
     profiles: [social]
-  postiz-temporal-elasticsearch:
-    logging: *logs
-    profiles: [social]
   postiz-temporal-postgres:
     logging: *logs
     profiles: [social]

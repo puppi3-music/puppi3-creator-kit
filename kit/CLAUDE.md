@@ -93,8 +93,8 @@ to move anything. Nothing of a site goes in
   less `172.16.0.0/12`, Docker's own: a connection Docker relays itself, e.g. any over IPv6 to an IPv4-only network,
   arrives from its network's gateway, so that range let the internet onto the home-network-only names);
   on Linux (sudo, once) each image's user gets its folders: TinyIce 1000, Prometheus's `data/` and password file
-  nobody (not its folder: kit.sh writes `prometheus.yml` there as the user), Grafana 472, MySQL the stack's 1002:1003,
-  Postiz's Elasticsearch 1000:0 (Docker Desktop hides owners, so only Linux shows a miss: kit/test.sh there);
+  nobody (not its folder: kit.sh writes `prometheus.yml` there as the user), Grafana 472, MySQL the stack's 1002:1003
+  (Docker Desktop hides owners, so only Linux shows a miss: kit/test.sh there);
   `secrets/monitoring.env` (Grafana's admin and `grafana_ro` passwords, the alerts' ntfy topic = the bridge's) and
   Prometheus's `tinyice-password` file; on Docker Desktop (`docker info`) `DISK_MOUNT=/var/lib/docker`, as its
   machine's `/` is a kind node-exporter skips (Health's disk tile would be empty). Keeps files that are there. Prints what's left by hand, for the modules that are on (DNS names, Ghost owner and theme, Postiz account and keys,
@@ -190,7 +190,8 @@ to move anything. Nothing of a site goes in
   `LOCAL_RANGES` in `TRUSTED_EXTRA`), the kit's theme uploaded through the Admin API, ffmpeg streaming
   Ogg to TinyIce, a muted browser (`theme-test/kit-site.mjs`: looks like a visitor's Chrome, or Ghost's tracker skips
   it) for the LIVE NOW bar, plays, beacons and a page hit (country from page-hit-country: the browser says UTC), the
-  bridge's health, performance and a signed webhook's DRY_RUN preview, and no puppi3 in routers, containers,
+  bridge's health, performance and a signed webhook's DRY_RUN preview, Postiz's search fields in Temporal's Postgres (no
+  Elasticsearch) and its running-job search, and no puppi3 in routers, containers,
   metrics or the rendered config; an old-layout copy of the site (`secrets/puppi3.env`, `data/puppi3/`) rendering with
   its own paths and password. Made as a
   try-out (`TRYOUT=yes`, all eight networks); checks only 80, 443 and the stream's port are on the host, http:// and

@@ -25,7 +25,7 @@ addons:
   - name: coredns
   - name: kube-proxy
 managedNodeGroups:
-  # Managed nodes, not Fargate: Fargate takes no EBS volumes or privileged pods (Temporal's Elasticsearch)
+  # Managed nodes, not Fargate: Fargate takes no EBS volumes, and every module keeps its data on one
   - name: kit
     instanceType: m7i.xlarge   # 4 vCPU, 16 GiB: analytics + live + social + monitoring fit on two
     desiredCapacity: 2
