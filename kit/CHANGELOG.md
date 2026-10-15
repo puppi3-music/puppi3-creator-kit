@@ -18,6 +18,19 @@ April 2028. Nothing it does changes, and its log no longer warns that SQLite is 
 
 **Restarts:** the bridge, a few seconds: publish nothing in Ghost meanwhile. The site stays up.
 
+### Two fixes in the bridge: SoundCloud share links, and short links to the home page
+
+A featured link copied from SoundCloud's Share button (it ends in `?si=...`) wasn't recognised in the post's text, so
+Bluesky and Threads showed its whole address after the link text and lost the featured line. Now the post comes out as
+with any other featured link.
+
+A short link to the home page (`example.com/b`, `/t`, `/i` or `/k`, which the bridge posts when a post links to the
+home page) was counted as a page called `/b/` on the Post and Page dashboards. It now counts as the home page.
+
+**Your site:** nothing more: the same `up -d` (or `k8s/up.sh`) as for Node 24 brings both.
+
+**Restarts:** none of their own.
+
 ## 1.3.1
 
 **All of it at once:** with nothing scheduled in Postiz, `kit/kit.sh <folder> up -d --remove-orphans`, then
