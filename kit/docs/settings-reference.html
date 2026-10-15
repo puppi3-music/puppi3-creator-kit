@@ -356,7 +356,7 @@ k8s/up.sh &lt;folder&gt; &lt;overlay&gt;       # Kubernetes (local, eks, gke, ..
 <thead><tr><th>Setting</th><th>Example or default</th><th>What it's for</th></tr></thead>
 <tbody>
 <tr><td><code id="var-GHOST_DB_HOST">GHOST_DB_HOST</code> <span class="pill skip">optional</span></td><td><code>puppi3-db-1</code></td><td>Ghost's MySQL by container name [puppi3-db-1; a kit site's is set for it]; never "db", which other stacks on the proxy network also answer to. (<code>database__connection__host</code> is no longer read.)</td></tr>
-<tr><td><code id="var-database__connection__user">database__connection__user</code> <br><code id="var-database__connection__password">database__connection__password</code> <span class="pill auto">setup makes it</span> <br><code id="var-database__connection__database">database__connection__database</code> <span class="pill auto">setup fills it in</span></td><td><code>root</code> <br><span class="none">empty</span> <br><code>ghost-puppi3</code></td><td>Ghost's MySQL login (the root user, which the stack's MySQL is made with) and Ghost's database</td></tr>
+<tr><td><code id="var-database__connection__user">database__connection__user</code> <br><code id="var-database__connection__password">database__connection__password</code> <span class="pill auto">setup makes it</span> <br><code id="var-database__connection__database">database__connection__database</code> <span class="pill auto">setup fills it in</span></td><td><code>root</code> <br><span class="none">empty</span> <br><code>ghost</code></td><td>Ghost's MySQL login (the root user, which the stack's MySQL is made with) and Ghost's database</td></tr>
 </tbody></table></div>
   <h3 id="secrets-postiz">secrets/postiz.env</h3>
   <p>The social module: Postiz, each network's developer app, and the bridge's keys and options. Made from <code>stacks/postiz/.env.example</code>.</p>
@@ -365,7 +365,7 @@ k8s/up.sh &lt;folder&gt; &lt;overlay&gt;       # Kubernetes (local, eks, gke, ..
 <tbody>
 <tr><td><code id="var-POSTIZ_DOMAIN">POSTIZ_DOMAIN</code> <span class="pill auto">setup fills it in</span> <br><code id="var-POSTIZ_JWT_SECRET">POSTIZ_JWT_SECRET</code> <span class="pill auto">setup makes it</span></td><td><code>postiz.example.com</code> <br><span class="none">empty</span></td><td>Postiz's address (postiz.&lt;the site&gt;), and the secret it signs its sign-ins with</td></tr>
 <tr><td><code id="var-POSTIZ_DB_PASSWORD">POSTIZ_DB_PASSWORD</code> <span class="pill auto">setup makes it</span> <br><code id="var-TEMPORAL_DB_PASSWORD">TEMPORAL_DB_PASSWORD</code> <span class="pill auto">setup makes it</span></td><td><span class="none">empty</span> <br><span class="none">empty</span></td><td>Postiz's database and Temporal's (its job runner); the bridge reads Postiz's too, for the networks' numbers</td></tr>
-<tr><td><code id="var-POSTIZ_DISABLE_REGISTRATION">POSTIZ_DISABLE_REGISTRATION</code> <span class="pill auto">setup fills it in</span></td><td><code>true</code></td><td>true = no one else can make a Postiz account (set it once yours is made)</td></tr>
+<tr><td><code id="var-POSTIZ_DISABLE_REGISTRATION">POSTIZ_DISABLE_REGISTRATION</code> <span class="pill auto">setup fills it in</span></td><td><code>false</code></td><td>true = no one else can make a Postiz account (set it once yours is made)</td></tr>
 <tr><td><code id="var-THREADS_APP_ID">THREADS_APP_ID</code> <br><code id="var-THREADS_APP_SECRET">THREADS_APP_SECRET</code> <br><code id="var-INSTAGRAM_APP_ID">INSTAGRAM_APP_ID</code> <br><code id="var-INSTAGRAM_APP_SECRET">INSTAGRAM_APP_SECRET</code> <br><code id="var-FACEBOOK_APP_ID">FACEBOOK_APP_ID</code> <br><code id="var-FACEBOOK_APP_SECRET">FACEBOOK_APP_SECRET</code> <br><code id="var-TIKTOK_CLIENT_ID">TIKTOK_CLIENT_ID</code> <br><code id="var-TIKTOK_CLIENT_SECRET">TIKTOK_CLIENT_SECRET</code> <br><code id="var-YOUTUBE_CLIENT_ID">YOUTUBE_CLIENT_ID</code> <br><code id="var-YOUTUBE_CLIENT_SECRET">YOUTUBE_CLIENT_SECRET</code></td><td><span class="none">empty</span> <br><span class="none">empty</span> <br><span class="none">empty</span> <br><span class="none">empty</span> <br><span class="none">empty</span> <br><span class="none">empty</span> <br><span class="none">empty</span> <br><span class="none">empty</span> <br><span class="none">empty</span> <br><span class="none">empty</span></td><td>Each network's developer app, which Postiz connects your accounts through (Instagram and Facebook: Meta's apps; YouTube: a Google app, which the bridge also uses for YouTube's numbers). Leave a network's empty to skip it.</td></tr>
 <tr><td><code id="var-POSTIZ_API_KEY">POSTIZ_API_KEY</code> <br><code id="var-GHOST_WEBHOOK_SECRET">GHOST_WEBHOOK_SECRET</code> <span class="pill auto">setup makes it</span></td><td><span class="none">empty</span> <br><span class="none">empty</span></td><td>ghost-bridge: Postiz's API key (Postiz -&gt; Settings -&gt; Developers, "Public API"), and the secret Ghost's webhook signs with</td></tr>
 <tr><td><code id="var-GHOST_BRIDGE_DRY_RUN">GHOST_BRIDGE_DRY_RUN</code></td><td><code>false</code></td><td>true = the bridge shares nothing: it logs what it would post, and draws a preview of each</td></tr>
@@ -432,7 +432,7 @@ k8s/up.sh &lt;folder&gt; &lt;overlay&gt;       # Kubernetes (local, eks, gke, ..
 <div class="tablewrap"><table>
 <thead><tr><th>Setting</th><th>Example or default</th><th>What it's for</th></tr></thead>
 <tbody>
-<tr><td><code id="var-AWS_ACCESS_KEY_ID">AWS_ACCESS_KEY_ID</code> <br><code id="var-AWS_SECRET_ACCESS_KEY">AWS_SECRET_ACCESS_KEY</code></td><td><code>GOOG1EXAMPLE</code> <br><span class="none">empty</span></td><td></td></tr>
+<tr><td><code id="var-AWS_ACCESS_KEY_ID">AWS_ACCESS_KEY_ID</code> <br><code id="var-AWS_SECRET_ACCESS_KEY">AWS_SECRET_ACCESS_KEY</code></td><td><code>GOOG1EXAMPLE</code> <br><span class="none">empty</span></td><td>The HMAC key: its access ID (GOOG...) and its secret (Cloud Storage's S3 API takes them as AWS-style keys)</td></tr>
 </tbody></table></div>
   <h3 id="k8s-eks">cloud-eks.env</h3>
   <p>What the eks overlay needs from AWS: k8s/up.sh &lt;folder&gt; eks reads it. Made from <code>k8s/overlays/eks/cloud.env.example</code>.</p>
@@ -497,7 +497,7 @@ k8s/up.sh &lt;folder&gt; &lt;overlay&gt;       # Kubernetes (local, eks, gke, ..
 <tr><td><code id="var-SITE_MIDDLEWARES">SITE_MIDDLEWARES</code></td><td>Extra Traefik middlewares on the site's router, for a second site behind the same Traefik (a staging copy's red bar).</td></tr>
 <tr><td><code id="var-ADMIN_MIDDLEWARES">ADMIN_MIDDLEWARES</code></td><td>The same, on Ghost Admin's router.</td></tr>
 <tr><td><code id="var-UPSTREAM_PROXY">UPSTREAM_PROXY</code></td><td>A proxy in front of Traefik whose X-Real-Ip header is believed (a staging copy behind the main Traefik).</td></tr>
-<tr><td><code id="var-ENTRYPOINT">ENTRYPOINT</code></td><td>Traefik's entry point for the site's routers (websecure unless a second site needs another).</td></tr>
+<tr><td><code id="var-ENTRYPOINT">ENTRYPOINT</code></td><td>Traefik's entry point for the site's routers (https unless a second site needs another).</td></tr>
 </tbody></table></div>
 </section>
 <!-- /generated -->
