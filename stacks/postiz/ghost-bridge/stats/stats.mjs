@@ -62,10 +62,11 @@ export function startStats({ env, dataDir, log, postiz, pgQuery, PG, ghostPosts,
   }
   const enabled = (v) => (v || 'true') === 'true';
   const files = {};
+  const ticks = {}; // each collector's poll, by name (run() below)
 
   const archiveTo = (name, parts) => archive(dataDir, name, parts);
   // Runs collect(out, prev) every few minutes and writes out (prev = the last file, for its history), and keeps the
-  // totals in the archive (the day's last poll)
+  // totals in the archive (the day's last poll). The timers don't keep the bridge running (its server does)
   // a network left out of NETWORKS (config.mjs) is off like its <NAME>_STATS=false
   const NETWORK_FILES = ['ghost', 'bluesky', 'threads', 'tiktok', 'mixcloud'];
   function collector(name, label, on, mins, delaySeconds, collect) {
@@ -89,8 +90,9 @@ export function startStats({ env, dataDir, log, postiz, pgQuery, PG, ghostPosts,
         if (out.errors.length) log(`${label} stats: ${out.errors.join('; ')}`);
       } catch (e) { log(`${label} stats: ${e.message}`); } finally { busy = false; }
     };
-    setTimeout(tick, delaySeconds * 1000);
-    setInterval(tick, mins * 60_000);
+    ticks[name] = tick;
+    setTimeout(tick, delaySeconds * 1000).unref();
+    setInterval(tick, mins * 60_000).unref();
   }
 
   // ---------- Postiz channels (Threads, TikTok, Bluesky's handle) ----------
@@ -179,6 +181,9 @@ export function startStats({ env, dataDir, log, postiz, pgQuery, PG, ghostPosts,
 
   return {
     files,
+    // one collector's poll now, whatever its timer (the tests; a collector that's off has none)
+    run: async (name) => { await ticks[name]?.(); },
+    live: live.poll,
     countClick: clicks.countClick,
     post: postRoute({ dataDir, ghostPosts }),
     page: pageRoute({ dataDir, ghostPosts }),

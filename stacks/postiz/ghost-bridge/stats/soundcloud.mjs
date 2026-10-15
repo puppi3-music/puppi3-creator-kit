@@ -80,7 +80,8 @@ function scTime(s) {
   return (m ? Date.parse(`${m[1]}-${m[2]}-${m[3]}T${m[4]}${m[5]}:${m[6]}`) : Date.parse(s)) || null;
 }
 
-async function pollSoundCloudStats() {
+// One poll now: startSoundCloudStats runs it on its timer; the tests call it
+export async function pollSoundCloudStats() {
   const out = { updatedAt: new Date().toISOString(), account: null, totals: {}, daily: [], tracks: [], tracksPerDay: [], playlists: [], errors: [] };
   let prev = {};
   try { prev = JSON.parse(await fs.readFile(SC_STATS_FILE, 'utf8')); } catch {}
