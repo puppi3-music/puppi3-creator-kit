@@ -3,8 +3,14 @@
 # Prometheus with what it reads: Traefik, TinyIce, the bridge's counters, cAdvisor (containers), node-exporter (the
 # disk) and blackbox (the public checks). Kit-only (a host with its own Prometheus and Grafana leaves the
 # module off), so this isn't in stacks/. Relative paths are kit/monitoring/'s.
+# Each container's log is kept to 5 files of 10 MB (as Kubernetes does), then the oldest goes (Docker keeps all of
+# it otherwise: at 20 page views a second traffic-analytics alone logs about 2.5 GB a day)
+x-logging: &logs
+  driver: json-file
+  options: {max-size: 10m, max-file: "5"}
 services:
   prometheus:
+    logging: *logs
     image: prom/prometheus:v3.5.0
     container_name: ${ID_PREFIX:?run through kit/kit.sh}-prometheus
     profiles: [monitoring]
@@ -22,6 +28,7 @@ services:
     networks: [default, monitoring]   # Traefik, TinyIce and the bridge are on monitoring
 
   grafana:
+    logging: *logs
     image: grafana/grafana:13.2.3
     container_name: ${ID_PREFIX}-grafana
     profiles: [monitoring]
@@ -71,6 +78,7 @@ services:
   # stacks/ghost/grafana-ro.sh lists, Postiz's Postgres on the four its panels read. They wait for Ghost's and
   # Postiz's own tables, then exit.
   grafana-ro-ghost:
+    logging: *logs
     image: mysql:8.0.46
     profiles: [monitoring]
     restart: "no"
@@ -85,6 +93,7 @@ services:
       - ./grants.sh:/grants.sh:ro
       - ../../stacks/ghost/grafana-ro.sh:/grafana-ro.sh:ro
   grafana-ro-postiz:
+    logging: *logs
     image: postgres:17.11-alpine
     profiles: [monitoring]
     restart: "no"
@@ -101,6 +110,7 @@ services:
 
   # Per-container CPU and memory (Health, Social's Postiz containers)
   cadvisor:
+    logging: *logs
     image: ghcr.io/google/cadvisor:v0.60.6   # 0.54+ reads Docker's containerd image store (Docker 29's default)
     profiles: [monitoring]
     restart: unless-stopped
@@ -128,6 +138,7 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
   # The host's disk (Health's "Disk free" and its alert: the root filesystem, DISK_MOUNT in site.env for another)
   node-exporter:
+    logging: *logs
     image: quay.io/prometheus/node-exporter:v1.9.1
     profiles: [monitoring]
     restart: unless-stopped
@@ -137,6 +148,7 @@ services:
       - /:/host:ro
   # The public checks (the site, Ghost's API, the live stream), from here out
   blackbox:
+    logging: *logs
     image: quay.io/prometheus/blackbox-exporter:v0.27.0
     profiles: [monitoring]
     restart: unless-stopped

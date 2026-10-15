@@ -2,8 +2,14 @@
 # kit's in as kit-*.yml on every run), next to any routes of the site's own.
 # Host ports: only the web ones (HTTP_PORT, HTTPS_PORT, for a machine where 80 or 443 is taken); the dashboard is
 # at traefik.<LAN_DOMAIN>, never on a port of its own that would skip lan-only.
+# Each container's log is kept to 5 files of 10 MB (as Kubernetes does), then the oldest goes (Docker keeps all of
+# it otherwise: at 20 page views a second traffic-analytics alone logs about 2.5 GB a day)
+x-logging: &logs
+  driver: json-file
+  options: {max-size: 10m, max-file: "5"}
 services:
   traefik:
+    logging: *logs
     ports: !override
       - ${HTTP_PORT:-80}:80
       - ${HTTPS_PORT:-443}:443

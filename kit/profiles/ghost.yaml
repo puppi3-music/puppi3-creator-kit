@@ -1,6 +1,12 @@
 # Ghost and MySQL always; Ghost's own analytics (Tinybird) with the analytics profile.
+# Each container's log is kept to 5 files of 10 MB (as Kubernetes does), then the oldest goes (Docker keeps all of
+# it otherwise: at 20 page views a second traffic-analytics alone logs about 2.5 GB a day)
+x-logging: &logs
+  driver: json-file
+  options: {max-size: 10m, max-file: "5"}
 services:
   ghost:
+    logging: *logs
     # no host port: only Traefik reaches it (a port here would skip Traefik, Cloudflare-only and a server's firewall)
     ports: !reset []
     # by the site's name (the NAS's is website-puppi3); Traefik and the bridge are told (profiles/traefik.yaml, postiz.yaml)
@@ -23,18 +29,23 @@ services:
         condition: service_healthy
         required: false   # Ghost starts without the analytics profile too
   db:
+    logging: *logs
     container_name: ${ID_PREFIX:-site}-db
   traffic-analytics:
+    logging: *logs
     profiles: [analytics]
     ports: !reset []   # only through Traefik's page-hits route
     env_file: !override
       - path: ${GHOST_DATA_DIR}/tinybird/tokens.env
         required: false
   tinybird-local:
+    logging: *logs
     profiles: [analytics]
   tinybird-sync:
+    logging: *logs
     profiles: [analytics]
   tb-setup:
+    logging: *logs
     profiles: [analytics]
     # this kit version's published image (kit.sh sets it; KIT_BUILD=1 builds it here instead: build.yaml)
     build: !reset null

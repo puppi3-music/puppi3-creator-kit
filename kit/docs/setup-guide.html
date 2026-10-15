@@ -310,8 +310,14 @@ header.top .pup svg{display:block;width:100%;height:auto}
   </table></div>
   <ul>
     <li><b>Memory:</b> the site alone runs on a 2 GB machine. With everything on, 10 GB at least, 12 to 16 GB to be comfortable, plus what the machine's own system needs. On a Mac or Windows, Docker Desktop runs everything inside its own machine: give it that much under Settings, Resources (its default is often 8 GB, too tight with every module on).</li>
-    <li><b>Disk:</b> about 1 GB for the site's folder at the start, plus the images above. It grows with what you upload (images, audio, video: usually the most), Prometheus's history (a year, at most 10 GB: then it drops the oldest), Tinybird's page hits and Postiz's uploads (small). 50 GB free covers everything for a long time.</li>
+    <li><b>Disk:</b> about 1 GB for the site's folder at the start, plus the images above. It grows with what you upload (images, audio, video: usually the most), Prometheus's history (a year, at most 10 GB: then it drops the oldest), Tinybird's page hits and Postiz's uploads (small). Each container's log stops at 50 MB (the oldest lines go). 50 GB free covers everything for a long time.</li>
     <li><b>Kubernetes:</b> each pod asks for less than this and may use up to its limit (Tinybird 2 GiB, up to 4 GiB); two nodes of 4 CPUs and 16 GB hold everything, which is what the cluster recipes make.</li>
+  </ul>
+  <p><b>How busy a site one machine holds</b> (measured on a Mac with 16 GB for Docker, kit 1.2.3, with no Cloudflare cache in front, so every page view reached Ghost):</p>
+  <ul>
+    <li><b>Visitors:</b> 20 page views a second, about 1.7 million a day, with everything on. Ghost used 0.3 GB and pages took under 0.1 s; the whole site went from 6.6 GB to 7.5 GB. That's far more than most creators' sites see, so a busy day doesn't need a bigger machine, or Kubernetes.</li>
+    <li><b>A year of analytics:</b> with a year of 2,000 page views a day, Ghost Admin's Analytics answered for every range in under 0.2 s. With a year of 20,000 a day (7.7 million), a week to six months still worked (about 1 s), but the 12-month and all-time views stopped with an error: each of Tinybird's queries may use 2 GB, and those need a little more. That limit is Tinybird's own, the same on any machine and on Kubernetes, so more memory doesn't change it. A site that busy reads its year in shorter ranges.</li>
+    <li><b>Disk for the analytics:</b> about 1.2 GB for those 7.7 million page views.</li>
   </ul>
   <h3 id="before-cloudflare-or-not">Cloudflare or not</h3>
   <p>The kit works with or without Cloudflare in front of the site.</p>

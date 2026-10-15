@@ -1,6 +1,12 @@
 # TinyIce: the live profile.
+# Each container's log is kept to 5 files of 10 MB (as Kubernetes does), then the oldest goes (Docker keeps all of
+# it otherwise: at 20 page views a second traffic-analytics alone logs about 2.5 GB a day)
+x-logging: &logs
+  driver: json-file
+  options: {max-size: 10m, max-file: "5"}
 services:
   tinyice:
+    logging: *logs
     profiles: [live]
     # the streaming software's port (LIVE_PORT): TinyIce straight, as Traefik would drop the audio. So it's all of
     # TinyIce, admin sign-in too, over plain http: LIVE_BIND (empty = every address) keeps it to one of the host's
