@@ -437,7 +437,7 @@ kubectl -n mysite logs &lt;pod&gt; --previous      # why it stopped, if it resta
     <tbody>
       <tr><td>Site</td><td><code>traefik</code>, <code>ghost</code>, <code>db</code></td><td>The router in front (https, Cloudflare-only), Ghost, its MySQL</td></tr>
       <tr><td><code>analytics</code></td><td><code>tinybird-local</code>, <code>tb-setup</code>, <code>tinybird-sync</code>, <code>traffic-analytics</code></td><td>Where page views are kept, its one-time setup, and the part that receives them from visitors</td></tr>
-      <tr><td><code>social</code></td><td><code>postiz</code>, <code>postiz-ghost-bridge</code>, <code>postiz-postgres</code>, <code>postiz-redis</code>, <code>postiz-temporal</code> and its database and search</td><td>Postiz, the bridge that shares posts and collects the numbers, and Postiz's helpers</td></tr>
+      <tr><td><code>social</code></td><td><code>postiz</code>, <code>postiz-ghost-bridge</code>, <code>postiz-postgres</code>, <code>postiz-redis</code>, <code>postiz-temporal</code> and its database</td><td>Postiz, the bridge that shares posts and collects the numbers, and Postiz's helpers</td></tr>
       <tr><td><code>live</code></td><td><code>tinyice</code></td><td>The stream server</td></tr>
       <tr><td><code>monitoring</code></td><td><code>grafana</code>, <code>prometheus</code>, <code>blackbox</code>, <code>cadvisor</code>, <code>node-exporter</code>, <code>grafana-ro-*</code></td><td>The dashboards, the numbers behind them, the outside checks, and the jobs that give Grafana its read-only logins</td></tr>
     </tbody>
@@ -478,6 +478,8 @@ kit/kit.sh kit/sites/mysite restart ghost</pre></div>
     <dt>Instagram or TikTok drafts don't arrive on the phone</dt>
     <dd>The ntfy app is subscribed to <code>NTFY_TOPIC</code> on <code>NTFY_URL</code>. Send a test from the bridge:</dd>
     <dd><div class="code"><pre>kit/kit.sh kit/sites/mysite exec postiz-ghost-bridge sh -c 'wget -qO- --post-data test "$NTFY_URL/$NTFY_TOPIC"'</pre></div></dd>
+    <dt>Postiz can't schedule: "no mapping defined for search attribute postId"</dt>
+    <dd>Postiz adds the two fields it searches Temporal by when it starts, so it started before Temporal's records were made new (the update to kit 1.2.4, or Temporal's database started over). Start it again: <code>kit/kit.sh &lt;folder&gt; restart postiz</code>.</dd>
     <dt>A network shows as an alert error in Grafana</dt>
     <dd>It's in <code>NETWORKS</code> but its keys aren't set yet. Set them up, or take it out of <code>NETWORKS</code>.</dd>
   </dl>
