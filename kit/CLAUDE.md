@@ -134,7 +134,10 @@ to move anything. Nothing of a site goes in
   and with 0.60 its Docker factory doesn't register at all without that socket, so no container has a name. The
   socket is the system's at `/run/containerd/` (Docker Desktop, Docker's packages) or dockerd's own at
   `/run/docker/containerd/` (an engine that runs its own, like `docker:dind`): a `sh -c` entrypoint passes the one
-  that's there as `--containerd`, then runs the image's `entrypoint.sh`; node-exporter's `/` mount
+  that's there as `--containerd`, then runs the image's `entrypoint.sh`; `--disable_metrics` leaves only CPU and
+  memory (all the dashboards and alerts read: `container_cpu_usage_seconds_total`, `container_memory_working_set_bytes`),
+  since its disk metrics alone held ~0.7 GB (measured: 690 MB -> 20 MB; a panel needing another metric must take it
+  out of that list); node-exporter's `/` mount
   has no `rslave` (Docker Desktop refuses it). Kubernetes' monitoring module uses `grants.sh`,
   `grafana/datasources.yml` and `grafana/dashboards.yml` as they are (`k8s/components/monitoring/`): keep its hosts
   (`mysql` there via `GHOST_DB_HOST`) and env names working for both.

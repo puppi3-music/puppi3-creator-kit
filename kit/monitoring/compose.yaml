@@ -128,6 +128,9 @@ services:
       - --housekeeping_interval=15s
       - --store_container_labels=false
       - --whitelisted_container_labels=com.docker.compose.project,com.docker.compose.service
+      # Only CPU and memory: the dashboards and alerts read nothing else (disk space comes from node-exporter).
+      # Its disk metrics measured every container's files and held ~0.7 GB doing it; with them off it holds ~20 MB
+      - --disable_metrics=advtcp,cpu_topology,cpuset,disk,diskIO,hugetlb,memory_numa,network,oom_event,percpu,perf_event,process,referenced_memory,resctrl,sched,tcp,udp
     volumes:
       - /:/rootfs:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro   # the socket itself: Docker Desktop has none in its /var/run

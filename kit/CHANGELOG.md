@@ -19,6 +19,17 @@ view: at 20 page views a second that's about 2.5 GB a day, until the disk fills.
 
 **Restarts:** every container, once: about a minute without the site.
 
+### cAdvisor holds about 20 MB instead of about 1 GB
+
+With the monitoring module, cAdvisor measured how much disk every container's files take, and held 0.7 to 1.1 GB of
+memory doing it. Nothing in the kit read those numbers: the dashboards and alerts use each container's CPU and memory
+only, and the disk tiles come from node-exporter. cAdvisor now collects only those two, and holds about 20 MB.
+Prometheus keeps about a quarter as many series from it, so it also uses less memory and disk.
+
+**Your site:** `kit/kit.sh <folder> up -d`.
+
+**Restarts:** cAdvisor only; the site stays up.
+
 ### The Setup guide says how busy a site one machine holds
 
 Measured with up to 20 page views a second and a year of history: what that takes, and that Ghost Admin's 12-month
