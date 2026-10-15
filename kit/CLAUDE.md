@@ -27,10 +27,11 @@ CLAUDE.md (never in the kit's repo).
 wording goes in its `site.env` (the bridge's `FEATURED_*` lines).
 
 - `docs/`: the kit's own guides, built by `docs/build-docs.py` (`KIT_PAGES`: the shared styles and script, their own
-  neutral header, a blue palette and the kit's puppy mark (`docs/images/kit-puppy.svg`, also the README's top and the pages' tab icon); build-docs also fails on `PRIVATE_WORDS` anywhere in a kit page or the shared assets). `index.html` is
-  their front page: a card per guide, each with the kit's puppy on a sitting body (inline SVG, shared `#kp-*` parts
-  in a hidden defs block after `<body>`; outlines and ears take `var(--accent)` through inline `style`, since page CSS
-  doesn't reach `<use>` copies) in that guide's outfit; the tail wags and the head tilts on hover, props float or spin
+  neutral header, a blue palette and Puppi3's puppy as the mark: her theme's `puppi3-icon.png`, the headphones puppy,
+  drawn flat (`docs/images/kit-puppy.svg`; the same SVG is each page's header mark and, inline, its tab icon, and the
+  README's top); build-docs also fails on `PRIVATE_WORDS` anywhere in a kit page or the shared assets). `index.html` is
+  their front page: a card per guide, each with her puppy on a sitting body in her own colours (inline SVG, shared
+  `#kp-*` parts in a hidden defs block after `<body>`; no headphones there, only on the mark) in that guide's outfit; the tail wags and the head tilts on hover, props float or spin
   (all off under reduced motion). `setup-guide.html` (by hand): requirements, Cloudflare or not, the
   folder (setup's questions), Compose, finishing by hand (mail, theme, redirects, Postiz, webhook, ntfy, streaming,
   Grafana), Kubernetes (overlays, images, up), EKS/GKE (what to make, neutral: no

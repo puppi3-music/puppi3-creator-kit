@@ -1,11 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="96" height="96" role="img" aria-label="The Creator Kit's puppy">
-  <ellipse cx="32" cy="36" rx="18" ry="17" fill="#E0EDF8" stroke="#1A6FB0" stroke-width="3"/>
-  <ellipse cx="13" cy="33" rx="6.5" ry="13" transform="rotate(22 13 33)" fill="#1A6FB0"/>
-  <ellipse cx="51" cy="33" rx="6.5" ry="13" transform="rotate(-22 51 33)" fill="#1A6FB0"/>
-  <circle cx="25" cy="34" r="2.8" fill="#14202B"/><circle cx="39" cy="34" r="2.8" fill="#14202B"/>
-  <circle cx="26" cy="33" r="0.9" fill="#fff"/><circle cx="40" cy="33" r="0.9" fill="#fff"/>
-  <ellipse cx="32" cy="44" rx="8" ry="6" fill="#fff"/>
-  <ellipse cx="32" cy="41.2" rx="3.6" ry="2.6" fill="#14202B"/>
-  <path d="M30 47.5q2 5 4 0z" fill="#F07C98"/>
-  <path d="M32 43.6v2.6M27.6 46q4.4 2.8 4.4 0q0 2.8 4.4 0" fill="none" stroke="#14202B" stroke-width="1.6" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="50 -6 140 140" width="96" height="96" role="img" aria-label="Puppi3's puppy">
+  <clipPath id="s"><circle cx="120" cy="78" r="44"/></clipPath>
+  <ellipse cx="69" cy="84" rx="14" ry="30" fill="#8A4B2A" transform="rotate(12 69 84)"/>
+  <ellipse cx="171" cy="84" rx="14" ry="30" fill="#8A4B2A" transform="rotate(-12 171 84)"/>
+  <circle cx="120" cy="78" r="44" fill="#F2B66D"/>
+  <g clip-path="url(#s)"><ellipse cx="120" cy="32" rx="24" ry="16" fill="#B97B48"/><ellipse cx="120" cy="103" rx="24.5" ry="19" fill="#FFF1E0"/></g>
+  <circle cx="93" cy="94" r="7.5" fill="#FF7E8C" opacity=".6"/><circle cx="147" cy="94" r="7.5" fill="#FF7E8C" opacity=".6"/>
+  <circle cx="103" cy="77" r="7" fill="#24142F"/><circle cx="137" cy="77" r="7" fill="#24142F"/>
+  <circle cx="105.6" cy="74.4" r="2.2" fill="#fff"/><circle cx="139.6" cy="74.4" r="2.2" fill="#fff"/>
+  <path d="M111.5 90 q8.5 -3.5 17 0 q-1 7.5 -8.5 9.5 q-7.5 -2 -8.5 -9.5 z" fill="#24142F"/>
+  <path d="M115.5 104 h9 v3 a4.5 4.5 0 0 1 -9 0 z" fill="#FF5F96"/>
+  <path d="M110 102 q5 5.5 10 0 q5 5.5 10 0" fill="none" stroke="#24142F" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M68 66 C68 0 172 0 172 66" fill="none" stroke="#24142F" stroke-width="10" stroke-linecap="round"/>
+  <rect x="56" y="54" width="27" height="44" rx="13.5" fill="#FF3F8A" stroke="#24142F" stroke-width="6"/>
+  <rect x="157" y="54" width="27" height="44" rx="13.5" fill="#FF3F8A" stroke="#24142F" stroke-width="6"/>
 </svg>

@@ -1,4 +1,4 @@
-![The Creator Kit's puppy](kit/docs/images/kit-puppy.svg)
+![Puppi3's puppy](kit/docs/images/kit-puppy.svg)
 
 # Puppi3's Creator Kit 🐾
 
