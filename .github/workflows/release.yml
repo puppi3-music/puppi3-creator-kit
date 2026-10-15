@@ -26,7 +26,17 @@ jobs:
           [ "$GITHUB_REF_NAME" = "v$v" ] || { echo "::error::the tag is $GITHUB_REF_NAME, but kit/VERSION says $v"; exit 1; }
           echo "VERSION=$v" >> "$GITHUB_ENV"
           # the lines under "## <version>" (exactly: "(not released yet)" means it isn't ready)
-          awk -v h="## $v" '$0 == h { f = 1; next } /^## / { f = 0 } f' kit/CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+          # GitHub breaks the notes wherever the text does, so each wrapped line joins the one before it (headings,
+          # list items, tables, quotes and code blocks keep their own lines)
+          awk -v h="## $v" '$0 == h { f = 1; next } /^## / { f = 0 } f' kit/CHANGELOG.md | awk '
+            function flush() { if (buf != "") print buf; buf = "" }
+            /^[[:space:]]*```/ { code = !code; flush(); print; next }
+            code { print; next }
+            /^[[:space:]]*$/ { flush(); print; next }
+            { t = $0; sub(/^[[:space:]]+/, "", t)
+              if (buf != "" && t !~ /^([-*+] |#|[|>]|[0-9]+\. )/) { buf = buf " " t; next }
+              flush(); buf = $0 }
+            END { flush() }' > "$RUNNER_TEMP/notes.md"
           grep -q '[^[:space:]]' "$RUNNER_TEMP/notes.md" || { echo "::error::kit/CHANGELOG.md has no '## $v' section"; exit 1; }
 
       - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1   # v4.4.0

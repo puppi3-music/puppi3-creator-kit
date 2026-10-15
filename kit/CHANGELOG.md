@@ -3,37 +3,82 @@
 What each version of Puppi3's Creator Kit changes for a site already running. Your version is in `kit/VERSION`.
 How to update: the Operations guide (`kit/docs/operations-guide.html#upgrade`).
 
+From 1.2.2 on, each change has a `###` heading saying what it does, a short paragraph or two, then **Your site:**
+(what to run, if anything) and **Restarts:** (what goes down, and for how long), each its own paragraph. The release workflow joins wrapped
+lines, since GitHub's release notes break wherever the text does.
+
 ## 1.2.3 (not released yet)
 
 Security fixes from a review of the kit.
 
-- The home-network-only names (Traefik's dashboard, TinyIce's admin, Grafana at `*.<home domain>`): setup no longer
-  lets in `172.16.0.0/12`, Docker's own networks. Connections Docker hands over itself (any over IPv6, on a server
-  with an IPv6 address) arrive from a Docker network's gateway, so with that range anyone could reach those pages.
-  `kit.sh` now warns at every start when your site's `lan-only.yml` lets such an address in, and on Docker Desktop,
-  where every connection comes from `192.168.65.1`, says those pages answer anyone who reaches the computer. Your site:
-  take `"172.16.0.0/12", ` out of `data/traefik/dynamic/lan-only.yml` (Traefik picks it up at once; no restart).
-- Ghost's mail on Compose comes from `secrets/ghost-mail.env` (`kit/examples/ghost-mail.env.example`), as on
-  Kubernetes, instead of `config.production.json`, which everyone on the machine can read. Your site, if its mail is
-  in that file: move the `mail` part to `secrets/ghost-mail.env`, one `mail__…` setting per line, take it out of
-  the config file, then `kit/kit.sh <folder> up -d` (Ghost restarts: a few seconds without the site).
-- The streaming software's port (8222) is all of TinyIce, its admin sign-in too, over plain http. New settings keep
-  it to your own addresses: `LIVE_BIND` (Compose: the one host address it listens on) and `LIVE_SOURCE_RANGES`
-  (Kubernetes: the ranges its load balancer lets in); or a firewall rule. The Setup guide's Live says which.
-- Postiz's and Grafana's public names see the visitor's real address (the real-ip middleware, as the site has), so
-  their sign-in limits can't be dodged with a made-up `X-Forwarded-For`. Your site: `kit/kit.sh <folder> up -d`
-  (Postiz and Grafana restart), or `k8s/up.sh <folder> <overlay>`.
-- On Kubernetes, Prometheus reads the kubelets' numbers from each node directly (port 10250) and its ClusterRole no
-  longer has `nodes/proxy`, which would have let its token run commands in any pod. Your site: `k8s/up.sh <folder>
-  <overlay>` (Prometheus restarts). Pods must reach the nodes' port 10250, as the kit's EKS and GKE recipes allow.
+### Home-network-only pages are closed to Docker's own networks
+
+Traefik's dashboard, TinyIce's admin and Grafana at `*.<home domain>` are meant for your home network. Setup also let
+in `172.16.0.0/12`, Docker's own networks. Connections Docker hands over itself (any over IPv6, on a server with an
+IPv6 address) arrive from a Docker network's gateway, so with that range anyone could reach those pages.
+
+`kit.sh` now warns at every start when your site's `lan-only.yml` lets such an address in. On Docker Desktop, where
+every connection comes from `192.168.65.1`, it says those pages answer anyone who reaches the computer.
+
+**Your site:** take `"172.16.0.0/12", ` out of `data/traefik/dynamic/lan-only.yml`.
+
+**Restarts:** nothing. Traefik picks it up at once.
+
+### Ghost's mail password moves to `secrets/` on Compose
+
+Ghost's mail settings come from `secrets/ghost-mail.env`, as on Kubernetes, instead of `config.production.json`, which
+everyone on the machine can read. The example is `kit/examples/ghost-mail.env.example`.
+
+**Your site,** if its mail is in `config.production.json`:
+
+1. Move the `mail` part to `secrets/ghost-mail.env`, one `mail__…` setting per line.
+2. Take it out of `config.production.json`.
+3. Run `kit/kit.sh <folder> up -d`.
+
+**Restarts:** Ghost, a few seconds without the site.
+
+### The streaming port can be kept to your own addresses
+
+The streaming software's port (8222) is all of TinyIce, its admin sign-in too, over plain http. Two new settings keep
+it to your own addresses:
+
+- `LIVE_BIND` (Compose): the one host address it listens on.
+- `LIVE_SOURCE_RANGES` (Kubernetes): the ranges its load balancer lets in.
+
+**Your site:** set the one for your setup, or add a firewall rule. The Setup guide's Live section says which.
+
+### Postiz and Grafana see visitors' real addresses
+
+Their public names use the real-ip middleware, as the site does, so their sign-in limits can't be dodged with a
+made-up `X-Forwarded-For`.
+
+**Your site:** `kit/kit.sh <folder> up -d` (Compose) or `k8s/up.sh <folder> <overlay>` (Kubernetes).
+
+**Restarts:** Postiz and Grafana.
+
+### Kubernetes: Prometheus no longer needs `nodes/proxy`
+
+Prometheus reads the kubelets' numbers from each node directly (port 10250), and its ClusterRole no longer has
+`nodes/proxy`, which would have let its token run commands in any pod.
+
+**Your site:** `k8s/up.sh <folder> <overlay>`. Pods must reach the nodes' port 10250, as the kit's EKS and GKE
+recipes allow.
+
+**Restarts:** Prometheus.
 
 ## 1.2.2
 
-- Tinybird (the `analytics` module) uses about 0.6 GB less memory, about 1.8 GB instead of 2.4: it starts without
-  the parts Ghost never uses (its MCP and Kafka servers and its last CSV import worker). The image is the same; only
-  how it starts changes, and if a later image doesn't fit, it starts as before and says so in its log. On Kubernetes
-  its pod asks for 2 GiB instead of 2.5. Your site: `kit/kit.sh <folder> up -d` (Tinybird restarts: Ghost's analytics
-  pause for about a minute, and page hits sent meanwhile aren't counted), or `k8s/up.sh <folder> <overlay>`.
+### Tinybird uses about 0.6 GB less memory
+
+Tinybird (the `analytics` module) needs about 1.8 GB instead of 2.4: it starts without the parts Ghost never uses
+(its MCP and Kafka servers and its last CSV import worker). On Kubernetes its pod asks for 2 GiB instead of 2.5.
+
+The image is the same; only how it starts changes. If a later image doesn't fit, it starts as before and says so in
+its log.
+
+**Your site:** `kit/kit.sh <folder> up -d` (Compose) or `k8s/up.sh <folder> <overlay>` (Kubernetes).
+
+**Restarts:** Tinybird. Ghost's analytics pause for about a minute, and page hits sent meanwhile aren't counted.
 
 ## 1.2.1
 

@@ -76,6 +76,11 @@ and arm64 on GitHub's registry (`ghcr.io/puppi3-music/puppi3-creator-kit/<name>:
 with the theme's zip and that section as its notes. It stops if the tag and `kit/VERSION` differ or the section is
 missing. Only the maintainer tags.
 
+Each change in a section gets a `###` heading saying what it does, a paragraph or two, then `**Your site:**`
+(what to run, if anything) and `**Restarts:**` (what goes down, and for how long), each its own paragraph: as list
+items they'd run into a list above them. Wrap lines as usual: the workflow joins them, since GitHub's release notes
+break wherever the text does.
+
 ## Writing
 
 Commit messages and the guides use plain words: say what changed and why, the way you'd tell the site's owner.
