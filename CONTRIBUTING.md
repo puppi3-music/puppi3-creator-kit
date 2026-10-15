@@ -44,8 +44,9 @@ next to what you change, and keep it true in the same change.
 
 | What you changed | Run | Time |
 |---|---|---|
-| Anything, before a pull request | `kit/check.sh`: the checks below that need no Docker (the guides, dashboards, the bridge and its tests, shell scripts) and that every path a file names is there. GitHub runs it on every push and pull request too (`.github/workflows/check.yml`) | seconds |
-| The bridge (`stacks/postiz/ghost-bridge/`) | its tests: `node --test` in `stacks/postiz/ghost-bridge-test/` (Node 22.13 or later; captions, links, the numbers' helpers, and what a post turns into on each network, run dry against a fake Postiz). A fix or a new rule gets a test there | seconds |
+| Anything, before a pull request | `kit/check.sh`: the checks below that need no Docker (the guides, dashboards, the bridge and its tests, the Traefik plugins' tests, shell scripts) and that every path a file names is there. GitHub runs it on every push and pull request too (`.github/workflows/check.yml`) | seconds |
+| The bridge (`stacks/postiz/ghost-bridge/`) | its tests: `node --test` in `stacks/postiz/ghost-bridge-test/` (Node 22.13 or later; captions, links, what a post turns into on each network, run dry against a fake Postiz, and each network's numbers collected from made-up API answers). A fix or a new rule gets a test there | seconds |
+| A Traefik plugin (`stacks/traefik/plugins-local/`) | its tests: `go test` in the plugin's folder (Go 1.22 or later) | seconds |
 | The dashboard scripts (`parts.py`, `render.py`) | their tests: `python3 -m unittest discover -s stacks/monitoring/grafana/tests` | seconds |
 | Any guide, setting or example | `python3 docs/build-docs.py --check` (the commit hook runs it too) | seconds |
 | The theme | `kit/theme-zip.sh` (Ghost's gscan, and no site-specific names), then the theme test: `docker compose -f kit/theme-test/compose.yaml up -d`, and `npm install` (once) and `node test.mjs` in `kit/theme-test/` (a local Ghost and a browser test; `down -v` after) | minutes |
