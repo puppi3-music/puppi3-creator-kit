@@ -8,12 +8,12 @@
 {{- $ep := env "ENTRYPOINT" | default "https" }}
 http:
   routers:
-    # The public name, Cloudflare only, behind Grafana's own sign-in
+    # The public name, Cloudflare only, behind Grafana's own sign-in (real-ip: its sign-in limits see the real address)
     grafana:
       rule: "Host(`{{ $grafana }}`)"
       entryPoints: [{{ $ep }}]
       service: grafana
-      middlewares: [cloudflare-only]
+      middlewares: [cloudflare-only, real-ip]
 {{- if ne $resolver "none" }}
       tls:{{ if eq $resolver "self" }} {}{{ else }}
         certResolver: {{ $resolver }}{{ end }}

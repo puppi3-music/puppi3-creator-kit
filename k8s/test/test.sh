@@ -24,7 +24,8 @@
 #     through Traefik (https on its own certificate: TLS_RESOLVER=self); with BEHIND_CLOUDFLARE=false, from anywhere
 #   - Traefik runs its own image, the kit's plugins (a ConfigMap) load, no router or middleware in error, the dashboard on
 #     traefik.<LAN_DOMAIN>
-#   - Ghost's mail settings from the site's secrets/ghost-mail.env
+#   - Ghost's mail settings from the site's secrets/ghost-mail.env; Prometheus's ClusterRole without nodes/proxy;
+#     LIVE_SOURCE_RANGES as tinyice-source's loadBalancerSourceRanges
 #   - Ghost with the kit's theme (uploaded through the Admin API) and a post; killing the Ghost and MySQL pods brings
 #     them back with the theme, its settings and the post
 #   - a change to the profile that isn't Ghost's (BEHIND_CLOUDFLARE) leaves the Ghost pod running
@@ -41,10 +42,10 @@
 #     tinyice.<LAN_DOMAIN>
 #   - both mounts renamed in the running TinyIce's config (as its admin would): k8s/up.sh takes the new names, a stream
 #     to the new source mount reaches listeners of the new mp3 mount, from a relay
-#   - social: Postiz through Traefik on postiz.<SITE_HOST>; the webhook, the theme's clicks and the social preview
+#   - social: Postiz through Traefik on postiz.<SITE_HOST> (Cloudflare-only, real-ip); the webhook, the theme's clicks and the social preview
 #     reach the bridge; the bridge has Tinybird's tokens; with listeners on the relays, its live shows count the
 #     listeners, not the relays; a new bridge pod keeps its data
-#   - monitoring: Grafana on grafana.<SITE_HOST> (Cloudflare-only) and grafana.<LAN_DOMAIN>, every dashboard
+#   - monitoring: Grafana on grafana.<SITE_HOST> (Cloudflare-only, real-ip) and grafana.<LAN_DOMAIN>, every dashboard
 #     rendered with render.py --profile cloud in the site's folder, no panel naming a datasource Grafana lacks, a real
 #     query through each datasource (grafana_ro on MySQL and Postgres, Tinybird with this Ghost's site_uuid, which
 #     up.sh asked Ghost for, the bridge, Prometheus with every job up), Health's pod memory by workload and its disk
@@ -153,6 +154,17 @@ for t in "$K8S"/overlays/k3d-*/; do
         && ok "$t differs from $c only by the stand-ins" || { cat "$SP/twin.txt"; fail "$t differs from $c only by the stand-ins"; }
 done
 check "Ghost takes its mail settings from secrets/ghost-mail.env" grep -q 'name: ghost-mail-' "$SP/render-local.yaml"
+# Prometheus reads each kubelet itself: its ClusterRole never has nodes/proxy (which runs commands in any pod)
+check "Prometheus's ClusterRole: nodes/metrics, no nodes/proxy" eval 'grep -q "nodes/metrics" "$SP/render-local.yaml" && ! grep -q "nodes/proxy" "$SP/render-local.yaml"'
+# LIVE_SOURCE_RANGES: only those addresses reach the streaming software's port
+cp "$S/site.env" "$SP/site.env.bak"; echo "LIVE_SOURCE_RANGES=203.0.113.7/32, 198.51.100.0/24" >> "$S/site.env"
+"$K8S/up.sh" "$S" local --render >/dev/null 2>&1
+check "LIVE_SOURCE_RANGES becomes tinyice-source's loadBalancerSourceRanges" python3 - "$S/data/k8s/rendered.yaml" <<'PY'
+import sys, yaml
+svc = [d for d in yaml.safe_load_all(open(sys.argv[1])) if d and d["kind"] == "Service" and d["metadata"]["name"] == "tinyice-source"]
+sys.exit(not svc or svc[0]["spec"].get("loadBalancerSourceRanges") != ["203.0.113.7/32", "198.51.100.0/24"])
+PY
+cp "$SP/site.env.bak" "$S/site.env"
 if [ "$RENDER_ONLY" = 1 ]; then
     if [ "$fails" = 0 ]; then echo "all passed (render only)"; else echo "$fails failed"; fi
     exit $(( fails > 0 ? 2 : 0 ))
@@ -283,8 +295,9 @@ postiz_up() { c="$(code "${CF[@]}" https://postiz.kit.test/)"; [ "${c:0:1}" = 2 
 check "Postiz answers through Traefik on postiz.<SITE_HOST> ($(code "${CF[@]}" https://postiz.kit.test/))" postiz_up
 # (this Mac's addresses are trusted by now, so Cloudflare-only shows in the routers, not as a 403)
 cf_routers() { api routers | python3 -c 'import json,sys; r={x["name"]: x for x in json.load(sys.stdin)}
-sys.exit(not all("cloudflare-only@file" in r.get(n, {}).get("middlewares", []) for n in ("postiz@file", "postiz-ghost-bridge@file", "kittest-social-preview@file")))'; }
-check "...and its routes, the webhook's and the social preview's are Cloudflare-only" cf_routers
+sys.exit(not all("cloudflare-only@file" in r.get(n, {}).get("middlewares", []) for n in ("postiz@file", "postiz-ghost-bridge@file", "kittest-social-preview@file"))
+         or "real-ip@file" not in r.get("postiz@file", {}).get("middlewares", []))'; }
+check "...and its routes, the webhook's and the social preview's are Cloudflare-only (Postiz's with real-ip)" cf_routers
 check "Ghost's webhook reaches the bridge (unsigned: 401)" [ "$(code "${CF[@]}" -X POST -d '{}' https://postiz.kit.test/ghost-webhook)" = 401 ]
 check "the theme's clicks reach the bridge" [ "$(code "${CF[@]}" -X POST "https://kit.test/.site/click?kind=out&to=https%3A%2F%2Fexample.com%2F&from=%2F")" = 204 ]
 preview() { curl "${R[@]}" "${CF[@]}" https://kit.test/ghost/social-preview/00000000-0000-0000-0000-000000000000/; }
@@ -299,8 +312,8 @@ graf_up() { g /api/health | grep -q '"database": *"ok"'; }
 wait_for "Grafana answers on grafana.<LAN_DOMAIN>" 60 graf_up && ok "Grafana answers on grafana.<LAN_DOMAIN>"
 check "...and on grafana.<SITE_HOST> ($(code "${CF[@]}" https://grafana.kit.test/login))" [ "$(code "${CF[@]}" https://grafana.kit.test/login)" = 200 ]
 cf_grafana() { api routers | python3 -c 'import json,sys; r={x["name"]: x for x in json.load(sys.stdin)}
-sys.exit("cloudflare-only@file" not in r.get("grafana@file", {}).get("middlewares", []))'; }
-check "...Cloudflare-only" cf_grafana
+sys.exit(r.get("grafana@file", {}).get("middlewares", [])[:2] != ["cloudflare-only@file", "real-ip@file"])'; }
+check "...Cloudflare-only, with real-ip" cf_grafana
 dash_ok() { g '/api/search?type=dash-db' | python3 -c "
 import json,sys,glob
 got={d['uid']: d.get('folderTitle') for d in json.load(sys.stdin)}

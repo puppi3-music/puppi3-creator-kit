@@ -7,9 +7,13 @@ services:
     container_name: ${ID_PREFIX:-site}-ghost
     # Ghost's image as it comes: it owns its content folder, then runs as its node user (the NAS runs it as 1002:1003)
     user: !reset null
-    # tb-setup's tokens from the site's data folder (the stack reads ./tinybird/, the NAS's own folder)
+    # tb-setup's tokens from the site's data folder (the stack reads ./tinybird/, the NAS's own folder), and Ghost's mail
+    # (mail__* lines, kit/examples/ghost-mail.env.example) from secrets/ghost-mail.env if the site has one: there only
+    # its owner reads the SMTP password, where config.production.json is readable by everyone on the machine
     env_file: !override
       - path: ${GHOST_DATA_DIR}/tinybird/tokens.env
+        required: false
+      - path: ${SITE_DIR:?run through kit/kit.sh}/secrets/ghost-mail.env
         required: false
     environment:
       # the database by a name no other stack on proxy has (the NAS uses its container name, puppi3-db-1)

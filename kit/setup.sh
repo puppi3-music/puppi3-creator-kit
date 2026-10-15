@@ -185,14 +185,18 @@ if [ ! -f "$d/monitoring/prometheus/tinyice-password" ]; then
         > "$d/monitoring/prometheus/tinyice-password")
 fi
 # lan-only: the home-network-only names (*.<LAN_DOMAIN>) answer private addresses only. The site's own file: edit the
-# ranges to your network's.
+# ranges to your network's. Not 172.16.0.0/12: Docker's own networks are there, and a connection Docker relays itself
+# (over IPv6, on a server with an IPv6 address) arrives from its network's gateway, so that range would let the
+# internet in. kit.sh warns at every up when the file lets in an address every connection may come from.
 [ -f "$d/traefik/dynamic/lan-only.yml" ] || cat > "$d/traefik/dynamic/lan-only.yml" <<'EOF'
-# Home network only, for the *.<LAN_DOMAIN> names (Traefik's dashboard, TinyIce's admin): private addresses only.
+# Home network only, for the *.<LAN_DOMAIN> names (Traefik's dashboard, TinyIce's admin, Grafana): private addresses
+# only. Edit the ranges to your home network's. Leave out Docker's own networks (172.16.0.0/12 by default): connections
+# Docker relays itself arrive from their gateway, which would let anyone in. kit/kit.sh warns if this lets one in.
 http:
   middlewares:
     lan-only:
       ipAllowList:
-        sourceRange: ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "127.0.0.1/32", "fc00::/7", "fe80::/10"]
+        sourceRange: ["10.0.0.0/8", "192.168.0.0/16", "127.0.0.1/32", "fc00::/7", "fe80::/10"]
 EOF
 # On Linux each image's user must own its folders (Ghost's image sees to its own)
 if [ "$(uname)" = Linux ]; then
@@ -253,6 +257,8 @@ if on live; then cat <<EOF
   - Live: the streaming software sends Ogg to $(val LIVE_HOST) port $(val LIVE_PORT | grep . || echo 8222) (this host's own address if behind Cloudflare,
     which doesn't pass the port; straight to TinyIce: Traefik would drop the audio), mount /stream-ogg, user source, password TINYICE_SOURCE_PASSWORD from secrets/icecast.env.
     TinyIce's admin: http://tinyice.$(val LAN_DOMAIN) (home network), TINYICE_ADMIN_USER / TINYICE_ADMIN_PASSWORD.
+    That port is all of TinyIce over plain http, its admin sign-in too: keep it to the addresses you stream from with a
+    firewall rule, or LIVE_BIND in site.env (the Setup guide, Live).
 EOF
 else cat <<EOF
   - Live is off. To add it later: put live in MODULES in site.env, point $(val LIVE_HOST) at this host, run

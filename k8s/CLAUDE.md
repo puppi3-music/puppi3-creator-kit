@@ -53,7 +53,7 @@ A site is the same folder as on Compose (`kit/setup.sh` makes it: `site.env`, `s
   - Ghost: `ghost:<version>-alpine` (the Compose stack's exact version), 1 replica, `Recreate`, settings as environment (no `config.production.json`), MySQL at
     Service `mysql` (an init container waits for it), content on PVC `ghost-content`; mail (`mail__*`, as the NAS's
     config file's `mail`) from the site's optional `secrets/ghost-mail.env` (Secret `ghost-mail`, envFrom, optional:
-    without it Ghost's Direct mail; `examples/ghost-mail.env.example`); probes ask
+    without it Ghost's Direct mail; `kit/examples/ghost-mail.env.example`, which Compose reads too); probes ask
     `/ghost/api/admin/site/` with `X-Forwarded-Proto: https`.
 - `components/mysql/`: MySQL 8 StatefulSet (the Compose stack's exact version) + Service `mysql`, root's password from Secret `ghost`.
 - `components/analytics/` (module `analytics`): `tinybird-local` StatefulSet (the stack's digest; ClickHouse and Redis
@@ -71,7 +71,8 @@ A site is the same folder as on Compose (`kit/setup.sh` makes it: `site.env`, `s
   config from Secret `tinyice-config` = `data/icecast/tinyice-data/config.json`, copied onto its PVC only when the
   volume has none, so admin edits stay; history on the same PVC), Service `tinyice` (Traefik, the relays, the bridge's
   `LIVE_STATUS_URL` default, Prometheus) and LoadBalancer `tinyice-source` on 8222 for the streaming software (straight to
-  TinyIce: Traefik drops a SOURCE body). Listeners' `/stream-mp3` goes to `tinyice-relay`: **Icecast 2** relays
+  TinyIce: Traefik drops a SOURCE body; all of TinyIce answers there, admin sign-in too, so the site's
+  `LIVE_SOURCE_RANGES` becomes its `loadBalancerSourceRanges`, an up.sh patch). Listeners' `/stream-mp3` goes to `tinyice-relay`: **Icecast 2** relays
   (`images/icecast-relay/`, Alpine's package, uid 100), 2 replicas, stateless, pulling `/stream-mp3` from `tinyice`;
   their `icecast.xml` is Secret `icecast-relay-config` from `up.sh` (TinyIce's admin password and mp3 burst size,
   500 listeners each, logs to /dev/stdout and /dev/stderr: Icecast puts `<logdir>` in front of the names;
@@ -122,9 +123,12 @@ A site is the same folder as on Compose (`kit/setup.sh` makes it: `site.env`, `s
   `grafana-dashboard-<name>` each, listed in Grafana's projected `dashboards` volume by a patch, `grafana-alerting`
   (a changed rule = a new name = Grafana restarts, which is when it reads them), and writes Prometheus's jobs
   (`prometheus-config`): Traefik, the bridge (`<ID_PREFIX>-pets`), TinyIce, `tinyice-relays` (each ready relay of
-  `tinyice-relay-pods` through json-exporter, the mount label cut to its path), blackbox, and the kubelets through
-  the API server (`cadvisor`: pod CPU/memory; `kubelet`: volume stats; only those metrics and the site's namespace
-  kept; ClusterRole renamed per site by up.sh). No node-exporter or cAdvisor of its own. After the first up it asks
+  `tinyice-relay-pods` through json-exporter, the mount label cut to its path), blackbox, and the kubelets straight
+  at each node's :10250 (`cadvisor`: pod CPU/memory; `kubelet`: volume stats; only those metrics and the site's
+  namespace kept; `insecure_skip_verify`, as a kubelet's serving certificate is usually its own; ClusterRole renamed
+  per site by up.sh: `nodes` list/watch and `nodes/metrics` get only, never `nodes/proxy`, which lets a token run
+  commands in any pod through the kubelet; pods must reach the nodes' :10250, as k3d, eksctl's and GKE Standard's
+  defaults allow). No node-exporter or cAdvisor of its own. After the first up it asks
   Ghost for its `site_uuid` (`kubectl exec deploy/traefik -- wget`), keeps it in `data/k8s/ghost.env` and runs
   itself once more (only Grafana's ConfigMaps change). Grafana's routers are `grafana`/`grafana-lan`, not
   `<ID_PREFIX>-grafana` as on Compose: every router here is `@file`, and Health counts `<ID_PREFIX>-*@file` as the
@@ -195,7 +199,7 @@ A site is the same folder as on Compose (`kit/setup.sh` makes it: `site.env`, `s
   managed node group of two m7i.xlarge, not Fargate) and `clusters/eks-gp3.yaml` (the default StorageClass): the user
   runs them; untested without an AWS account. `clusters/gke.sh up|down` (gcloud, `PROJECT=`): one zone, two
   e2-standard-4, Workload Identity on; prints the binding for `cloud-sql`. The user runs it; untested.
-- `examples/`: what a site's Kubernetes-only secrets files hold (`ghost-mail.env`, `cloud.env`, `s3.env`; copy to
+- `examples/`: what a site's Kubernetes-only secrets files hold (`cloud.env`, `s3.env`; copy to
   `<site>/secrets/`), with the overlays' `cloud.env.example`s the source of the kit's Settings reference
   (`kit/docs/settings_reference.py`): its comments are the reference's text, and a key nothing reads stops the build.
 - `migrate/` (Phase D part 4): `to-cloud.sh <site> <overlay> --from [<user>@<host>:]<data folder>` and

@@ -38,10 +38,10 @@ SECRETS = [
      "The live module: TinyIce's passwords.", True),
     ("secrets-monitoring", "secrets/monitoring.env", ["kit/examples/monitoring.env.example"],
      "The monitoring module: Grafana's logins and where the alerts go.", True),
+    ("secrets-ghost-mail", "secrets/ghost-mail.env", ["kit/examples/ghost-mail.env.example"],
+     "Ghost's mail, on Compose and Kubernetes alike (you make this one: copy the example).", False),
 ]
 K8S = [
-    ("k8s-ghost-mail", "secrets/ghost-mail.env", ["k8s/examples/ghost-mail.env.example"],
-     "Ghost's mail on Kubernetes (on Compose it's in Ghost's config file, data/ghost/ghost/config.production.json).", False),
     ("k8s-cloud", "secrets/cloud.env", ["k8s/examples/cloud.env.example"],
      "The cloud database's master login (eks and gke, with the social module).", True),
     ("k8s-s3", "secrets/s3.env", ["k8s/examples/s3.env.example"],

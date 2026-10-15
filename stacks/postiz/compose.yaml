@@ -66,7 +66,9 @@ services:
       - traefik.http.routers.postiz.rule=Host(`${POSTIZ_DOMAIN}`)
       - traefik.http.routers.postiz.entrypoints=https
       - traefik.http.routers.postiz.tls.certresolver=${TLS_RESOLVER:-cf}
-      - traefik.http.routers.postiz.middlewares=cloudflare-only@file   # traefik/dynamic/cloudflare-only.yml
+      # cloudflare-only (traefik/dynamic/cloudflare-only.yml), then real-ip (real-ip.yml): Postiz sees the visitor's real
+      # address, not one a visitor put in front of X-Forwarded-For (its sign-in limits count by address)
+      - traefik.http.routers.postiz.middlewares=cloudflare-only@file,real-ip@file
       - traefik.http.services.postiz.loadbalancer.server.port=5000
     healthcheck:
       test: ["CMD", "node", "-e", "const r=require('http').get('http://localhost:5000/',res=>process.exit(res.statusCode<500?0:1));r.on('error',()=>process.exit(1));r.setTimeout(4000,()=>{r.destroy();process.exit(1)})"]
