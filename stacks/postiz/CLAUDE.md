@@ -193,8 +193,9 @@ DRY_RUN bridge as a staging copy (it previews and logs, never posts); some notes
 - `ghost-bridge/Dockerfile` (+ `.dockerignore`: only the `.mjs` files): the bridge with its code inside, which the kit
   publishes and Kubernetes runs; the NAS's stack keeps its `dockerfile_inline` base with the code mounted (the same
   Node: `image-pins.py`). deploy.sh sends both files with the stack; the NAS doesn't use them.
-- Per-post history: `data/stats.db` (`stats/store.mjs`, SQLite via `node:sqlite`, works in node:22-alpine >= 22.13 with an
-  ExperimentalWarning; `storeFor(dataDir)`; all SQL there, plain enough for PostgreSQL: BIGINT ms, JSON in TEXT, ON CONFLICT):
+- Per-post history: `data/stats.db` (`stats/store.mjs`, SQLite via `node:sqlite`, needs Node >= 22.13; the image's
+  Node 24 doesn't warn it's experimental; `storeFor(dataDir)`; all SQL there, plain enough for PostgreSQL: BIGINT ms,
+  JSON in TEXT, ON CONFLICT):
   `checks` (every check in a post's first `POST_EARLY_HOURS` [96] and during a take-off, else only changes: `recordChecks`;
   `posts.last_checked` moves on an unchanged one), `days` (UTC day's last numbers via `trackPosts` -> `recordDay`, all kept;
   YouTube's/Ghost's real per-day numbers via `setDays`: `ytVideoDays`, Analytics per video back to its upload, refetched after

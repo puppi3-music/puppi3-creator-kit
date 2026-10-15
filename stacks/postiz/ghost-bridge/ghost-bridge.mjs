@@ -30,7 +30,7 @@
 //   Google Search, live shows (TinyIce) and links clicked off the site (POST /.puppy/click), each in
 //   data/<name>.json, served at /<name>.json. Everything each API gives (also numbers nothing shows yet) is kept for
 //   good in data/archive/<network>.json (stats/history.mjs archive(); not served).
-// Modules, all mounted with this file (compose mounts the folder; no npm dependencies, runs on node:22-alpine
+// Modules, all mounted with this file (compose mounts the folder; no npm dependencies, runs on node:24-alpine
 // with ffmpeg added: dockerfile_inline in compose). Which file has what: docs/bridge-map.md in the repo.
 //  - here:     this file (start-up, routes, Ghost's webhook), config.mjs (settings, log, posted.json/custom.json),
 //              services.mjs (Postiz's API and alerts, its database, Ghost's Admin API)
