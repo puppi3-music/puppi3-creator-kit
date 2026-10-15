@@ -26,6 +26,10 @@ if git diff --cached --name-only | grep -qE "^($G/provisioning/dashboards/|$G/al
     || { rm -rf "$out"; exit 1; }
   rm -rf "$out"
 fi
+# and parts.py's and render.py's tests ($G/tests/)
+if git diff --cached --name-only | grep -qE "^($G/provisioning/dashboards/|$G/alerts\.yml|$G/[^/]+\.py|$G/tests/)"; then
+  python3 -m unittest discover -q -s $G/tests || { echo "pre-commit: the dashboard scripts' tests failed"; exit 1; }
+fi
 if git diff --cached --name-only | grep -qE "^$G/(provisioning/dashboards/|style\.py|parts\.py)"; then
   python3 $G/style.py --check || exit 1
 fi
@@ -34,12 +38,15 @@ fi
 #    module loads (an import of a name another module doesn't export only shows when Node loads it), and
 #    docs/bridge-map.md is current: every module has its heading, every file it names exists, every export it lists is
 #    still exported (.githooks/bridge-check.mjs).
-if git diff --cached --name-only | grep -qE '^(stacks/postiz/ghost-bridge/|docs/bridge-map\.md$)'; then
+#    Then its tests (stacks/postiz/ghost-bridge-test/, under a second).
+if git diff --cached --name-only | grep -qE '^(stacks/postiz/ghost-bridge(-test)?/|docs/bridge-map\.md$|kit/redirects\.yaml$)'; then
   if command -v node >/dev/null 2>&1; then
     # (no settings, so it starts nothing; it exits as soon as every module has loaded)
     err=$(cd stacks/postiz/ghost-bridge && env -i PATH="$PATH" PORT=0 DRY_RUN=true STATE_FILE=/nonexistent/posted.json \
       MAP="$OLDPWD/docs/bridge-map.md" node "$OLDPWD/.githooks/bridge-check.mjs" 2>&1 >/dev/null) \
       || { echo "$err" | grep '^pre-commit:' || echo "pre-commit: the bridge doesn't load"; exit 1; }
+    out=$(cd stacks/postiz/ghost-bridge-test && node --test --test-reporter=dot 2>&1) \
+      || { echo "$out" | tail -40; echo "pre-commit: the bridge's tests failed"; exit 1; }
   fi
 fi
 

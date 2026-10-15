@@ -17,8 +17,10 @@ only reports; a mention meant to stay goes in `ALLOW` with its reason.
 
 `check.sh [--here <repo>]`: the checks that need no Docker, in seconds: `check_refs.py` (every repo path a file names
 is in the repo, every Traefik plugin a file loads is there: one missing turns them all off; `ALLOW` for a mention
-that's fine), the guides' build, the dashboards' checks and a render for the example profile, the bridge's modules,
-every shell script's syntax. A site repo that sends the kit runs it on the kit's copy with `--here` itself, so a path
+that's fine), the guides' build, the dashboards' checks and a render for the example profile, the dashboard scripts'
+tests (`stacks/monitoring/grafana/tests/`), the bridge's modules and its tests (`stacks/postiz/ghost-bridge-test/`),
+every shell script's syntax. `.github/workflows/check.yml` runs it in the kit's repo on every push and pull request
+(the Node of the bridge's Dockerfile, the runner's Python 3; only there, like release.yml). A site repo that sends the kit runs it on the kit's copy with `--here` itself, so a path
 only that site has counts as missing. A site's own notes for a folder may be in a `CLAUDE.site.md` beside its
 CLAUDE.md (never in the kit's repo).
 
