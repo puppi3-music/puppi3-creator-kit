@@ -57,7 +57,9 @@ A site is the same folder as on Compose (`kit/setup.sh` makes it: `site.env`, `s
     `/ghost/api/admin/site/` with `X-Forwarded-Proto: https`.
 - `components/mysql/`: MySQL 8 StatefulSet (the Compose stack's exact version) + Service `mysql`, root's password from Secret `ghost`.
 - `components/analytics/` (module `analytics`): `tinybird-local` StatefulSet (the stack's digest; ClickHouse and Redis
-  volumes; `PYTHON_CPU_COUNT=2`, as the stack: one CSV import worker instead of half the node's CPUs, ~0.5 GB each; ~2.2 GB idle, 2.75 GB at most, so request 2560Mi, limit 4Gi (with five workers 3Gi was OOM-killed in a loop); startup
+  volumes; started trimmed by the Ghost stack's script (no MCP or Kafka server, no CSV worker; `image-pins.py` keeps
+  the copies equal): ~1.8 GB idle, so request 2Gi; limit 4Gi, room for an unchanged start (~2.4 GB with one CSV worker
+  at `PYTHON_CPU_COUNT=2`; with five workers 3Gi was OOM-killed in a loop); startup
   probe with a 5 s timeout, as Compose's), `traffic-analytics` Deployment (salts on a small PVC), and `tb-setup` as a
   Job: init containers copy Ghost's schema files out of Ghost's image and run the stack's `setup.sh` with
   `TB_SETUP_EXIT=1`, then `save-tokens` puts the tokens into Secret `tinybird-tokens` with a server-side apply through

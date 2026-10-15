@@ -296,22 +296,22 @@ header.top .pup svg{display:block;width:100%;height:auto}
     </tbody>
   </table></div>
   <h3 id="before-how-big">How big a machine</h3>
-  <p>Measured on the kit's test site (Docker Desktop on a Mac, kit 1.2.0) with every module on, at rest and while it streams, takes page hits and makes social previews. Memory barely moves between the two: most of it is held from the start.</p>
+  <p>Measured on the kit's test site (Docker Desktop on a Mac, kit 1.2.0; analytics kit 1.2.2) with every module on, at rest and while it streams, takes page hits and makes social previews. Memory barely moves between the two: most of it is held from the start.</p>
   <div class="tablewrap"><table>
     <thead><tr><th>Part</th><th>Memory</th><th>Disk for its images</th><th>What takes it</th></tr></thead>
     <tbody>
       <tr><td>The site</td><td>0.7 GB</td><td>2.5 GB</td><td>MySQL about 0.4 GB, Ghost 0.2 GB, Traefik under 0.1 GB</td></tr>
-      <tr><td><code>analytics</code></td><td>2.5 GB, 3 GB when busy</td><td>10 GB</td><td>Tinybird (a ClickHouse database with Tinybird's servers around it) about 2.2 GB all the time; traffic-analytics 0.3 GB</td></tr>
+      <tr><td><code>analytics</code></td><td>2 GB, 2.2 GB when busy</td><td>10 GB</td><td>Tinybird (a ClickHouse database with Tinybird's servers around it) about 1.8 GB all the time; traffic-analytics 0.3 GB</td></tr>
       <tr><td><code>social</code></td><td>2.5 GB, 3 GB when busy</td><td>11 GB</td><td>Postiz 1.4 to 2 GB; Temporal's Elasticsearch 0.6 GB; Temporal, the databases and the bridge the rest</td></tr>
       <tr><td><code>live</code></td><td>under 0.1 GB</td><td>0.1 GB</td><td>TinyIce; each listener adds a little</td></tr>
       <tr><td><code>monitoring</code></td><td>1.9 GB</td><td>2.5 GB</td><td>cAdvisor about 1.2 GB on Docker Desktop (less on Linux, where it sees fewer containers), Grafana 0.5 to 0.7 GB, Prometheus 0.1 GB</td></tr>
-      <tr><td><b>Everything</b></td><td><b>7.5 GB, 8 GB when busy</b></td><td><b>about 26 GB</b></td><td></td></tr>
+      <tr><td><b>Everything</b></td><td><b>7 GB, 7.5 GB when busy</b></td><td><b>about 26 GB</b></td><td></td></tr>
     </tbody>
   </table></div>
   <ul>
     <li><b>Memory:</b> the site alone runs on a 2 GB machine. With everything on, 10 GB at least, 12 to 16 GB to be comfortable, plus what the machine's own system needs. On a Mac or Windows, Docker Desktop runs everything inside its own machine: give it that much under Settings, Resources (its default is often 8 GB, too tight with every module on).</li>
     <li><b>Disk:</b> about 1 GB for the site's folder at the start, plus the images above. It grows with what you upload (images, audio, video: usually the most), Prometheus's history (a year, at most 10 GB: then it drops the oldest), Tinybird's page hits and Postiz's uploads (small). 50 GB free covers everything for a long time.</li>
-    <li><b>Kubernetes:</b> each pod asks for less than this and may use up to its limit (Tinybird 2.5 GiB, up to 4 GiB); two nodes of 4 CPUs and 16 GB hold everything, which is what the cluster recipes make.</li>
+    <li><b>Kubernetes:</b> each pod asks for less than this and may use up to its limit (Tinybird 2 GiB, up to 4 GiB); two nodes of 4 CPUs and 16 GB hold everything, which is what the cluster recipes make.</li>
   </ul>
   <h3 id="before-cloudflare-or-not">Cloudflare or not</h3>
   <p>The kit works with or without Cloudflare in front of the site.</p>
