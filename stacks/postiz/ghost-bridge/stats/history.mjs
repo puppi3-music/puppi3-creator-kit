@@ -607,7 +607,8 @@ export const median = (xs) => {
 let siteHosts = [...new Set(SITE_HOSTS.map((h) => h.replace(/^www\./, '')))];
 // more names, if a caller has any
 export const addSiteHosts = (hosts) => { siteHosts = [...new Set([...siteHosts, ...hosts])].filter(Boolean); };
-const BIO_LINKS = ['/bsky', '/ig', '/th', '/tk', '/threads', '/tiktok', '/dis', '/yt', '/d', '/y'];
+// (and the short links with no path: tagLink's for the home page, /b /t /i /k, and /d /y)
+const BIO_LINKS = ['/bsky', '/ig', '/th', '/tk', '/threads', '/tiktok', '/dis', '/yt', '/b', '/t', '/i', '/k', '/d', '/y'];
 export function sitePath(raw) {
   let p = String(raw || '/').split(/[?#]/)[0].replace(/[.,;:!]+$/, '');
   const short = /^\/[btikdy]\/([\w-].*?)\/*$/.exec(p);
