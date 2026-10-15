@@ -321,7 +321,7 @@ k8s/up.sh kit/sites/mysite &lt;overlay&gt;</pre></div>
   <div class="note warn"><b class="label">Never down -v</b><p><code>kit/kit.sh &lt;folder&gt; down -v</code> deletes those volumes, and with them every visitor count. Use <code>stop</code> or <code>down</code> without <code>-v</code>, unless you're removing the site for good.</p></div>
   <p>A backup holds the site's passwords and keys (<code>secrets/</code>). Keep it somewhere private, and keep one copy away from the machine that runs the site.</p>
   <h3 id="backup-everything">Everything, with the site stopped</h3>
-  <p>The whole site, as it is, in a few minutes of downtime. The safest kind: the databases are closed, so nothing is half-written. Set <code>ID</code> to the site's short name.</p>
+  <p>The whole site, as it is, in a few minutes of downtime. The safest kind: the databases are closed, so nothing is half-written. Set <code>ID</code> to the site's short name (<code>ID_PREFIX</code> in its <code>site.env</code>, which may differ from the folder's name).</p>
 <div class="code"><pre>ID=mysite; B=~/backups/$ID-$(date +%F); mkdir -p "$B"
 kit/kit.sh kit/sites/mysite stop
 tar -czpf "$B/folder.tar.gz" -C kit/sites mysite
@@ -343,7 +343,7 @@ tar -czf "$B/ghost-content.tar.gz" -C kit/sites/mysite/data/ghost/ghost content
   <p>The warning about a password on the command line is MySQL's own, and harmless here: it's the container's own password, inside the container. Ghost's database is called <code>ghost</code> unless you changed <code>database__connection__database</code>. These copies don't include the analytics or the dashboards' history: take a stopped backup now and then for those.</p>
   <h3 id="backup-restore">Putting a backup back</h3>
   <p>On the same machine or a new one, with this repo at the same version as when the backup was made. The short name stays the same (it names the volumes):</p>
-<div class="code"><pre>ID=mysite; B=~/backups/mysite-2026-10-12
+<div class="code"><pre>ID=mysite; B=~/backups/$ID-2026-10-12                                        # the backup's folder
 kit/kit.sh kit/sites/mysite down 2&gt;/dev/null; rm -rf kit/sites/mysite     # only if an old copy is there
 docker volume rm $(docker volume ls -q --filter label=com.docker.compose.project=$ID) 2&gt;/dev/null
 tar -xzpf "$B/folder.tar.gz" -C kit/sites                                    # sudo on Linux
@@ -486,7 +486,7 @@ kit/kit.sh kit/sites/mysite restart ghost</pre></div>
     <dt>The streaming software can't connect</dt>
     <dd>Behind Cloudflare, stream to the server's own address, not the site's name: Cloudflare doesn't pass port 8222. Port 8222 forwarded to the server, mount <code>/stream-ogg</code>, user <code>source</code>, <code>TINYICE_SOURCE_PASSWORD</code>, format Ogg. If you kept the port to your own addresses (a firewall rule, <code>LIVE_BIND</code> or <code>LIVE_SOURCE_RANGES</code>), check the address you're streaming from is one of them.</dd>
     <dt>Streaming, but no LIVE NOW bar</dt>
-    <dd>The theme's Live stream URL must be set (<code>https://live.&lt;your site&gt;/stream-mp3</code>). <code>https://live.&lt;your site&gt;/live-status.json</code> lists the stream while you're on.</dd>
+    <dd>The theme's Live stream URL must be set (<code>https://live.&lt;your site&gt;/stream-mp3</code>). <code>https://&lt;your site&gt;/live-status.json</code> (the site's own address, not <code>live.</code>) lists the stream while you're on.</dd>
   </dl>
   <h3 id="trouble-kubernetes">Kubernetes</h3>
   <dl class="faq">

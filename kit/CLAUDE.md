@@ -54,7 +54,8 @@ wording goes in its `site.env` (the bridge's `FEATURED_*` lines).
   `settings_reference.py` between its `generated` markers (the rest of the page is by hand): `site.env` from
   `instances/example.env`, each `secrets/<stack>.env` from its examples, k8s's files from `k8s/examples/` and the
   overlays' `cloud.env.example`, the bridge's fixed settings (literal values in `stacks/postiz/compose.yaml`, with the
-  comment beside each), and which keys setup asks for, makes or fills in (read from `setup.sh`). Its checks stop
+  comment beside each), and which keys setup asks for, makes or fills in (read from `setup.sh`; a fixed value it writes, like
+  `database__connection__database=ghost`, is shown instead of the stack example's own). Its checks stop
   build-docs (and the pre-commit hook, which runs when any of those files are staged): a `${VAR}` in a kit compose
   file, profile or Traefik template that no example documents (or `SET_FOR_YOU` lists), a documented key nothing
   reads (git grep outside the examples), private names (`PRIVATE_WORDS`). So a new setting needs a commented line in

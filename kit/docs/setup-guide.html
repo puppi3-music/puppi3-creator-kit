@@ -428,8 +428,8 @@ docker image prune -a      # every image no container uses: also other projects'
   <ol>
     <li>Make your account at <code>https://postiz.&lt;your site&gt;</code>, then close sign-ups: <code>POSTIZ_DISABLE_REGISTRATION=true</code> in <code>secrets/postiz.env</code>.</li>
     <li>Put each network's app keys in <code>secrets/postiz.env</code>, start again, and connect the networks in Postiz.</li>
-    <li>In Postiz's settings, make an API key: <code>POSTIZ_API_KEY</code>.</li>
-    <li>In Ghost, Settings, Integrations, the Custom tab, add a custom integration. Its Admin API key goes in <code>GHOST_ADMIN_API_KEY</code> (the Social preview button). Give it a webhook: event <b>Post published</b>, address <code>https://postiz.&lt;your site&gt;/ghost-webhook</code>, secret = <code>GHOST_WEBHOOK_SECRET</code> from <code>secrets/postiz.env</code>. Ghost sends it only to a public address: <code>postiz.&lt;your site&gt;</code> must resolve to one from the server (so not a home-network address, even if your home DNS gives one).</li>
+    <li>In Postiz's settings, make an API key: <code>POSTIZ_API_KEY</code> in <code>secrets/postiz.env</code>.</li>
+    <li>In Ghost, Settings, Integrations, the Custom tab, add a custom integration. Its Admin API key goes in <code>GHOST_ADMIN_API_KEY</code> in <code>secrets/postiz.env</code> (the Social preview button). Give it a webhook: event <b>Post published</b>, address <code>https://postiz.&lt;your site&gt;/ghost-webhook</code>, secret = <code>GHOST_WEBHOOK_SECRET</code> from <code>secrets/postiz.env</code>. Ghost sends it only to a public address: <code>postiz.&lt;your site&gt;</code> must resolve to one from the server (so not a home-network address, even if your home DNS gives one).</li>
     <li>To see what it would post before anything goes out: <code>GHOST_BRIDGE_DRY_RUN=true</code> in <code>secrets/postiz.env</code>. The bridge then posts nothing, and logs and previews what it would; set it back to <code>false</code> when you're happy. While it's on, its phone notifications are off too, unless you also set <code>DRY_RUN_NTFY=true</code>.</li>
     <li>If you use the manual drafts (the default for Instagram and TikTok), make a tag called <b>Post in app</b> once in Postiz's post editor, or change <code>DRAFT_TAG</code> in <code>site.env</code>.</li>
     <li>Start again (<code>kit/kit.sh &lt;folder&gt; up -d</code> or <code>k8s/up.sh &lt;folder&gt; &lt;overlay&gt;</code>), then publish a test post with the internal tag <code>#nosocial</code> to see that nothing goes out, and a real one when you're ready.</li>
@@ -486,7 +486,7 @@ UP_TIMEOUT=1200 k8s/up.sh kit/sites/mysite selfhosted</pre></div>
     <li><b>Cluster</b>: <code>eksctl create cluster -f k8s/clusters/eks.yaml</code> (check its name, region and node size first), then <code>kubectl apply -f k8s/clusters/eks-gp3.yaml</code> and the AWS Load Balancer Controller (Helm chart <code>eks/aws-load-balancer-controller</code>, with the ServiceAccount the cluster file made).</li>
     <li><b>Databases</b>: RDS for MySQL 8 and RDS for Postgres 17 in the cluster's network, on its private subnets, reachable only from the nodes' security group. Postgres's parameter group needs <code>rds.force_ssl=0</code> (Postiz connects without TLS; the traffic stays in the network).</li>
     <li><b>Bucket</b>: a private S3 bucket, and an IAM role for ServiceAccount <code>ghost</code> in your namespace (IRSA) that may read, write and delete its objects and list it. No key is stored anywhere.</li>
-    <li><b>Registry</b>, only for images you build yourself: ECR repositories <code>creator-kit/tb-setup</code>, <code>icecast-relay</code>, <code>ghost-bridge</code>.</li>
+    <li><b>Registry</b>, only for images you build yourself: ECR repositories <code>creator-kit/tb-setup</code>, <code>creator-kit/icecast-relay</code> and <code>creator-kit/ghost-bridge</code>.</li>
   </ul>
   <p>Then <code>cp k8s/overlays/eks/cloud.env.example &lt;folder&gt;/cloud-eks.env</code> and fill it in.</p>
   <h3 id="cloud-google-gke">Google GKE</h3>
@@ -504,7 +504,7 @@ UP_TIMEOUT=1200 k8s/up.sh kit/sites/mysite selfhosted</pre></div>
     <li><code>secrets/s3.env</code> (GKE only): the HMAC key.</li>
     <li><code>secrets/ghost-mail.env</code>: Ghost's mail.</li>
   </ul>
-  <p>The examples are in <code>k8s/examples/</code>, and the <a href="settings-reference.html#k8s">Settings reference</a> lists every line. Then (the kit's images are the release's: building your own only for a changed kit, <a href="#k8s-images">the images</a>) <code>k8s/up.sh &lt;folder&gt; eks --render</code> (or <code>gke</code>), and up.</p>
+  <p>Setup already made <code>secrets/ghost.env</code> and you made <code>secrets/ghost-mail.env</code>: change only the login in the first. <code>cloud.env</code> and <code>s3.env</code> start from their examples in <code>k8s/examples/</code>. The <a href="settings-reference.html#k8s">Settings reference</a> lists every line. Then (the kit's images are the release's: building your own only for a changed kit, <a href="#k8s-images">the images</a>) <code>k8s/up.sh &lt;folder&gt; eks --render</code> (or <code>gke</code>), and up.</p>
   <h3 id="cloud-test-before-the-dns">Test before the DNS</h3>
   <p>Before pointing the domain at the cloud, check it through its own address: put yours in <code>TRUSTED_EXTRA</code> (behind Cloudflare, nothing else gets in), then</p>
   <div class="code"><pre>curl -k --connect-to example.com:443:&lt;traefik's EXTERNAL-IP&gt;:443 -sI https://example.com/</pre></div>

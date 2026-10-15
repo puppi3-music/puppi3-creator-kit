@@ -73,7 +73,7 @@ SET_FOR_YOU = {
     "ADMIN_MIDDLEWARES": "The same, on Ghost Admin's router.",
     "UPSTREAM_PROXY": "A proxy in front of Traefik whose X-Real-Ip header is believed (a staging copy behind the "
                       "main Traefik).",
-    "ENTRYPOINT": "Traefik's entry point for the site's routers (websecure unless a second site needs another).",
+    "ENTRYPOINT": "Traefik's entry point for the site's routers (https unless a second site needs another).",
 }
 
 # What the reference must never say: the names of the site the kit was built for, and its NAS (the kit's guides are
@@ -127,7 +127,9 @@ def setup_roles():
     made = set(re.findall(r"[\"( ]([A-Za-z_][A-Za-z0-9_]*)=\$\(rand", sh))
     derived = set(re.findall(r"setkey \"\$SITE_DIR/site\.env\" ([A-Z_]+) ", sh))
     derived |= set(re.findall(r"\"([A-Za-z_][A-Za-z0-9_]*)=", sh))
-    return asked, made, derived - asked - made
+    # a fixed value setup writes ("KEY=value", no $) is what a site has, not the stack example's own (the NAS's)
+    values = dict(re.findall(r"\"([A-Za-z_][A-Za-z0-9_]*)=([^$\"]*)\"", sh))
+    return asked, made, derived - asked - made, values
 
 
 def linkify(text, known):
@@ -139,7 +141,7 @@ def linkify(text, known):
 
 
 def rows(groups, known, roles, skip=()):
-    asked, made, derived = roles
+    asked, made, derived, fixed = roles
     out = []
     for note, keys in groups:
         keys = [k for k in keys if k[0] not in skip]
@@ -147,6 +149,7 @@ def rows(groups, known, roles, skip=()):
             continue
         names, values = [], []
         for name, value, optional in keys:
+            value = fixed.get(name, value)
             pills = []
             if optional: pills.append(' <span class="pill skip">optional</span>')
             if name in asked: pills.append(' <span class="pill you">setup asks</span>')
