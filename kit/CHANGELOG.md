@@ -27,6 +27,13 @@ machine). The Setup guide's "How big a machine".
 
 **Your site:** nothing.
 
+### The kit's mark is Puppi3's puppy
+
+The README, the guides' headers and tab icons, and the guides' front page show DJ Puppi3's headphones puppy instead
+of the blue one. Your site's own theme and logo don't change.
+
+**Your site:** nothing.
+
 ## 1.2.3
 
 Security fixes from a review of the kit.

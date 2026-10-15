@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cellipse cx="32" cy="36" rx="18" ry="17" fill="%23E0EDF8" stroke="%231A6FB0" stroke-width="3"/%3E%3Cellipse cx="13" cy="33" rx="6.5" ry="13" transform="rotate%2822 13 33%29" fill="%231A6FB0"/%3E%3Cellipse cx="51" cy="33" rx="6.5" ry="13" transform="rotate%28-22 51 33%29" fill="%231A6FB0"/%3E%3Ccircle cx="25" cy="34" r="2.8" fill="%2314202B"/%3E%3Ccircle cx="39" cy="34" r="2.8" fill="%2314202B"/%3E%3Ccircle cx="26" cy="33" r="0.9" fill="%23fff"/%3E%3Ccircle cx="40" cy="33" r="0.9" fill="%23fff"/%3E%3Cellipse cx="32" cy="44" rx="8" ry="6" fill="%23fff"/%3E%3Cellipse cx="32" cy="41.2" rx="3.6" ry="2.6" fill="%2314202B"/%3E%3Cpath d="M30 47.5q2 5 4 0z" fill="%23F07C98"/%3E%3Cpath d="M32 43.6v2.6M27.6 46q4.4 2.8 4.4 0q0 2.8 4.4 0" fill="none" stroke="%2314202B" stroke-width="1.6" stroke-linecap="round"/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="50 -6 140 140"%3E%3CclipPath id="s"%3E%3Ccircle cx="120" cy="78" r="44"/%3E%3C/clipPath%3E%3Cellipse cx="69" cy="84" rx="14" ry="30" fill="%238A4B2A" transform="rotate(12 69 84)"/%3E%3Cellipse cx="171" cy="84" rx="14" ry="30" fill="%238A4B2A" transform="rotate(-12 171 84)"/%3E%3Ccircle cx="120" cy="78" r="44" fill="%23F2B66D"/%3E%3Cg clip-path="url(%23s)"%3E%3Cellipse cx="120" cy="32" rx="24" ry="16" fill="%23B97B48"/%3E%3Cellipse cx="120" cy="103" rx="24.5" ry="19" fill="%23FFF1E0"/%3E%3C/g%3E%3Ccircle cx="93" cy="94" r="7.5" fill="%23FF7E8C" opacity=".6"/%3E%3Ccircle cx="147" cy="94" r="7.5" fill="%23FF7E8C" opacity=".6"/%3E%3Ccircle cx="103" cy="77" r="7" fill="%2324142F"/%3E%3Ccircle cx="137" cy="77" r="7" fill="%2324142F"/%3E%3Ccircle cx="105.6" cy="74.4" r="2.2" fill="%23fff"/%3E%3Ccircle cx="139.6" cy="74.4" r="2.2" fill="%23fff"/%3E%3Cpath d="M111.5 90 q8.5 -3.5 17 0 q-1 7.5 -8.5 9.5 q-7.5 -2 -8.5 -9.5 z" fill="%2324142F"/%3E%3Cpath d="M115.5 104 h9 v3 a4.5 4.5 0 0 1 -9 0 z" fill="%23FF5F96"/%3E%3Cpath d="M110 102 q5 5.5 10 0 q5 5.5 10 0" fill="none" stroke="%2324142F" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/%3E%3Cpath d="M68 66 C68 0 172 0 172 66" fill="none" stroke="%2324142F" stroke-width="10" stroke-linecap="round"/%3E%3Crect x="56" y="54" width="27" height="44" rx="13.5" fill="%23FF3F8A" stroke="%2324142F" stroke-width="6"/%3E%3Crect x="157" y="54" width="27" height="44" rx="13.5" fill="%23FF3F8A" stroke="%2324142F" stroke-width="6"/%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Creator Kit Settings Reference</title>
 <meta name="description" content="Every setting of Puppi3's Creator Kit: site.env, each stack's secrets, the Kubernetes and cloud files, the bridge's fixed settings, what setup asks for and makes.">
@@ -49,7 +49,6 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 header.top{padding-block:40px 28px;border-bottom:1px solid var(--rule);display:grid;gap:14px}
 header.top .mark{width:64px;height:64px}
 header.top .mark svg{display:block;width:100%;height:100%}
-.mark .a{fill:var(--accent)}.mark .face{fill:#E0EDF8;stroke:var(--accent);stroke-width:3}.mark .ink{fill:#14202B}.mark .shine{fill:#fff}.mark .tongue{fill:#F07C98}.mark .line{fill:none;stroke:#14202B;stroke-width:1.6;stroke-linecap:round}
 .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,5vw,44px);line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.01em}
 h1 .dot{color:var(--accent)}
@@ -245,12 +244,21 @@ header.top .pup svg{display:block;width:100%;height:auto}
 <body>
 <div class="wrap">
 <header class="top">
-  <div class="mark"><svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-    <ellipse class="face" cx="32" cy="36" rx="18" ry="17"/>
-    <ellipse class="a" cx="13" cy="33" rx="6.5" ry="13" transform="rotate(22 13 33)"/><ellipse class="a" cx="51" cy="33" rx="6.5" ry="13" transform="rotate(-22 51 33)"/>
-    <circle class="ink" cx="25" cy="34" r="2.8"/><circle class="ink" cx="39" cy="34" r="2.8"/><circle class="shine" cx="26" cy="33" r=".9"/><circle class="shine" cx="40" cy="33" r=".9"/>
-    <ellipse class="shine" cx="32" cy="44" rx="8" ry="6"/><ellipse class="ink" cx="32" cy="41.2" rx="3.6" ry="2.6"/>
-    <path class="tongue" d="M30 47.5q2 5 4 0z"/><path class="line" d="M32 43.6v2.6M27.6 46q4.4 2.8 4.4 0q0 2.8 4.4 0"/>
+  <div class="mark"><svg viewBox="50 -6 140 140" aria-hidden="true" focusable="false">
+    <clipPath id="mark-skull"><circle cx="120" cy="78" r="44"/></clipPath>
+    <ellipse cx="69" cy="84" rx="14" ry="30" fill="#8A4B2A" transform="rotate(12 69 84)"/>
+    <ellipse cx="171" cy="84" rx="14" ry="30" fill="#8A4B2A" transform="rotate(-12 171 84)"/>
+    <circle cx="120" cy="78" r="44" fill="#F2B66D"/>
+    <g clip-path="url(#mark-skull)"><ellipse cx="120" cy="32" rx="24" ry="16" fill="#B97B48"/><ellipse cx="120" cy="103" rx="24.5" ry="19" fill="#FFF1E0"/></g>
+    <circle cx="93" cy="94" r="7.5" fill="#FF7E8C" opacity=".6"/><circle cx="147" cy="94" r="7.5" fill="#FF7E8C" opacity=".6"/>
+    <circle cx="103" cy="77" r="7" fill="#24142F"/><circle cx="137" cy="77" r="7" fill="#24142F"/>
+    <circle cx="105.6" cy="74.4" r="2.2" fill="#fff"/><circle cx="139.6" cy="74.4" r="2.2" fill="#fff"/>
+    <path d="M111.5 90 q8.5 -3.5 17 0 q-1 7.5 -8.5 9.5 q-7.5 -2 -8.5 -9.5 z" fill="#24142F"/>
+    <path d="M115.5 104 h9 v3 a4.5 4.5 0 0 1 -9 0 z" fill="#FF5F96"/>
+    <path d="M110 102 q5 5.5 10 0 q5 5.5 10 0" fill="none" stroke="#24142F" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M68 66 C68 0 172 0 172 66" fill="none" stroke="#24142F" stroke-width="10" stroke-linecap="round"/>
+    <rect x="56" y="54" width="27" height="44" rx="13.5" fill="#FF3F8A" stroke="#24142F" stroke-width="6"/>
+    <rect x="157" y="54" width="27" height="44" rx="13.5" fill="#FF3F8A" stroke="#24142F" stroke-width="6"/>
   </svg></div>
   <div class="eyebrow">Puppi3's Creator Kit · reference</div>
   <h1>Settings Reference<span class="dot">.</span></h1>
