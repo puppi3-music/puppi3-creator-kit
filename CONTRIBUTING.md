@@ -30,7 +30,8 @@ next to what you change, and keep it true in the same change.
    - **A new setting** needs a commented line in its example file (`instances/example.env`, a stack's
      `.env.example`, `kit/examples/` or `k8s/examples/`). The comment is what the Settings reference says, so write it
      in plain words. The build fails on a setting that's read but not documented, or documented but not read.
-   - **A service** added to a module needs its line in `kit/profiles/` and its counterpart under `k8s/`.
+   - **A service** added to a module needs its line in `kit/profiles/` (with its module's profile and `logging: *logs`,
+     or Docker keeps its whole log) and its counterpart under `k8s/`.
    - **The theme**: keep the kit's parts in their own files where you can; any edit to Source's own files goes in
      `kit/theme/KIT.md`, so an upgrade of Source can put it back.
    - **Names**: nothing site-specific in the kit (no real addresses, accounts or home-network names, comments

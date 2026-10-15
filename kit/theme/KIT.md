@@ -15,8 +15,9 @@ rebuilt: the kit's additions are files of their own, plus the few edits listed b
 - `assets/kit/live-bar.js`: the **LIVE NOW** bar's player (with no mascot: `window.site.livePup` stands in when a
   theme adds one). Plays, pauses and hiccups go out as beacons (`kind=play|stall|reconnect`).
 - `assets/kit/kit.css`: the bar, the button, the platform link icons (`.kit-platform-link`), in Source's accent colour.
-- `partials/kit/live-bar.hbs`: the bar: shown while `/live-status.json` lists `/stream-ogg` (the kit's live module);
-  plays the **Live stream URL** setting; empty = no bar.
+- `partials/kit/live-bar.hbs`: the bar: shown while `/live-status.json` (the kit's live module) lists a source other
+  than the stream it plays and TinyIce's own (`/_...`), so the mounts can be renamed in TinyIce (a `data-mount`
+  attribute names one instead); plays the **Live stream URL** setting; empty = no bar.
 - `partials/kit/icons.hbs`: the bar's play/pause and the platforms' icons (`#kit-i-<name>`).
 
 ## What the kit changes in Source's files (re-apply after an upgrade)

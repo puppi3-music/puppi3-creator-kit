@@ -445,7 +445,7 @@ kubectl -n mysite logs &lt;pod&gt; --previous      # why it stopped, if it resta
   <h3 id="trouble-the-site">The site</h3>
   <dl class="faq">
     <dt>Normal on a first start, for a few minutes</dt>
-    <dd>Ghost waits until the analytics setup has written its tokens (<code>kit.sh</code> says it's waiting). On Kubernetes, Ghost, Grafana and the bridge show <code>CreateContainerConfigError</code>, <code>secret "tinybird-tokens" not found</code>, and pods sit in <code>Init:</code> until their database answers.</dd>
+    <dd>Ghost waits until the analytics setup has written its tokens (<code>kit.sh</code> says it's waiting). On Kubernetes, Ghost, traffic-analytics, Grafana and the bridge show <code>CreateContainerConfigError</code>, <code>secret "tinybird-tokens" not found</code>, and pods sit in <code>Init:</code> until their database answers.</dd>
     <dt>Everything says 403</dt>
     <dd>The site only lets Cloudflare in (<code>BEHIND_CLOUDFLARE=true</code>). The DNS records must be proxied (the orange cloud). Visiting the server's own address directly, from home or a test, is turned away unless that address is in <code>TRUSTED_EXTRA</code>.</dd>
     <dt>Certificate warnings that don't go away</dt>
@@ -479,7 +479,7 @@ kit/kit.sh kit/sites/mysite restart ghost</pre></div>
     <dd>The ntfy app is subscribed to <code>NTFY_TOPIC</code> on <code>NTFY_URL</code>. Send a test from the bridge:</dd>
     <dd><div class="code"><pre>kit/kit.sh kit/sites/mysite exec postiz-ghost-bridge sh -c 'wget -qO- --post-data test "$NTFY_URL/$NTFY_TOPIC"'</pre></div></dd>
     <dt>Postiz can't schedule: "no mapping defined for search attribute postId"</dt>
-    <dd>Postiz adds the two fields it searches Temporal by when it starts, so it started before Temporal's records were made new (the update to kit 1.2.4, or Temporal's database started over). Start it again: <code>kit/kit.sh &lt;folder&gt; restart postiz</code>.</dd>
+    <dd>Postiz adds the two fields it searches Temporal by when it starts, so it started before Temporal's records were made new (the update to kit 1.3.1, or Temporal's database started over). Start it again: <code>kit/kit.sh &lt;folder&gt; restart postiz</code>.</dd>
     <dt>A network shows as an alert error in Grafana</dt>
     <dd>It's in <code>NETWORKS</code> but its keys aren't set yet. Set them up, or take it out of <code>NETWORKS</code>.</dd>
   </dl>

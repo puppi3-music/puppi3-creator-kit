@@ -304,7 +304,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
     </tbody>
   </table></div>
   <h3 id="before-how-big">How big a machine</h3>
-  <p><b>By site size.</b> With every module on, pick by how busy the site is (measured on a Mac with 16 GB for Docker, kit 1.2.4, with a year of made-up page views in the analytics). Everything but the analytics stays the same size whatever the site's size. The analytics module keeps every page view in Tinybird, a database that Ghost Admin's Analytics reads; Tinybird holds more while it reads a long history, and that's what grows:</p>
+  <p><b>By site size.</b> With every module on, pick by how busy the site is (measured on a Mac with 16 GB for Docker, kit 1.3.1, with a year of made-up page views in the analytics). Everything but the analytics stays the same size whatever the site's size. The analytics module keeps every page view in Tinybird, a database that Ghost Admin's Analytics reads; Tinybird holds more while it reads a long history, and that's what grows:</p>
   <div class="tablewrap"><table>
     <thead><tr><th>Size</th><th>Page views a day</th><th>Highest memory measured</th><th>Give Docker</th><th>Ghost Admin's Analytics</th></tr></thead>
     <tbody>
@@ -314,7 +314,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
     </tbody>
   </table></div>
   <p>The highest numbers are short jumps (gone by the next sample, 30 s later: Tinybird taking in new page views or answering a query), so a run catches some and misses others: they're rounded up here. Between them, Tinybird holds 2 GB to 2.5 GB for a small or medium site and about 3 GB for a large one. The large site's highest jumps reached 5.8 GB and 8.6 GB in two runs; with the rest of the site that's 9 GB to 10 GB.</p>
-  <p><b>Where it goes, by module.</b> Turning a module off saves its row. Measured on the kit's test site (Docker Desktop on a Mac, kit 1.2.4) with every module on, at rest, and ("when busy") while it streams, takes page hits and makes social previews. Page traffic barely moves it: most of it is held from the start. What does move it is the analytics history, above.</p>
+  <p><b>Where it goes, by module.</b> Turning a module off saves its row. Measured on the kit's test site (Docker Desktop on a Mac, kit 1.3.1) with every module on, at rest, and ("when busy") while it streams, takes page hits and makes social previews. Page traffic barely moves it: most of it is held from the start. What does move it is the analytics history, above.</p>
   <div class="tablewrap"><table>
     <thead><tr><th>Part</th><th>Memory</th><th>Disk for its images</th><th>What takes it</th></tr></thead>
     <tbody>
@@ -398,7 +398,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
 kit/kit.sh kit/sites/mysite logs -f ghost # one part's log
 kit/kit.sh kit/sites/mysite down          # stop it (the data stays)</pre></div>
   <p>Open <code>https://&lt;your site&gt;/</code>: Ghost's welcome page means it works. Then <a href="#finish">finish by hand</a>.</p>
-  <div class="note"><b class="label">On Linux</b><p>Setup asks for sudo once to give each part its folders: the stream server, Prometheus, Grafana, the database (MySQL) and Postiz's search engine each run as their own user, and can't write to a folder that's yours.</p></div>
+  <div class="note"><b class="label">On Linux</b><p>Setup asks for sudo once to give each part its folders: the stream server, Prometheus, Grafana and the database (MySQL) each run as their own user, and can't write to a folder that's yours.</p></div>
   <p>If it stops with <b>port is already allocated</b>, something else on the machine has that port: stop it, or give the kit another one (<code>HTTP_PORT</code>, <code>HTTPS_PORT</code>, <code>LIVE_PORT</code> in <code>site.env</code>) and start again.</p>
   <h3 id="compose-the-home-network-only-names">The home-network-only names</h3>
   <p>Traefik's dashboard, TinyIce's admin and Grafana also answer at <code>traefik.</code>, <code>tinyice.</code> and <code>grafana.&lt;home domain&gt;</code>, over plain http, to private addresses only: the ranges in <code>data/traefik/dynamic/lan-only.yml</code>, your site's own file. Set them to your home network's (or your VPN's); Traefik picks up a change at once.</p>
@@ -482,7 +482,7 @@ k8s/build-images.sh --registry &lt;registry&gt;/creator-kit --platform linux/amd
   <h3 id="k8s-up">Up</h3>
   <div class="code"><pre>k8s/up.sh kit/sites/mysite selfhosted --render   # only writes what it would apply: data/k8s/rendered.yaml
 UP_TIMEOUT=1200 k8s/up.sh kit/sites/mysite selfhosted</pre></div>
-  <p>It names the cluster <code>kubectl</code> points at and asks before using it. The first time takes a while (image downloads, the analytics' first start). Ghost, Grafana and the bridge wait with <code>CreateContainerConfigError</code> until the analytics setup job has made its tokens: that's normal.</p>
+  <p>It names the cluster <code>kubectl</code> points at and asks before using it. The first time takes a while (image downloads, the analytics' first start). Ghost, traffic-analytics, Grafana and the bridge wait with <code>CreateContainerConfigError</code> until the analytics setup job has made its tokens: that's normal.</p>
   <p>Then the outside addresses, for DNS:</p>
   <div class="code"><pre>kubectl -n &lt;short name&gt; get svc traefik tinyice-source    # EXTERNAL-IP</pre></div>
   <p>Point the site's names at <code>traefik</code>'s address and the streaming software at <code>tinyice-source</code>'s, then <a href="#finish">finish by hand</a> as on Compose. <code>k8s/up.sh &lt;folder&gt; --down</code> deletes the site from the cluster, volumes and all.</p>

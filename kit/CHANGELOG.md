@@ -9,6 +9,9 @@ lines, since GitHub's release notes break wherever the text does.
 
 ## 1.2.4 (not released yet)
 
+**All of it at once:** with nothing scheduled in Postiz, `kit/kit.sh <folder> up -d --remove-orphans`, then
+`kit/kit.sh <folder> restart postiz`: about a minute without the site. Kubernetes and the details: each change below.
+
 ### Containers' logs stop growing at 50 MB each
 
 Docker kept every line a container logged, for as long as the container lived. Ghost's analytics log every page
