@@ -124,7 +124,8 @@ featured link, frames).
 
 ### `stats/stats.mjs`
 `startStats`: the generic `collector()` loop, Postiz channels/analytics for the collectors, runs the grouped
-collectors, and answers the stats routes; `/metrics` lines; `/account.json` itself.
+collectors, and answers the stats routes; `/metrics` lines; `/account.json` itself. Its `run(name)` and `live` poll one
+collector now (the tests).
 - Exports: `startStats`
 - Imports: config (`METRIC_PREFIX`, `networkOn`), stats/history, stats/performance, stats/timing, stats/post, stats/social, stats/site, stats/live
 
@@ -162,17 +163,17 @@ All SQL lives here.
 
 ### `stats/instagram.mjs`
 Instagram account + posts + Stories + profile days, straight from Graph with Postiz's token; writes instagram.json.
-- Exports: `IG_STATS`, `IG_STATS_FILE`, `startInstagramStats`
+- Exports: `IG_STATS`, `IG_STATS_FILE`, `startInstagramStats`, `pollInstagramStats` (one poll: the tests)
 - Imports: config, services (`PG`, `pgQuery`, `postiz`), stats/history, stats/performance
 
 ### `stats/youtube.mjs`
 YouTube Data + Analytics APIs (token swapped from Postiz's refresh token), per-video days (`ytVideoDays`).
-- Exports: `YT_STATS`, `YT_STATS_FILE`, `startYouTubeStats`
+- Exports: `YT_STATS`, `YT_STATS_FILE`, `startYouTubeStats`, `pollYouTubeStats` (one poll: the tests)
 - Imports: config, services (`PG`, `pgQuery`), stats/history, stats/performance
 
 ### `stats/soundcloud.mjs`
 SoundCloud with the bridge's own app (client credentials), daily history from totals.
-- Exports: `SC_STATS`, `SC_STATS_FILE`, `startSoundCloudStats`
+- Exports: `SC_STATS`, `SC_STATS_FILE`, `startSoundCloudStats`, `pollSoundCloudStats` (one poll: the tests)
 - Imports: config, stats/history, stats/performance
 
 ### `stats/social.mjs`
