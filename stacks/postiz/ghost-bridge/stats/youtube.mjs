@@ -168,7 +168,8 @@ async function ytVideoDays(videos, token) {
   if (failed.length) throw new Error(`${failed.length} of ${Math.min(due.length, YT_VIDEO_CALLS)}: ${failed[0]}`);
 }
 
-async function pollYouTubeStats() {
+// One poll now: startYouTubeStats runs it on its timer; the tests call it
+export async function pollYouTubeStats() {
   const out = { updatedAt: new Date().toISOString(), account: null, totals: {}, daily: [], videos: [], videosPerDay: [], errors: [] };
   const kept = { days: {}, posts: [] }; // for the archive
   let prev = {};

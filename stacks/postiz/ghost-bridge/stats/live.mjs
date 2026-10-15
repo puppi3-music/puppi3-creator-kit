@@ -138,11 +138,12 @@ export function liveShows({ env, log, file, files, enabled }) {
       busy = true;
       pollLive().catch((e) => log(`live shows: ${e.message}`)).finally(() => { busy = false; });
     };
-    setTimeout(tick, 5_000);
-    setInterval(tick, LIVE_EVERY);
+    setTimeout(tick, 5_000).unref(); // (the bridge's server keeps it running)
+    setInterval(tick, LIVE_EVERY).unref();
   }
   return {
     live,
+    poll: pollLive, // (the tests)
     save: () => { if (LIVE) try { writeJsonSync(LIVE_FILE, liveDoc()); } catch {} },
   };
 }

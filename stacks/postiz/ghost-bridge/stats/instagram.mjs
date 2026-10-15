@@ -170,7 +170,8 @@ function igOnlineByHour(online) {
   return sums.map((s, h) => ({ hour: String(h).padStart(2, '0'), followers: s.days ? Math.round(s.total / s.days) : null }));
 }
 
-async function pollInstagramStats() {
+// One poll now: startInstagramStats runs it on its timer; the tests call it
+export async function pollInstagramStats() {
   igCalls = 0;
   const out = { updatedAt: new Date().toISOString(), account: null, daily: [], totals: {}, posts: [], postsPerDay: [], stories: [], errors: [] };
   let prev = {};

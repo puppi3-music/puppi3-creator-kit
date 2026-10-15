@@ -10,7 +10,7 @@ for (const k of Object.keys(process.env)) if (!KEEP.has(k) && !k.startsWith('NOD
 
 Object.assign(process.env, {
   SITE_HOST: 'example.com',
-  // nowhere real: nothing the tests run writes there (no dry run records what it shared)
+  // a folder of this run's own: only the numbers collectors' tests write there (collectors.mjs makes it and removes it)
   STATE_FILE: path.join(os.tmpdir(), `ghost-bridge-test-${process.pid}`, 'posted.json'),
   // set so config.mjs doesn't warn that they aren't
   POSTIZ_API_KEY: 'test',
