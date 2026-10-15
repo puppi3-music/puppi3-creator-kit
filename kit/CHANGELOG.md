@@ -3,6 +3,14 @@
 What each version of Puppi3's Creator Kit changes for a site already running. Your version is in `kit/VERSION`.
 How to update: the Operations guide (`kit/docs/operations-guide.html#upgrade`).
 
+## 1.2.2
+
+- Tinybird (the `analytics` module) uses about 0.6 GB less memory, about 1.8 GB instead of 2.4: it starts without
+  the parts Ghost never uses (its MCP and Kafka servers and its last CSV import worker). The image is the same; only
+  how it starts changes, and if a later image doesn't fit, it starts as before and says so in its log. On Kubernetes
+  its pod asks for 2 GiB instead of 2.5. Your site: `kit/kit.sh <folder> up -d` (Tinybird restarts: Ghost's analytics
+  pause for about a minute, and page hits sent meanwhile aren't counted), or `k8s/up.sh <folder> <overlay>`.
+
 ## 1.2.1
 
 - On Kubernetes, Traefik runs Traefik's own image (`traefik:v3.7.13`, as on Compose), with the kit's two plugins

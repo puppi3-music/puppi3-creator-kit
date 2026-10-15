@@ -69,11 +69,11 @@ social previews:
 | Part | Memory | Disk for its images |
 |---|---|---|
 | The site (Ghost, MySQL, Traefik) | 0.7 GB | 2.5 GB |
-| `analytics` (Tinybird holds about 2.2 GB all the time) | 2.5 GB, 3 GB when busy | 10 GB |
+| `analytics` (Tinybird holds about 1.8 GB all the time) | 2 GB, 2.2 GB when busy | 10 GB |
 | `social` (Postiz and its Temporal) | 2.5 GB, 3 GB when busy | 11 GB |
 | `live` | under 0.1 GB | 0.1 GB |
 | `monitoring` | 1.9 GB | 2.5 GB |
-| **Everything** | **7.5 GB, 8 GB when busy** | **about 26 GB** |
+| **Everything** | **7 GB, 7.5 GB when busy** | **about 26 GB** |
 
 So the site alone runs on a 2 GB machine, and everything wants 10 GB of memory or more (12 to 16 GB is comfortable)
 and 50 GB of free disk. On a Mac or Windows, Docker Desktop's own settings must give it that much memory (Settings,

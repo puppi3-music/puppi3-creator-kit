@@ -89,8 +89,28 @@ services:
     image: tinybirdco/tinybird-local@sha256:16c661bba64b99d904d9384ac414ee7ffa9d09d12bf77a42d41885408a2d8963
     restart: unless-stopped
     stop_grace_period: 10s
-    # Its CSV import workers (~0.5 GB each, unused by Ghost) number half the CPUs Python sees: 2 keeps one, and
-    # Tinybird uses ~2 GB instead of ~5 on a 10-CPU machine
+    # Started without what Ghost never uses: its MCP and Kafka servers (~0.2 GB each) and its CSV import workers
+    # (~0.5 GB each; csv_workers 0 in a settings file for tinybird_server). The image's own files are copied to /tmp
+    # with those changes, so the image stays as it is: ~1.8 GB instead of ~2.4 (~4.3 with every worker). If a new
+    # image's files don't match, it says so in its log and starts unchanged; kit/test.sh checks it's trimmed.
+    command:
+      - sh
+      - -c
+      - |
+        set -e
+        mkdir -p /tmp/kit
+        printf 'def conf(env):\n    return {"csv_workers": 0}\n' > /tmp/kit/settings.py
+        awk '/^\[program:/ { skip = ($$0 == "[program:tinybird-mcp]" || $$0 == "[program:tinybird-kafka]") } !skip' \
+          /etc/supervisor/conf.d/supervisord.conf \
+          | sed 's|^command=tinybird_server --port 8001$$|& --config /tmp/kit/settings.py|' > /tmp/kit/programs.conf
+        sed 's|^files = /etc/supervisor/conf.d/\*.conf$$|files = /tmp/kit/programs.conf|' /etc/supervisor/supervisord.conf > /tmp/kit/supervisord.conf
+        if grep -q 'settings.py$$' /tmp/kit/programs.conf && grep -q '^files = /tmp/kit/programs.conf$$' /tmp/kit/supervisord.conf \
+          && ! grep -q 'program:tinybird-mcp\|program:tinybird-kafka' /tmp/kit/programs.conf; then
+          exec /usr/bin/supervisord -c /tmp/kit/supervisord.conf
+        fi
+        echo "kit: this Tinybird image's start files aren't the ones the kit trims; starting it unchanged (more memory)" >&2
+        exec /usr/bin/supervisord
+    # Only for an unchanged start: its CSV workers number half the CPUs Python sees, so 2 keeps one
     environment:
       PYTHON_CPU_COUNT: 2
     # No host port: Traefik reaches it over the proxy network, so only the GET-only route below

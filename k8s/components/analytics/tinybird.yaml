@@ -21,8 +21,25 @@ spec:
         - name: tinybird-local
           # the Ghost stack's pin (stacks/ghost/compose.yaml: keep them in step)
           image: tinybirdco/tinybird-local@sha256:16c661bba64b99d904d9384ac414ee7ffa9d09d12bf77a42d41885408a2d8963
-          # Its CSV import workers (~0.5 GB each, unused by Ghost) number half the node's CPUs: 2 keeps one (the
-          # Ghost stack's setting)
+          # Started without its MCP and Kafka servers and CSV workers, as the Ghost stack's (stacks/ghost/compose.yaml
+          # says why; keep the two scripts the same)
+          command: [sh, -c]
+          args:
+            - |
+              set -e
+              mkdir -p /tmp/kit
+              printf 'def conf(env):\n    return {"csv_workers": 0}\n' > /tmp/kit/settings.py
+              awk '/^\[program:/ { skip = ($0 == "[program:tinybird-mcp]" || $0 == "[program:tinybird-kafka]") } !skip' \
+                /etc/supervisor/conf.d/supervisord.conf \
+                | sed 's|^command=tinybird_server --port 8001$|& --config /tmp/kit/settings.py|' > /tmp/kit/programs.conf
+              sed 's|^files = /etc/supervisor/conf.d/\*.conf$|files = /tmp/kit/programs.conf|' /etc/supervisor/supervisord.conf > /tmp/kit/supervisord.conf
+              if grep -q 'settings.py$' /tmp/kit/programs.conf && grep -q '^files = /tmp/kit/programs.conf$' /tmp/kit/supervisord.conf \
+                && ! grep -q 'program:tinybird-mcp\|program:tinybird-kafka' /tmp/kit/programs.conf; then
+                exec /usr/bin/supervisord -c /tmp/kit/supervisord.conf
+              fi
+              echo "kit: this Tinybird image's start files aren't the ones the kit trims; starting it unchanged (more memory)" >&2
+              exec /usr/bin/supervisord
+          # Only for an unchanged start: its CSV workers number half the node's CPUs, so 2 keeps one
           env:
             - {name: PYTHON_CPU_COUNT, value: "2"}
           ports:
@@ -38,9 +55,10 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 5
           resources:
-            # ~2.2 GB idle with one CSV worker (ClickHouse, Redis, Kafka and Tinybird's servers in one container), 2.75 GB
-            # at most in kit/test.sh (2026-10-14; ~4.3 GB idle with five workers, when a 3 GiB limit had it killed in a loop)
-            requests: {cpu: 200m, memory: 2560Mi}
+            # ~1.8 GB idle trimmed (ClickHouse, Redis and Tinybird's servers in one container; 2026-10-15), ~2.4 GB with
+            # one CSV worker and MCP and Kafka (an unchanged start), ~4.3 GB with five workers, when a 3 GiB limit had
+            # it killed in a loop: the limit leaves room for an unchanged start
+            requests: {cpu: 200m, memory: 2Gi}
             limits: {memory: 4Gi}
           volumeMounts:
             - {name: clickhouse, mountPath: /var/lib/clickhouse}

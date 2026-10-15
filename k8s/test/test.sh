@@ -32,7 +32,8 @@
 #     it under content/images|media|files/ (the NAS's layout), none on Ghost's volume; Ghost serves them at the
 #     site's own /content/... addresses (same bytes, a resized image made and kept in the bucket, byte ranges for
 #     players); a post stores the image as __GHOST_URL__/content/..., as on the NAS; served still after a new Ghost pod
-#   - analytics: tb-setup's tokens in a Secret, Ghost started with them; a page hit through Traefik reaches Tinybird
+#   - analytics: tb-setup's tokens in a Secret, Ghost started with them; Tinybird trimmed (no MCP or Kafka server,
+#     no CSV worker); a page hit through Traefik reaches Tinybird
 #     with page-hit-country's country; Ghost Admin's GET-only stats route answers, Tinybird's other API doesn't
 #   - live: ffmpeg streams Ogg to TinyIce's port like the streaming software; /live-status.json shows it; a listener through
 #     Traefik gets the 320 kbps mp3 from a relay, and it's the tone; the source drops out and reconnects with another tone,
@@ -251,6 +252,9 @@ check "a post keeps it as ${stored:-nothing} (as on the NAS: the files can move 
 echo "== analytics"
 check "tb-setup saved Tinybird's tokens as a Secret" [ "$(k get secret tinybird-tokens -o jsonpath='{.data}' | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")" = 3 ]
 check "Ghost started with them, never restarted" [ "$(k get pod -l app=ghost -o jsonpath='{.items[0].status.containerStatuses[0].restartCount}')" = 0 ]
+tb_trimmed() { local p; p="$(k exec tinybird-local-0 -- ps -eo args)" || return 1
+  grep -q 'tinybird_server --port 8001 --config /tmp/kit/settings.py' <<<"$p" && ! grep -q 'tinybird.mcp\|tbakafka\|csv_worker' <<<"$p"; }
+check "Tinybird trimmed: no MCP or Kafka server, no CSV worker" tb_trimmed
 tok() { k get secret tinybird-tokens -o jsonpath="{.data.$1}" | base64 -d; }
 site_uuid="$(admin GET /site/ | python3 -c "import json,sys; print(json.load(sys.stdin)['site']['site_uuid'])")"
 # A page hit as Ghost's tracker sends it (JavaScript's toISOString: traffic-analytics refuses microseconds), from a browser that says UTC (no country): page-hit-country adds CA

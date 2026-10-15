@@ -9,7 +9,8 @@
 #   - Cloudflare-only: a visitor from outside Cloudflare's ranges gets 403; from a trusted address the site loads
 #     through Traefik (https on Traefik's own certificate: TLS_RESOLVER=self); with BEHIND_CLOUDFLARE=false, from anywhere
 #   - Ghost with the kit's theme (uploaded through the Admin API): a page hit reaches Tinybird, with its country
-#     filled in by page-hit-country (the browser says UTC, Cloudflare's header says CA)
+#     filled in by page-hit-country (the browser says UTC, Cloudflare's header says CA); Tinybird started trimmed
+#     (no MCP or Kafka server, no CSV worker)
 #   - Live: ffmpeg streams Ogg to TinyIce like the streaming software; /live-status.json shows it, the LIVE NOW bar appears
 #     with the track and plays /stream-mp3; the play and a link out reach the bridge as click beacons
 #   - The bridge: /health, /performance.json, a signed Ghost webhook through Traefik makes a DRY_RUN preview
@@ -134,6 +135,9 @@ wait_for "a page hit with country CA in Tinybird" 15 hit_ok && ok "a page hit re
 check "bridge /health" [ "$(bridge /health)" = ok ]
 check "the bridge has Tinybird's token (Ghost's numbers on Platforms, no copying by hand)" \
     [ -n "$(docker exec postiz-ghost-bridge printenv tinybird__adminToken 2>/dev/null)" ]
+tb_trimmed() { local p; p="$(docker exec kittest-tinybird-local-1 ps -eo args)" || return 1
+  grep -q 'tinybird_server --port 8001 --config /tmp/kit/settings.py' <<<"$p" && ! grep -q 'tinybird.mcp\|tbakafka\|csv_worker' <<<"$p"; }
+check "Tinybird trimmed: no MCP or Kafka server, no CSV worker (its start script in stacks/ghost/compose.yaml)" tb_trimmed
 bridge /performance.json | grep -q '"summary"' && ok "bridge /performance.json" || fail "bridge /performance.json"
 secret="$(sed -n 's/^GHOST_WEBHOOK_SECRET=//p' "$S/secrets/postiz.env")"
 python3 -c "import json; p=json.load(open('$SP/post.json'))['posts'][0]; open('$SP/hook.json','w').write(json.dumps({'post':{'current':p}}))"

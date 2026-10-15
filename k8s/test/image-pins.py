@@ -12,6 +12,10 @@ a variable. A site's repo may list its own folders in `.image-pins` at the top: 
 checked) or `own <folder>/` (exact, but its versions may differ from the rest: a staging copy where an upgrade is
 tried first). The kit's repo has none.
 
+Also Tinybird's start script (tinybird-local without its MCP and Kafka servers and CSV workers): the same in every
+file that has it (TINYBIRD_START), and Tinybird pinned to the image it was tried on (TINYBIRD_TRIED). A new Tinybird
+image fails here until kit/test.sh has run on it (its "Tinybird trimmed" check) and TINYBIRD_TRIED names it.
+
 Run from anywhere; the pre-commit hook runs it when a compose file, k8s YAML, Dockerfile or one of SCRIPTS is
 staged. Exit 1 on any problem.
 """
@@ -37,6 +41,11 @@ SCRIPTS = (
     ("k8s/build-images.sh", re.compile(r"^av=(\S+)"), "alpine"),
     ("kit/theme-zip.sh", re.compile(r"npx -y (gscan@\S+)"), "npm"),
 )
+# Tinybird's start script: in these files (a site's own copies are found too), from `set -e` to its last line
+TINYBIRD_START = ("stacks/ghost/compose.yaml", "k8s/components/analytics/tinybird.yaml")
+TINYBIRD_REPO = "tinybirdco/tinybird-local"
+TINYBIRD_TRIED = "@sha256:16c661bba64b99d904d9384ac414ee7ffa9d09d12bf77a42d41885408a2d8963"
+START_END = "exec /usr/bin/supervisord\n"
 
 
 def site_lists():
@@ -133,8 +142,54 @@ def line(repo, tag):
     return repo if not m else "%s:%s%s" % (repo, m.group(1), m.group(2) and " (" + m.group(2).lstrip("-.") + ")")
 
 
+def tinybird_starts():
+    """{file: the start script} for every tracked YAML with one (a compose file's $$ read as $)."""
+    found = {}
+    for path in tracked():
+        if kind(path) != "yaml" or path.startswith("kit/profiles/"):
+            continue
+        text = (ROOT / path).read_text()
+        if "/tmp/kit/settings.py" not in text:
+            continue
+        lines = text.splitlines(keepends=True)
+        start = next((i for i, l in enumerate(lines) if l.strip() == "set -e" and i + 1 < len(lines)
+                      and "/tmp/kit" in lines[i + 1]), None)
+        if start is None:
+            found[path] = None
+            continue
+        indent = len(lines[start]) - len(lines[start].lstrip())
+        body = []
+        for l in lines[start:]:
+            body.append(l[indent:] if l.strip() else "\n")
+            if l.strip() + "\n" == START_END:
+                break
+        script = "".join(body)
+        found[path] = script.replace("$$", "$") if "compose" in path.rsplit("/", 1)[-1] else script
+    return found
+
+
+def check_tinybird(problems):
+    starts = tinybird_starts()
+    for path in TINYBIRD_START:
+        if (ROOT / path).exists() and path not in starts:
+            problems.append("%s: Tinybird's start script (set -e ... %s) is missing" % (path, START_END.strip()))
+    scripts = {s for s in starts.values()}
+    if None in scripts or len(scripts) > 1:
+        first = starts.get(TINYBIRD_START[0])
+        differ = [p for p, s in sorted(starts.items()) if s != first]
+        problems.append("Tinybird's start script differs from %s's (or isn't whole) in: %s" % (
+            TINYBIRD_START[0], ", ".join(differ)))
+    for path, n, image in refs():
+        repo, tag = split(image)
+        if repo == TINYBIRD_REPO and tag != TINYBIRD_TRIED:
+            problems.append("%s:%d: Tinybird %s isn't the image its start script was tried on: run kit/test.sh with it "
+                            "(\"Tinybird trimmed\" must pass), then set TINYBIRD_TRIED in k8s/test/image-pins.py"
+                            % (path, n, tag))
+
+
 def main():
     problems = []
+    check_tinybird(problems)
     tags = defaultdict(lambda: defaultdict(list))
     for path, n, image in refs():
         if "$" in image or image.startswith("creator-kit/") or image.endswith(":local") or image == "scratch":
