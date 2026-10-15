@@ -280,13 +280,14 @@ header.top .pup svg{display:block;width:100%;height:auto}
   <ul>
     <li><code>site.env</code>: the site itself (its address, name, time zone, which modules run). No secrets, so it's safe to keep with notes or in a private repo.</li>
     <li><code>secrets/&lt;stack&gt;.env</code>: each part's passwords and keys. Setup makes random passwords; the keys for outside services (each social network's app, Cloudflare, Search Console) are yours to add.</li>
-    <li>On Kubernetes, a few more: <code>secrets/ghost-mail.env</code>, and for a cloud, <code>secrets/cloud.env</code>, <code>secrets/s3.env</code> and <code>cloud-&lt;overlay&gt;.env</code>.</li>
+    <li><code>secrets/ghost-mail.env</code>: Ghost's mail service, which you make yourself from the example (<a href="#secrets-ghost-mail">below</a>).</li>
+    <li>On Kubernetes, for a cloud, a few more: <code>secrets/cloud.env</code>, <code>secrets/s3.env</code> and <code>cloud-&lt;overlay&gt;.env</code>.</li>
   </ul>
   <p>After a change, start the site again and the parts that use the setting are recreated:</p>
   <div class="code"><pre>kit/kit.sh &lt;folder&gt; up -d          # Docker Compose
 k8s/up.sh &lt;folder&gt; &lt;overlay&gt;       # Kubernetes (local, eks, gke, ...)</pre></div>
   <div class="note"><b class="label">Two exceptions</b>
-    <p>TinyIce's passwords and Ghost's mail on Compose are written once, by setup, into files of their own (<code>data/icecast/tinyice-data/config.json</code>, hashed, and <code>data/ghost/ghost/config.production.json</code>). Change those in TinyIce's admin page and in Ghost's config file.</p>
+    <p>TinyIce's passwords are written once, by setup, into a file of its own (<code>data/icecast/tinyice-data/config.json</code>, hashed), and Ghost's own settings into <code>data/ghost/ghost/config.production.json</code>. Change the passwords in TinyIce's admin page and the rest in Ghost's config file. Ghost's mail isn't one of them: it's <code>secrets/ghost-mail.env</code>.</p>
   </div>
   <p>A name in both <code>site.env</code> and a secrets file takes <code>site.env</code>'s value. In the tables, <span class="pill you">setup asks</span> means setup asked you for it, <span class="pill auto">setup makes it</span> that it's a random password made for you, <span class="pill auto">setup fills it in</span> that setup worked it out from your answers, and <span class="pill skip">optional</span> that the line starts commented out, with its default shown.</p>
 </section>

@@ -133,9 +133,10 @@ mkdir -p "$d/$g/ghost/content" "$d/$g/db" "$d/$g/tinybird" "$d/icecast/tinyice-d
     "$d/postiz/temporal-postgres" "$d/postiz/temporal-elasticsearch" "$d/traefik/dynamic" "$d/traefik/letsencrypt" \
     "$d/monitoring/prometheus/data" "$d/monitoring/grafana/data" "$d/monitoring/grafana/rendered"
 # Ghost's config file, replacing the image's own, so it says what that does: listen on all addresses, content in
-# /var/lib/ghost/content. Mail goes here (https://ghost.org/docs/config/#mail): Ghost emails staff a code at each
-# new sign-in (staffDeviceVerification; STAFF_DEVICE_VERIFICATION=false turns it off, as a try-out does: no mail
-# service yet, and Direct mail rarely arrives).
+# /var/lib/ghost/content. Direct mail until the site has secrets/ghost-mail.env (its mail__* settings win over this
+# file's; not here, as this file is readable by everyone on the machine): Ghost emails staff a code at each new
+# sign-in (staffDeviceVerification; STAFF_DEVICE_VERIFICATION=false turns it off, as a try-out does: no mail service
+# yet, and Direct mail rarely arrives).
 [ -f "$d/$g/ghost/config.production.json" ] || cat > "$d/$g/ghost/config.production.json" <<JSON
 {
   "server": { "port": 2368, "host": "::" },
