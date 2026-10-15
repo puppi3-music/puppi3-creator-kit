@@ -25,6 +25,11 @@ other seven (Page included), and everything the dashboards share (files, gotchas
   `python3 stacks/monitoring/grafana/parts.py split <export.json> stacks/monitoring/grafana/provisioning/dashboards/json/site/<n>-<name>`
   (rewrites only changed parts, removes gone ones). To make another v2 dashboard a folder: `parts.py split <its .json>`
   (removes the file).
+- `tests/`: parts.py's and render.py's (`python3 -m unittest discover -s stacks/monitoring/grafana/tests`; `kit/check.sh`
+  runs them, and GitHub with it): each folder dashboard is exactly what `split` writes, split and build round-trip, a
+  broken folder names what's wrong; a kit render (made-up site `radio.test`, ID_PREFIX `test-radio`) fills every
+  placeholder and leaves no `puppi3`, networks and modules switched off drop their rows, rules (listed in `deleteRules`)
+  and dashboards, `NTFY_URL` empty, the cloud profile, `by_workload`'s pod names. Not puppi3.py (not in the kit).
 - **Placeholders: the source names no site.** Where a site's own value goes, the dashboards and the alert rules'
   source (`alerts.yml`) say `@NAME@`: `@SITE_HOST@`, `@LIVE_HOST@`, `@SITE_NAME@` (the Grafana folder),
   `@SITE_TIMEZONE@`, `@TZ_NAME@` ("@TZ_NAME@ time"), `@TZ_HOURS@` (the MySQL fallback's `INTERVAL @TZ_HOURS@ HOUR`),
