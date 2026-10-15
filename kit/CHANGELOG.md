@@ -7,7 +7,7 @@ From 1.2.2 on, each change has a `###` heading saying what it does, a short para
 (what to run, if anything) and **Restarts:** (what goes down, and for how long), each its own paragraph. The release workflow joins wrapped
 lines, since GitHub's release notes break wherever the text does.
 
-## 1.2.4 (not released yet)
+## 1.3.1
 
 **All of it at once:** with nothing scheduled in Postiz, `kit/kit.sh <folder> up -d --remove-orphans`, then
 `kit/kit.sh <folder> restart postiz`: about a minute without the site. Kubernetes and the details: each change below.
