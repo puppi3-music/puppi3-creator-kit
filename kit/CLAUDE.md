@@ -211,7 +211,9 @@ to move anything. Nothing of a site goes in
   guide's update section, and ZIP users, read them). A release bumps both, and is the tag `v<VERSION>` on the kit's
   repo (`CONTRIBUTING.md`, Releases): `.github/workflows/release.yml` builds the three images for amd64 and arm64 onto
   GHCR (`k8s/build-images.sh --platform ... --tag <VERSION>`) and a GitHub Release with the theme's zip and the
-  changelog section as its notes (Actions pinned by commit). Only the maintainer tags.
+  changelog section as its notes (Actions pinned by commit), its wrapped lines joined (GitHub's notes break where the
+  text does). From 1.2.2 each change is a `###` heading, prose, then `**Your site:**` and `**Restarts:**` paragraphs (not list items)
+  (CONTRIBUTING.md, Releases). Only the maintainer tags.
 
 ## The kit's theme (`theme/`)
 
