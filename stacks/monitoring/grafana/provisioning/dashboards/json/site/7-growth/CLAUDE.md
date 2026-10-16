@@ -15,7 +15,7 @@ read, one source up close.
   any utm_*), each with a computed Link column, `merge`d with members_created_events grouped by utm_source + utm_medium (one row per
   network and link: posts / bio link / "tagged by Instagram" for ig, which Instagram adds with utm_medium=social
   to plain profile links to the site), with Network mappings. The tags come from the bridge's short links (`TAG_LINKS`,
-  `stacks/postiz/CLAUDE.md`) and the bio links in the site's redirects (`kit/redirects.yaml`).
+  `stacks/postiz/ghost-bridge/share/CLAUDE.md`) and the bio links in the site's redirects (`kit/redirects.yaml`).
 - Growth hides outlier rows with Hide/Show custom section variables `hide_direct` (Sources' row, regex `^(null)?$`) and
   `hide_home` (Content's row, `^/$`) used in a filterByValue regex after the join (`${var:raw}`; Show = `(?!)`); its tables
   are `filterable` (column filters, per viewer). "Posts vs bio links" = api_top_utm_mediums + members_created_events.utm_medium (social = bridge + hand-shared `/d/`, `/y/` links, bio = short links);

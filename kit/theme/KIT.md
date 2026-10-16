@@ -31,7 +31,8 @@ rebuilt: the kit's additions are files of their own, plus the few edits listed b
 - `package.json`: `name` `puppi3-creator-kit`, `description`, `version` (the kit theme's own), `author`, `keywords`,
   `source_theme` (which Source it's built on), Source's dev fields dropped, and the setting `live_stream_url`
   (Ghost allows 20 theme settings: Source uses 19, this is the 20th).
-- Left out of Source's repo: its build tooling (gulpfile, pnpm files, renovate) and its own AGENTS.md/CLAUDE.md.
+- Left out of Source's repo: its build tooling (gulpfile, pnpm files, renovate) and its own AGENTS.md/CLAUDE.md (the
+  `CLAUDE.md` here is the kit's notes, left out of the zip like this file).
 
 ## Upgrading Source
 Copy the new tag over this folder (the same files left out), put the edits above back, bump `source_theme.version`

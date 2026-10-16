@@ -4,9 +4,10 @@ The site's Grafana dashboards and alert rules, for the `monitoring` module (`kit
 `k8s/components/monitoring/` on Kubernetes). The dashboards' source is `provisioning/dashboards/json/site/` (render.py's
 `SRC_FOLDER`), the alert rules' `alerts.yml`; neither names a site (Placeholders, below): `render.py` makes a site's
 copies each time `kit.sh` or `up.sh` runs. What each bridge file (`/post.json`, `/page.json`, `/timing.json`,
-`/upnext.json`, `/performance.json`, `/<network>.json`) computes: `stacks/postiz/CLAUDE.md`; this file says which panel
-shows it, and how. For the owner: keep the Analytics guide (`kit/docs/analytics-guide.html`) current when dashboards,
-panels, source labels or what's collected change.
+`/performance.json`, `/<network>.json`) computes: `stacks/postiz/ghost-bridge/stats/CLAUDE.md` (`/upnext.json`:
+`stacks/postiz/ghost-bridge/share/CLAUDE.md`); this file says which panel shows it, and how. For the owner: keep the
+Analytics guide (`kit/docs/analytics-guide.html`) current when dashboards, panels, source labels or what's collected
+change.
 Growth, Platforms and Post have a CLAUDE.md of their own, in their folders (`provisioning/dashboards/json/site/7-growth/`,
 `8-platforms/`, `9-post/`), with what's particular to that dashboard: open it before working on one. This file has the
 other seven (Page included), and everything the dashboards share (files, gotchas, source labels, shared look).
@@ -60,7 +61,7 @@ other seven (Page included), and everything the dashboards share (files, gotchas
   `LEFTOVERS_KIT` stops it on any `puppi3`, `Puppi3` or `website-` left. A site's own value in a dashboard is a
   placeholder; a new kind of ID_PREFIX reference needs a swap here. style.py and ro-tables.py check the
   source; the kit's copies only lose and rename things, so they aren't run on them.
-- A kit site on Kubernetes: `render.py --profile cloud --site …` (k8s/up.sh runs it; `k8s/CLAUDE.md`) = kit plus
+- A kit site on Kubernetes: `render.py --profile cloud --site …` (k8s/up.sh runs it; `k8s/components/monitoring/CLAUDE.md`) = kit plus
   `cloud_swaps`, put ahead of the kit's (matched on the source's text, so `@DISK_MOUNT@` where the disk is named): Health's container CPU/memory -> the kubelet's
   cAdvisor for the site's namespace, every pod, `sum by (name)` with `name` = the pod's Deployment/StatefulSet
   (`by_workload`: three `label_replace`s strip `-0` or `-<hash>-<5>` in Kubernetes' own letters, `SAFE`), Social's
@@ -128,7 +129,7 @@ other seven (Page included), and everything the dashboards share (files, gotchas
   `9-post/CLAUDE.md`).
 - All 10 dashboards share the header nav and top links (Post and Page too, though not listed in them; Overview, Health, Traffic, Growth, Members, Content, Social, Platforms).
 - Page (`10-page.json`, uid puppi3-page, classic; not in the nav: style.py's `EXTRA_NAV` marks "Page: ${page:text}"):
-  one site page, from the bridge's `GET /page.json` (`stacks/postiz/CLAUDE.md`). `page` dropdown (page.json `pages`,
+  one site page, from the bridge's `GET /page.json` (`stacks/postiz/ghost-bridge/stats/CLAUDE.md`). `page` dropdown (page.json `pages`,
   custom values allowed: links pass `var-page=<path>`), hidden `rules` (page.json?path=); tiles Posts that led here
   (`$count(posts[key != "ghost"])`), Visitors to the page (Tinybird `api_kpis?pathname=`, as Post's 11), …of them from the
   networks (page.json `visitors[isNetwork]`), New members who joined there (Post's 13 SQL); "Posts that led here" table

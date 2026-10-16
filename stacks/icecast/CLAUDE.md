@@ -1,7 +1,7 @@
 # stacks/icecast/
 
 The `live` module's stream server: TinyIce (one container: stream input, mounts, the mp3 transcode, the player page,
-admin). What visitors see of it, the LIVE NOW bar, is in the theme (`kit/theme/`, `kit/CLAUDE.md`).
+admin). What visitors see of it, the LIVE NOW bar, is in the theme (`kit/theme/`, `kit/theme/CLAUDE.md`).
 
 - The streaming software sends Ogg to `/stream-ogg` on host port 8222, always straight to TinyIce's port, never through
   Traefik: Traefik drops a SOURCE request's body, so TinyIce logs "has sent no audio", the mp3 transcoder can't start
@@ -19,4 +19,4 @@ admin). What visitors see of it, the LIVE NOW bar, is in the theme (`kit/theme/`
 - The image is pinned by digest (TinyIce 2.12.3). Hosts and paths come from the instance profile: `SITE_HOST` and
   `DATA_DIR` (required), `LIVE_HOST`, `LAN_DOMAIN` (`instances/CLAUDE.md`).
 - On Kubernetes (`k8s/components/live/`) the same TinyIce takes the stream, and Icecast 2 relays serve listeners'
-  `/stream-mp3`: TinyIce's own edge relays refuse private (in-cluster) addresses (`k8s/CLAUDE.md`).
+  `/stream-mp3`: TinyIce's own edge relays refuse private (in-cluster) addresses (`k8s/components/live/CLAUDE.md`).

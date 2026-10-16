@@ -9,7 +9,7 @@ along with the Infinity/MySQL gotchas and the shared look; the colour variable: 
   "Social posts" annotation text on Overview/Traffic/Growth carries an `<a href>` the same way, only for networks the bridge
   collects (SQL `CASE`), and the magenta "Ghost posts" annotation's links `var-network=ghost&var-post=<id>`; `/post.json` maps Postiz's `instagram-standalone`/`tiktok-business` (`NETWORK_ALIASES`) and explains
   others): one post's numbers now, "vs your other <network> posts" + "vs the industry average" tiles, "Why", "What it was
-  judged on" (panels 7, 10, 8, 9: post.json's `performance`/`perfSignals`, see the verdicts in `stacks/postiz/CLAUDE.md`),
+  judged on" (panels 7, 10, 8, 9: post.json's `performance`/`perfSignals`, see the verdicts in `stacks/postiz/ghost-bridge/stats/CLAUDE.md`),
   "Number by number vs your usual <network> post" (panel 5: median of the network's other posts at the same age, by the
   hour in the first `POST_EARLY_HOURS`, then days; needs 3; chart of the
   number picked in the section's "Compare on" dropdown `compare` (from `compareOptions`, usual first; `&compare=<key>`) vs
