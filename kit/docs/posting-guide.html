@@ -387,7 +387,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
   </ul>
 
   <h3 id="writing-feature-image">Feature image</h3>
-  <p>The feature image goes out with the post on every platform. JPG, PNG, WebP and GIF all work: the bridge turns them into whatever each app accepts, and scales big photos down. Photos Postiz can't take as they are (AVIF, BMP, TIFF, iPhone HEIC) are turned into JPEGs first. Square or 4:5 portrait images work best on Instagram. When you post it yourself, the app lets you crop. With <span class="tag">#autopost</span>, very wide banners get rejected by Instagram.</p>
+  <p>The feature image goes out with the post on every platform. JPG, PNG, WebP and GIF all work: the bridge turns them into whatever each app accepts, and scales big photos down. Ghost itself doesn't take other kinds, like an iPhone's HEIC photos: save those as JPEG first. Square or 4:5 portrait images work best on Instagram. When you post it yourself, the app lets you crop. With <span class="tag">#autopost</span>, very wide banners get rejected by Instagram.</p>
 
   <h3 id="writing-several-photos-a-gallery">Several photos: a gallery</h3>
   <p>Add a <strong>gallery card</strong> to share several photos. They go out after the feature image, in the gallery's order, up to 10 photos in all (a photo that's both the feature image and in the gallery counts once):</p>
@@ -423,12 +423,12 @@ header.top .pup svg{display:block;width:100%;height:auto}
     <li><strong>On your phone:</strong> open the video in CapCut or InShot and export it. They save as MP4. This is also the easiest way to trim a long recording into a short clip.</li>
     <li><strong>OBS recordings:</strong> in OBS, choose <em>File → Remux Recordings</em>, pick the MKV and click <em>Remux</em>. You get an MP4 in seconds, with no quality loss.</li>
   </ul>
-  <div class="note warn"><b class="label">Keep uploads small</b><p>Uploads to Ghost over <strong>100 MB fail</strong>. <span>Don&#x27;t upload a whole 2-hour recording; upload a short clip and link the full one on YouTube, Vimeo, Spotify or wherever it lives.</span></p></div>
+  <div class="note warn"><b class="label">Keep uploads small</b><p>Uploads to Ghost over <strong>100 MB fail</strong> when the site is behind Cloudflare, as most are (whoever runs the site can tell you). <span>Don&#x27;t upload a whole 2-hour recording; upload a short clip and link the full one on YouTube, Vimeo, Spotify or wherever it lives.</span></p></div>
 
   
   
   <h3 id="writing-linking-your-set">The featured link: where your work is</h3>
-  <p>If the post links to where the work itself is (a video on YouTube or Vimeo, an episode on Spotify or Apple Podcasts, a track on SoundCloud, Mixcloud, Apple Music or Bandcamp, a stream on Twitch), the social posts point to it. On Bluesky and Threads you get a line with the service's name and the tappable link, like <strong>🔗 YouTube: https://youtube.com/…</strong>. On Instagram and TikTok, where links can't be tapped, you get "🔗 Also on YouTube + the full post: link in bio". The link can be anywhere in the post: a video embedded in the post, a caption under an embed, a bookmark card, or normal text. The services are ranked in that order, YouTube first, so if the post links to YouTube and Spotify the YouTube link is used. With several links to the same site, the first is used. To use a different link (your shop, a second video, anything) or none at all, pick it on the <a href="#writing-checking-the-social-posts-before-you-publish">Social preview</a>. Whoever runs the site can change the services and the wording (<a href="settings-reference.html#var-FEATURED_DOMAINS">FEATURED_DOMAINS</a> and the lines after it).</p>
+  <p>If the post links to where the work itself is (a video on YouTube or Vimeo, an episode on Spotify or Apple Podcasts, a track on SoundCloud, Mixcloud, Apple Music or Bandcamp, a stream on Twitch), the social posts point to it. On Bluesky and Threads you get a line with the service's name and the tappable link, like <strong>🔗 YouTube: https://youtube.com/…</strong>. On Instagram and TikTok, where links can't be tapped, you get "🔗 Also on YouTube + the full post: link in bio". The link can be anywhere in the post: a video embedded in the post, a caption under an embed, a bookmark card, or normal text. When the post links to more than one of them, the one first in this order is used: YouTube, Vimeo, SoundCloud, Mixcloud, Spotify, Apple Podcasts, Apple Music, Bandcamp, Twitch. So with a YouTube link and a Spotify link, YouTube's is used. With several links to the same service, the first in the post is used. To use a different link (your shop, a second video, anything) or none at all, pick it on the <a href="#writing-checking-the-social-posts-before-you-publish">Social preview</a>. Whoever runs the site can change the services and the wording (<a href="settings-reference.html#var-FEATURED_DOMAINS">FEATURED_DOMAINS</a> and the lines after it).</p>
   <p><strong>Links carry a tag.</strong> The link to your post is a short link with a letter for the network: <code>example.com/b/&lt;the post's slug&gt;</code> on Bluesky, <code>/t/</code> on Threads, <code>/i/</code> for the Instagram link sticker, <code>/k/</code> on TikTok. It takes people straight to the post and tells the site's stats which network each visitor and new member came from (apps often hide it). Leave it on when you edit a caption. For the same reason, use the short links in your bios: <code>example.com/ig</code>, <code>/bsky</code>, <code>/th</code>, <code>/tk</code>, <code>/dis</code> for Discord and <code>/yt</code> for YouTube (they're tagged as bio links). The bridge doesn't post to Discord or YouTube, so when you share a post there yourself, use <code>example.com/d/&lt;the post's slug&gt;</code> on Discord or <code>example.com/y/&lt;the post's slug&gt;</code> on YouTube (in a video's description, a pinned comment or a community post; or <code>/d</code>, <code>/y</code> alone for the home page) and it's counted as a Discord or YouTube post. To group posts into a campaign, add an internal tag like <span class="tag">#campaign-summer-launch</span> (see below); its links are then longer.</p>
   
   
@@ -470,7 +470,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
       <tr><td><span class="tag">#nosocial</span></td><td>Keeps the post off social media completely.</td></tr>
       <tr><td><span class="tag">#bigdrop</span></td><td>For major releases. A notification of its own reminds you to post an Instagram Story with a <strong>link sticker</strong>, with the photo or video for it and the link to use.</td></tr>
       <tr><td><span class="tag">#story</span></td><td>Makes the Instagram version a <strong>Story</strong> instead of a feed post.</td></tr>
-      <tr><td><span class="tag">#autopost</span></td><td>Posts to Instagram and TikTok automatically too, with no drafts or notifications. Use it when you don't need to add music or tags. TikTok needs a video or audio card for this; an image-only TikTok post needs extra setup and will otherwise fail.</td></tr>
+      <tr><td><span class="tag">#autopost</span></td><td>Posts to Instagram and TikTok automatically too, with no drafts or notifications. Use it when you don't need to add music or tags. TikTok needs a video or audio card for this; an image-only TikTok post needs a one-time setting by whoever runs the site (in the <a href="setup-guide.html#finish-social">Setup guide</a>), and fails without it.</td></tr>
       <tr><td><span class="tag">#useexcerpt</span></td><td>Uses the post's <strong>Excerpt</strong> as the social text instead of your post text, for a short hook while the full write-up stays on the site. Hashtags from the end of your post are still added.</td></tr>
       <tr><td><span class="tag">#campaign-summer-launch</span></td><td>Groups the post under a <strong>campaign</strong> (here "summer-launch") in the Growth dashboard's Campaigns table. Its links on Bluesky, Threads and the Instagram link sticker become the longer form ending in <code>&amp;utm_campaign=summer-launch</code>. Use the same name on every post of a campaign (letters, digits and dashes). Bio links are not affected.</td></tr>
       <tr><td><span class="tag">#manualpost</span></td><td>The opposite of #autopost. You only need it if the default has been changed to automatic.</td></tr>
@@ -488,7 +488,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
       <tr><td>A gallery card (with or without a feature image)</td><td><span class="pill auto">Auto</span><br>Several photos: a grid of up to 4 on Bluesky, a carousel on Threads</td><td><span class="pill you">You finish</span><br>Draft + notification for a carousel (Instagram) or photo post (TikTok), with the first photo attached</td></tr>
       <tr><td>An audio card</td><td><span class="pill auto">Auto</span><br>A short video the system makes: your feature image with your audio playing</td><td><span class="pill you">You finish</span><br>Draft + notification, with that same video attached. It already has your audio, so you don't need to add music.</td></tr>
       <tr><td>A video card (MP4)</td><td><span class="pill auto">Auto</span><br>Your video, with its own sound</td><td><span class="pill you">You finish</span><br>Draft + notification, with your video attached. It has its own sound, so music is optional.</td></tr>
-      <tr><td>Tag <span class="tag">#autopost</span></td><td><span class="pill auto">Auto</span></td><td><span class="pill auto">Auto</span><br>Instagram posts right away. TikTok videos land in your TikTok inbox for you to publish; image-only TikTok posts need extra setup.</td></tr>
+      <tr><td>Tag <span class="tag">#autopost</span></td><td><span class="pill auto">Auto</span></td><td><span class="pill auto">Auto</span><br>Instagram posts right away. TikTok videos land in your TikTok inbox for you to publish; image-only TikTok posts need a one-time setting by whoever runs the site.</td></tr>
       <tr><td>Tag <span class="tag">#nosocial</span>, or not Public</td><td><span class="pill skip">Skipped</span></td><td><span class="pill skip">Skipped</span></td></tr>
     </tbody>
   </table></div>
@@ -669,7 +669,7 @@ Caption:
   <p>Every <span class="tag">#bigdrop</span> post gets its own "<span>🔗</span> Big drop: add the link Story" notification (as long as Instagram is connected in Postiz), sent first, before the Instagram and TikTok ones, whether Instagram was posted by hand or automatically. It has the Story's photo attached (the first one, uncropped so it fills the Story), or the video, and the buttons <em>Copy sticker link</em>, <em>Open Instagram</em> and <em><span>Open Spotify</span></em> (or <em>Open post</em> when there's no <span>featured link</span>). See <a href="#finishing-big-drop-the-link-story">Big drop: the link Story</a>. The one exception is <span class="tag">#story</span> + <span class="tag">#bigdrop</span>, covered by the Instagram notification above. Story notifications always come in first (the bridge waits a couple of seconds before sending the rest, so they reach your phone in that order): with <span class="tag">#story</span>, Instagram's arrives before TikTok's.</p>
 
   <h3 id="notifications-taking-off">📈 Taking off</h3>
-  <p>"📈 Your YouTube video is taking off" (or <span>Instagram post</span>, <span>TikTok video</span> and so on) means an older post suddenly picked up: in the last 4 hours or so, or the last day, it gained at least 5% of what it had, and at least 3 times what it usually gets. It says how much it gained and what it usually gets, with buttons to its <em>Post dashboard</em> in Grafana and to the post itself. Nothing to do: it's a good moment to reshare it, pin it or post something like it. You get one per take-off; the Post dashboard shows how it goes.</p>
+  <p>"📈 Your YouTube video is taking off" (or <span>Instagram post</span>, <span>TikTok video</span> and so on) means an older post suddenly picked up: in about the last 4 hours, or the last 18, it gained at least 5% of what it had (and at least 10), and at least 3 times what it usually gets in that time. It says how much it gained and what it usually gets, with buttons to its <em>Post dashboard</em> in Grafana and to the post itself. Nothing to do: it's a good moment to reshare it, pin it or post something like it. You get one per take-off; the Post dashboard shows how it goes.</p>
 
   
   
@@ -685,10 +685,11 @@ Caption:
     <li>📖 the three most-read pages,</li>
     <li>🎧 your live shows, if you had any: how many, how long, and the most listeners at once.</li>
   </ul>
-  <p>The <em>Open Grafana</em> button takes you to the Overview dashboard for more (the <a href="analytics-guide.html">Analytics Guide</a> explains it). Nothing to do: it's only a summary. A line is left out when its numbers couldn't be read that week. To get it on another day or time, or not at all, ask whoever looks after the server (it's one setting).</p>
+  <p>The <em>Open Grafana</em> button takes you to the Overview dashboard for more (the <a href="analytics-guide.html">Analytics Guide</a> explains it). Nothing to do: it's only a summary. A line is left out when its numbers couldn't be read that week. To get it on another day or time, or not at all, ask whoever runs the site (it's one setting).</p>
 
   <h3 id="notifications-warnings">⚠️ Warnings</h3>
   <p>"⚠️ Postiz needs attention" means a post couldn't go out: a platform rejected it, or an account needs reconnecting. "⚠️ Postiz: … failed on …" means the post couldn't even be handed to Postiz. Tap either to open Postiz, then see <a href="#faq">Something went wrong?</a></p>
+  <p>The same app also gets the site's own alerts (the site or the live stream down, numbers that stopped updating). Those are for whoever runs the site; you can pass them on.</p>
 </section>
 
 <section id="finishing">
@@ -742,9 +743,9 @@ Caption:
   <h2>Something went wrong?</h2>
   <dl class="faq">
     <dt>I published, but nothing went out anywhere.</dt>
-    <dd>Check that the post is <strong>Public</strong> and doesn't have <span class="tag">#nosocial</span>. Posts that were already shared once won't go out again. If none of that is it, ask whoever maintains the system to check the bridge logs.</dd>
+    <dd>Check that the post is <strong>Public</strong> and doesn't have <span class="tag">#nosocial</span>. Posts that were already shared once won't go out again. If none of that is it, ask whoever runs the site to check the bridge's log.</dd>
     <dt>Bluesky or Threads says posted, but I can't see it.</dt>
-    <dd>Give it a minute, then check your profile, not the home feed. If you got a ⚠️ notification, the post failed, so resend it from Postiz. If there's no warning and it still isn't there after 10 minutes, tell the maintainer: the part of Postiz that sends posts may need a restart.</dd>
+    <dd>Give it a minute, then check your profile, not the home feed. If you got a ⚠️ notification, the post failed, so resend it from Postiz. If there's no warning and it still isn't there after 10 minutes, tell whoever runs the site: the part of Postiz that sends posts may need a restart.</dd>
     <dt>I didn't get the Instagram or TikTok notification.</dt>
     <dd>Check that you're subscribed to <span>the site's topic</span> in the ntfy app. Also check that the phone allows ntfy's notifications (on Android, that it isn't battery-restricted; on an iPhone, that no Focus mode hides them), and that the topic isn't muted. The account also needs to be connected in Postiz, otherwise no notification is sent for it.</dd>
     <dt>The notification doesn't mention a Postiz draft, or the draft isn't in the calendar.</dt>
@@ -752,7 +753,7 @@ Caption:
     <dt>My video wasn't used; the post went out with the image.</dt>
     <dd>Only MP4 videos are used. Convert other formats to MP4 and upload them again in a video card.</dd>
     <dt>I want to share an old post again.</dt>
-    <dd>Post it from Postiz, or ask the maintainer to clear it from the "already shared" list so that republishing in Ghost shares it again.</dd>
+    <dd>Post it from Postiz, or ask whoever runs the site to take it off the bridge's "already shared" list (the <a href="operations-guide.html#trouble-social">Operations guide</a> says how); then unpublish it in Ghost and publish it again, and it's shared like a new post.</dd>
   </dl>
 </section>
 

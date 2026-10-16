@@ -2,8 +2,8 @@
 # Runs a kit site (a folder kit/setup.sh made) on Kubernetes:
 #   k8s/up.sh <site folder> <overlay>            render, apply, wait until everything's ready
 #   k8s/up.sh <site folder> <overlay> --render   only render (data/k8s/rendered.yaml); no cluster needed
-#   k8s/up.sh <site folder> --down               delete the site's namespace, its volumes with it
-# Overlays: local (this Mac's k3d cluster: k8s/test/k3d.sh), selfhosted (any cluster), eks and gke (Amazon EKS, Google
+#   k8s/up.sh <site folder> <overlay> --down     delete the site's namespace, its volumes with it (no overlay: local)
+# Overlays: local (this computer's k3d test cluster: k8s/test/k3d.sh), selfhosted (any cluster), eks and gke (Amazon EKS, Google
 # GKE: the site's values in <site>/cloud-<overlay>.env), k3d-eks and k3d-gke (those on k3d, with stand-ins for the
 # cloud's databases and bucket). Moving a site's data between the NAS and a cluster: k8s/migrate/. local uses k3d's own kubeconfig
 # and refuses any other cluster; the rest use kubectl's current context, after asking (--yes: don't ask).

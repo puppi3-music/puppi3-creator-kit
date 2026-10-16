@@ -1,5 +1,5 @@
-# The cloud's MySQL 8 (RDS, Cloud SQL), standing in: its master login is Ghost's (secrets/ghost.env), as the cloud
-# runbook sets up
+# The cloud's MySQL 8 (RDS, Cloud SQL), standing in: its master login is Ghost's (secrets/ghost.env), as the Setup
+# guide's EKS or GKE sets up
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:

@@ -5,7 +5,7 @@
 #   eksctl delete cluster -f k8s/clusters/eks.yaml        when the burst is over (after k8s/migrate/to-nas.sh)
 # Then, in the same VPC (the Setup guide): RDS for MySQL 8 and for Postgres, reachable only from the nodes'
 # security group (Postgres with rds.force_ssl=0), the site's bucket, Ghost's IAM role (IRSA, for ServiceAccount
-# "ghost" in the site's namespace), and ECR for the kit's images. Their names go in <site>/cloud-eks.env.
+# "ghost" in the site's namespace), and ECR only for images you build yourself. Their names go in <site>/cloud-eks.env.
 # Not tested here: only a real AWS account can.
 apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig

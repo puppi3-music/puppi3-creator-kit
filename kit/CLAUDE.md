@@ -36,18 +36,24 @@ wording goes in its `site.env` (the bridge's `FEATURED_*` lines).
   their front page: a card per guide, each with her puppy on a sitting body in her own colours (inline SVG, shared
   `#kp-*` parts in a hidden defs block after `<body>`; no headphones there, only on the mark) in that guide's outfit; the tail wags and the head tilts on hover, props float or spin
   (all off under reduced motion). `setup-guide.html` (by hand): requirements, Cloudflare or not, the
-  folder (setup's questions), Compose, finishing by hand (mail, theme, redirects, Postiz, webhook, ntfy, streaming,
-  Grafana), Kubernetes (overlays, images, up), EKS/GKE (what to make, neutral: no
+  folder (setup's questions), Compose, the try-out and its switch to the real site, finishing by hand (mail, theme,
+  redirects, Postiz, webhook, each network's numbers and what they need: `#finish-numbers`, ntfy, streaming, Grafana), Kubernetes (overlays, images, up), EKS/GKE (what to make, neutral: no
   one site's own commands), the tests: keep it current with `setup.sh`'s questions and printed steps, `up.sh` and the overlays.
   `operations-guide.html` (by hand): updating (git pull, `pull --ignore-buildable`, images, theme and redirects by
   `git diff` from the noted version), backups (the folder plus Compose's four Tinybird volumes,
   `<ID_PREFIX>_tinybird_*`/`_traffic_analytics_data`, which `down -v` deletes; stopped tar, running dumps, restore
   through `kit.sh create` so Compose owns the volumes; Kubernetes), moving (another machine; `to-cloud.sh`/`to-nas.sh`
-  for a kit site: a second folder for the cluster, same `ID_PREFIX` and secrets), troubleshooting, commands. Its
+  for a kit site: a second folder for the cluster, same `ID_PREFIX` and secrets), troubleshooting (sharing a post
+  again: its entry out of the bridge's `posted.json`, a one-liner by title), commands. Its
   backup and restore commands were tried on a throwaway site: keep them true to `kit.sh`, the stacks' volumes and
-  `k8s/migrate/`.
+  `k8s/migrate/`. Putting a nightly copy back was tried on `kit/test.sh --keep`'s site: Ghost's posts and files came
+  back, Postiz's `dropdb --force` + `psql` ran clean and Postiz came back healthy, but that site's Postiz had no
+  rows to compare; rows and grants coming back were seen on a lone `postgres:17.11-alpine` with a reader connected.
   `theme-guide.html` (by hand, for the site's owner): the kit's theme (Source plus the kit's parts; installing and
-  updating it), Source's settings as Ghost Admin shows them (`theme/package.json`'s `config.custom`), the LIVE NOW bar,
+  updating it), Source's settings as Ghost Admin shows them (`theme/package.json`'s `config.custom`; Ghost Admin's own labels and
+  menu paths, like Settings → Theme → Change theme, Customize's Brand and Theme tabs, Labs → Redirects → Edit, are in the
+  Ghost image's admin bundle, `core/built/admin/assets/settings-*.js` and `design-and-theme-modal-*.js`: check them
+  there after a Ghost update, as all the guides name them), the LIVE NOW bar,
   the Social preview button, the platforms `kit.js` gives icons ("Links to your other platforms", `#platforms`), the short links (`redirects.yaml`), and another
   theme (what it lacks, adding the kit's parts from `theme/KIT.md`). Keep it current with `theme/` and `redirects.yaml`.
   `posting-guide.html` (for whoever posts: the bridge's tags, captions, media, notifications, finishing Instagram and

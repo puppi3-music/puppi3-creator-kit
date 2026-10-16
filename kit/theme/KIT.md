@@ -35,8 +35,10 @@ rebuilt: the kit's additions are files of their own, plus the few edits listed b
 
 ## Upgrading Source
 Copy the new tag over this folder (the same files left out), put the edits above back, bump `source_theme.version`
-and `version`, run `kit/theme-zip.sh`, and check it in a Ghost (the LIVE NOW bar, the button, a beacon).
+and `version`, run `kit/theme-zip.sh`, and check it in a Ghost: `kit/theme-test/` (a throwaway local Ghost and a
+browser test of the LIVE NOW bar, the button, the beacons and the platform icons; CONTRIBUTING.md has the commands).
 
 ## Building
 `kit/theme-zip.sh` -> `kit/dist/puppi3-creator-kit-theme.zip`: gscan, and a check that no other site's address, private
-name or value got in (the list is in the script). Short links: `kit/redirects.yaml` (a deploy of their own, not in the zip).
+name or value got in (the list is in the script). Short links: `kit/redirects.yaml` (uploaded on their own, not in the
+zip).
