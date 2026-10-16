@@ -289,7 +289,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
 <div class="code"><pre>git rev-parse --short HEAD          # write this down</pre></div></li>
     <li>Pick a quiet moment: no live show, nothing scheduled to publish in the next few minutes.</li>
   </ul>
-  <div class="note"><b class="label">From a ZIP</b><p>No git? Download the new ZIP, unzip it beside the old copy, and move your site's folder (<code>kit/sites/mysite</code>) into the new one; then run the commands below from the new copy, without <code>git pull</code>. Keep the old copy until the site runs well: it's your way back (going back is the same move the other way, with the backup). Where the steps below use <code>git diff</code>, compare the two copies instead: <code>diff -rq old/kit/theme new/kit/theme</code> and <code>diff old/kit/redirects.yaml new/kit/redirects.yaml</code> for the theme and short links, <code>diff</code> of their <code>instances/example.env</code> and <code>stacks/*/.env.example</code> for the settings.</p></div>
+  <div class="note"><b class="label">From a ZIP</b><p>No git? Download the new ZIP, unzip it beside the old copy, and move your site's folder (<code>kit/sites/mysite</code>) into the new one; then run the commands below from the new copy, without <code>git pull</code>. Keep the old copy until the site runs well: it's your way back (going back is the same move the other way, with the backup). Where the steps below use <code>git diff</code>, compare the two copies instead: <code>diff -rq old/kit/theme new/kit/theme</code> and <code>diff old/kit/redirects.yaml new/kit/redirects.yaml</code> for the theme and short links, <code>diff</code> of their <code>instances/example.env</code>, <code>stacks/*/.env.example</code>, <code>kit/examples/</code> and <code>k8s/examples/</code> for the settings.</p></div>
   <h3 id="upgrade-compose">On Docker Compose</h3>
 <div class="code"><pre>git pull
 kit/kit.sh kit/sites/mysite pull --ignore-buildable   # the images this version names (the changelog says which changed)
@@ -304,15 +304,15 @@ k8s/up.sh kit/sites/mysite &lt;overlay&gt;</pre></div>
   <p>See whether the update changed them:</p>
 <div class="code"><pre>git diff --stat &lt;the version you noted&gt; HEAD -- kit/theme kit/redirects.yaml</pre></div>
   <ul>
-    <li><b>The theme</b> changed: download <code>puppi3-creator-kit-theme.zip</code> from <a href="https://github.com/puppi3-music/puppi3-creator-kit/releases">the new version's release</a> and upload it in Ghost (Settings, Design &amp; branding, Customize, Change theme, Upload theme). Its settings, like the Live stream URL, stay as they were.</li>
-    <li><b>The short links</b> changed: upload <code>kit/redirects.yaml</code> again (Settings, Labs (under Advanced: Open, Beta features), Redirects). If you've added your own lines to it, keep your copy and add the new lines to it.</li>
+    <li><b>The theme</b> changed: download <code>puppi3-creator-kit-theme.zip</code> from <a href="https://github.com/puppi3-music/puppi3-creator-kit/releases">the new version's release</a> and upload it in Ghost (Settings → Theme → Change theme → Upload theme). Ghost asks whether to overwrite the theme it has: <b>Overwrite</b>. Its settings, like the Live stream URL, stay as they were.</li>
+    <li><b>The short links</b> changed: upload <code>kit/redirects.yaml</code> again (Settings → Labs (under Advanced) → Open → Beta features → Redirects → Upload redirects file). If you've added redirects of your own, an upload would replace them: add the kit's new lines with <b>Edit</b>, beside the upload, instead.</li>
   </ul>
   <h3 id="upgrade-new-settings">New settings</h3>
   <p>A new setting starts with its default, so nothing needs adding for the site to keep working. To see what's new:</p>
 <div class="code"><pre>git diff &lt;the version you noted&gt; HEAD -- instances/example.env stacks/*/.env.example kit/examples k8s/examples</pre></div>
   <p>The <a href="settings-reference.html">Settings reference</a> explains each one.</p>
   <h3 id="upgrade-going-back">Going back</h3>
-  <p>If the new version misbehaves: <code>git checkout &lt;the version you noted&gt;</code>, put the backup back (<a href="#backup-restore">below</a>), and start the site again. Putting back only the old code isn't enough once a newer Ghost has updated the database. Then come back to the newer version: <code>git checkout main</code> (or the branch you follow).</p>
+  <p>If the new version misbehaves: <code>git checkout &lt;the version you noted&gt;</code>, put the backup back (<a href="#backup-restore">below</a>), and start the site again. Putting back only the old code isn't enough once a newer Ghost has updated the database. Later, to try a newer version again: <code>git checkout main</code> (or the branch you follow), then update as above.</p>
 </section>
 
 <section id="backup">
@@ -342,9 +342,9 @@ tar -czf "$B/ghost-content.tar.gz" -C kit/sites/mysite/data/ghost/ghost content
   <p>A site made before kit 1.2.0 keeps Ghost's files in <code>data/puppi3/</code> instead of <code>data/ghost/</code> (the kit uses whichever the site has): write <code>puppi3</code> for <code>ghost</code> in those paths.</p>
   <p>The warning about a password on the command line is MySQL's own, and harmless here: it's the container's own password, inside the container. Ghost's database is called <code>ghost</code> unless you changed <code>database__connection__database</code>. These copies don't include the analytics or the dashboards' history: take a stopped backup now and then for those.</p>
   <h3 id="backup-restore">Putting a backup back</h3>
-  <p>On the same machine or a new one, with this repo at the same version as when the backup was made. The short name stays the same (it names the volumes):</p>
+  <p>On the same machine or a new one, with the kit at the same version as when the backup was made. The short name stays the same (it names the volumes):</p>
 <div class="code"><pre>ID=mysite; B=~/backups/$ID-2026-10-12                                        # the backup's folder
-kit/kit.sh kit/sites/mysite down 2&gt;/dev/null; rm -rf kit/sites/mysite     # only if an old copy is there
+kit/kit.sh kit/sites/mysite down 2&gt;/dev/null; rm -rf kit/sites/mysite     # only if an old copy is there (sudo rm on Linux)
 docker volume rm $(docker volume ls -q --filter label=com.docker.compose.project=$ID) 2&gt;/dev/null
 tar -xzpf "$B/folder.tar.gz" -C kit/sites                                    # sudo on Linux
 kit/kit.sh kit/sites/mysite create                                           # makes the empty volumes
@@ -352,9 +352,16 @@ for f in "$B"/${ID}_*.tgz; do v=$(basename "$f" .tgz)
   docker run --rm -v $v:/v -v "$B":/b busybox:1.37.0 tar -xzf /b/$v.tgz -C /v
 done
 kit/kit.sh kit/sites/mysite up -d</pre></div>
-  <p>From a nightly copy instead, put the database back into a running site:</p>
-<div class="code"><pre>gunzip -c "$B/ghost.sql.gz" | kit/kit.sh kit/sites/mysite exec -T db sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD" ghost'
+  <p>From a nightly copy instead, put Ghost's database and files back into a running site (the <code>tar</code> line with <code>sudo</code> on Linux, where Ghost owns its files):</p>
+<div class="code"><pre>B=~/backups/mysite-2026-10-12                                                # the copy's folder
+gunzip -c "$B/ghost.sql.gz" | kit/kit.sh kit/sites/mysite exec -T db sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD" ghost'
+tar -xzf "$B/ghost-content.tar.gz" -C kit/sites/mysite/data/ghost/ghost
 kit/kit.sh kit/sites/mysite restart ghost</pre></div>
+  <p>Postiz's copy replaces its whole database, so stop Postiz and the bridge first (<code>--force</code> also closes Grafana's connections to it):</p>
+<div class="code"><pre>kit/kit.sh kit/sites/mysite stop postiz postiz-ghost-bridge
+kit/kit.sh kit/sites/mysite exec -T postiz-postgres sh -c 'dropdb -U postiz --force postiz &amp;&amp; createdb -U postiz postiz'
+gunzip -c "$B/postiz.sql.gz" | kit/kit.sh kit/sites/mysite exec -T postiz-postgres psql -q -U postiz postiz &gt;/dev/null
+kit/kit.sh kit/sites/mysite up -d</pre></div>
   <h3 id="backup-kubernetes">On Kubernetes</h3>
   <ul>
     <li><b>Your own cluster</b> (<code>selfhosted</code>): the databases run in the cluster. Dump them the same way through <code>kubectl</code>, and copy Ghost's files out of its pod:
@@ -396,10 +403,11 @@ kubectl -n $NS exec deploy/ghost -c ghost -- tar -czf - -C /var/lib/ghost conten
 <div class="code"><pre>mkdir -p kit/sites/mysite-k8s/data/icecast/tinyice-data
 cp -Rp kit/sites/mysite/site.env kit/sites/mysite/secrets kit/sites/mysite-k8s/
 cp -p kit/sites/mysite/data/icecast/tinyice-data/config.json kit/sites/mysite-k8s/data/icecast/tinyice-data/</pre></div>
+    On Linux, TinyIce's <code>config.json</code> belongs to TinyIce's user: if <code>cp</code> can't read it, copy it with <code>sudo cp</code>, then make the copy yours (<code>sudo chown $USER</code> on it). When the Compose site is on another machine, copy the same files from there (with <code>scp</code>, say).
     Keep <code>ID_PREFIX</code> as it is: the scripts find the site by it on both sides. Bring <code>secrets/ghost-mail.env</code> (Ghost's mail); a site that still has its mail in the <code>mail</code> part of <code>data/ghost/ghost/config.production.json</code> moves it there first, one setting per line. For EKS or GKE, add the cloud's file and secrets as the <a href="setup-guide.html#cloud">setup guide</a> says. Behind Cloudflare, use <code>TLS_RESOLVER=cf</code>: it gets certificates from anywhere.</div></li>
     <li><div><b>The empty site up</b>, a day or so before: run <code>k8s/up.sh kit/sites/mysite-k8s &lt;overlay&gt;</code>. Check it through the cluster's own address (<a href="setup-guide.html#cloud-test-before-the-dns">how</a>) while the Compose site keeps serving.</div></li>
     <li><div><b>Freeze.</b> From now until the DNS points at the cluster: no edits or new posts in Ghost Admin, nothing scheduled to publish, no live show. Anything written on the Compose side after the copy starts stays behind.</div></li>
-    <li><div><b>Move.</b> A dry run, then the real one. The data folder is the Compose site's <code>data/</code>, here or on another machine:
+    <li><div><b>Move.</b> A dry run, then the real one. The data folder is the Compose site's <code>data/</code>, on another machine (<code>&lt;user&gt;@&lt;host&gt;:</code> in front) or on this one (just its path, like <code>kit/sites/mysite/data</code>):
 <div class="code"><pre>k8s/migrate/to-cloud.sh kit/sites/mysite-k8s &lt;overlay&gt; --from &lt;user&gt;@&lt;host&gt;:/path/to/mysite/data -n
 k8s/migrate/to-cloud.sh kit/sites/mysite-k8s &lt;overlay&gt; --from &lt;user&gt;@&lt;host&gt;:/path/to/mysite/data</pre></div>
     It stops Postiz, Temporal and the bridge on the Compose side (for good), copies everything, and ends by starting the site in the cluster with <code>up.sh</code>.</div></li>
@@ -408,9 +416,9 @@ k8s/migrate/to-cloud.sh kit/sites/mysite-k8s &lt;overlay&gt; --from &lt;user&gt;
   </ol>
   <p>The Compose side keeps its copy, its social part stopped. Leave it so until you move back, or until you're sure, then <code>kit/kit.sh kit/sites/mysite stop</code>. Never <code>up -d</code> it while the site is in the cluster.</p>
   <h3 id="move-back-to-compose">Kubernetes → Compose</h3>
-  <p>The same freeze, the other way. The Compose site must be there, set up with the same <code>site.env</code> and secrets: the one the site left, or a new one made with <code>kit/setup.sh</code> and started once. Its databases must be running: if you stopped it, start only those, so the bridge stays off:</p>
+  <p>The same freeze, the other way. The Compose site must be there, set up with the same <code>site.env</code> and secrets: the one the site left, or a new folder with the cluster folder's <code>site.env</code> and <code>secrets/</code> copied in, then <code>kit/setup.sh</code> run on it (it keeps those and makes the rest) and started once. Its databases must be running: if you stopped it, start only those, so the bridge stays off:</p>
 <div class="code"><pre>kit/kit.sh kit/sites/mysite start db postiz-postgres postiz-temporal-postgres prometheus   # the ones your modules have</pre></div>
-  <p>Then:</p>
+  <p>Then, with its data folder as for the move out (<code>&lt;user&gt;@&lt;host&gt;:</code> in front, or just a path on this machine):</p>
 <div class="code"><pre>k8s/migrate/to-nas.sh kit/sites/mysite-k8s &lt;overlay&gt; --to &lt;user&gt;@&lt;host&gt;:/path/to/mysite/data -n
 k8s/migrate/to-nas.sh kit/sites/mysite-k8s &lt;overlay&gt; --to &lt;user&gt;@&lt;host&gt;:/path/to/mysite/data</pre></div>
   <ul>
@@ -418,7 +426,7 @@ k8s/migrate/to-nas.sh kit/sites/mysite-k8s &lt;overlay&gt; --to &lt;user&gt;@&lt
     <li>If it says Tinybird's tokens differ, it has written the new ones: recreate the parts that read them, then start everything as usual (that also gives Grafana back its view of Postiz's tables):
 <div class="code"><pre>kit/kit.sh kit/sites/mysite up -d --force-recreate ghost traffic-analytics postiz-ghost-bridge
 kit/kit.sh kit/sites/mysite up -d</pre></div></li>
-    <li>Point the DNS back, check the site, end the freeze. The cluster keeps its copy, its social part stopped, until <code>k8s/up.sh kit/sites/mysite-k8s --down</code> deletes it. In a cloud, delete what costs money too (the cluster, databases and bucket).</li>
+    <li>Point the DNS back, check the site, end the freeze. The cluster keeps its copy, its social part stopped, until <code>k8s/up.sh kit/sites/mysite-k8s &lt;overlay&gt; --down</code> deletes it. In a cloud, delete what costs money too (the cluster, databases and bucket).</li>
   </ul>
 </section>
 
@@ -480,8 +488,13 @@ kit/kit.sh kit/sites/mysite restart ghost</pre></div>
     <dd><div class="code"><pre>kit/kit.sh kit/sites/mysite exec postiz-ghost-bridge sh -c 'wget -qO- --post-data test "$NTFY_URL/$NTFY_TOPIC"'</pre></div></dd>
     <dt>Postiz can't schedule: "no mapping defined for search attribute postId"</dt>
     <dd>Postiz adds the two fields it searches Temporal by when it starts, so it started before Temporal's records were made new (the update to kit 1.3.1, or Temporal's database started over). Start it again: <code>kit/kit.sh &lt;folder&gt; restart postiz</code>.</dd>
+    <dt>Postiz says a post went out (or still shows it queued), but it never appears</dt>
+    <dd>The part of Postiz that publishes the queued posts may be stuck. Start it again: <code>kit/kit.sh &lt;folder&gt; restart postiz</code>. With no ⚠️ notification and nothing after 10 minutes, this is the usual fix.</dd>
+    <dt>A post should be shared again</dt>
+    <dd>The bridge shares each post once: republishing it in Ghost does nothing, because the post is listed in <code>data/postiz/ghost-bridge/data/posted.json</code> as already shared. Take it off that list by its title (<code>sudo</code> on Linux), then unpublish the post in Ghost and publish it again:</dd>
+    <dd><div class="code"><pre>python3 -c 'import json,sys; f,t=sys.argv[1:]; s=json.load(open(f)); k=[i for i in s if s[i].get("title")==t]; [s.pop(i) for i in k]; json.dump(s,open(f,"w"),indent=2); print(len(k),"removed")' kit/sites/mysite/data/postiz/ghost-bridge/data/posted.json "The post's title"</pre></div></dd>
     <dt>A network shows as an alert error in Grafana</dt>
-    <dd>It's in <code>NETWORKS</code> but its keys aren't set yet. Set them up, or take it out of <code>NETWORKS</code>.</dd>
+    <dd>It's in <code>NETWORKS</code> but what its numbers need isn't set up yet (<a href="setup-guide.html#finish-numbers">the Setup guide</a> says what each one needs). Set it up, or take it out of <code>NETWORKS</code>.</dd>
   </dl>
   <h3 id="trouble-live">Live</h3>
   <dl class="faq">
@@ -493,7 +506,7 @@ kit/kit.sh kit/sites/mysite restart ghost</pre></div>
   <h3 id="trouble-kubernetes">Kubernetes</h3>
   <dl class="faq">
     <dt><code>ImagePullBackOff</code></dt>
-    <dd>"not found" with the kit's own images: your copy is newer than the last release (between a change and its release), or <code>k8s/images/built.env</code> names a registry you no longer use: delete that file to use the release's images, or build again for yours. Only for images you build yourself: "no match for platform" means they weren't built for the nodes' kind (<code>--platform</code>), "unauthorized" that the nodes can't read your registry.</dd>
+    <dd>"not found" with the kit's own images: your copy is newer than the last release (between a change and its release), or <code>k8s/images/built.env</code> names a registry you no longer use (the Kubernetes tests leave one naming their throwaway cluster's, <code>k3d-creator-kit-registry</code>): delete that file to use the release's images, or build again for yours. Only for images you build yourself: "no match for platform" means they weren't built for the nodes' kind (<code>--platform</code>), "unauthorized" that the nodes can't read your registry.</dd>
     <dt>Pods <code>Pending</code> for long</dt>
     <dd>"unbound PersistentVolumeClaims": no default StorageClass (<code>kubectl get sc</code>). "Insufficient memory": the nodes are full: add one.</dd>
     <dt>A pod that keeps crashing doesn't come back after a fix</dt>
@@ -516,7 +529,7 @@ kit/kit.sh kit/sites/mysite restart ghost</pre></div>
       <tr><td><code>kit/kit.sh &lt;folder&gt; ps</code>, <code>logs -f &lt;service&gt;</code></td><td>What's running; one part's log</td></tr>
       <tr><td><code>kit/kit.sh &lt;folder&gt; pull --ignore-buildable</code></td><td>Newer images, used at the next <code>up -d</code></td></tr>
       <tr><td><code>k8s/up.sh &lt;folder&gt; &lt;overlay&gt; [--render]</code></td><td>Put the site on the cluster, or apply changes (<code>--render</code>: only write what it would apply)</td></tr>
-      <tr><td><code>k8s/up.sh &lt;folder&gt; --down</code></td><td>Delete the site from the cluster, volumes and all</td></tr>
+      <tr><td><code>k8s/up.sh &lt;folder&gt; &lt;overlay&gt; --down</code></td><td>Delete the site from the cluster, volumes and all (without an overlay: the <code>local</code> test cluster)</td></tr>
       <tr><td><code>k8s/build-images.sh --registry &lt;registry&gt;</code></td><td>Build and push the kit's three images yourself (a changed kit; otherwise each release's are used)</td></tr>
       <tr><td><code>k8s/migrate/to-cloud.sh</code>, <code>to-nas.sh</code></td><td>Move the site's data Compose → Kubernetes, and back (<code>-n</code>: a dry run)</td></tr>
       <tr><td><code>kit/theme-zip.sh</code></td><td>Build the theme's zip for Ghost from your copy (each release has one ready)</td></tr>

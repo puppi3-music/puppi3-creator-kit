@@ -56,7 +56,7 @@ to build.
   names like `traefik` and `postiz`.
 - **Docker** with Compose 2.24 or newer, and **Python 3**.
 - **Ports 80 and 443** that the internet reaches, and 8222 for streaming (best kept to the addresses you stream from:
-  the Setup guide's Live). Each can be another: see `HTTP_PORT` and `LIVE_PORT` in the
+  the Setup guide's Live). Each can be another: see `HTTP_PORT`, `HTTPS_PORT` and `LIVE_PORT` in the
   [Settings reference](kit/docs/settings-reference.html).
 - **A domain** whose DNS you can change.
 
@@ -104,8 +104,9 @@ Compose and Kubernetes, Cloudflare or not, the clouds. In short, on one machine:
    volumes (the [Operations guide](kit/docs/operations-guide.html#backup) says how to back up both).
 2. **Start it:** `kit/kit.sh kit/sites/mysite up -d`. The first start downloads the images and takes a few minutes.
    `kit.sh` takes any `docker compose` command: `ps`, `logs -f`, `down`.
-3. **Finish by hand:** setup prints the steps for your modules:
+3. **Finish by hand:** setup prints most of these steps for your modules (the Setup guide has them all):
    - DNS for the site, `live.`, `postiz.` and `grafana.`.
+   - A mail service for Ghost (`secrets/ghost-mail.env`): it emails staff a code at each new sign-in.
    - Ghost's owner account.
    - The theme: `puppi3-creator-kit-theme.zip` from [the release](https://github.com/puppi3-music/puppi3-creator-kit/releases)
      for your version (`kit/VERSION`), uploaded in Ghost Admin.
@@ -186,7 +187,7 @@ open `kit/docs/index.html` from your copy (GitHub's file view shows a guide as i
 
 Fixes, new networks and reports from your own site are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) says where things
 are and which check fits a change. The checks build throwaway sites on your own computer (Linux, a Mac, or Windows
-with WSL2), never on your real one. The `CLAUDE.md` files and `docs/bridge-map.md` are working notes for whoever
+with WSL2; the Kubernetes one, for now, a Mac), never on your real one. The `CLAUDE.md` files and `docs/bridge-map.md` are working notes for whoever
 changes the kit, people and coding assistants alike.
 
 ## Licence and credit

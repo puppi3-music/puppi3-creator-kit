@@ -55,22 +55,23 @@ next to what you change, and keep it true in the same change.
 | An image's version (a compose file, k8s's YAML, a Dockerfile) | `python3 k8s/test/image-pins.py`: every image at an exact version, the same in every file (the hook runs it). A bump is one edit in all of them, with its `kit/CHANGELOG.md` line | seconds |
 | A new file, or anything with an address or name in it | `python3 kit/scrub.py --names` (no site's own names in the kit's files; without `--names` it also runs gitleaks for secrets, in Docker) | seconds |
 | The README's screenshots (after a visible change to the theme or the dashboards) | `kit/demo/demo.sh`: a made-up demo site, photographed and removed; writes `kit/docs/images/` | several minutes |
-| Anything in `k8s/` | `k8s/test/test.sh --render-only` first; then `k8s/test/test.sh` (with `--overlay k3d-eks` or `k3d-gke` for a cloud overlay, `--migrate` for the migration) on a local k3d cluster | 1-16 min |
+| Anything in `k8s/` | `k8s/test/test.sh --render-only` first; then `k8s/test/test.sh` (with `--overlay k3d-eks` or `k3d-gke` for a cloud overlay, `--migrate` for the migration) on a local k3d cluster (for now on a Mac with Docker Desktop: below) | 1-16 min |
 
 `kit/test.sh` and `kit/demo/demo.sh` run on Linux, a Mac, or Windows inside WSL2 (Ubuntu, with the repo cloned
 into WSL's own folders, not `/mnt/c`, and Docker Desktop's WSL integration on). They need Docker, ports 80, 443 and
 8222 free (`LIVE_PORT=<another>` moves the stream's), Python 3, ffmpeg (and cwebp for the demo), and the browser:
 `npm install` and `npx playwright install --with-deps chromium` in `kit/theme-test/`. Each says what's missing. On
-Linux, setup asks for sudo once (each container's folders get their owners).
+Linux, setup asks for sudo once (each container's folders get their owners). The Kubernetes test (`k8s/test/test.sh`)
+runs only on a Mac with Docker Desktop for now; making it run on Linux too is a welcome change. It leaves
+`k8s/images/built.env` naming its cluster's registry: delete it before using `k8s/up.sh` on a real cluster.
 
 None of them touch a real site, cluster or cloud account. What only a real cloud can show (its permissions, load
 balancer, database network) is for whoever runs one: say what you tried.
 
 A site runs the kit's published images and theme (each release's, below), so to try a changed bridge (or analytics
 setup job) on a site of your own, build them from your copy: `KIT_BUILD=1 kit/kit.sh <folder> up -d` (the tests and
-the demo always do). A
-changed image for Kubernetes: `k8s/build-images.sh` (the Setup guide's "The images"). A changed theme:
-`kit/theme-zip.sh` builds the zip in `kit/dist/`.
+the demo always do). A changed image for Kubernetes: `k8s/build-images.sh` (the Setup guide's "The images"). A changed
+theme: `kit/theme-zip.sh` builds the zip in `kit/dist/`.
 
 ## Releases
 

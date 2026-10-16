@@ -293,24 +293,24 @@ header.top .pup svg{display:block;width:100%;height:auto}
     <li>a <b>Source</b> link beside it, to the kit's code on GitHub. The licence (the AGPL) asks a site to offer its visitors the code it runs: this link does that for you. If you change the kit, point it at your changed copy.</li>
   </ul>
   <h3 id="theme-installing">Installing it</h3>
-  <p>Whoever set up the site does this once (the <a href="setup-guide.html#finish-ghost">Setup guide</a> has it): download <code>puppi3-creator-kit-theme.zip</code> from <a href="https://github.com/puppi3-music/puppi3-creator-kit/releases">the kit's release</a> for your version (<code>kit/VERSION</code>; a theme you've changed: <code>kit/theme-zip.sh</code> builds it in <code>kit/dist/</code>), and you upload it in Ghost Admin under <b>Settings → Design &amp; branding → Customize → Change theme → Upload theme</b>, then <b>Activate</b>.</p>
+  <p>Whoever set up the site does this once (the <a href="setup-guide.html#finish-ghost">Setup guide</a> has it): download <code>puppi3-creator-kit-theme.zip</code> from <a href="https://github.com/puppi3-music/puppi3-creator-kit/releases">the kit's release</a> for your version (<code>kit/VERSION</code>; a theme you've changed: <code>kit/theme-zip.sh</code> builds it in <code>kit/dist/</code>), and you upload it in Ghost Admin under <b>Settings → Theme → Change theme → Upload theme</b>, then <b>Activate</b>.</p>
   <h3 id="theme-updating">When the kit is updated</h3>
-  <p>A new version of the kit may bring a new theme: download its zip from the new version's release and upload it the same way (the <a href="operations-guide.html#upgrade-theme-and-short-links">Operations guide</a> says how to tell). Ghost keeps your settings, since it's the same theme. Changes made to the theme's files yourself are lost then: see <a href="#own">Another theme</a> for the way to keep them.</p>
+  <p>A new version of the kit may bring a new theme: download its zip from the new version's release and upload it the same way (the <a href="operations-guide.html#upgrade-theme-and-short-links">Operations guide</a> says how to tell). Ghost asks whether to overwrite the theme it has: <b>Overwrite</b>. It keeps your settings, since it's the same theme. Changes made to the theme's files yourself are lost then: see <a href="#own">Another theme</a> for the way to keep them.</p>
 </section>
 
 <section id="settings">
   <h2>Its settings</h2>
-  <p>Everything here is in Ghost Admin, needs no code and is live as soon as you save. Most of it is under <b>Settings → Design &amp; branding → Customize</b>, which shows the site beside the settings as you change them.</p>
+  <p>Everything here is in Ghost Admin, needs no code and is live as soon as you save. Most of it is under <b>Settings → Design &amp; branding → Customize</b>, which shows the site beside the settings as you change them. Customize has two tabs: <b>Brand</b>, Ghost's own, and <b>Theme</b>, the theme's settings, in three parts: <b>Site wide</b>, <b>Homepage</b> and <b>Post</b>.</p>
   <h3 id="settings-brand">Brand</h3>
-  <p><b>Brand</b> (the first tab in Customize): the site's description, the <b>accent colour</b>, the icon (the small picture in the browser's tab), the logo and the cover image. The accent colour is used for buttons and links all over the site, and for the kit's parts too: the LIVE NOW bar, the Social preview button and the platform links follow it.</p>
-  <h3 id="settings-site-wide">Site-wide</h3>
+  <p><b>Brand</b>, the first tab: the <b>accent colour</b>, the icon (the small picture in the browser's tab), the logo, the cover image, and <b>Typography</b>: a heading font and a body font from Ghost's own list. The accent colour is used for buttons and links all over the site, and for the kit's parts too: the LIVE NOW bar, the Social preview button and the platform links follow it. The site's name and description aren't here: they're in <b>Settings → Title &amp; description</b>.</p>
+  <h3 id="settings-site-wide">Site wide</h3>
   <div class="tablewrap"><table>
     <thead><tr><th>Setting</th><th>What it does</th></tr></thead>
     <tbody>
       <tr><td>Navigation layout</td><td>Where the logo sits in the top bar: in the middle, on the left, or stacked above the menu</td></tr>
       <tr><td>Site background color</td><td>The page's background; text turns light by itself on a dark one</td></tr>
       <tr><td>Header and footer color</td><td>The top bar and footer in the background colour, or in the accent colour</td></tr>
-      <tr><td>Title font, Body font</td><td>Modern sans-serif, elegant serif or (titles only) mono</td></tr>
+      <tr><td>Title font, Body font</td><td>Modern sans-serif, elegant serif or (titles only) mono. A font picked in Brand's Typography wins over these</td></tr>
       <tr><td>Signup heading, subheading</td><td>The sign-up box in the footer of every page; empty = the site's title and description</td></tr>
       <tr><td>Live stream URL</td><td>The kit's own: the stream the <a href="#live">LIVE NOW bar</a> plays. Empty = no bar</td></tr>
     </tbody>
@@ -321,7 +321,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
     <tbody>
       <tr><td>Header style</td><td>The top of the home page. <b>Landing</b>: a big welcome with the sign-up box (best for most sites). <b>Highlight</b> and <b>Magazine</b>: your latest posts up top, for sites with many posts. <b>Search</b>: a search box. <b>Off</b>: straight into the posts</td></tr>
       <tr><td>Header text</td><td>Landing and Search's text; empty = the site's description</td></tr>
-      <tr><td>Background image</td><td>Landing and Search over the cover image from Brand</td></tr>
+      <tr><td>Background image</td><td>Landing and Search: the header sits over the cover image from Brand</td></tr>
       <tr><td>Show featured posts</td><td>Highlight and Magazine: posts you've marked as featured get a place of their own</td></tr>
       <tr><td>Post feed style</td><td>The posts as a list or as a grid of cards</td></tr>
       <tr><td>Show images in feed</td><td>List only: each post's feature image beside it</td></tr>
@@ -340,9 +340,9 @@ header.top .pup svg{display:block;width:100%;height:auto}
   </table></div>
   <h3 id="settings-elsewhere">Elsewhere in Settings</h3>
   <ul>
-    <li><b>Settings → General</b>: the site's title, time zone, and <b>Social accounts</b>: the ones you fill in show as icons in the footer.</li>
+    <li><b>Settings → Title &amp; description</b>, <b>Timezone</b> and <b>Social accounts</b> (under General settings): the site's name and description, its time zone, and your accounts on the big networks, which show as icons in the footer.</li>
     <li><b>Settings → Navigation</b>: the menu at the top (<b>Primary</b>) and the links in the footer (<b>Secondary</b>), where the <a href="#platforms">links to your other platforms</a> go.</li>
-    <li><b>Settings → Membership</b> and <b>Newsletters</b>: signing up, the Portal button, and how the newsletter looks.</li>
+    <li><b>Settings → Access</b> and <b>Signup portal</b> (under Membership): who can sign up, and the sign-up window with its button. <b>Settings → Newsletters</b>: how the newsletter looks.</li>
   </ul>
 </section>
 
@@ -350,7 +350,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
   <h2>The LIVE NOW bar</h2>
   <p>While you're streaming, a <b>LIVE NOW</b> bar appears at the top of every page, with a play button, a volume slider (phones use their own volume buttons) and the track playing, when your streaming software sends it. It shows within 15 seconds of you going on air, on pages already open too, and goes away when you stop.</p>
   <h3 id="live-switching-it-on">Switching it on</h3>
-  <p>It needs the site's <code>live</code> module (whoever set up the site switches it on). Then set <b>Live stream URL</b> in <a href="#settings-site-wide">Site-wide</a> to the stream's address: <code>https://live.example.com/stream-mp3</code>, with your own site's address for example.com. Empty the setting to switch the bar off; the stream itself keeps working.</p>
+  <p>It needs the site's <code>live</code> module (whoever set up the site switches it on). Then set <b>Live stream URL</b> (Customize's Theme tab, <a href="#settings-site-wide">Site wide</a>) to the stream's address: <code>https://live.example.com/stream-mp3</code>, with your own site's address for example.com. Empty the setting to switch the bar off; the stream itself keeps working.</p>
   <h3 id="live-what-listeners-hear">What listeners hear</h3>
   <p>When someone presses play, the bar waits a few seconds before the sound starts, so short hiccups in their connection aren't heard later. If their connection drops, it picks up again by itself while you're still on air. Each play and each hiccup is counted on the dashboards (<a href="analytics-guide.html#questions-hows-the-live-stream-doing">How did my live show go?</a>).</p>
   <h3 id="live-not-showing">The bar doesn't show</h3>
@@ -369,14 +369,14 @@ header.top .pup svg{display:block;width:100%;height:auto}
 
 <section id="platforms">
   <h2>Links to your other platforms</h2>
-  <p>Ghost's <b>Social accounts</b> (Settings → General) cover the big networks (Facebook, X, Instagram, TikTok, YouTube, Bluesky, Threads and so on), not the other places a creator is: a membership page, a shop, a newsletter, a portfolio, a podcast, a music profile. For those, add them to the footer's links: <b>Settings → Navigation → Secondary</b>, a label (e.g. "Patreon") and your page's full address. Links to these get their icon in front:</p>
+  <p>Ghost's <b>Social accounts</b> (Settings → Social accounts, under General settings) cover the big networks (Facebook, X, Instagram, TikTok, YouTube, Bluesky, Threads and so on), not the other places a creator is: a membership page, a shop, a newsletter, a portfolio, a podcast, a music profile. For those, add them to the footer's links: <b>Settings → Navigation → Secondary</b>, a label (e.g. "Patreon") and your page's full address. Links to these get their icon in front:</p>
   <p>Video and streams: Vimeo, Twitch. Support and newsletters: Patreon, Ko-fi, Substack. Shops and portfolios: Etsy, Behance. Community: Discord. Podcasts and music: Apple Podcasts, Spotify, SoundCloud, Mixcloud, Bandcamp (your <code>name.bandcamp.com</code> too), Beatport, Resident Advisor (<code>ra.co</code>).</p>
   <p>Links to anything else show as plain text links, as they would anyway. Clicks on them, and on any link to another site, are counted: <a href="analytics-guide.html#questions-do-people-click-through-to-my-music">Do people click through to my work elsewhere?</a></p>
 </section>
 
 <section id="short">
   <h2>Short links</h2>
-  <p>The kit comes with short links on your own site that tell the dashboards where a visitor came from. Apps like Instagram and TikTok often hide that; a link that names the network itself doesn't lose it. Whoever set up the site uploads them once (the file <code>kit/redirects.yaml</code>, in <b>Settings → Labs</b> (under Advanced: Open, Beta features) <b>→ Redirects</b>).</p>
+  <p>The kit comes with short links on your own site that tell the dashboards where a visitor came from. Apps like Instagram and TikTok often hide that; a link that names the network itself doesn't lose it. Whoever set up the site uploads them once (the file <code>kit/redirects.yaml</code>, in <b>Settings → Labs</b> (under Advanced) <b>→ Open → Beta features → Redirects → Upload redirects file</b>).</p>
   <h3 id="short-bio-links">Bio links</h3>
   <p>Put these in each network's profile, where it asks for your website:</p>
   <div class="tablewrap"><table>
@@ -395,7 +395,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
   <p>When the kit shares a post, links to your site in it go out as short links too: <code>example.com/b/your-post</code> on Bluesky, <code>/t/</code> on Threads, <code>/i/</code> on Instagram, <code>/k/</code> on TikTok. Nothing to do: they open the post, and the visit counts as coming from that network's posts. Sharing a post by hand on Discord or YouTube, put <code>/d/</code> or <code>/y/</code> in front of its path the same way (<code>example.com/d/your-post</code>).</p>
   <p>The dashboards show bio and post visits apart: <a href="analytics-guide.html#reading-posts-vs-bio-links">Posts vs bio links</a>. To share plain links instead, whoever runs the site sets <a href="settings-reference.html#var-TAG_LINKS"><code>TAG_LINKS</code></a> to <code>false</code>.</p>
   <h3 id="short-your-own">Redirects of your own</h3>
-  <p>Ghost takes a single redirects file, and uploading one replaces the one before. To add your own (an old address that moved, say), download the current file first (<b>Download current redirects</b>, beside the upload), add your lines to it and upload that. Keep your copy: when an update of the kit changes its short links, add its new lines to your copy rather than uploading the kit's file over it.</p>
+  <p>Ghost takes a single redirects file, and uploading one replaces the one before. To add your own (an old address that moved, say), click <b>Edit</b> beside <b>Upload redirects file</b>: it opens the current file, with the kit's short links in it; add your lines and <b>Save</b>. When an update of the kit changes its short links, add its new lines the same way rather than uploading the kit's file over yours.</p>
 </section>
 
 <section id="own">
@@ -415,12 +415,12 @@ header.top .pup svg{display:block;width:100%;height:auto}
   <ol>
     <li>Copy <code>assets/kit/</code> and <code>partials/kit/</code> from <code>kit/theme/</code> into your theme.</li>
     <li>In its <code>default.hbs</code>: <code>kit/kit.css</code> after the theme's own styles; <code>{{&gt; "kit/icons"}}</code> and <code>{{&gt; "kit/live-bar"}}</code> at the top of <code>&lt;body&gt;</code>; <code>kit/kit.js</code> and then, only when the Live stream URL is set, <code>kit/live-bar.js</code> at the end. The kit's <code>default.hbs</code> shows each, marked with a "Puppi3's Creator Kit" comment.</li>
-    <li>In its <code>package.json</code>: the <code>live_stream_url</code> setting under <code>config.custom</code>, as in the kit's. Ghost allows a theme 20 settings; if yours has no room, write the stream's address into <code>partials/kit/live-bar.hbs</code> instead of the setting.</li>
+    <li>In its <code>package.json</code>: the <code>live_stream_url</code> setting under <code>config.custom</code>, as in the kit's. Ghost allows a theme 20 settings. If yours has no room, write the stream's address into <code>partials/kit/live-bar.hbs</code> in place of <code>{{@custom.live_stream_url}}</code>, and take out the <code>{{#if @custom.live_stream_url}}</code> around the bar there and around <code>kit/live-bar.js</code> in <code>default.hbs</code>: without the setting they'd leave the bar off.</li>
     <li>The footer's platform link icons need the theme's footer menu to have the class <code>gh-footer-menu</code> (Source's), or that name changed in <code>kit.js</code>. Everything else works with any theme. The kit's styles use Source's <code>--ghost-accent-color</code>, which Ghost sets on every theme, and its <code>gh-outer</code>/<code>gh-inner</code> page widths, which other themes may lack: <code>kit.css</code> is short, and the bar's layout is at its top.</li>
   </ol>
   <p>Check it the way the kit's own theme is checked: <a href="https://gscan.ghost.org" rel="noopener">gscan</a> (Ghost's theme checker) on the zip, then a look at a draft's preview and a stream.</p>
   <h3 id="own-changing-the-kit-s-theme">Changing the kit's theme itself</h3>
-  <p>To change the kit's theme beyond its settings, make it your own: copy <code>kit/theme/</code> to a folder of yours, give it a new <code>name</code> in its <code>package.json</code>, and zip and upload that. Keep the footer's credit line in it: the kit's licence (the <code>LICENSE</code> file that comes with it) asks changed versions to keep it, and, if your site runs a changed version, to offer its visitors the changed code. Updates of the kit then don't overwrite it; bring over what an update changes in <code>kit/theme/</code> when you want it.</p>
+  <p>To change the kit's theme beyond its settings, make it your own: copy <code>kit/theme/</code> to a folder of yours, give it a new <code>name</code> in its <code>package.json</code>, and zip and upload that. Keep the footer's credit line in it: the kit's licence (the <code>LICENSE</code> file at the top of the kit; the theme's own <code>LICENSE</code> is Source's) asks changed versions to keep it, and, if your site runs a changed version, to offer its visitors the changed code. Updates of the kit then don't overwrite it; bring over what an update changes in <code>kit/theme/</code> when you want it.</p>
 </section>
 </main>
 </div>

@@ -6,7 +6,8 @@ one.
 
 A site is the same folder as on Compose (`kit/setup.sh` makes it: `site.env`, `secrets/`, `data/`).
 
-- `up.sh <site> <overlay> [--render] | <site> --down`: writes the site's kustomization to `<site>/data/k8s/` on every
+- `up.sh <site> <overlay> [--render] | <site> [<overlay>] --down` (no overlay: `local`, so a real cluster's needs it
+  named; the guides say so): writes the site's kustomization to `<site>/data/k8s/` on every
   run (the overlay; a component per module in `MODULES` that has one, others noted and left out; ConfigMap `site` from
   `site.env`; ConfigMap `ghost` with only `SITE_HOST` and `STAFF_DEVICE_VERIFICATION`, so other profile changes don't
   restart Ghost; a Secret per `secrets/<stack>.env`, named after the stack (`secrets/puppi3.env`, a site's from before
