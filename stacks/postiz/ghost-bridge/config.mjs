@@ -64,7 +64,8 @@ export const STATE_FILE = env.STATE_FILE || '/data/posted.json';
 //   listen: 'none' | <address> (the Listen link, instead of the one found in the post),
 //   storyLink: true | false (an Instagram Story by hand gets a sticker; unset = only #bigdrop's),
 //   stickerLink: 'none' | <address> (the sticker's link, instead of the featured link / post; none = text only),
-//   sticker: the sticker's text (you type it in Instagram; the reminder gives it to copy), at } }
+//   sticker: the sticker's text (you type it in Instagram; the reminder gives it to copy),
+//   storyAt: <ISO time> (the Instagram Story's own time: Postiz schedules it, or its reminder comes then), at } }
 export const CUSTOM_FILE = path.join(path.dirname(STATE_FILE), 'custom.json');
 export const CUSTOM_CHANNELS = ['bluesky', 'threads', 'instagram', 'tiktok'];
 // Instagram/TikTok notifications for several photos link a page with all of them and a "Share all" button

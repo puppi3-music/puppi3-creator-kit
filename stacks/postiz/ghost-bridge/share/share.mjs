@@ -118,6 +118,17 @@ export async function handlePost(post) {
   const igSticker = chosenSticker === 'none' ? null : !chosenSticker ? autoSticker
     : onSite(chosenSticker) ? tagLink(chosenSticker, 'instagram', campaign) : chosenSticker;
   if (chosenSticker) log(`  sticker link: ${igSticker || 'none'} (picked on the Social preview)`);
+  // the Instagram Story's own time, set on the Social preview (custom.storyAt, ISO): Postiz schedules a Story it posts
+  // then, and the reminder for one you post by hand comes then. Gone by when the post is shared (or under a minute
+  // after) = with the post; a draft preview of a scheduled post compares it with the post's own time
+  const storyAtSet = custom.storyAt ? Date.parse(custom.storyAt) : NaN;
+  const shareAt = Math.max(Date.now(), draftPreview && post.status === 'scheduled' ? Date.parse(post.published_at) || 0 : 0);
+  const storyAt = storyAtSet > shareAt + 60_000 ? storyAtSet : null;
+  if (custom.storyAt) log(storyAt ? `  Instagram Story at ${new Date(storyAt).toISOString()} (set on the Social preview)`
+    : `  Instagram Story time ${custom.storyAt} has gone by: it goes with the post`);
+  // postAt: the post's own time in Ghost (scheduled or published; a draft has none yet), the Story's by default
+  const storyTime = { storyAt: custom.storyAt || '', storyLate: !!custom.storyAt && !storyAt,
+    postAt: post.status === 'scheduled' || post.status === 'published' ? post.published_at || '' : '' };
   // on, with something to add: a link, or (no link) its text
   const stickerOn = storyLink && !!(igSticker || stickerText);
   const stickerInfo = { stickerOn, stickerUrl: igSticker, stickerAuto: autoSticker, stickerChosen: chosenSticker, stickerText,
@@ -219,9 +230,10 @@ export async function handlePost(post) {
 
   const manual = []; // [{ platform, idf, drafted }] - platforms you'll finish yourself
   const results = {};
-  const post_ = (integ, content, settings, type = 'now', postTags = [], story = false) => ({
-    type,
-    date: new Date().toISOString(),
+  // at: a time for it (ms): a post to go now is scheduled for then instead, a draft dated then
+  const post_ = (integ, content, settings, type = 'now', postTags = [], story = false, at = null) => ({
+    type: at && type === 'now' ? 'schedule' : type,
+    date: new Date(at || Date.now()).toISOString(),
     shortLink: false,
     tags: postTags,
     posts: [{
@@ -249,10 +261,10 @@ export async function handlePost(post) {
       results[idf] = 'manual';
       log(`  ${idf}: draft + ntfy - finish it in the app`);
       addPreview(integ, isIG && asStory ? `${idf}:story` : idf, 'manual', { caption: captionFor(idf, isIG && asStory), why,
-        ...(isIG && asStory ? stickerInfo : {}) });
+        ...(isIG && asStory ? { ...stickerInfo, ...storyTime } : {}) });
       if (MANUAL_DRAFTS) {
         const draft = post_(integ, isIG && asStory ? '' : buildContent(idf, say(idf)), settings, 'draft',
-          DRAFT_TAG ? [{ value: DRAFT_TAG, label: DRAFT_TAG }] : [], isIG && asStory);
+          DRAFT_TAG ? [{ value: DRAFT_TAG, label: DRAFT_TAG }] : [], isIG && asStory, isIG && asStory ? storyAt : null);
         if (isDry()) log(`  [dry run] ${idf} draft (${integ.name})`);
         else {
           try { await postiz('POST', '/posts', draft); entry.drafted = true; log(`  saved ${idf} draft in Postiz (${integ.name}) - it won't publish`); }
@@ -281,13 +293,13 @@ export async function handlePost(post) {
 
     // Stories have no caption (and the API can't add link stickers)
     const content = isIG && asStory ? '' : buildContent(idf, say(idf));
-    const jobs = [[isIG && asStory ? `${idf}:story` : idf, post_(integ, content, settings, 'now', [], isIG && asStory)]];
+    const jobs = [[isIG && asStory ? `${idf}:story` : idf, post_(integ, content, settings, 'now', [], isIG && asStory, isIG && asStory ? storyAt : null)]];
     if (bigDrop && BIG_DROP_AUTO_STORY && isIG && !asStory) {
-      jobs.push([`${idf}:story`, post_(integ, '', settingsFor(idf, { story: true }), 'now', [], true)]);
+      jobs.push([`${idf}:story`, post_(integ, '', settingsFor(idf, { story: true }), 'now', [], true, storyAt)]);
     }
 
     for (const [label, body] of jobs) {
-      addPreview(integ, label, 'auto', { caption: captionFor(idf, label.endsWith(':story')) });
+      addPreview(integ, label, 'auto', { caption: captionFor(idf, label.endsWith(':story')), ...(label.endsWith(':story') ? storyTime : {}) });
       if (isDry()) {
         log(`  [dry run] ${label} (${integ.name}) with ${mediaLabel(body)}:\n${JSON.stringify(body, null, 2)}`);
         results[label] = 'dry-run';
@@ -295,7 +307,7 @@ export async function handlePost(post) {
       }
       try {
         await postiz('POST', '/posts', body);
-        log(`  queued on ${label} (${integ.name}) with ${mediaLabel(body)}`);
+        log(`  ${body.type === 'schedule' ? `scheduled for ${body.date}` : 'queued'} on ${label} (${integ.name}) with ${mediaLabel(body)}`);
         results[label] = 'ok';
       } catch (e) {
         log(`  ERROR on ${label}: ${e.message}`);
@@ -307,7 +319,7 @@ export async function handlePost(post) {
   // #bigdrop: the (link-sticker) Story you add by hand (the API can't add stickers)
   const ig = integrations.find((i) => INSTAGRAM_IDS.includes(i.identifier));
   if (pv && bigDrop && ig && media && !asStory && !pv.entries.some((e) => e.label === `${ig.identifier}:story`)) {
-    addPreview(ig, `${ig.identifier}:story`, 'manual', { caption: '', ...stickerInfo,
+    addPreview(ig, `${ig.identifier}:story`, 'manual', { caption: '', ...stickerInfo, ...storyTime,
       note: stickerOn ? `${BIG_DROP_TAG}: you add this Story in the app with ${igSticker ? 'a link sticker' : 'its text'} (your ntfy reminder has the media and ${igSticker ? 'link' : 'text'})`
         : `${BIG_DROP_TAG}: you add this Story in the app (your ntfy reminder has the media)` });
   }
@@ -323,7 +335,7 @@ export async function handlePost(post) {
   // more to come after a Story notification: wait STORY_GAP_MS so the Story arrives first
   const storyGap = async (more) => { if (more && STORY_GAP_MS) await new Promise((r) => setTimeout(r, STORY_GAP_MS)); };
   if (bigDrop && ig && !igStoryByHand && (manual.length || Object.values(results).some((r) => r === 'ok' || r === 'dry-run'))) {
-    if (await notifyBigDrop({ title, url, listen, campaign, stickerUrl: igSticker, stickerText, stickerOn, kind, isClip: audiogram,
+    if (await notifyBigDrop({ title, url, listen, campaign, stickerUrl: igSticker, stickerText, stickerOn, kind, isClip: audiogram, at: storyAt,
       attachment: kind === 'image' && String(igStory[0]?.path).startsWith('http') ? igStory[0].path : attachment })) await storyGap(manual.length || (failed.length && NOTIFY_ERRORS));
   }
 
@@ -334,7 +346,7 @@ export async function handlePost(post) {
     for (const [n, m] of ordered.entries()) {
       const sent = await notifyManual({
         platform: m.platform, drafted: m.drafted,
-        title, url, listen, campaign, stickerUrl: igSticker, stickerText, bigDrop, stickerOn, story: m.platform === 'Instagram' && asStory, kind, audiogram,
+        title, url, listen, campaign, stickerUrl: igSticker, stickerText, bigDrop, stickerOn, story: m.platform === 'Instagram' && asStory, kind, audiogram, at: storyAt,
         attachment: m.platform === 'Instagram' && !asStory && igFeed[0] && igFeed[0] !== images[0] && igFeed[0].path.startsWith('http')
           ? igFeed[0].path : attachment,
         count: kind === 'image' ? imagesFor(m.idf, m.platform === 'Instagram' && asStory).length : 1,
@@ -448,6 +460,7 @@ export async function upNextDoc() {
     if (typeof custom.storyLink === 'boolean') notes.push(`Story sticker ${custom.storyLink ? 'on' : 'off'}`);
     if (custom.stickerLink) notes.push(`sticker link ${custom.stickerLink === 'none' ? 'none' : custom.stickerLink}`);
     if (custom.sticker) notes.push(`sticker text "${custom.sticker}"`);
+    if (custom.storyAt) notes.push(`Instagram Story at ${custom.storyAt}`);
     row.notes = notes.join('; ');
   }
   upNext = { at: Date.now(), doc };

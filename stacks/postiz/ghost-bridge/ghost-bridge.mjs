@@ -55,7 +55,7 @@ import { handlePost, upNextDoc } from './share/share.mjs';
 import { writePreview, servePreview, serveDraftPreview, cleanDraftMedia, sendJson,
   servePhotos } from './pages/preview-routes.mjs';
 import { postiz, startPostizAlerts, ghostAdmin, ghostMembers, ghostPublished, checkGhostKey, PG, pgQuery } from './services.mjs';
-import { startTakeOffNotices } from './share/ntfy.mjs';
+import { startTakeOffNotices, startLaterNotices } from './share/ntfy.mjs';
 import { startSeasonalPfp } from './share/pfp.mjs';
 import { startWeeklySummary } from './share/weekly.mjs';
 import { pets, countPets, savePets, startPets } from './stats/live.mjs';
@@ -138,6 +138,7 @@ startYouTubeStats();
 startSoundCloudStats();
 if (PETS) startPets();
 startTakeOffNotices();
+startLaterNotices();
 startSeasonalPfp();
 startWeeklySummary();
 const stats = startStats({ env, dataDir: path.dirname(STATE_FILE), log, postiz: POSTIZ_KEY ? postiz : null, pgQuery, PG,

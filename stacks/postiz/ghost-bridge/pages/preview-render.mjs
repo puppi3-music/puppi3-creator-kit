@@ -178,8 +178,22 @@ function previewCard(e, pv, s) {
       + `<div class="hint">${e.stickerUrl ? 'Empty = Instagram shows the address. ' : 'With no link, add it with Aa in the app. '}`
       + `Instagram's API can't add stickers, so your reminder gives the link and text to copy${e.stickerUrl
         ? ': in the app, tap "Customize sticker text" after adding the link' : ''}.</div></div></div>`;
+  // Draft previews, any Instagram Story: a time of its own (e.storyAt, ISO; shown and typed in SITE_TIMEZONE)
+  const tz = s.SITE_TIMEZONE || 'Etc/UTC';
+  // unset: it shows the post's own time in Ghost (none for a draft: it goes when you publish)
+  const local = (iso) => (iso ? new Date(iso).toLocaleString('sv-SE', { timeZone: tz, year: 'numeric', month: '2-digit',
+    day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).replace(' ', 'T').slice(0, 16) : '');
+  const localAt = local(e.storyAt) || local(e.postAt);
+  const timeEditor = !pv.draft || !story ? ''
+    : `<div class="editor"><label class="toggle" for="story-at">Post the Story at</label>`
+      + `<input id="story-at" type="datetime-local" data-story-at value="${escAttr(localAt)}">`
+      + `${e.storyAt ? ' <button type="button" class="linkish" data-story-now>With the post</button>' : ''}`
+      + `<span class="lsaved tsaved" aria-live="polite"></span>`
+      + `<div class="hint">${esc(tz)} time. ${e.storyAt ? '' : e.postAt ? 'The same time as the post in Ghost, until you change it. '
+        : 'The same time as the post: when you publish it, until you set a time. '}${e.status === 'auto' ? 'Postiz posts it then.'
+        : 'Your reminder for it comes then.'}${e.storyLate ? ' <b>That time comes before the post goes out, so the Story goes with the post.</b>' : ''}</div></div>`;
   // Draft previews: the channel's own text, behind a checkbox (saved as you type)
-  const editor = !pv.draft ? '' : story ? stickerEditor : e.status === 'skip' || !CUSTOM_CHANNELS.includes(key) ? ''
+  const editor = !pv.draft ? '' : story ? timeEditor + stickerEditor : e.status === 'skip' || !CUSTOM_CHANNELS.includes(key) ? ''
     : `<div class="editor"><label class="toggle"><input type="checkbox" data-custom="${key}"${own ? ' checked' : ''}>`
       + ` Modify text for ${esc(p.name)}</label><div class="box"${own ? '' : ' hidden'}>`
       + `<textarea data-channel="${key}" data-auto="${escAttr(auto)}" rows="5" maxlength="${CUSTOM_MAX}" spellcheck="true">${esc(own || auto)}</textarea>`
@@ -266,7 +280,8 @@ background:var(--bg);color:var(--text);font:inherit;font-size:14px;padding:8px 1
 .emeta{display:flex;justify-content:space-between;font-size:12px;color:var(--dim);margin-top:4px}.saved.err{color:var(--skip)}
 .hint{font-size:12px;color:var(--dim);margin-top:4px}.card.busy .mock{opacity:.6;transition:opacity .2s}
 .editor .box label[for]{display:block;margin-top:8px;font-weight:600}
-#sticker-link,#sticker-text,[data-sticker-other]{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:5px 8px;width:100%;margin-top:6px}
+.linkish{font:inherit;background:none;border:0;color:var(--link);cursor:pointer;padding:0 4px;text-decoration:underline}
+#story-at,#sticker-link,#sticker-text,[data-sticker-other]{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:5px 8px;width:100%;margin-top:6px}
 .listen{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 20px}
 .listen label{font-weight:600;margin-right:8px}.listen select,.listen input{font:inherit;color:inherit;background:var(--bg);
 border:1px solid var(--line);border-radius:8px;padding:5px 8px;max-width:100%}.listen input{width:32em;margin-top:6px}
@@ -392,6 +407,32 @@ document.querySelectorAll('textarea[data-channel]').forEach(lenOf);
 // The Listen link (draft previews): saved, then the page reloads, since every card and notification uses it
 function saveListen(url) {
   saveMore('listen', { url: url }, document.querySelector('.listen .lsaved'));
+}
+document.addEventListener('click', function (e) {
+  if (e.target.matches('[data-story-now]')) saveMore('story-at', { at: '' }, document.querySelector('.tsaved'));
+});
+// The Story's time: saved (and the page reloaded) only once you're done with it, so a change part-way through
+// doesn't close the date picker: 3 s after the last change while the box isn't in use, when you leave it, or on Enter
+var storyAt = document.querySelector('[data-story-at]'), storyWait = null;
+function saveStoryAt() {
+  clearTimeout(storyWait);
+  if (!storyAt || storyAt.value === storyAt.defaultValue) return;
+  saveMore('story-at', { at: storyAt.value }, document.querySelector('.tsaved'));
+}
+function storyAtLater() {
+  clearTimeout(storyWait);
+  storyWait = setTimeout(function () { if (document.activeElement === storyAt) storyAtLater(); else saveStoryAt(); }, 3000);
+}
+if (storyAt) {
+  var said = document.querySelector('.tsaved');
+  ['input', 'change'].forEach(function (ev) {
+    storyAt.addEventListener(ev, function () {
+      if (said && storyAt.value !== storyAt.defaultValue) { said.textContent = 'Saves when you click away (or press Enter)'; said.classList.remove('err'); }
+      storyAtLater();
+    });
+  });
+  storyAt.addEventListener('blur', saveStoryAt);
+  storyAt.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); saveStoryAt(); } });
 }
 // Saves that change the cards and notifications: then the page reloads
 function saveMore(what, body, said) {

@@ -34,7 +34,21 @@ change.
   (added with Aa in the app, since a link sticker needs a link). On with neither link nor text = nothing to add, as if
   off (`stickerOn`). Off: a plain Story (`notifyBigDrop` without the sticker steps; `notifyManual` without the line).
   Text: shown on the card, and since the API can't set it, the reminders give it with "Copy sticker text" (in place of
-  `notifyBigDrop`'s Open link button; first with no link). Stories the bridge posts itself can't have one. On the Instagram
+  `notifyBigDrop`'s Open link button; first with no link). Stories the bridge posts itself can't have one.
+- An Instagram Story's own time (user asked: post the Story at a different time): every Story card on the Social
+  preview has "Post the Story at" (datetime-local in `SITE_TIMEZONE`; `POST .../story-at` {at}, `zonedTime` turns it
+  into a time, refused when gone by or more than a year away; `storyAt` ISO in `custom.json`; "With the post" clears
+  it). Unset, the box shows the post's own time in Ghost (`postAt`: a scheduled or published post's `published_at`;
+  user asked: default to the Ghost post's time), and nothing is saved until it's changed, so a rescheduled post moves
+  the Story with it; a draft's box is empty (it goes when you publish). The box saves (and reloads the page) only once you're done with it: 3 s after the last
+  change while it isn't focused, on leaving it, or on Enter (user asked: saving on the first change closed the date
+  picker). On publish: a Story Postiz posts (#story #autopost, `BIG_DROP_AUTO_STORY`) goes as `type: 'schedule'` at that
+  `date` (the hand-posted #story's Postiz draft is dated then too); the reminder for one by hand (#bigdrop's,
+  #story's Instagram one) comes then, starting "⏰ The time you set for it: …" (`notifyAt`). Gone by when the post
+  is shared (a draft preview of a scheduled post compares with its time) = with the post, and the card says so
+  (`storyLate`). The bridge keeps those reminders itself in `data/later.json` (`startLaterNotices`, every 30 s,
+  a restart sends what came due; ntfy down = tried again, dropped a day late), not ntfy's delay: ntfy keeps a
+  delayed message only in its cache and for at most 3 days, and a server with no cache file loses it on a restart. On the Instagram
   card you drag photos within the frame (`POST .../frame`, saved as `frames` in `custom.json`); on publish
   the bridge crops Instagram's feed photos (ffmpeg) to the first photo's shape (4:5-1.91:1) at that framing
   (centred otherwise). It also fits every channel's photos to what Postiz and the platform accept (`IMAGE_RULES`:

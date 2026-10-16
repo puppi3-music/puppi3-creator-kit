@@ -1,7 +1,10 @@
 // share/ntfy.mjs: phone notifications through ntfy: the "post it in the app" ones for Instagram/TikTok, the #bigdrop
-// link-Story reminder, and an older post taking off (stats/history.mjs finds those).
+// link-Story reminder (either one at a time set for the Story), and an older post taking off (stats/history.mjs finds
+// those).
 
-import { env, NTFY_URL, NTFY_TOPIC, NTFY_TOKEN, NTFY_USER, NTFY_PASS, DRY_RUN, DRY_RUN_NTFY, NTFY_TITLE_PREFIX,
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { STATE_FILE, env, NTFY_URL, NTFY_TOPIC, NTFY_TOKEN, NTFY_USER, NTFY_PASS, DRY_RUN, DRY_RUN_NTFY, NTFY_TITLE_PREFIX,
   DRAFT_TAG, POSTIZ_PUBLIC_URL, SITE_TIMEZONE, FEATURED_ICON, previewStore, log, isDry, GRAFANA_URL, ID_PREFIX } from '../config.mjs';
 import { photoPage } from '../pages/preview-routes.mjs';
 import { stickerLink } from './content.mjs';
@@ -56,11 +59,69 @@ export async function notify(msg) {
   }
 }
 
+// ---------- at a time you set ----------
+// A Story's reminder for the time set on the Social preview: kept in later.json ([{ at, msg }]) and sent when it's
+// due, by the bridge itself. (ntfy can hold a message too, but only in its cache, which may not outlive a restart of
+// the server, and for at most 3 days.) Checked every 30 s; a restart sends what came due meanwhile.
+const LATER_FILE = path.join(path.dirname(STATE_FILE), 'later.json');
+const LATER_CHECK_MS = 30_000;
+const LATER_GIVE_UP_MS = 24 * 3_600_000; // one ntfy still refuses a day after it was due is dropped
+export const whenText = (ms) => new Date(ms).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short',
+  hour: '2-digit', minute: '2-digit', timeZone: SITE_TIMEZONE });
+async function readLater() {
+  try { return JSON.parse(await fs.readFile(LATER_FILE, 'utf8')); } catch { return []; }
+}
+// one write at a time, via a temp file
+let laterQueue = Promise.resolve();
+function editLater(change) {
+  const run = laterQueue.then(async () => {
+    const list = await readLater();
+    const out = (await change(list)) || list;
+    await fs.mkdir(path.dirname(LATER_FILE), { recursive: true });
+    await fs.writeFile(`${LATER_FILE}.tmp`, JSON.stringify(out, null, 2));
+    await fs.rename(`${LATER_FILE}.tmp`, LATER_FILE);
+  });
+  laterQueue = run.catch(() => {});
+  return run;
+}
+// msg at `at` (ms): now when that's under a minute away (or unset), else kept for then. A draft preview only shows it.
+export async function notifyAt(msg, at) {
+  if (!at || at <= Date.now() + 60_000) return notify(msg);
+  msg = { ...msg, message: `⏰ The time you set for it: ${whenText(at)}\n\n${msg.message || ''}` };
+  const store = previewStore.getStore();
+  store?.notes.push({ ...msg, at });
+  const sendAnyway = DRY_RUN && DRY_RUN_NTFY && !store?.draft;
+  if (!NTFY_URL || store?.draft) return false;
+  if (isDry() && !sendAnyway) { log(`  [dry run] ntfy at ${whenText(at)}: ${msg.title}`); return false; }
+  await editLater((list) => { list.push({ at, msg }); });
+  log(`  ntfy notification kept for ${whenText(at)}: ${msg.title}`);
+  return true;
+}
+// Sends what's due (now: for the tests), keeps the rest
+export async function sendDueLater(now = Date.now()) {
+  await editLater(async (list) => {
+    const keep = [];
+    for (const item of list) {
+      if (item.at > now) { keep.push(item); continue; }
+      log(`ntfy: the notification kept for ${whenText(item.at)}: ${item.msg.title}`);
+      if (await notify(item.msg)) continue;
+      if (now - item.at > LATER_GIVE_UP_MS) log(`  WARNING: dropped, still not sent a day after it was due`);
+      else keep.push(item);
+    }
+    return keep;
+  });
+}
+export function startLaterNotices() {
+  const run = () => sendDueLater().catch((e) => log(`ntfy: kept notifications: ${e.message}`));
+  setTimeout(run, 5_000);
+  setInterval(run, LATER_CHECK_MS).unref();
+}
+
 // The #bigdrop Story you add by hand (the API can't do stickers): its own notification, so the feed post's
 // notification keeps its buttons and attachment. Attached: the Story's photo (the first, uncropped) or video.
 // stickerOn false: the sticker was turned off on the Social preview, so it's a plain Story. stickerUrl: the sticker's
 // link (left out = the featured link, else the post; null = none: a sticker of text only, stickerText).
-export async function notifyBigDrop({ title, url, listen, campaign, stickerUrl, stickerText, stickerOn = true, attachment, isClip, kind }) {
+export async function notifyBigDrop({ title, url, listen, campaign, stickerUrl, stickerText, stickerOn = true, attachment, isClip, kind, at = null }) {
   const link = stickerUrl === undefined ? stickerLink(listen, url, campaign) : stickerUrl;
   const text = stickerOn && stickerText;
   const linked = stickerOn && !!link;
@@ -82,7 +143,7 @@ export async function notifyBigDrop({ title, url, listen, campaign, stickerUrl, 
   const open = listen ? { action: 'view', label: `Open ${listen.name}`, url: listen.url } : { action: 'view', label: 'Open post', url };
   const instagram = { action: 'view', label: 'Open Instagram', url: 'https://www.instagram.com/', clear: false };
   const copyText = { action: 'copy', label: 'Copy sticker text', value: text, clear: false };
-  return notify({
+  return notifyAt({
     title: `${FEATURED_ICON} Big drop: add the ${linked ? 'link ' : ''}Story for "${title}"`,
     message: lines.join('\n'),
     tags: ['loudspeaker'],
@@ -92,11 +153,11 @@ export async function notifyBigDrop({ title, url, listen, campaign, stickerUrl, 
     actions: linked ? [{ action: 'copy', label: 'Copy sticker link', value: link, clear: false }, instagram, text ? copyText : open]
       : text ? [copyText, instagram, open] : [instagram, open],
     ...(attachment ? { attach: attachment, ...(isClip || kind === 'video' ? { filename: isClip ? 'story-clip.mp4' : 'story.mp4' } : {}) } : {}),
-  });
+  }, at);
 }
 
 // "Finish it yourself" notification - one per platform (Instagram / TikTok)
-export async function notifyManual({ platform, title, url, listen, campaign, stickerUrl, stickerText, bigDrop, stickerOn = bigDrop, story, caption, attachment, kind, audiogram, drafted, count = 1, photos = [] }) {
+export async function notifyManual({ platform, title, url, listen, campaign, stickerUrl, stickerText, bigDrop, stickerOn = bigDrop, story, caption, attachment, kind, audiogram, drafted, count = 1, photos = [], at = null }) {
   const isIG = platform === 'Instagram';
   const what = isIG
     ? (story ? 'Story' : kind === 'video' ? 'Reel' : count > 1 ? `carousel (${count} photos)` : 'feed post')
@@ -145,7 +206,8 @@ export async function notifyManual({ platform, title, url, listen, campaign, sti
     if (stickerText) actions.push({ action: 'copy', label: 'Copy sticker text', value: stickerText, clear: false });
   } else if (POSTIZ_PUBLIC_URL && !page) actions.push({ action: 'view', label: 'Open Postiz', url: `${POSTIZ_PUBLIC_URL}/launches`, clear: false });
 
-  const sent = await notify({
+  // an Instagram Story (#story) with a time of its own comes then
+  const sent = await notifyAt({
     title: `${isIG ? '📸' : '🎵'} ${platform}: post "${title}"${linkStory && sticker ? ' + link sticker' : ''}`,
     // the caption comes last, so a long one is what gets cut
     message: fitMessage(lines.join('\n'), caption ? '\n(Cut short here: "Copy caption" has all of it.)' : ''),
@@ -154,7 +216,7 @@ export async function notifyManual({ platform, title, url, listen, campaign, sti
     // no click target: tapping opens the message in ntfy, where the attachment and buttons are
     actions: actions.slice(0, 3),
     ...(attachment ? { attach: attachment, ...(kind === 'video' ? { filename: `${platform.toLowerCase()}.mp4` } : {}) } : {}),
-  });
+  }, isIG && story ? at : null);
   // Without the page: an ntfy message carries one attachment, so each further photo comes as its own quiet one, in order
   for (let i = 1; !page && i < photos.length; i++) {
     await notify({

@@ -8,7 +8,7 @@ down, and the image takes every `.mjs` at any depth), Node's own runner, nothing
 environment (the bridge's defaults, `SITE_HOST=example.com`), as config.mjs reads it once at load. `content` (bodyText,
 links, the featured link, #clip, captions fitted to every network's limit, tagLink's short links against
 `kit/redirects.yaml`'s rules), `stats` (history.mjs's helpers: gains per day, 30-day sums, sitePath/siteLinks),
-`schedule` (WEEKLY_SUMMARY_AT, seasons, ntfy's cut), `share` (`handlePost` run as a draft preview, fully dry, against a
+`schedule` (WEEKLY_SUMMARY_AT, seasons, ntfy's cut), `later` (notifications kept for a Story's own time, against a fake ntfy; `zonedTime`), `share` (`handlePost` run as a draft preview, fully dry, against a
 fake Postiz that only lists channels: each network's status, caption, media and notifications), `postgres` (pgQuery's
 three sign-ins, a forged SCRAM server, errors). The numbers collectors, one poll each against made-up answers in the
 APIs' real shapes: `social` (Bluesky, Threads, TikTok, Mixcloud, Postiz's own), `site` (Ghost + Tinybird, Cloudflare,
