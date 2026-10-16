@@ -4,6 +4,8 @@ import './env.mjs';
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
 // the fake Postiz: GET /integrations, and a note of every request, so a test can see nothing else was asked
 const CHANNELS = [
@@ -25,7 +27,7 @@ process.env.POSTIZ_API_URL = `http://127.0.0.1:${postiz.address().port}`;
 
 // the bridge reads its settings when it loads: after the fake's address is set
 const { handlePost, musicRouting } = await import('../ghost-bridge/share/share.mjs');
-const { previewStore } = await import('../ghost-bridge/config.mjs');
+const { previewStore, editCustom } = await import('../ghost-bridge/config.mjs');
 
 // handlePost as a draft preview: { entries (one per network: label, status, caption, why, media), notes (the ntfy
 // notifications it would send), log }
@@ -81,8 +83,77 @@ test('the featured link and a #campaign- tag', async () => {
 test('#bigdrop with a video: a reminder to add the link-sticker Story', async () => {
   const { byLabel, notes } = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#bigdrop', '#autopost') });
   assert.equal(byLabel['instagram-standalone:story'].status, 'manual');
-  assert.equal(byLabel['instagram-standalone:story'].sticker, 'https://example.com/i/new-mix');
+  assert.equal(byLabel['instagram-standalone:story'].stickerOn, true);
+  assert.equal(byLabel['instagram-standalone:story'].stickerUrl, 'https://example.com/i/new-mix');
   assert.equal(notes.length, 1, 'the Story reminder');
+});
+
+test('the link sticker set on the Social preview: its text on the card and in both reminders, turned off, turned on, another link, no link', async () => {
+  // custom.json sits next to STATE_FILE, in this run's own folder
+  const dataDir = path.dirname(process.env.STATE_FILE);
+  await fs.mkdir(dataDir, { recursive: true });
+  after(() => fs.rm(dataDir, { recursive: true, force: true }));
+  await editCustom('p1', (m) => { m.sticker = 'LISTEN NOW'; });
+  try {
+    const { byLabel, notes } = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#bigdrop', '#autopost') });
+    assert.equal(byLabel['instagram-standalone:story'].stickerText, 'LISTEN NOW');
+    assert.match(notes[0].message, /Sticker text:\nLISTEN NOW/);
+    assert.deepEqual(notes[0].actions.map((a) => a.label), ['Copy sticker link', 'Open Instagram', 'Copy sticker text']);
+    // #story + #bigdrop by hand: the Story's own notification carries it
+    const byHand = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#bigdrop', '#story') });
+    assert.equal(byHand.byLabel['instagram-standalone:story'].stickerText, 'LISTEN NOW');
+    const ig = byHand.notes.find((n) => n.title.includes('Instagram'));
+    assert.match(ig.message, /Sticker text \("Customize sticker text"\): LISTEN NOW/);
+    assert.ok(ig.actions.some((a) => a.label === 'Copy sticker text' && a.value === 'LISTEN NOW'));
+    // turned off: a plain Story
+    await editCustom('p1', (m) => { m.storyLink = false; });
+    const off = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#bigdrop', '#autopost') });
+    assert.equal(off.byLabel['instagram-standalone:story'].stickerOn, false);
+    assert.doesNotMatch(off.notes[0].message, /sticker/i);
+    assert.deepEqual(off.notes[0].actions.map((a) => a.label), ['Open Instagram', 'Open post']);
+    // turned on for a #story by hand that isn't a #bigdrop
+    await editCustom('p1', (m) => { m.storyLink = true; });
+    const on = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#story') });
+    assert.equal(on.byLabel['instagram-standalone:story'].stickerOn, true);
+    const story = on.notes.find((n) => n.title.includes('Instagram'));
+    assert.match(story.message, /🔗 Add a link sticker to it → https:\/\/example.com\/i\/new-mix/);
+    // a link typed on the Social preview: as typed elsewhere, tagged for Instagram on the site
+    await editCustom('p1', (m) => { m.storyLink = true; m.stickerLink = 'https://shop.example.org/merch'; });
+    const other = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#bigdrop', '#autopost') });
+    assert.equal(other.byLabel['instagram-standalone:story'].stickerUrl, 'https://shop.example.org/merch');
+    assert.equal(other.byLabel['instagram-standalone:story'].stickerAuto, 'https://example.com/i/new-mix');
+    assert.match(other.notes[0].message, /Sticker link:\nhttps:\/\/shop.example.org\/merch/);
+    assert.equal(other.notes[0].actions[0].value, 'https://shop.example.org/merch');
+    await editCustom('p1', (m) => { m.stickerLink = 'https://example.com/tickets/'; });
+    const site = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#story') });
+    assert.equal(site.byLabel['instagram-standalone:story'].stickerUrl, 'https://example.com/i/tickets');
+    assert.ok(site.notes.find((n) => n.title.includes('Instagram')).actions.some((a) => a.value === 'https://example.com/i/tickets'));
+    // no link: a sticker of text only, both reminders without a link
+    await editCustom('p1', (m) => { m.stickerLink = 'none'; });
+    const plain = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#bigdrop', '#autopost') });
+    assert.equal(plain.byLabel['instagram-standalone:story'].stickerOn, true);
+    assert.equal(plain.byLabel['instagram-standalone:story'].stickerUrl, null);
+    assert.doesNotMatch(plain.notes[0].message, /Sticker link|Link sticker/);
+    assert.match(plain.notes[0].message, /add its text with Aa[^]*Sticker text:\nLISTEN NOW/);
+    assert.deepEqual(plain.notes[0].actions.map((a) => a.label), ['Copy sticker text', 'Open Instagram', 'Open post']);
+    const plainStory = (await share({ html: '<video src="/v.mp4"></video>', tags: tags('#story') })).notes.find((n) => n.title.includes('Instagram'));
+    assert.match(plainStory.message, /🔗 Add its text with Aa: LISTEN NOW/);
+    assert.deepEqual(plainStory.actions.map((a) => a.label), ['Open Instagram', 'Copy sticker text']);
+    // no link and no text: nothing to add
+    await editCustom('p1', (m) => { delete m.sticker; });
+    const empty = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#bigdrop', '#autopost') });
+    assert.equal(empty.byLabel['instagram-standalone:story'].stickerOn, false);
+    assert.doesNotMatch(empty.notes[0].message, /sticker/i);
+  } finally {
+    await editCustom('p1', (m) => { delete m.sticker; delete m.storyLink; delete m.stickerLink; });
+  }
+});
+
+test('#story by hand without #bigdrop: no link sticker unless turned on', async () => {
+  const { byLabel, notes } = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#story') });
+  assert.equal(byLabel['instagram-standalone:story'].stickerOn, false);
+  assert.equal(byLabel['instagram-standalone:story'].stickerUrl, 'https://example.com/i/new-mix');
+  assert.doesNotMatch(notes.find((n) => n.title.includes('Instagram')).message, /link sticker/);
 });
 
 test('posts that aren\'t shared', async () => {

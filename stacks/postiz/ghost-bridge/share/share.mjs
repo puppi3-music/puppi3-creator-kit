@@ -10,7 +10,7 @@ import { CHANNELS, SKIP_TAG, BIG_DROP_TAG, BIG_DROP_AUTO_STORY, MUSIC_MODE, AUTO
 import { postiz, postizChannels, uploadMedia, ghostToken, ghostSiteOrigin } from '../services.mjs';
 import { notify, notifyBigDrop, notifyManual, STORY_GAP_MS } from './ntfy.mjs';
 import { bodyText, findVideo, findAudio, findGalleryImages, postLinks, findListenLink, chosenListen, splitHashtags,
-  channelText, buildLines, buildContent, campaignOf, stickerLink } from './content.mjs';
+  channelText, buildLines, buildContent, campaignOf, stickerLink, tagLink } from './content.mjs';
 import { uploadAsJpeg, fitImages, fitContext, makeAudiogram, POSTABLE, IMAGE_RULES, pathOf } from './media.mjs';
 
 function settingsFor(identifier, { story = false } = {}) {
@@ -81,6 +81,7 @@ export async function handlePost(post) {
   const own = CUSTOM_CHANNELS.filter((c) => custom[c]);
   if (own.length) log(`  modified text for: ${own.join(', ')}`);
   if (custom.frames) log(`  instagram framing set for ${Object.keys(custom.frames).length} photo(s)`);
+  const stickerText = custom.sticker || '';
   if (previewStore.getStore()) Object.assign(previewStore.getStore(), { custom });
 
   const state = await loadState();
@@ -96,6 +97,10 @@ export async function handlePost(post) {
   const bigDrop = tags.includes(BIG_DROP_TAG);
   const asStory = tags.includes(STORY_TAG);
   if (bigDrop) log(`  big drop (${BIG_DROP_TAG})`);
+  // an Instagram Story you post by hand gets a sticker: #bigdrop's does, unless the Social preview says otherwise
+  const storyLink = typeof custom.storyLink === 'boolean' ? custom.storyLink : bigDrop;
+  if (typeof custom.storyLink === 'boolean') log(`  sticker ${storyLink ? 'on' : 'off'} (picked on the Social preview)`);
+  if (stickerText) log(`  sticker text "${stickerText}"`);
   if (asStory) log(`  ${STORY_TAG}: Instagram gets a Story instead of a feed post`);
   const campaign = campaignOf(tags);
   if (campaign) log(`  campaign: links carry utm_campaign=${campaign}`);
@@ -105,6 +110,18 @@ export async function handlePost(post) {
   if (previewStore.getStore()) Object.assign(previewStore.getStore(), { listen: { auto: autoListen, links, chosen: custom.listen || '' } });
   if (custom.listen) log(`  listen link picked on the Social preview: ${listen ? listen.url : 'none'}`);
   else if (listen) log(`  found ${listen.name} link: ${listen.url}`);
+  // the sticker's link: the featured link, else the post; or picked on the Social preview: 'none' (a sticker of
+  // text only) or any address (tagged when it's on the site, like the post's own)
+  const autoSticker = stickerLink(listen, url, campaign);
+  const onSite = (link) => { try { return new URL(link).host === new URL(url).host; } catch { return false; } };
+  const chosenSticker = custom.stickerLink || '';
+  const igSticker = chosenSticker === 'none' ? null : !chosenSticker ? autoSticker
+    : onSite(chosenSticker) ? tagLink(chosenSticker, 'instagram', campaign) : chosenSticker;
+  if (chosenSticker) log(`  sticker link: ${igSticker || 'none'} (picked on the Social preview)`);
+  // on, with something to add: a link, or (no link) its text
+  const stickerOn = storyLink && !!(igSticker || stickerText);
+  const stickerInfo = { stickerOn, stickerUrl: igSticker, stickerAuto: autoSticker, stickerChosen: chosenSticker, stickerText,
+    stickerPicked: storyLink };
   // each channel's starting text for the preview's "Modify text" box (link addresses only where they can be tapped)
   if (previewStore.getStore()) {
     previewStore.getStore().autoText = Object.fromEntries(CUSTOM_CHANNELS.map((key) => [key, channelText(text, key, { url, listen, campaign })]));
@@ -231,7 +248,8 @@ export async function handlePost(post) {
       if (!manual.some((m) => m.platform === entry.platform)) manual.push(entry);
       results[idf] = 'manual';
       log(`  ${idf}: draft + ntfy - finish it in the app`);
-      addPreview(integ, isIG && asStory ? `${idf}:story` : idf, 'manual', { caption: captionFor(idf, isIG && asStory), why });
+      addPreview(integ, isIG && asStory ? `${idf}:story` : idf, 'manual', { caption: captionFor(idf, isIG && asStory), why,
+        ...(isIG && asStory ? stickerInfo : {}) });
       if (MANUAL_DRAFTS) {
         const draft = post_(integ, isIG && asStory ? '' : buildContent(idf, say(idf)), settings, 'draft',
           DRAFT_TAG ? [{ value: DRAFT_TAG, label: DRAFT_TAG }] : [], isIG && asStory);
@@ -286,11 +304,12 @@ export async function handlePost(post) {
     }
   }
 
-  // #bigdrop: the link-sticker Story you add by hand (the API can't add stickers)
+  // #bigdrop: the (link-sticker) Story you add by hand (the API can't add stickers)
   const ig = integrations.find((i) => INSTAGRAM_IDS.includes(i.identifier));
   if (pv && bigDrop && ig && media && !asStory && !pv.entries.some((e) => e.label === `${ig.identifier}:story`)) {
-    addPreview(ig, `${ig.identifier}:story`, 'manual', { caption: '', sticker: stickerLink(listen, url, campaign),
-      note: `${BIG_DROP_TAG}: you add this Story in the app with a link sticker (your ntfy reminder has the media and link)` });
+    addPreview(ig, `${ig.identifier}:story`, 'manual', { caption: '', ...stickerInfo,
+      note: stickerOn ? `${BIG_DROP_TAG}: you add this Story in the app with ${igSticker ? 'a link sticker' : 'its text'} (your ntfy reminder has the media and ${igSticker ? 'link' : 'text'})`
+        : `${BIG_DROP_TAG}: you add this Story in the app (your ntfy reminder has the media)` });
   }
 
   // the first photo shared (a gallery-only post has no feature image)
@@ -304,7 +323,7 @@ export async function handlePost(post) {
   // more to come after a Story notification: wait STORY_GAP_MS so the Story arrives first
   const storyGap = async (more) => { if (more && STORY_GAP_MS) await new Promise((r) => setTimeout(r, STORY_GAP_MS)); };
   if (bigDrop && ig && !igStoryByHand && (manual.length || Object.values(results).some((r) => r === 'ok' || r === 'dry-run'))) {
-    if (await notifyBigDrop({ title, url, listen, campaign, kind, isClip: audiogram,
+    if (await notifyBigDrop({ title, url, listen, campaign, stickerUrl: igSticker, stickerText, stickerOn, kind, isClip: audiogram,
       attachment: kind === 'image' && String(igStory[0]?.path).startsWith('http') ? igStory[0].path : attachment })) await storyGap(manual.length || (failed.length && NOTIFY_ERRORS));
   }
 
@@ -315,7 +334,7 @@ export async function handlePost(post) {
     for (const [n, m] of ordered.entries()) {
       const sent = await notifyManual({
         platform: m.platform, drafted: m.drafted,
-        title, url, listen, campaign, bigDrop, story: m.platform === 'Instagram' && asStory, kind, audiogram,
+        title, url, listen, campaign, stickerUrl: igSticker, stickerText, bigDrop, stickerOn, story: m.platform === 'Instagram' && asStory, kind, audiogram,
         attachment: m.platform === 'Instagram' && !asStory && igFeed[0] && igFeed[0] !== images[0] && igFeed[0].path.startsWith('http')
           ? igFeed[0].path : attachment,
         count: kind === 'image' ? imagesFor(m.idf, m.platform === 'Instagram' && asStory).length : 1,
@@ -426,6 +445,9 @@ export async function upNextDoc() {
     const own = CUSTOM_CHANNELS.filter((c) => custom[c]);
     if (own.length) notes.push(`own text for ${own.join(', ')}`);
     if (custom.listen) notes.push(`listen link picked: ${custom.listen === 'none' ? 'none' : custom.listen}`);
+    if (typeof custom.storyLink === 'boolean') notes.push(`Story sticker ${custom.storyLink ? 'on' : 'off'}`);
+    if (custom.stickerLink) notes.push(`sticker link ${custom.stickerLink === 'none' ? 'none' : custom.stickerLink}`);
+    if (custom.sticker) notes.push(`sticker text "${custom.sticker}"`);
     row.notes = notes.join('; ');
   }
   upNext = { at: Date.now(), doc };

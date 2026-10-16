@@ -96,7 +96,8 @@ function mediaSet(list, { grid = false, cls = '', ...opts } = {}) {
 }
 
 function previewCard(e, pv, s) {
-  const { LIMITS, IMAGE_LIMITS, INSTAGRAM_IDS, TIKTOK_IDS, NO_LINK_IDS, CUSTOM_CHANNELS, CUSTOM_MAX, MANUAL_DRAFTS, channelKey } = s;
+  const { LIMITS, IMAGE_LIMITS, INSTAGRAM_IDS, TIKTOK_IDS, NO_LINK_IDS, CUSTOM_CHANNELS, CUSTOM_MAX, STICKER_TEXT_MAX, MANUAL_DRAFTS,
+    channelKey } = s;
   const p = PLATFORMS[e.idf] || { name: e.idf, hard: 500 };
   const story = e.label.endsWith(':story');
   const isIG = INSTAGRAM_IDS.includes(e.idf);
@@ -124,9 +125,13 @@ function previewCard(e, pv, s) {
     body = '<div class="skipped">Nothing goes to this channel.</div>';
   } else if (story) {
     body = `<div class="phone${video}">${mediaSet(list, { cls: 'fill' }) || '<div class="nomedia">No media</div>'}
-      ${e.sticker ? `<div class="sticker">🔗 ${esc(shortUrl(e.sticker))}</div>` : ''}<div class="bars"></div><div class="over top">${avatar(e)}<b>${who}</b><span class="soft">now</span></div>
+      ${e.stickerOn ? `<div class="sticker${e.stickerUrl ? '' : ' plain'}">${e.stickerUrl ? '🔗 ' : ''}${esc(e.stickerText || shortUrl(e.stickerUrl))}</div>` : ''}<div class="bars"></div><div class="over top">${avatar(e)}<b>${who}</b><span class="soft">now</span></div>
       <div class="over reply"><span class="field">Send message</span><span class="icons">${icons('heart', 'send')}</span></div></div>
-      <div class="dim small">${e.sticker ? 'No caption. The sticker links to ' + esc(e.sticker) + '.' : 'No caption. Add a link sticker in the app.'}</div>`;
+      <div class="dim small">${e.stickerOn && e.stickerUrl ? `No caption. The sticker links to ${esc(e.stickerUrl)}${e.stickerText ? ` and says "${esc(e.stickerText)}"` : ''}.`
+        : e.stickerOn ? `No caption. Its text, with no link: "${esc(e.stickerText)}".`
+        : e.stickerPicked ? 'No caption. The sticker has no link and no text, so there\'s nothing to add.'
+        : 'stickerAuto' in e ? 'No caption and no sticker.'
+        : 'No caption. Add a link sticker in the app.'}</div>`;
   } else if (isTT) {
     body = `<div class="phone${video}">${mediaSet(list, { cls: 'fill' }) || '<div class="nomedia">No media</div>'}
       <div class="rail">${avatar(e)}<span class="icons col">${icons('heart', 'comment', 'bookmark', 'share')}</span></div>
@@ -153,8 +158,28 @@ function previewCard(e, pv, s) {
   const key = channelKey(e.idf);
   const own = pv.custom?.[key] || '';
   const auto = (typeof pv.autoText === 'string' ? pv.autoText : pv.autoText?.[key]) || ''; // a string in older saved previews
+  // Draft previews, a Story posted by hand (e.stickerAuto set): its sticker, on or off (e.stickerPicked), its link
+  // (e.stickerChosen: '' automatic, 'none' or an address) and its text
+  const chosen = e.stickerChosen || '';
+  const otherLink = !!chosen && chosen !== 'none';
+  const linkOpt = (value, label, on) => `<option value="${escAttr(value)}"${on ? ' selected' : ''}>${esc(label)}</option>`;
+  const stickerEditor = !pv.draft || !story || !('stickerAuto' in e) ? ''
+    : `<div class="editor"><label class="toggle"><input type="checkbox" data-sticker-on${e.stickerPicked ? ' checked' : ''}> Sticker</label>`
+      + `<span class="lsaved ssaved" aria-live="polite"></span><div class="box"${e.stickerPicked ? '' : ' hidden'}>`
+      + `<label for="sticker-link">Sticker link</label><select id="sticker-link" data-sticker-link>`
+      + linkOpt('', `Automatic: ${e.stickerAuto}`, !chosen) + linkOpt('none', 'No link: text only', chosen === 'none')
+      + linkOpt('other', 'Another address…', otherLink) + `</select>`
+      + `<input type="url" data-sticker-other placeholder="https://…" value="${escAttr(otherLink ? chosen : '')}"${otherLink ? '' : ' hidden'}>`
+      + `<div class="hint">Automatic is the ${esc(words(s.FEATURED_LABEL))} above, else the post. An address on the site is`
+      + ` tagged for Instagram like the post's.</div>`
+      + `<label for="sticker-text">Sticker text</label>`
+      + `<input id="sticker-text" data-sticker maxlength="${STICKER_TEXT_MAX}" value="${escAttr(e.stickerText || '')}"`
+      + ` placeholder="${escAttr(e.stickerUrl ? shortUrl(e.stickerUrl) : 'what it says')}">`
+      + `<div class="hint">${e.stickerUrl ? 'Empty = Instagram shows the address. ' : 'With no link, add it with Aa in the app. '}`
+      + `Instagram's API can't add stickers, so your reminder gives the link and text to copy${e.stickerUrl
+        ? ': in the app, tap "Customize sticker text" after adding the link' : ''}.</div></div></div>`;
   // Draft previews: the channel's own text, behind a checkbox (saved as you type)
-  const editor = !pv.draft || story || e.status === 'skip' || !CUSTOM_CHANNELS.includes(key) ? ''
+  const editor = !pv.draft ? '' : story ? stickerEditor : e.status === 'skip' || !CUSTOM_CHANNELS.includes(key) ? ''
     : `<div class="editor"><label class="toggle"><input type="checkbox" data-custom="${key}"${own ? ' checked' : ''}>`
       + ` Modify text for ${esc(p.name)}</label><div class="box"${own ? '' : ' hidden'}>`
       + `<textarea data-channel="${key}" data-auto="${escAttr(auto)}" rows="5" maxlength="${CUSTOM_MAX}" spellcheck="true">${esc(own || auto)}</textarea>`
@@ -219,7 +244,7 @@ padding:3px 8px;border-radius:999px}.phone .counter{top:auto;bottom:auto;top:44p
 .phone{position:relative;aspect-ratio:9/16;background:#000;border-radius:12px;overflow:hidden;color:#fff}
 .sticker{position:absolute;left:50%;top:62%;transform:translateX(-50%);z-index:2;background:#fff;color:#1d6ff2;font-weight:600;
 font-size:14px;padding:8px 14px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.35);white-space:nowrap;max-width:85%;
-overflow:hidden;text-overflow:ellipsis}
+overflow:hidden;text-overflow:ellipsis}.sticker.plain{color:#16161a}
 .phone .over{position:absolute;left:0;right:0;padding:12px;z-index:2;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.7)}
 .phone .over .fold,.phone .over a{pointer-events:auto}.phone .cap{margin:4px 0}.phone .tag{color:#fff;font-weight:600}
 .phone .soft,.phone .more{color:rgba(255,255,255,.8);font-size:13px}.phone .deadlink{color:#fff}
@@ -240,6 +265,8 @@ background:var(--bg);color:var(--text);font:inherit;font-size:14px;padding:8px 1
 .box textarea:focus{outline:2px solid var(--link);outline-offset:-1px}
 .emeta{display:flex;justify-content:space-between;font-size:12px;color:var(--dim);margin-top:4px}.saved.err{color:var(--skip)}
 .hint{font-size:12px;color:var(--dim);margin-top:4px}.card.busy .mock{opacity:.6;transition:opacity .2s}
+.editor .box label[for]{display:block;margin-top:8px;font-weight:600}
+#sticker-link,#sticker-text,[data-sticker-other]{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:5px 8px;width:100%;margin-top:6px}
 .listen{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 20px}
 .listen label{font-weight:600;margin-right:8px}.listen select,.listen input{font:inherit;color:inherit;background:var(--bg);
 border:1px solid var(--line);border-radius:8px;padding:5px 8px;max-width:100%}.listen input{width:32em;margin-top:6px}
@@ -364,11 +391,14 @@ document.addEventListener('input', function (e) {
 document.querySelectorAll('textarea[data-channel]').forEach(lenOf);
 // The Listen link (draft previews): saved, then the page reloads, since every card and notification uses it
 function saveListen(url) {
-  var said = document.querySelector('.lsaved');
+  saveMore('listen', { url: url }, document.querySelector('.listen .lsaved'));
+}
+// Saves that change the cards and notifications: then the page reloads
+function saveMore(what, body, said) {
   function say(t, err) { if (said) { said.textContent = t; said.classList.toggle('err', !!err); } }
   say('Saving…');
-  fetch(location.pathname.replace(/[/]?$/, '/') + 'listen', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ url: url }) })
+  fetch(location.pathname.replace(/[/]?$/, '/') + what, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body) })
     .then(function (r) { if (r.ok) return location.reload(); return r.json().then(function (j) { throw new Error(j.error || r.status); }, function () { throw new Error(r.status); }); })
     .catch(function (e) { say("Couldn't save: " + e.message, true); });
 }
@@ -378,6 +408,15 @@ document.addEventListener('change', function (e) {
     if (e.target.value === 'other') { other.hidden = false; other.focus(); if (other.value.trim()) saveListen(other.value.trim()); return; }
     other.hidden = true; saveListen(e.target.value);
   } else if (e.target === other && other.value.trim()) saveListen(other.value.trim());
+  else if (e.target.matches('[data-sticker-on]')) {
+    e.target.closest('.editor').querySelector('.box').hidden = !e.target.checked;
+    saveMore('sticker', { on: e.target.checked }, document.querySelector('.ssaved'));
+  } else if (e.target.matches('[data-sticker-link]')) {
+    var addr = document.querySelector('[data-sticker-other]');
+    if (e.target.value === 'other') { addr.hidden = false; addr.focus(); if (addr.value.trim()) saveMore('sticker', { link: addr.value.trim() }, document.querySelector('.ssaved')); return; }
+    addr.hidden = true; saveMore('sticker', { link: e.target.value }, document.querySelector('.ssaved'));
+  } else if (e.target.matches('[data-sticker-other]') && e.target.value.trim()) saveMore('sticker', { link: e.target.value.trim() }, document.querySelector('.ssaved'));
+  else if (e.target.matches('[data-sticker]')) saveMore('sticker', { text: e.target.value.trim() }, document.querySelector('.ssaved'));
 });
 })();`;
 
@@ -475,7 +514,7 @@ function listenPicker(pv, s) {
     <input type="url" data-listen-other placeholder="https://…" value="${escAttr(other ? chosen : '')}"${other ? '' : ' hidden'}>
     <span class="lsaved" aria-live="polite"></span>
     <div class="hint">Bluesky and Threads get a "${esc(shown(s.FEATURED_LINE))}" line with it, Instagram and TikTok
-    "${esc(shown(s.FEATURED_BIO_LINE))}", and a #bigdrop's link sticker points to it. Automatic picks ${esc(order)}
+    "${esc(shown(s.FEATURED_BIO_LINE))}", and a #bigdrop's link sticker points to it (unless its Story card says otherwise). Automatic picks ${esc(order)}
     (the order of FEATURED_DOMAINS).</div></div>`;
 }
 
