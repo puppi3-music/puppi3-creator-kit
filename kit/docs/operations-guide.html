@@ -377,7 +377,7 @@ kubectl -n $NS exec deploy/ghost -c ghost -- tar -czf - -C /var/lib/ghost conten
 
 <section id="move">
   <h2>Moving a site</h2>
-  <p>The same site can run on Docker Compose or Kubernetes, and move between them with its data: posts, members, pictures, the social queue and history, the analytics, the stream server's settings and the dashboards' history.</p>
+  <p>The same site can run on Docker Compose or Kubernetes, and move between them with its data: posts, members, pictures, the social queue and history, the analytics, the stream server's settings and the dashboards' history. A busy stretch in a cloud, from setting up the cloud to tearing it down: the <a href="cloud-guide.html">Cloud guide</a>.</p>
   <div class="tablewrap"><table>
     <thead><tr><th>From → to</th><th>How</th></tr></thead>
     <tbody>
@@ -450,6 +450,19 @@ kubectl -n mysite logs &lt;pod&gt; --previous      # why it stopped, if it resta
       <tr><td><code>monitoring</code></td><td><code>grafana</code>, <code>prometheus</code>, <code>blackbox</code>, <code>cadvisor</code>, <code>node-exporter</code>, <code>grafana-ro-*</code></td><td>The dashboards, the numbers behind them, the outside checks, and the jobs that give Grafana its read-only logins</td></tr>
     </tbody>
   </table></div>
+  <h3 id="trouble-alerts">The alerts</h3>
+  <p>With the <code>monitoring</code> module, Grafana sends these to the phone (the ntfy topic in <code>NTFY_TOPIC</code> on <code>NTFY_URL</code>), and a "Resolved" one when each clears. The ones firing now are listed at the top of the Overview dashboard. A module that's off has none of its alerts.</p>
+  <ul>
+    <li><strong>Down:</strong> the site, Ghost or the bridge for 5 minutes, the stream server for 10. <a href="#trouble-first-look">First look</a> says which part and why.</li>
+    <li><strong>The site is serving errors:</strong> more than 5% of its requests ended in a server error over the last hour (once there were more than 20). Ghost's log says why.</li>
+    <li><strong>The certificate expires soon:</strong> under 14 days left on the one visitors get. <a href="#trouble-the-site">The site</a> has what usually causes it.</li>
+    <li><strong>The disk is nearly full:</strong> under 10% free where the site's data is (<code>DISK_MOUNT</code>).</li>
+    <li><strong>Visitors aren't being counted:</strong> no page view reached the analytics in 12 hours although Ghost answered over 100 requests; or the analytics have no page views for yesterday and today. The counting broke, not the visits: the <code>analytics</code> module's parts, and the page-hit route.</li>
+    <li><strong>The newsletter:</strong> someone marked one as spam in the last hour, or more than 5% of the last 2 days' newsletter emails failed.</li>
+    <li><strong>Social:</strong> a post failed in Postiz in the last hour, posts stuck in its queue, a channel that needs connecting again (<a href="#trouble-social">Social</a>, and the <a href="networks-guide.html">Networks guide</a>).</li>
+    <li><strong>A network's numbers stopped updating</strong> for 3 hours: its status panel on the Platforms dashboard says why, often a sign-in that needs connecting again.</li>
+  </ul>
+  <p>To check they reach the phone: Grafana → <em>Alerting → Contact points</em>, the site's, <em>Test</em>.</p>
   <h3 id="trouble-the-site">The site</h3>
   <dl class="faq">
     <dt>Normal on a first start, for a few minutes</dt>
@@ -480,21 +493,28 @@ kit/kit.sh kit/sites/mysite restart ghost</pre></div>
   <h3 id="trouble-social">Social</h3>
   <dl class="faq">
     <dt>A post wasn't shared</dt>
-    <dd>The bridge's log: <code>kit/kit.sh &lt;folder&gt; logs --tail 200 postiz-ghost-bridge</code>. "Rejected request: bad or missing X-Ghost-Signature" means the secret in Ghost's webhook isn't <code>GHOST_WEBHOOK_SECRET</code>. No line at all means Ghost didn't call it: the webhook's address and event (Post published) in Ghost's integration. A post tagged <code>#nosocial</code>, or a members-only one (<code>ONLY_PUBLIC</code>, on by default), is skipped on purpose.</dd>
+    <dd>The bridge's log: <code>kit/kit.sh &lt;folder&gt; logs --tail 200 postiz-ghost-bridge</code>. "Rejected request: bad or missing X-Ghost-Signature" means the secret in Ghost's webhook isn't <code>GHOST_WEBHOOK_SECRET</code>. No line at all means Ghost didn't call it: the webhook's address and event (Post published) in Ghost's integration. From a browser, <code>https://postiz.&lt;your site&gt;/ghost-webhook</code> should answer with the bridge's plain "not found", not Postiz's page; behind Cloudflare, also check that its Bot Fight Mode or firewall rules aren't stopping Ghost's call. A post tagged <code>#nosocial</code>, or a members-only one (<code>ONLY_PUBLIC</code>, on by default), is skipped on purpose: "skip: visibility is …" in the log. If every post says so, the site's default post access isn't Public (Ghost's Settings → Access, under Membership).</dd>
     <dt>The bridge is up but Postiz refuses it</dt>
     <dd><code>POSTIZ_API_KEY</code> in <code>secrets/postiz.env</code> is Postiz's current key (Postiz's settings), and the network is connected in Postiz. Postiz allows 30 new posts an hour through its API; each Ghost post uses up to four.</dd>
     <dt>Instagram or TikTok drafts don't arrive on the phone</dt>
-    <dd>The ntfy app is subscribed to <code>NTFY_TOPIC</code> on <code>NTFY_URL</code>. Send a test from the bridge:</dd>
+    <dd>The ntfy app is subscribed to <code>NTFY_TOPIC</code> on <code>NTFY_URL</code>, and the bridge's first lines in its log say <code>ntfy: &lt;the server&gt;/&lt;the topic&gt;</code>, not <code>ntfy: off</code> (off: <code>NTFY_URL</code> was empty when it started, or it's a dry run). Send a test from the bridge:</dd>
     <dd><div class="code"><pre>kit/kit.sh kit/sites/mysite exec postiz-ghost-bridge sh -c 'wget -qO- --post-data test "$NTFY_URL/$NTFY_TOPIC"'</pre></div></dd>
     <dt>Postiz can't schedule: "no mapping defined for search attribute postId"</dt>
     <dd>Postiz adds the two fields it searches Temporal by when it starts, so it started before Temporal's records were made new (the update to kit 1.3.1, or Temporal's database started over). Start it again: <code>kit/kit.sh &lt;folder&gt; restart postiz</code>.</dd>
     <dt>Postiz says a post went out (or still shows it queued), but it never appears</dt>
-    <dd>The part of Postiz that publishes the queued posts may be stuck. Start it again: <code>kit/kit.sh &lt;folder&gt; restart postiz</code>. With no ⚠️ notification and nothing after 10 minutes, this is the usual fix.</dd>
+    <dd>The part of Postiz that publishes the queued posts may be stuck. Start it again: <code>kit/kit.sh &lt;folder&gt; restart postiz</code>. With no ⚠️ notification and nothing after 10 minutes, this is the usual fix. To look first: Postiz's publishing jobs are in Temporal, and a stuck worker shows as no pollers on its <code>main</code> queue:</dd>
+    <dd><div class="code"><pre>kit/kit.sh kit/sites/mysite exec postiz-temporal temporal workflow list --address postiz-temporal:7233 --limit 10
+kit/kit.sh kit/sites/mysite exec postiz-temporal temporal task-queue describe --address postiz-temporal:7233 --task-queue main</pre></div></dd>
+    <dd>Temporal also has a page for the same: <code>http://127.0.0.1:8233</code> on the server (on Compose). It has no sign-in, so it only listens there; from your own computer, through ssh: <code>ssh -L 8233:127.0.0.1:8233 &lt;you&gt;@&lt;the server&gt;</code>, then <code>http://localhost:8233</code>.</dd>
+    <dt>A post with an audio card went out as a picture</dt>
+    <dd>The bridge couldn't make the video from the sound: its log says "couldn't make the audio clip" and why.</dd>
+    <dt>Lines in Postiz's log that don't matter</dt>
+    <dd><code>upstream timed out … /copilot/chat</code> is Postiz's AI assistant, which has no key, and <code>Email sender information not found</code> means Postiz has no mail service set up, which it doesn't need.</dd>
     <dt>A post should be shared again</dt>
     <dd>The bridge shares each post once: republishing it in Ghost does nothing, because the post is listed in <code>data/postiz/ghost-bridge/data/posted.json</code> as already shared. Take it off that list by its title (<code>sudo</code> on Linux), then unpublish the post in Ghost and publish it again:</dd>
     <dd><div class="code"><pre>python3 -c 'import json,sys; f,t=sys.argv[1:]; s=json.load(open(f)); k=[i for i in s if s[i].get("title")==t]; [s.pop(i) for i in k]; json.dump(s,open(f,"w"),indent=2); print(len(k),"removed")' kit/sites/mysite/data/postiz/ghost-bridge/data/posted.json "The post's title"</pre></div></dd>
     <dt>A network shows as an alert error in Grafana</dt>
-    <dd>It's in <code>NETWORKS</code> but what its numbers need isn't set up yet (<a href="setup-guide.html#finish-numbers">the Setup guide</a> says what each one needs). Set it up, or take it out of <code>NETWORKS</code>.</dd>
+    <dd>It's in <code>NETWORKS</code> but what its numbers need isn't set up yet (the <a href="networks-guide.html">Networks guide</a> says what each one needs). Set it up, or take it out of <code>NETWORKS</code>.</dd>
   </dl>
   <h3 id="trouble-live">Live</h3>
   <dl class="faq">

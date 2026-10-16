@@ -456,7 +456,13 @@ header.top .pup svg{display:block;width:100%;height:auto}
   <p>Each mock-up is laid out like the app (icons included, though they're only pictures), so you can see how the text, links, hashtags and media will sit. Play any video, step through a carousel with the ‹ › arrows (or swipe or scroll), and click a photo to open it full size.</p>
   <p><strong>Lining up photos for Instagram:</strong> Instagram shows every photo of a post in the first photo's shape (between square-ish 4:5 and wide 1.91:1), so the others get cropped. On the Instagram card, drag a photo to choose which part shows; double-click puts it back in the middle. It's saved straight away, and when you publish, the photos are cropped exactly like that for Instagram (the Postiz draft and the photo in your notification too). The other platforms get the whole photos.</p>
   
-  <p><strong>Choosing the featured link:</strong> the <strong>🔗 Featured link</strong> menu above the cards shows which link the posts will use. <em>Automatic</em> is the one found in the post (see <a href="#writing-linking-your-set">The featured link</a>). You can pick any other link in the post, <em>None</em> for no featured link, or <em>Another address…</em> and type any web address (press Enter or click away to save). The page reloads with every card, and the #bigdrop link sticker, using it. Pick <em>Automatic</em> to go back.</p>
+  <p><strong>Choosing the featured link:</strong> the <strong>🔗 Featured link</strong> menu above the cards shows which link the posts will use. <em>Automatic</em> is the one found in the post (see <a href="#writing-linking-your-set">The featured link</a>). You can pick any other link in the post, <em>None</em> for no featured link, or <em>Another address…</em> and type any web address (press Enter or click away to save). The page reloads with every card, and the Story's link sticker (unless you gave it a link of its own, below), using it. Pick <em>Automatic</em> to go back.</p>
+  <p><strong>The Story's sticker:</strong> an Instagram Story you post by hand (a <span class="tag">#bigdrop</span>'s, or a <span class="tag">#story</span> that comes to you to finish) has a <strong>Sticker</strong> checkbox on its card. It starts ticked for <span class="tag">#bigdrop</span> and unticked otherwise; untick it for a plain Story, or tick it to give any Story a sticker. Under it:</p>
+  <ul>
+    <li><strong>Sticker link:</strong> <em>Automatic</em> is the featured link, or the post when there's none. <em>No link</em> makes it text only (Instagram's link sticker needs a link, so you add the text with <strong>Aa</strong> instead). <em>Another address…</em> takes any web address; a page on your own site gets the Instagram tag, like the post's link.</li>
+    <li><strong>Sticker text:</strong> what the sticker says, up to 60 characters. Leave it empty and Instagram shows the link's address.</li>
+  </ul>
+  <p>The card draws the sticker as you set it, and the page reloads after each change. The bridge can't put a sticker on for you (Instagram doesn't allow it), so your notification gives you the link and text to copy.</p>
   <p><strong>Different text for one channel:</strong> tick <strong>Modify text for Bluesky</strong> (or Threads, Instagram, TikTok) on that channel's card. A box opens with your post text; change it there. It saves as you type and the mock-up updates. When you publish, that channel gets your own text instead of the post text. The post link (or on Instagram and TikTok, the "link in bio" line) is still added after it, unless your text already has it. Untick it to go back to the post text. Until you actually change the text, nothing is saved, so that channel keeps following the post: later edits in Ghost still reach it. It's handy for Bluesky's 300 characters.</p>
   <p>Nothing is posted. It shows the post as last saved, so after changing something, wait for Ghost to say <em>Saved</em> and refresh the tab. A post with an audio card takes a few seconds, while the clip is made.</p>
 </section>
@@ -660,21 +666,24 @@ Caption:
 <span>Forty seconds of the opening, read by me. …</span></pre>
     <div class="btns"><span>Copy caption</span><span>Open Instagram</span><span>Open Postiz</span></div>
   </div>
-  <p>This example is for a post with an audio card. It tells you whether to post a <strong>feed post</strong> (image only), a <strong>Reel</strong> (when the post has a video or an audio card) or a <strong>Story</strong> (with <span class="tag">#story</span>). When it says "it already has sound", the attached video already plays your audio or your video's soundtrack, so you only need to add @tags. With several photos, <em>Open Postiz</em> becomes <em>All N photos</em> (see <a href="#finishing">Finishing</a>). With <span class="tag">#story</span> and <span class="tag">#bigdrop</span> together, the Story is the link Story, so this notification gets a "Big drop: add a link sticker to it" line and <em>Copy sticker link</em> instead of a separate reminder.</p>
+  <p>This example is for a post with an audio card. It tells you whether to post a <strong>feed post</strong> (image only), a <strong>Reel</strong> (when the post has a video or an audio card) or a <strong>Story</strong> (with <span class="tag">#story</span>). When it says "it already has sound", the attached video already plays your audio or your video's soundtrack, so you only need to add @tags. With several photos, <em>Open Postiz</em> becomes <em>All N photos</em> (see <a href="#finishing">Finishing</a>). When the Story you post here has a sticker (<span class="tag">#story</span> with <span class="tag">#bigdrop</span>, or one you ticked on the Social preview), this notification gets an "Add a link sticker to it" line with <em>Copy sticker link</em>, and <em>Copy sticker text</em> when you set its text (with <em>No link</em>, an "Add its text with Aa" line), instead of a separate reminder.</p>
 
   <h3 id="notifications-tiktok-finish-the-post">TikTok: finish the post</h3>
   <p>Same idea, with a 🎵 and TikTok's own caption. Buttons: <em>Copy caption</em>, <em>Open TikTok</em>, <em>Open Postiz</em>.</p>
 
   <h3 id="notifications-big-drop-reminder">Big-drop reminder</h3>
-  <p>Every <span class="tag">#bigdrop</span> post gets its own "<span>🔗</span> Big drop: add the link Story" notification (as long as Instagram is connected in Postiz), sent first, before the Instagram and TikTok ones, whether Instagram was posted by hand or automatically. It has the Story's photo attached (the first one, uncropped so it fills the Story), or the video, and the buttons <em>Copy sticker link</em>, <em>Open Instagram</em> and <em><span>Open Spotify</span></em> (or <em>Open post</em> when there's no <span>featured link</span>). See <a href="#finishing-big-drop-the-link-story">Big drop: the link Story</a>. The one exception is <span class="tag">#story</span> + <span class="tag">#bigdrop</span>, covered by the Instagram notification above. Story notifications always come in first (the bridge waits a couple of seconds before sending the rest, so they reach your phone in that order): with <span class="tag">#story</span>, Instagram's arrives before TikTok's.</p>
+  <p>Every <span class="tag">#bigdrop</span> post gets its own "<span>🔗</span> Big drop: add the link Story" notification (as long as Instagram is connected in Postiz), sent first, before the Instagram and TikTok ones, whether Instagram was posted by hand or automatically. It has the Story's photo attached (the first one, uncropped so it fills the Story), or the video, and the buttons <em>Copy sticker link</em>, <em>Open Instagram</em> and <em><span>Open Spotify</span></em> (or <em>Open post</em> when there's no <span>featured link</span>). When you set the sticker's text on the Social preview, <em>Copy sticker text</em> takes the third button's place; with <em>No link</em> the buttons are <em>Copy sticker text</em>, <em>Open Instagram</em> and the link, and with the sticker unticked it's a plain "add the Story" reminder. See <a href="#finishing-big-drop-the-link-story">Big drop: the link Story</a>. The one exception is <span class="tag">#story</span> + <span class="tag">#bigdrop</span>, covered by the Instagram notification above. Story notifications always come in first (the bridge waits a couple of seconds before sending the rest, so they reach your phone in that order): with <span class="tag">#story</span>, Instagram's arrives before TikTok's.</p>
 
   <h3 id="notifications-taking-off">📈 Taking off</h3>
   <p>"📈 Your YouTube video is taking off" (or <span>Instagram post</span>, <span>TikTok video</span> and so on) means an older post suddenly picked up: in about the last 4 hours, or the last 18, it gained at least 5% of what it had (and at least 10), and at least 3 times what it usually gets in that time. It says how much it gained and what it usually gets, with buttons to its <em>Post dashboard</em> in Grafana and to the post itself. Nothing to do: it's a good moment to reshare it, pin it or post something like it. You get one per take-off; the Post dashboard shows how it goes.</p>
 
-  
-  
-  
-  
+  <h3 id="notifications-seasonal-profile-picture">🐶 Seasonal profile picture</h3>
+  <p>Only on a site whose theme dresses its mascot up for the seasons (the kit's own theme doesn't). When one of the outfits comes on (a witch hat for Halloween, say), you get "🐶 Halloween puppy pfp" (or whichever it is) with the mascot in that outfit attached, as a square picture ready to use, and the networks to change it on.</p>
+  <ol>
+    <li>Save the picture: tap <strong>⋯ → Save file</strong> (or the <em>Save picture</em> button), as with any attachment.</li>
+    <li>Set it as your profile picture in each app. The first two networks in the list have an <em>Open</em> button.</li>
+  </ol>
+  <p>When the outfit's days are over, "🐶 Back to the usual pfp" reminds you to put your usual picture back on the same networks. Nothing is changed for you: it's only a reminder, and skipping it is fine. You get each one once. To leave a network out of the list, or stop the reminders, ask whoever runs the site (it's one setting).</p>
 
   <h3 id="notifications-your-week">📊 Your week</h3>
   <p>Every Monday at 9 in the morning <span>(the site's time zone)</span> you get "📊 Your week on example.com" with how the week before (Monday to Sunday) went, so you don't have to open Grafana to know:</p>
@@ -708,8 +717,9 @@ Caption:
     <li>Open the "<span>🔗</span> Big drop: add the link Story" notification and save its attachment (<strong>⋯ → Save file</strong>). It's the first photo uncropped, so it fills the Story, or the video.</li>
     <li>Instagram: <em>+ → Story</em>, then pick it from the <em>Download</em> album.</li>
     <li>Tap the sticker icon, then <strong>Link</strong>. Paste the link (tap <em>Copy sticker link</em> in the notification).</li>
-    <li>Tap <em>Customize sticker text</em> and write something like "<span>Out now</span>", then share.</li>
+    <li>Tap <em>Customize sticker text</em> and paste the text you set (<em>Copy sticker text</em>), or write something like "<span>Out now</span>", then share.</li>
   </ol>
+  <p>The link, the text and whether there's a sticker at all are yours to choose on the Social preview (see <a href="#writing-checking-the-social-posts-before-you-publish">Checking the social posts</a>). With <em>No link</em>, skip step 3 and add the text with <strong>Aa</strong>; with the sticker unticked, skip steps 3 and 4.</p>
 </section>
 
 <section id="postiz">
@@ -732,7 +742,7 @@ Caption:
     
     <li><strong>Pick music that fits you.</strong> One that matches your work and your audience, rather than whatever is trending that day.</li>
     <li><strong>Use an Instagram Creator account,</strong> not Business. Creator accounts get the full music library.</li>
-    <li><strong>Keep your bio links current.</strong> On Instagram, add <code>example.com</code> and <span>your other main page (a shop, a channel, a newsletter)</span> under <em>Edit profile → Links</em>. The site's home page always shows the newest post, so "link in bio" keeps working. On TikTok, bio links need 1,000 followers or a Business account.</li>
+    <li><strong>Keep your bio links current.</strong> On Instagram, add your short link <code>example.com/ig</code> (so visits from your profile count as such) and <span>your other main page (a shop, a channel, a newsletter)</span> under <em>Edit profile → Links</em>. The site's home page always shows the newest post, so "link in bio" keeps working. On TikTok, bio links need 1,000 followers or a Business account.</li>
     
     <li><strong>Mind the copyright.</strong> A video with someone else's song in it can get muted on Instagram and TikTok. Your own sound gets through; music picked from the apps' own libraries is always allowed.</li>
     <li><strong>Engage.</strong> Replying to comments and resharing when <span>people tag you</span> does more for growth than posting more often.</li>
@@ -747,7 +757,7 @@ Caption:
     <dt>Bluesky or Threads says posted, but I can't see it.</dt>
     <dd>Give it a minute, then check your profile, not the home feed. If you got a ⚠️ notification, the post failed, so resend it from Postiz. If there's no warning and it still isn't there after 10 minutes, tell whoever runs the site: the part of Postiz that sends posts may need a restart.</dd>
     <dt>I didn't get the Instagram or TikTok notification.</dt>
-    <dd>Check that you're subscribed to <span>the site's topic</span> in the ntfy app. Also check that the phone allows ntfy's notifications (on Android, that it isn't battery-restricted; on an iPhone, that no Focus mode hides them), and that the topic isn't muted. The account also needs to be connected in Postiz, otherwise no notification is sent for it.</dd>
+    <dd>Check that you're subscribed to <span>the site's topic</span> in the ntfy app. Also check that the phone allows ntfy's notifications (on Android: its High and Low priority kinds of notification turned on, its battery use Unrestricted, and its "listening" notification showing; on an iPhone, that no Focus mode hides them), and that the topic isn't muted. The account also needs to be connected in Postiz, otherwise no notification is sent for it.</dd>
     <dt>The notification doesn't mention a Postiz draft, or the draft isn't in the calendar.</dt>
     <dd>Postiz couldn't save the draft, usually because that account needs reconnecting (see <a href="#postiz">Using Postiz</a>). The notification itself still has everything you need to post by hand.</dd>
     <dt>My video wasn't used; the post went out with the image.</dt>
@@ -767,7 +777,7 @@ Caption:
     <dt>Draft</dt><dd>A post saved in Postiz that won't publish until you tell it to.</dd>
     <dt>Internal tag</dt><dd>A Ghost tag starting with <code>#</code>. Readers never see it; it tells the system what to do.</dd>
     <dt>Audio card / Video card</dt><dd>Blocks in the Ghost editor for uploading sound or video into a post.</dd>
-    <dt>Link sticker</dt><dd>A tappable link you add to an Instagram Story. It can only be added in the Instagram app.</dd>
+    <dt>Link sticker</dt><dd>A tappable link you add to an Instagram Story. It can only be added in the Instagram app; the Social preview sets its link and text.</dd>
   </dl>
 </section>
 </main>

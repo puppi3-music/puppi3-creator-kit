@@ -246,7 +246,8 @@ EOF
 fi
 on social && cat <<EOF
   - Social: make your account at https://postiz.$SITE_HOST, then set POSTIZ_DISABLE_REGISTRATION=true in
-    secrets/postiz.env; connect the networks; put Postiz's API key in POSTIZ_API_KEY; a Ghost custom integration's
+    secrets/postiz.env; connect the networks (each one step by step: kit/docs/networks-guide.html); put Postiz's
+    API key in POSTIZ_API_KEY; a Ghost custom integration's
     Admin API key in GHOST_ADMIN_API_KEY, and its webhook "Post published" to
     https://postiz.$SITE_HOST/ghost-webhook with secret GHOST_WEBHOOK_SECRET (in secrets/postiz.env). Ghost sends
     it only to a public address (postiz.$SITE_HOST must resolve to one from this machine). To try it first without
