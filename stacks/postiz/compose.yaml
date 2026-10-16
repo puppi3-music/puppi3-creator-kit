@@ -385,7 +385,8 @@ services:
       postiz-temporal-postgres:
         condition: service_healthy
 
-  # Optional web UI for debugging stuck posts. LAN-local only: http://<nas-ip>:8233
+  # Optional web UI for debugging stuck posts. On this machine only (127.0.0.1:8233, no sign-in): from another,
+  # an ssh tunnel, ssh -L 8233:127.0.0.1:8233 <you>@<this machine>, then http://localhost:8233
   # Remove this service if you don't want it.
   postiz-temporal-ui:
     image: temporalio/ui:2.34.0

@@ -12,9 +12,9 @@ credit (the copyright line, and the theme footer's "Theme: Puppi3's Creator Kit 
 
 | Part | Folder | Notes for whoever works there |
 |---|---|---|
-| The Compose kit: `setup.sh`, `kit.sh`, the profiles, monitoring | `kit/` | `kit/CLAUDE.md` |
-| The kit's theme (Ghost's Source plus the kit's parts) | `kit/theme/` | `kit/theme/KIT.md` lists every change to Source's files |
-| Kubernetes: base, components, overlays, migration | `k8s/` | `k8s/CLAUDE.md` |
+| The Compose kit: `setup.sh`, `kit.sh`, the profiles, monitoring | `kit/` | `kit/CLAUDE.md`, and the one in each of its folders |
+| The kit's theme (Ghost's Source plus the kit's parts) | `kit/theme/` | `kit/theme/CLAUDE.md`; `kit/theme/KIT.md` lists every change to Source's files |
+| Kubernetes: base, components, overlays, migration | `k8s/` | `k8s/CLAUDE.md`, and the one in each of its folders |
 | The services: Traefik, Ghost, the social bridge, the stream | `stacks/` | a `CLAUDE.md` in each stack's folder |
 | The dashboards and alert rules | `stacks/monitoring/grafana/` | its `CLAUDE.md` |
 | Every setting and its default | `instances/example.env`, the `.env.example`s, `kit/examples/` | their comments are the Settings reference |

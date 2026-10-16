@@ -8,7 +8,8 @@
 if git diff --cached --name-only | grep -qE '^(docs/|kit/docs/|kit/examples/|kit/profiles/|kit/setup\.sh$|kit/compose\.yaml$|kit/monitoring/compose\.yaml$|instances/example\.env$|stacks/(traefik|ghost|postiz|icecast)/(\.env\.example|compose\.yaml)$|stacks/traefik/dynamic/|k8s/examples/|k8s/overlays/[^/]+/cloud\.env\.example$)'; then
   python3 docs/build-docs.py || exit 1
   git add kit/docs/settings-reference.html kit/docs/setup-guide.html kit/docs/operations-guide.html \
-    kit/docs/posting-guide.html kit/docs/analytics-guide.html kit/docs/theme-guide.html
+    kit/docs/networks-guide.html kit/docs/cloud-guide.html kit/docs/posting-guide.html kit/docs/analytics-guide.html \
+    kit/docs/theme-guide.html
 fi
 
 # 2. Grafana: grafana_ro may read only the tables listed in stacks/ghost/grafana-ro.sh, so a dashboard or alert rule

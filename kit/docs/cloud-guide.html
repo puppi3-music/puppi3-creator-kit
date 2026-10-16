@@ -1,0 +1,959 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="50 -6 140 140"%3E%3CclipPath id="s"%3E%3Ccircle cx="120" cy="78" r="44"/%3E%3C/clipPath%3E%3Cellipse cx="69" cy="84" rx="14" ry="30" fill="%238A4B2A" transform="rotate(12 69 84)"/%3E%3Cellipse cx="171" cy="84" rx="14" ry="30" fill="%238A4B2A" transform="rotate(-12 171 84)"/%3E%3Ccircle cx="120" cy="78" r="44" fill="%23F2B66D"/%3E%3Cg clip-path="url(%23s)"%3E%3Cellipse cx="120" cy="32" rx="24" ry="16" fill="%23B97B48"/%3E%3Cellipse cx="120" cy="103" rx="24.5" ry="19" fill="%23FFF1E0"/%3E%3C/g%3E%3Ccircle cx="93" cy="94" r="7.5" fill="%23FF7E8C" opacity=".6"/%3E%3Ccircle cx="147" cy="94" r="7.5" fill="%23FF7E8C" opacity=".6"/%3E%3Ccircle cx="103" cy="77" r="7" fill="%2324142F"/%3E%3Ccircle cx="137" cy="77" r="7" fill="%2324142F"/%3E%3Ccircle cx="105.6" cy="74.4" r="2.2" fill="%23fff"/%3E%3Ccircle cx="139.6" cy="74.4" r="2.2" fill="%23fff"/%3E%3Cpath d="M111.5 90 q8.5 -3.5 17 0 q-1 7.5 -8.5 9.5 q-7.5 -2 -8.5 -9.5 z" fill="%2324142F"/%3E%3Cpath d="M115.5 104 h9 v3 a4.5 4.5 0 0 1 -9 0 z" fill="%23FF5F96"/%3E%3Cpath d="M110 102 q5 5.5 10 0 q5 5.5 10 0" fill="none" stroke="%2324142F" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/%3E%3Cpath d="M68 66 C68 0 172 0 172 66" fill="none" stroke="%2324142F" stroke-width="10" stroke-linecap="round"/%3E%3Crect x="56" y="54" width="27" height="44" rx="13.5" fill="%23FF3F8A" stroke="%2324142F" stroke-width="6"/%3E%3Crect x="157" y="54" width="27" height="44" rx="13.5" fill="%23FF3F8A" stroke="%2324142F" stroke-width="6"/%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Creator Kit Cloud Guide</title>
+<meta name="description" content="Moving a Puppi3's Creator Kit site to Amazon EKS or Google GKE for a busy stretch and back: Cloudflare's cache, the costs, setting up each cloud, the move, and tearing it down.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#F4F6F8; --surface:#FFFFFF; --sunken:#E9EDF1; --ink:#14202B; --muted:#52606E; --rule:#D5DDE5;
+  --accent:#1A6FB0; --accent-soft:#E0EDF8;
+  --auto:#0B7F80; --auto-soft:#DDF3F2;
+  --you:#9A5B00; --you-soft:#FBEFD9;
+  --skip:#66717D; --skip-soft:#EAEDF0;
+  --code-bg:#17212B; --code-ink:#E4EAF0;
+  --display:"Unbounded", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0E141A; --surface:#151E26; --sunken:#1C2731; --ink:#E3EAF0; --muted:#9EAEBC; --rule:#2A3845;
+    --accent:#5AB0F0; --accent-soft:#132A3D;
+    --auto:#3CC7C9; --auto-soft:#12302F;
+    --you:#F2B35A; --you-soft:#352812;
+    --skip:#9AA6B2; --skip-soft:#212B34;
+    --code-bg:#0A0F14; --code-ink:#E4EAF0;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E141A; --surface:#151E26; --sunken:#1C2731; --ink:#E3EAF0; --muted:#9EAEBC; --rule:#2A3845;
+  --accent:#5AB0F0; --accent-soft:#132A3D;
+  --auto:#3CC7C9; --auto-soft:#12302F;
+  --you:#F2B35A; --you-soft:#352812;
+  --skip:#9AA6B2; --skip-soft:#212B34;
+  --code-bg:#0A0F14; --code-ink:#E4EAF0;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6;padding-inline:16px;padding-block:0 64px}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto}
+header.top{padding-block:40px 28px;border-bottom:1px solid var(--rule);display:grid;gap:14px}
+header.top .mark{width:64px;height:64px}
+header.top .mark svg{display:block;width:100%;height:100%}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,5vw,44px);line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1 .dot{color:var(--accent)}
+.lede{font-size:19px;max-width:62ch;margin:0;color:var(--ink)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--muted)}
+.layout{display:grid;grid-template-columns:230px minmax(0,1fr);min-width:0;gap:48px;padding-top:32px}
+nav.toc{min-width:0;position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:14px}
+nav.toc p{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+nav.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+nav.toc a{display:block;padding:6px 10px;border-radius:6px;color:var(--ink);text-decoration:none}
+nav.toc a:hover{background:var(--sunken)}
+main{min-width:0;max-width:96ch}
+section{padding-block:8px 28px;border-bottom:1px solid var(--rule);margin-bottom:28px;scroll-margin-top:20px}
+section:last-of-type{border-bottom:0}
+h2{font-family:var(--display);font-weight:500;font-size:clamp(21px,3vw,26px);line-height:1.2;margin:8px 0 14px;text-wrap:balance}
+h3{font-size:18px;margin:26px 0 8px;font-family:var(--mono)}
+p{margin:0 0 14px}
+ul,ol{margin:0 0 16px;padding-left:22px}
+li{margin-bottom:6px}
+code{font-family:var(--mono);font-variant-ligatures:none;font-size:.86em;background:var(--sunken);padding:1px 6px;border-radius:5px;overflow-wrap:anywhere}
+a code{color:var(--accent)}
+.note{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;margin:0 0 18px}
+.note b.label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.note p:last-child{margin-bottom:0}
+.pill{display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:1px 7px;border-radius:999px;white-space:nowrap;margin-left:6px;vertical-align:1px}
+.pill.auto{background:var(--auto-soft);color:var(--auto)}
+.pill.you{background:var(--you-soft);color:var(--you)}
+.pill.skip{background:var(--skip-soft);color:var(--skip)}
+.none{color:var(--muted);font-style:italic;font-size:14px}
+.tablewrap{overflow-x:auto;margin:0 0 18px;border:1px solid var(--rule);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--rule)}
+th{font-size:12px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--sunken);font-weight:600}
+tr:last-child td{border-bottom:0}
+td:first-child{white-space:nowrap}
+td:first-child code{scroll-margin-top:110px}
+td:nth-child(2){min-width:12em}
+td:nth-child(2) code{white-space:normal;overflow-wrap:anywhere}
+td code:target{outline:2px solid var(--accent);outline-offset:1px}
+.code{position:relative;margin:0 0 16px}
+.code pre{font-variant-ligatures:none;background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:13px;line-height:1.55;padding:14px 16px;padding-right:72px;border-radius:10px;overflow-x:auto;margin:0}
+.code button{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:var(--code-ink);border:1px solid color-mix(in srgb,var(--code-ink) 35%,transparent);border-radius:6px;padding:4px 8px;cursor:pointer}
+footer{max-width:96ch;margin:24px 0 0 278px;font-size:14px;color:var(--muted)}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;gap:18px}
+  nav.toc{position:static}
+  nav.toc ol{display:flex;overflow-x:auto;gap:6px;padding-bottom:6px}
+  nav.toc a{white-space:nowrap;border:1px solid var(--rule);background:var(--surface)}
+  footer{margin-left:0}
+  td:first-child{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+<!-- shared styles: from docs/assets/docs.css, copied in by docs/build-docs.py -->
+<style>
+/* Shared by the docs pages, on top of each page's own styles, and copied into each page by
+   docs/build-docs.py (so every guide works as a single file): the top bar with search and theme
+   switch, the contents list that follows along, search highlights, back to top. Colours come from
+   each page's variables, so light and dark mode both work. Edit this file, not the copies. */
+
+:root{--bar-h:58px}
+
+/* Headings land below the sticky bar */
+section,h3{scroll-margin-top:calc(var(--bar-h) + 18px)}
+nav.toc{top:calc(env(safe-area-inset-top,0px) + var(--bar-h) + 18px);max-height:calc(100vh - var(--bar-h) - 36px);overflow-y:auto}
+
+/* ---------- top bar ---------- */
+.docbar{position:sticky;top:0;z-index:50;margin-inline:-16px;padding:0 16px;
+  background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);
+  border-bottom:1px solid var(--rule)}
+.docbar-in{max-width:1180px;margin:0 auto;min-height:var(--bar-h);display:flex;align-items:center;gap:14px}
+.docbar .brand{font-family:var(--display);font-weight:700;font-size:15px;color:var(--ink);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.docbar .brand span{color:var(--accent)}
+.docbar .home{display:inline-flex;align-items:center;gap:6px;flex:none;font-size:13px;color:var(--muted);text-decoration:none;
+  border:1px solid var(--rule);border-radius:8px;padding:6px 10px;white-space:nowrap}
+.docbar .home svg{width:14px;height:14px;fill:currentColor}
+.docbar .home:hover{color:var(--accent);border-color:var(--accent)}
+.docbar .grow{flex:1}
+.docbar .iconbtn{font:inherit;font-size:13px;background:var(--surface);color:var(--ink);border:1px solid var(--rule);border-radius:8px;padding:6px 10px;cursor:pointer;white-space:nowrap}
+.docbar .iconbtn:hover{border-color:var(--accent)}
+
+/* ---------- search ---------- */
+.search{position:relative;width:min(420px,100%)}
+.search input{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--surface);border:1px solid var(--rule);
+  border-radius:10px;padding:8px 44px 8px 36px;outline:none;-webkit-appearance:none;appearance:none}
+.search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.search input::placeholder{color:var(--muted)}
+.search .glass{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);pointer-events:none}
+.search kbd{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:11px;color:var(--muted);
+  border:1px solid var(--rule);border-bottom-width:2px;border-radius:5px;padding:0 6px;background:var(--sunken);pointer-events:none}
+.search input:focus + kbd,.search input:not(:placeholder-shown) + kbd{display:none}
+.results{position:absolute;top:calc(100% + 8px);right:0;width:min(640px,calc(100vw - 32px));max-height:min(70vh,560px);overflow-y:auto;
+  background:var(--surface);border:1px solid var(--rule);border-radius:12px;box-shadow:0 18px 50px rgba(10,12,30,.22);padding:6px;display:none;z-index:60}
+.results.open{display:block}
+.results .hint{padding:10px 12px;font-size:14px;color:var(--muted)}
+.results .hint b{color:var(--ink)}
+.result{display:block;padding:10px 12px;border-radius:8px;color:var(--ink);text-decoration:none;border:1px solid transparent}
+.result[aria-selected="true"],.result:hover{background:var(--sunken);border-color:var(--rule)}
+.result .where{display:block;margin-bottom:3px;font-size:14.5px;font-weight:700;line-height:1.35}
+.result .snip{font-size:13.5px;color:var(--muted);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.result mark,mark.hit{background:var(--you-soft);color:inherit;border-radius:3px;padding:0 1px;box-shadow:0 0 0 1px color-mix(in srgb,var(--you) 45%,transparent)}
+
+@media (max-width:820px){
+  /* phones: name and theme on one row, search across the full width below */
+  :root{--bar-h:106px}
+  .docbar-in{flex-wrap:wrap;gap:8px 10px;padding-block:8px}
+  .docbar .brand{flex:1}
+  .docbar .home{padding:7px 8px}
+  .docbar .home span{display:none}
+  .docbar .grow{display:none}
+  .search{order:3;flex:1 1 100%;width:100%}
+  .search kbd{display:none}
+  .results{position:fixed;left:16px;right:16px;top:calc(var(--bar-h) + 6px);width:auto}
+}
+
+/* ---------- contents list that follows along ---------- */
+nav.toc a[aria-current="true"]{background:var(--accent-soft);color:var(--accent);font-weight:700}
+nav.toc ul.sub{list-style:none;margin:2px 0 6px 10px;padding:0 0 0 8px;border-left:2px solid var(--rule);display:none}
+nav.toc li.open > ul.sub{display:block}
+nav.toc ul.sub a{padding:4px 8px;font-size:13px;color:var(--muted)}
+nav.toc ul.sub a:hover{color:var(--ink)}
+nav.toc ul.sub a[aria-current="true"]{background:none;color:var(--ink);font-weight:700}
+@media (max-width:900px){ nav.toc ul.sub{display:none !important} nav.toc{max-height:none} }
+
+/* where a search result or link lands */
+.flash{animation:flash 1.6s ease-out}
+@keyframes flash{0%{background:var(--you-soft);box-shadow:0 0 0 8px var(--you-soft)}100%{background:transparent;box-shadow:0 0 0 8px transparent}}
+
+/* ---------- tables ---------- */
+/* Names in the first column break only when they can't fit a whole line: the pages' code{overflow-wrap:anywhere}
+   lets a table squeeze its first column to a letter or two per line, and that column holds the names. */
+td:first-child code{overflow-wrap:break-word;word-break:normal}
+/* the first column (names) only as wide as its longest name, the rest goes to the text */
+td:first-child{font-weight:600;width:1%;min-width:13rem}
+td:first-child code,td:first-child em{font-weight:normal}
+td{line-height:1.55}
+tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--sunken) 35%,transparent)}
+/* Lines between columns; a cell shared by several columns (colspan) runs across them and starts
+   with a tag naming the columns it covers */
+:is(td,th)+:is(td,th){border-left:1px solid var(--rule)}
+td[colspan][data-label]::before{content:attr(data-label);display:inline-block;margin-right:8px;padding:0 7px;
+  border:1px solid var(--rule);border-radius:999px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--muted);vertical-align:1px;line-height:1.6}
+/* Phones: each row becomes a card, every cell under its column name (data-label, set by docs.js) */
+@media (max-width:640px){
+  .tablewrap table,.tablewrap tbody,.tablewrap tr,.tablewrap td{display:block;width:auto}
+  .tablewrap thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .tablewrap tr{border-bottom:1px solid var(--rule);padding:6px 0}
+  .tablewrap tr:last-child{border-bottom:0}
+  .tablewrap td{border:0;padding:4px 14px;min-width:0}
+  .tablewrap td[data-label]:not(:first-child)::before{content:attr(data-label);display:block;font-family:var(--mono);font-size:11px;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+  .tablewrap :is(td,th){border-left:0}
+  .tablewrap td[colspan][data-label]::before{border:0;border-radius:0;padding:0;margin-right:0;letter-spacing:.08em}
+  .tablewrap tbody tr:nth-child(even) td{background:none}
+  .tablewrap tbody tr:nth-child(even){background:color-mix(in srgb,var(--sunken) 35%,transparent)}
+}
+
+/* ---------- small reading aids ---------- */
+tbody tr:hover td{background:color-mix(in srgb,var(--sunken) 60%,transparent)}
+h2 .anchor,h3 .anchor{opacity:0;margin-left:8px;font-size:.8em;color:var(--muted);text-decoration:none}
+h2:hover .anchor,h3:hover .anchor,.anchor:focus{opacity:1}
+.totop{position:fixed;right:18px;bottom:18px;z-index:40;font:inherit;font-size:13px;font-weight:700;background:var(--ink);color:var(--bg);
+  border:0;border-radius:999px;padding:9px 14px;cursor:pointer;box-shadow:0 8px 24px rgba(10,12,30,.25);opacity:0;pointer-events:none;transition:opacity .2s}
+.totop.show{opacity:1;pointer-events:auto}
+
+@media (prefers-reduced-motion:reduce){.flash{animation:none}.totop{transition:none}}
+@media print{.docbar,.totop{display:none}nav.toc{position:static;max-height:none}}
+
+/* ---------- the guide's puppy (the site mascot, drawn inline in each page's header) ---------- */
+header.top .pup{width:150px}
+header.top .pup svg{display:block;width:100%;height:auto}
+.pup .bg,.pup .cut{fill:var(--accent-soft)}
+.pup .tail{transform-box:fill-box;transform-origin:0% 100%}
+.pup:hover .tail{animation:pup-wag .35s ease-in-out infinite alternate}
+.pup .float{animation:pup-float 3.2s ease-in infinite;opacity:0}
+.pup .float.d1{animation-delay:1.05s}.pup .float.d2{animation-delay:2.1s}
+.pup .spin{transform-box:fill-box;transform-origin:50% 50%;animation:pup-spin 9s linear infinite}
+@keyframes pup-wag{from{transform:rotate(-12deg)}to{transform:rotate(14deg)}}
+@keyframes pup-float{0%{transform:translateY(10px);opacity:0}20%{opacity:1}100%{transform:translateY(-34px);opacity:0}}
+@keyframes pup-spin{to{transform:rotate(360deg)}}
+@media (min-width:821px){
+  /* wide screens: puppy to the right of the title, intro and meta */
+  header.top:has(.pup){grid-template-columns:minmax(0,1fr) auto;column-gap:32px}
+  header.top > *{grid-column:1}
+  header.top .pup{grid-column:2;grid-row:1 / span 4;align-self:center;width:210px}
+}
+@media (prefers-reduced-motion:reduce){.pup:hover .tail,.pup .spin{animation:none}.pup .float{animation:none;opacity:1}}
+</style>
+<!-- /shared styles -->
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="mark"><svg viewBox="50 -6 140 140" aria-hidden="true" focusable="false">
+    <clipPath id="mark-skull"><circle cx="120" cy="78" r="44"/></clipPath>
+    <ellipse cx="69" cy="84" rx="14" ry="30" fill="#8A4B2A" transform="rotate(12 69 84)"/>
+    <ellipse cx="171" cy="84" rx="14" ry="30" fill="#8A4B2A" transform="rotate(-12 171 84)"/>
+    <circle cx="120" cy="78" r="44" fill="#F2B66D"/>
+    <g clip-path="url(#mark-skull)"><ellipse cx="120" cy="32" rx="24" ry="16" fill="#B97B48"/><ellipse cx="120" cy="103" rx="24.5" ry="19" fill="#FFF1E0"/></g>
+    <circle cx="93" cy="94" r="7.5" fill="#FF7E8C" opacity=".6"/><circle cx="147" cy="94" r="7.5" fill="#FF7E8C" opacity=".6"/>
+    <circle cx="103" cy="77" r="7" fill="#24142F"/><circle cx="137" cy="77" r="7" fill="#24142F"/>
+    <circle cx="105.6" cy="74.4" r="2.2" fill="#fff"/><circle cx="139.6" cy="74.4" r="2.2" fill="#fff"/>
+    <path d="M111.5 90 q8.5 -3.5 17 0 q-1 7.5 -8.5 9.5 q-7.5 -2 -8.5 -9.5 z" fill="#24142F"/>
+    <path d="M115.5 104 h9 v3 a4.5 4.5 0 0 1 -9 0 z" fill="#FF5F96"/>
+    <path d="M110 102 q5 5.5 10 0 q5 5.5 10 0" fill="none" stroke="#24142F" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M68 66 C68 0 172 0 172 66" fill="none" stroke="#24142F" stroke-width="10" stroke-linecap="round"/>
+    <rect x="56" y="54" width="27" height="44" rx="13.5" fill="#FF3F8A" stroke="#24142F" stroke-width="6"/>
+    <rect x="157" y="54" width="27" height="44" rx="13.5" fill="#FF3F8A" stroke="#24142F" stroke-width="6"/>
+  </svg></div>
+  <div class="eyebrow">Puppi3's Creator Kit · the cloud</div>
+  <h1>Cloud Guide<span class="dot">.</span></h1>
+  <p class="lede">Moving a site from Docker Compose to Amazon's EKS or Google's GKE for a busy stretch (a big release, a festival weekend), and bringing it home again: Cloudflare's cache first, what it costs, setting up each cloud once, the move, and tearing it all down.</p>
+  <div class="meta"><span>For: whoever runs the site</span><span>Assumes a terminal, kubectl, and the AWS or Google Cloud CLI</span><span>Not yet run on a real cloud: the first time is a test (<a href="#first-time">what to watch</a>)</span></div>
+</header>
+
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <p>On this page</p>
+  <ol>
+    <li><a href="#start">How it goes</a></li>
+    <li><a href="#caching">Cloudflare's cache first</a></li>
+    <li><a href="#costs">Which cloud, and the cost</a></li>
+    <li><a href="#aws">Amazon EKS, once</a></li>
+    <li><a href="#gcp">Google GKE, once</a></li>
+    <li><a href="#folder">The cluster's folder</a></li>
+    <li><a href="#first-up">First up</a></li>
+    <li><a href="#move">The move</a></li>
+    <li><a href="#during">During</a></li>
+    <li><a href="#home">Coming home</a></li>
+    <li><a href="#teardown">Tearing down</a></li>
+    <li><a href="#first-time">The first time</a></li>
+    <li><a href="#trouble">Troubleshooting</a></li>
+    <li><a href="#commands">Command reference</a></li>
+  </ol>
+</nav>
+
+<main>
+<section id="start">
+  <h2>How it goes</h2>
+  <p>The site keeps running where it is, on Docker Compose. For the busy stretch, a second folder of the same site goes on a cluster in the cloud with <code>k8s/up.sh</code>, and <code>k8s/migrate/</code> carries the data across: Ghost and its database, the analytics, the stream server, Postiz, the bridge, and the site's own Grafana and Prometheus with their history. In the cloud, the databases are the cloud's own (RDS or Cloud SQL), and Ghost's pictures and files go in a bucket.</p>
+  <ol>
+    <li><strong>Once, now:</strong> <a href="#caching">Cloudflare's cache</a>. It helps at home too, and it's what keeps a busy stretch cheap.</li>
+    <li><strong>Once per cloud:</strong> the account, the cluster, the databases, the bucket and the permissions (<a href="#aws">EKS</a> or <a href="#gcp">GKE</a>), then <a href="#folder">the cluster's folder</a>. Budget an afternoon the first time.</li>
+    <li><strong>A day or so before:</strong> make the cluster, <a href="#first-up">bring the empty site up</a> and try it, while the Compose site keeps serving.</li>
+    <li><strong>The move</strong>, about half an hour: freeze, <code>to-cloud.sh</code>, check, point the DNS at the cloud (<a href="#move">The move</a>).</li>
+    <li><strong>Afterwards:</strong> <code>to-nas.sh</code>, the DNS back home (<a href="#home">Coming home</a>), then <a href="#teardown">delete what costs money</a>.</li>
+  </ol>
+  <div class="note warn"><b class="label">One copy at a time</b><p>Postiz, Temporal and the bridge run in one place only: two bridges would share every post twice. <code>to-cloud.sh</code> stops them on the Compose side, and they stay stopped until <code>to-nas.sh</code> starts them again there. Don't start that side with <code>kit/kit.sh … up</code> while the site is in the cloud.</p></div>
+  <p>The scripts never touch your DNS (both switches are yours, by hand), never make or delete anything in the cloud (the commands below do, and you run them), and never go ahead without asking: they show what they'll do and wait for a yes, and with <code>-n</code> they only check and print the steps.</p>
+</section>
+
+<section id="caching">
+  <h2>Cloudflare's cache first</h2>
+  <p>Ghost sends its pages with <code>Cache-Control: public, max-age=0</code>, so every visit to a post reaches your server. A cache rule lets Cloudflare answer visitors who aren't signed in for a few minutes at a time, so a busy night barely reaches the site, wherever it runs, and a cloud's outgoing traffic (which costs money) drops. Pictures and other files under <code>/content/</code> are cached already. For a site behind Cloudflare; do it now, whether or not a busy stretch is coming.</p>
+  <h3 id="caching-the-cache-rule">The cache rule</h3>
+  <p>In Cloudflare: your site → <em>Caching → Cache Rules → Create rule</em>, named "Ghost pages". Choose <em>Edit expression</em> and paste, with your site's name on the first line:</p>
+<div class="code"><pre>(http.host eq "example.com"
+ and not starts_with(http.request.uri.path, "/ghost/")
+ and not starts_with(http.request.uri.path, "/members/")
+ and not starts_with(http.request.uri.path, "/.ghost/")
+ and not starts_with(http.request.uri.path, "/.site/")
+ and not starts_with(http.request.uri.path, "/.puppy/")
+ and not starts_with(http.request.uri.path, "/.well-known/")
+ and not starts_with(http.request.uri.path, "/p/")
+ and not starts_with(http.request.uri.path, "/r/")
+ and not starts_with(http.request.uri.path, "/email/")
+ and not starts_with(http.request.uri.path, "/unsubscribe")
+ and http.request.uri.path ne "/live-status.json"
+ and not http.cookie contains "ghost-members-ssr"
+ and not http.cookie contains "ghost-admin-api-session")</pre></div>
+  <p>Then: <em>Cache eligibility</em>: Eligible for cache. <em>Edge TTL</em>: Ignore cache-control header and use this TTL, 5 minutes. <em>Browser TTL</em>: Respect origin (browsers keep asking, and Cloudflare answers).</p>
+  <p>What's left out, and why: Ghost Admin and its API (<code>/ghost/</code>, the Social preview too), members' sign-in and account (<code>/members/</code>, and anyone with a members' cookie, who may see paid posts), Ghost's analytics (<code>/.ghost/</code>), the theme's clicks and a mascot's pets (<code>/.site/</code>, <code>/.puppy/</code>), previews (<code>/p/</code>), the newsletter's links (<code>/r/</code>, <code>/email/</code>, <code>/unsubscribe</code>), ActivityPub (<code>/.well-known/</code>) and the LIVE NOW bar's status (<code>/live-status.json</code>, which must be fresh).</p>
+  <h3 id="caching-what-changes">What changes for you</h3>
+  <ul>
+    <li>A new or edited post can take up to 5 minutes to show for visitors who aren't signed in. You see it at once while signed in to Ghost. In a hurry: <em>Caching → Configuration → Purge Everything</em>.</li>
+    <li>To check it works: <code>curl -sI https://example.com/ | grep -i cf-cache-status</code> says <code>MISS</code>, then <code>HIT</code> on a second try.</li>
+    <li>Ghost's own visitor numbers keep counting: the page view is sent by the visitor's browser, not by the page's request.</li>
+  </ul>
+</section>
+
+<section id="costs">
+  <h2>Which cloud, and what it costs</h2>
+  <p>Both work the same way from here on. GKE is cheaper for a short stretch: Google's free tier covers one zonal cluster's fee, and its nodes cost less. EKS is the one to choose if you already use AWS.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Part</th><th>EKS (us-east-1)</th><th>GKE (us-central1)</th></tr></thead>
+    <tbody>
+      <tr><td>The cluster's fee</td><td>$0.10 an hour, about $2.40 a day</td><td>Free for one zonal cluster (free tier credit)</td></tr>
+      <tr><td>Two nodes, 4 vCPU and 16 GB each</td><td>m7i.xlarge, about $9.70 a day</td><td>e2-standard-4, about $6.40 a day</td></tr>
+      <tr><td>MySQL and Postgres, small</td><td>RDS db.t4g.small ×2, about $1.60 a day</td><td>Cloud SQL, shared core, about $1.70 a day</td></tr>
+      <tr><td>Load balancers (the site, the stream's source)</td><td>Two NLBs, about $1.10 a day + traffic</td><td>Two forwarding rules, about $1.20 a day</td></tr>
+      <tr><td>NAT for the nodes' outgoing calls</td><td>About $1.10 a day + $0.045/GB</td><td>None (the nodes have public addresses)</td></tr>
+      <tr><td>Disks, the bucket</td><td>Under $0.50 a day</td><td>Under $0.50 a day</td></tr>
+      <tr><td>Roughly, standing still</td><td>$16–17 a day</td><td>$10–11 a day</td></tr>
+      <tr><td>Traffic out to the internet</td><td>About $0.09/GB</td><td>About $0.08–0.12/GB</td></tr>
+    </tbody>
+  </table></div>
+  <p>These are rough list prices from mid-2026, for planning only: check each cloud's pricing calculator before a long stretch. The part that varies is traffic. Cloudflare's cache takes most of the pages and pictures, but not the live stream: 320 kbps is about 144 MB per listener per hour, so a three-hour show with 100 listeners is about 43 GB, or $4–5.</p>
+  <p>What keeps costing after a stretch: the databases, the bucket and the image registry, until you <a href="#teardown">delete them</a>. A stopped RDS database starts again by itself after 7 days.</p>
+</section>
+
+<section id="aws">
+  <h2>Amazon EKS, once</h2>
+  <p>You need the <code>aws</code> CLI (v2, signed in: <code>aws sts get-caller-identity</code>), <code>eksctl</code>, <code>kubectl</code> and <code>helm</code> (only for the load balancer controller). The commands use these names; <code>NS</code> is your site's short name (<code>ID_PREFIX</code>), which is also its namespace on the cluster:</p>
+<div class="code"><pre>export AWS_REGION=us-east-1 CLUSTER=creator-kit NS=mysite
+export ACCOUNT=$(aws sts get-caller-identity --query Account --output text)</pre></div>
+  <h3 id="aws-the-cluster">The cluster</h3>
+  <p>Check <code>k8s/clusters/eks.yaml</code> first: its name and region (the ones above), the Kubernetes version and the two m7i.xlarge nodes. Then (about 20 minutes):</p>
+<div class="code"><pre>eksctl create cluster -f k8s/clusters/eks.yaml
+kubectl apply -f k8s/clusters/eks-gp3.yaml          # the gp3 disks every volume asks for
+kubectl config current-context                       # should name the new cluster</pre></div>
+  <p>The AWS Load Balancer Controller makes the load balancers the site asks for. Its ServiceAccount and IAM role came with the cluster:</p>
+<div class="code"><pre>helm repo add eks https://aws.github.io/eks-charts &amp;&amp; helm repo update
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system \
+  --set clusterName=$CLUSTER --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller
+kubectl -n kube-system rollout status deploy/aws-load-balancer-controller</pre></div>
+  <h3 id="aws-databases">Databases (RDS)</h3>
+  <p>Both go in the cluster's network, on its private subnets, and only the cluster's nodes may reach them:</p>
+<div class="code"><pre>VPC=$(aws eks describe-cluster --name $CLUSTER --query cluster.resourcesVpcConfig.vpcId --output text)
+NODE_SG=$(aws eks describe-cluster --name $CLUSTER --query cluster.resourcesVpcConfig.clusterSecurityGroupId --output text)
+SUBNETS=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=$VPC Name=tag:kubernetes.io/role/internal-elb,Values=1 \
+  --query 'Subnets[].SubnetId' --output text)
+aws rds create-db-subnet-group --db-subnet-group-name $NS --db-subnet-group-description $NS --subnet-ids $SUBNETS
+DB_SG=$(aws ec2 create-security-group --group-name $NS-db --description "$NS databases" --vpc-id $VPC --query GroupId --output text)
+aws ec2 authorize-security-group-ingress --group-id $DB_SG --protocol tcp --port 3306 --source-group $NODE_SG
+aws ec2 authorize-security-group-ingress --group-id $DB_SG --protocol tcp --port 5432 --source-group $NODE_SG
+
+# Postiz and Temporal connect without TLS (the traffic stays inside the cluster's network)
+aws rds create-db-parameter-group --db-parameter-group-name $NS-pg17 --db-parameter-group-family postgres17 \
+  --description "no forced TLS"
+aws rds modify-db-parameter-group --db-parameter-group-name $NS-pg17 \
+  --parameters ParameterName=rds.force_ssl,ParameterValue=0,ApplyMethod=immediate
+
+aws rds create-db-instance --db-instance-identifier $NS-mysql --engine mysql --engine-version 8.0 \
+  --db-instance-class db.t4g.small --allocated-storage 20 --storage-type gp3 --db-name ghost \
+  --master-username admin --master-user-password '&lt;a new password&gt;' \
+  --db-subnet-group-name $NS --vpc-security-group-ids $DB_SG --no-publicly-accessible --backup-retention-period 1
+aws rds create-db-instance --db-instance-identifier $NS-postgres --engine postgres --engine-version 17 \
+  --db-instance-class db.t4g.small --allocated-storage 20 --storage-type gp3 --db-parameter-group-name $NS-pg17 \
+  --master-username postgres --master-user-password '&lt;another new password&gt;' \
+  --db-subnet-group-name $NS --vpc-security-group-ids $DB_SG --no-publicly-accessible --backup-retention-period 1
+aws rds wait db-instance-available --db-instance-identifier $NS-mysql
+aws rds wait db-instance-available --db-instance-identifier $NS-postgres
+aws rds describe-db-instances --query 'DBInstances[].[DBInstanceIdentifier,Endpoint.Address]' --output table</pre></div>
+  <p>Keep both passwords and both addresses: they go in <a href="#folder">the cluster's folder</a>. Ghost's database is called <code>ghost</code> here. If the Compose side's has another name, that's fine: the migration reads each side's from its own settings.</p>
+  <h3 id="aws-the-bucket-and-ghost-s-role">The bucket and Ghost's role</h3>
+  <p>Ghost's pictures, media and files go in a private bucket. Ghost serves them itself at the usual <code>/content/…</code> addresses, so no link changes. Ghost reaches the bucket through an IAM role tied to its Kubernetes ServiceAccount (IRSA), so no key is stored anywhere:</p>
+<div class="code"><pre>BUCKET=$NS-content-$ACCOUNT                       # bucket names are global: this one is yours
+aws s3api create-bucket --bucket $BUCKET           # outside us-east-1: --create-bucket-configuration LocationConstraint=$AWS_REGION
+aws s3api put-public-access-block --bucket $BUCKET --public-access-block-configuration \
+  BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
+cat &gt; ghost-s3.json &lt;&lt;EOF
+{"Version": "2012-10-17", "Statement": [
+  {"Effect": "Allow", "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"], "Resource": "arn:aws:s3:::$BUCKET/*"},
+  {"Effect": "Allow", "Action": "s3:ListBucket", "Resource": "arn:aws:s3:::$BUCKET"}]}
+EOF
+aws iam create-policy --policy-name $NS-ghost-s3 --policy-document file://ghost-s3.json
+eksctl create iamserviceaccount --cluster $CLUSTER --namespace $NS --name ghost --role-name $NS-ghost \
+  --attach-policy-arn arn:aws:iam::$ACCOUNT:policy/$NS-ghost-s3 --role-only --approve
+echo arn:aws:iam::$ACCOUNT:role/$NS-ghost         # GHOST_ROLE_ARN</pre></div>
+  <p><code>--role-only</code>: the kit makes the ServiceAccount itself, with this role's name on it. The role trusts only ServiceAccount <code>ghost</code> in your namespace. The migration's helper pod uses it too, to fill the bucket.</p>
+  <h3 id="aws-the-image-registry">The image registry (ECR)</h3>
+  <p>Only for images you build yourself (<a href="setup-guide.html#k8s-images">the Setup guide's The images</a>); a site on a released kit uses the release's:</p>
+<div class="code"><pre>for i in tb-setup icecast-relay ghost-bridge; do aws ecr create-repository --repository-name creator-kit/$i; done
+aws ecr get-login-password | docker login --username AWS --password-stdin $ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com
+echo $ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com/creator-kit     # the registry for build-images.sh</pre></div>
+  <p>The nodes may pull from it already: eksctl gives them read access to ECR.</p>
+</section>
+
+<section id="gcp">
+  <h2>Google GKE, once</h2>
+  <p>You need <code>gcloud</code> (signed in: <code>gcloud auth login</code>), <code>kubectl</code> and the GKE auth plugin (<code>gcloud components install gke-gcloud-auth-plugin</code>), and a project with billing on. <code>NS</code> is your site's short name, as above:</p>
+<div class="code"><pre>export PROJECT=&lt;your project&gt; REGION=us-central1 NS=mysite
+gcloud config set project $PROJECT</pre></div>
+  <h3 id="gcp-the-cluster">The cluster</h3>
+  <p>GKE Standard, one zone, two e2-standard-4 nodes, Workload Identity on (about 10 minutes). It also turns on the APIs it needs and points <code>kubectl</code> at the new cluster:</p>
+<div class="code"><pre>PROJECT=$PROJECT REGION=$REGION k8s/clusters/gke.sh up</pre></div>
+  <p>The volumes use <code>standard-rwo</code>, GKE's own disk class, so there's nothing more to set up for them.</p>
+  <h3 id="gcp-databases">Databases (Cloud SQL)</h3>
+  <p>Pods reach them through the Cloud SQL Auth Proxy, which runs beside each pod that needs a database and signs in as a Google service account. Nothing is opened to the internet, even though the instances have public addresses.</p>
+<div class="code"><pre>gcloud sql instances create $NS-mysql --database-version MYSQL_8_0 --edition enterprise \
+  --tier db-g1-small --region $REGION --storage-size 20 --storage-type SSD
+gcloud sql users set-password root --host % --instance $NS-mysql --password '&lt;a new password&gt;'
+gcloud sql databases create ghost --instance $NS-mysql
+
+gcloud sql instances create $NS-postgres --database-version POSTGRES_17 --edition enterprise \
+  --tier db-g1-small --region $REGION --storage-size 20 --storage-type SSD
+gcloud sql users set-password postgres --instance $NS-postgres --password '&lt;another new password&gt;'
+
+gcloud sql instances list --format 'table(name,connectionName)'     # MYSQL_INSTANCE, POSTGRES_INSTANCE
+
+# the service account the proxies act as, and its link to Kubernetes ServiceAccount "cloud-sql"
+gcloud iam service-accounts create $NS-sql
+SQL_SA=$NS-sql@$PROJECT.iam.gserviceaccount.com
+gcloud projects add-iam-policy-binding $PROJECT --member serviceAccount:$SQL_SA --role roles/cloudsql.client
+gcloud iam service-accounts add-iam-policy-binding $SQL_SA --role roles/iam.workloadIdentityUser \
+  --member "serviceAccount:$PROJECT.svc.id.goog[$NS/cloud-sql]"
+echo $SQL_SA                                                        # CLOUD_SQL_SA</pre></div>
+  <h3 id="gcp-the-bucket-and-its-key">The bucket and its key</h3>
+  <p>Ghost uses the same adapter as on AWS, through Cloud Storage's S3-compatible side, with an HMAC key belonging to a service account that may only use this bucket:</p>
+<div class="code"><pre>BUCKET=$NS-content-$PROJECT
+gcloud storage buckets create gs://$BUCKET --location $REGION --uniform-bucket-level-access --public-access-prevention
+gcloud iam service-accounts create $NS-storage
+gcloud storage buckets add-iam-policy-binding gs://$BUCKET \
+  --member serviceAccount:$NS-storage@$PROJECT.iam.gserviceaccount.com --role roles/storage.objectUser
+gcloud storage hmac create $NS-storage@$PROJECT.iam.gserviceaccount.com   # prints accessId and secret: keep both</pre></div>
+  <h3 id="gcp-the-image-registry">The image registry (Artifact Registry)</h3>
+  <p>Only for images you build yourself:</p>
+<div class="code"><pre>gcloud artifacts repositories create creator-kit --repository-format docker --location $REGION
+gcloud auth configure-docker $REGION-docker.pkg.dev
+echo $REGION-docker.pkg.dev/$PROJECT/creator-kit              # the registry for build-images.sh</pre></div>
+  <p>If pods later say <code>ImagePullBackOff</code> with "permission denied", the nodes' service account can't read the registry: give it <code>roles/artifactregistry.reader</code> (newer projects no longer grant it by default).</p>
+</section>
+
+<section id="folder">
+  <h2>The cluster's folder</h2>
+  <p>The cluster gets a folder of its own, a copy of the Compose site's settings and secrets, made once and kept for every stretch (it holds secrets: never anywhere that syncs or gets committed). How to make it: the first step of the Operations guide's <a href="operations-guide.html#move-to-kubernetes">Compose → Kubernetes</a>. Then, for a cloud:</p>
+  <h3 id="folder-site-env">site.env</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Setting</th><th>In the cloud</th></tr></thead>
+    <tbody>
+      <tr><td><code>TRUSTED_EXTRA</code></td><td>Empty, but for your own address while you <a href="#first-up">try it out</a>: home-network ranges mean nothing there, and could even match the cloud's own addresses.</td></tr>
+      <tr><td><code>NTFY_URL</code></td><td>An ntfy server your phone reaches from anywhere, like <code>https://ntfy.sh</code>, if the Compose site uses one at home. With ntfy.sh, use a long topic nobody could guess.</td></tr>
+      <tr><td><code>GRAFANA_HOST</code>, <code>GRAFANA_URL</code></td><td>The cluster has its own Grafana, at <code>grafana.&lt;your site&gt;</code>: a home-only address won't do.</td></tr>
+      <tr><td><code>DATA_DIR</code></td><td>Not used by the cluster: the Compose site's data folder is given to the migration scripts instead.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Leave <code>ID_PREFIX</code> as it is: the scripts find the site by it on both sides, and it keeps the dashboards' history continuous.</p>
+  <h3 id="folder-secrets">Its secrets</h3>
+  <p>The ones the Setup guide lists in <a href="setup-guide.html#cloud-the-site-s-secrets">The site's secrets for a cloud</a>: in <code>secrets/ghost.env</code>, Ghost's login on the cloud's MySQL (EKS: <code>admin</code>, its password and the database <code>ghost</code>; GKE: <code>root</code>, its password and <code>ghost</code>); <code>secrets/cloud.env</code> with the Postgres master login; <code>secrets/s3.env</code> with the HMAC key (GKE only); and <code>secrets/ghost-mail.env</code>, Ghost's mail, without which its sign-in codes and members' links won't arrive. The rest stay as the Compose site had them: the data that moves was made with them. A new <code>NTFY_TOPIC</code> goes in both <code>secrets/postiz.env</code> and <code>secrets/monitoring.env</code>, so the alerts reach your phone too.</p>
+  <h3 id="folder-the-cloud-s-addresses">The cloud's addresses</h3>
+  <p>From the setup above, in the overlay's file (the comments in it say what each line is):</p>
+<div class="code"><pre>cp k8s/overlays/eks/cloud.env.example kit/sites/mysite-k8s/cloud-eks.env     # MYSQL_HOST, POSTGRES_HOST, S3_BUCKET, S3_REGION, GHOST_ROLE_ARN
+cp k8s/overlays/gke/cloud.env.example kit/sites/mysite-k8s/cloud-gke.env     # MYSQL_INSTANCE, POSTGRES_INSTANCE, CLOUD_SQL_SA, S3_BUCKET</pre></div>
+  <p>Then check it renders, with no cluster needed: <code>k8s/up.sh kit/sites/mysite-k8s eks --render</code> (or <code>gke</code>) writes everything the cluster would get to <code>data/k8s/rendered.yaml</code> in the folder (mode 600: it holds the secrets).</p>
+</section>
+
+<section id="first-up">
+  <h2>First up</h2>
+  <p>A day or so before the move, while the Compose site keeps serving: the cluster gets the site with empty databases. This checks everything only a real cloud can: the permissions, the load balancer, the database rules and the certificates.</p>
+  <ol>
+    <li>Let yourself through Cloudflare-only for the test: <code>curl -s https://ifconfig.me</code>, then <code>TRUSTED_EXTRA=&lt;that&gt;/32</code> in the folder's <code>site.env</code>.</li>
+    <li>Up. It asks before using kubectl's current cluster, so check the name it shows. The first time takes a while (pulling images, the analytics' first start), so give it longer:
+<div class="code"><pre>UP_TIMEOUT=1200 k8s/up.sh kit/sites/mysite-k8s eks        # or gke</pre></div>
+      It stops by itself on a pod that's stuck, and says why. In another terminal, <code>kubectl -n mysite get pods -w</code> shows them come up; Ghost, Grafana and the bridge wait in <code>CreateContainerConfigError</code> until the analytics' setup has made its tokens, which is normal.</li>
+    <li>The load balancer's address: <code>kubectl -n mysite get svc traefik tinyice-source</code> (EXTERNAL-IP: a hostname on EKS, an address on GKE).</li>
+    <li>The site through the cluster rather than Cloudflare, as the Setup guide's <a href="setup-guide.html#cloud-test-before-the-dns">Test before the DNS</a> says (<code>-k</code> until the certificate arrives, a minute or two). For a browser, a hosts-file line with the address (on EKS, <code>dig +short &lt;the hostname&gt;</code>) and the site's names: <code>example.com</code>, <code>postiz.</code>, <code>grafana.</code> and <code>live.</code>. Take it out afterwards.</li>
+    <li>In that browser, make a throwaway owner at <code>https://example.com/ghost/</code>, and upload a picture to a draft: if it shows, Ghost can reach the bucket. The move replaces this owner and draft.</li>
+    <li>Grafana at <code>grafana.example.com</code> (user <code>admin</code>, the password in <code>secrets/monitoring.env</code>): the Health dashboard has numbers.</li>
+    <li>Park the bridge until the move, so it sends no notifications from an empty site: <code>kubectl -n mysite scale deploy/postiz-ghost-bridge --replicas 0</code>. The move's own <code>up.sh</code> brings it back.</li>
+  </ol>
+  <p>Anything wrong: <a href="#trouble">Troubleshooting</a>. The first time on each cloud, also go through <a href="#first-time">what to watch</a>.</p>
+</section>
+
+<section id="move">
+  <h2>The move</h2>
+  <p>About half an hour, most of it copying. The Compose site keeps serving visitors until the DNS moves. Anything written there after the copy starts is lost (Ghost Admin edits, new members, comments), so pick a quiet moment and keep the gap short.</p>
+  <ul>
+    <li><strong>Before:</strong> freeze Ghost Admin (no edits or new posts until the DNS has moved), nothing scheduled to publish in the next hour, and no live show during the move. Note down your DNS records for the site, <code>www</code>, <code>postiz</code> and <code>live</code>: they go back when you come home.</li>
+    <li><strong>The move itself</strong> is the Operations guide's <a href="operations-guide.html#move-to-kubernetes">Compose → Kubernetes</a>: <code>to-cloud.sh</code>'s dry run, then the real one, then a check of the site through the cluster's own address (sign in to Ghost Admin, too: a new-device code arrives by mail if <code>secrets/ghost-mail.env</code> is right).</li>
+  </ul>
+  <h3 id="move-point-the-dns-at-the-cloud">Point the DNS at the cloud</h3>
+  <ol>
+    <li>Take your address back out: <code>TRUSTED_EXTRA=</code> in <code>site.env</code>, then <code>k8s/up.sh</code> again (Traefik restarts, Ghost doesn't). Take the hosts-file line out.</li>
+    <li>In Cloudflare's DNS, point the site, <code>www</code>, <code>postiz</code> and <code>live</code> at the cluster, all proxied (orange): on EKS a CNAME to <code>traefik</code>'s hostname (Cloudflare allows one at the root), on GKE an A record to its address. Add <code>grafana</code> the same way. Proxied records switch within seconds.</li>
+    <li>For your streaming software: a DNS-only (grey) record, like <code>source.example.com</code>, to <code>tinyice-source</code>'s address, since Cloudflare doesn't carry the stream's port. The software's server becomes that name, port 8222, with the same mount and password. Keep the port to your own addresses: <code>LIVE_SOURCE_RANGES</code> in <code>site.env</code> (the Setup guide's <a href="setup-guide.html#finish-live">Live</a>), then <code>k8s/up.sh</code> again.</li>
+    <li>Check from your phone, off Wi-Fi: the site, a post, the LIVE NOW bar. Then end the freeze.</li>
+  </ol>
+</section>
+
+<section id="during">
+  <h2>During the busy stretch</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Thing</th><th>In the cloud</th></tr></thead>
+    <tbody>
+      <tr><td>Phone notifications</td><td>On the folder's <code>NTFY_TOPIC</code> at its <code>NTFY_URL</code>: subscribe to it in the ntfy app before the move. The bridge and the alerts both use it.</td></tr>
+      <tr><td>Grafana</td><td><code>grafana.example.com</code>, the cluster's own, with the same dashboards and their history.</td></tr>
+      <tr><td>More listeners</td><td>Each relay takes up to 500: <code>kubectl -n mysite scale deploy/tinyice-relay --replicas 4</code>. Every <code>up.sh</code> sets it back to 2, so scale again after one.</td></tr>
+      <tr><td>The stream server's admin</td><td>Not on the internet: <code>kubectl -n mysite port-forward deploy/tinyice 8080:8080</code>, then <code>http://localhost:8080/admin</code>.</td></tr>
+      <tr><td>Uploads</td><td>Everything goes through Cloudflare, so its 100 MB limit applies to every upload.</td></tr>
+      <tr><td>A change to the kit's own images</td><td><code>k8s/build-images.sh</code> again, then <code>up.sh</code>.</td></tr>
+      <tr><td>The Compose side</td><td>Its social part stays stopped (<a href="#start">one copy at a time</a>).</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="home">
+  <h2>Coming home</h2>
+  <p>The same freeze, the other way: the Operations guide's <a href="operations-guide.html#move-back-to-compose">Kubernetes → Compose</a>. <code>to-nas.sh</code> brings back what was made in the cloud (posts, members, uploads, the bridge's history, page views and the dashboards' numbers), keeping what the Compose side had first. Then:</p>
+  <ul>
+    <li>Put your DNS records back as you noted them, and delete <code>grafana</code>'s and the stream source's. The streaming software goes back to its usual server.</li>
+    <li>Check from your phone, then end the freeze. The phone's subscription goes back to the usual topic, if you changed it.</li>
+  </ul>
+</section>
+
+<section id="teardown">
+  <h2>Tearing down</h2>
+  <p>Only once the site is home and checked. Deleting the cluster deletes its volumes too.</p>
+  <h3 id="teardown-aws">AWS</h3>
+<div class="code"><pre>k8s/up.sh kit/sites/mysite-k8s eks --down       # the site first, so its load balancers go before the cluster
+eksctl delete cluster -f k8s/clusters/eks.yaml
+aws rds delete-db-instance --db-instance-identifier $NS-mysql --skip-final-snapshot
+aws rds delete-db-instance --db-instance-identifier $NS-postgres --skip-final-snapshot
+aws s3 rb s3://$BUCKET --force</pre></div>
+  <h3 id="teardown-google-cloud">Google Cloud</h3>
+<div class="code"><pre>k8s/up.sh kit/sites/mysite-k8s gke --down
+PROJECT=$PROJECT k8s/clusters/gke.sh down
+gcloud sql instances delete $NS-mysql
+gcloud sql instances delete $NS-postgres
+gcloud storage rm --recursive gs://$BUCKET</pre></div>
+  <p>Keeping things for the next stretch? The databases are the main cost: stop them (RDS starts a stopped one again after 7 days) or delete them, since the next move fills new ones anyway. The image registry, the roles, the service accounts and the cluster's folder cost nothing, or close to it. Check the billing page a day later to see nothing was left running.</p>
+</section>
+
+<section id="first-time">
+  <h2>The first time on each cloud</h2>
+  <p>The kit is tested on a cluster on one computer that stands in for each cloud; some things only the real one can show. Try the first stretch on a cluster you can throw away, and look at these:</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Cloud</th><th>What</th><th>If it goes wrong</th></tr></thead>
+    <tbody>
+      <tr><td>Both</td><td>The load balancer keeps the visitor's address (<code>externalTrafficPolicy: Local</code>), so Cloudflare-only sees Cloudflare</td><td>403 for everyone through Cloudflare: Traefik's log shows which address it saw. Health checks failing on the node without Traefik are normal: that's how Local works.</td></tr>
+      <tr><td>Both</td><td>The cloud's database logins may drop and make tables (the migration does both)</td><td><code>to-cloud.sh</code> stops with the database's error: grant the login those rights on its database.</td></tr>
+      <tr><td>Both</td><td>How long the copy takes with the real sizes. Big buckets go through the helper pod's own disk</td><td>Note the time for next time. If the helper pod is evicted for disk, the nodes need bigger disks (<code>volumeSize</code> in <code>eks.yaml</code>, <code>--disk-size</code> in <code>gke.sh</code>).</td></tr>
+      <tr><td>EKS</td><td>The load balancer controller makes an NLB for <code>traefik</code> and <code>tinyice-source</code></td><td>EXTERNAL-IP stays pending: <code>kubectl -n kube-system logs deploy/aws-load-balancer-controller</code>.</td></tr>
+      <tr><td>EKS</td><td>IRSA: Ghost reaches the bucket with its role</td><td>Uploads fail and Ghost's log says AccessDenied: does the role's trust name your namespace and ServiceAccount <code>ghost</code>? Is <code>GHOST_ROLE_ARN</code> right?</td></tr>
+      <tr><td>EKS</td><td>Postiz and Temporal on RDS Postgres without TLS (<code>rds.force_ssl=0</code>)</td><td>"no pg_hba.conf entry … no encryption": the parameter group isn't on the instance, or the instance needs a reboot.</td></tr>
+      <tr><td>GKE</td><td>Workload Identity: the proxies sign in as <code>CLOUD_SQL_SA</code></td><td><code>kubectl -n mysite logs deploy/ghost -c cloud-sql-proxy</code> says 403 or "permission": the binding for <code>&lt;namespace&gt;/cloud-sql</code>, the Cloud SQL Client role.</td></tr>
+      <tr><td>GKE</td><td>Cloud Storage takes Ghost's uploads through its S3 side (the overlay sends checksums only when required)</td><td>Uploads fail with a checksum or "not implemented" error in Ghost's log.</td></tr>
+      <tr><td>GKE</td><td>The proxies reach Cloud SQL by its public address</td><td>If you made the instances private only, set <code>CLOUD_SQL_PROXY_FLAGS=--private-ip</code> in <code>cloud-gke.env</code>.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Whatever you find, the kit would like to hear it: open an issue on <a href="https://github.com/puppi3-music/puppi3-creator-kit/issues">the kit's GitHub page</a>.</p>
+</section>
+
+<section id="trouble">
+  <h2>Troubleshooting</h2>
+  <p>Start with <code>kubectl -n mysite get pods</code>, and the Operations guide's <a href="operations-guide.html#trouble-kubernetes">Kubernetes</a> troubleshooting. In a cloud, also:</p>
+  <dl class="faq">
+    <dt><code>ImagePullBackOff</code> with images you built</dt>
+    <dd>"no match for platform": built on an ARM computer (a recent Mac, say) without <code>--platform linux/amd64</code>: the clouds' nodes here are Intel or AMD. "unauthorized" or "denied": the nodes can't read the registry (on GKE, see <a href="#gcp-the-image-registry">the registry</a>).</dd>
+    <dt>Pods <code>Pending</code>: "unbound PersistentVolumeClaims"</dt>
+    <dd>EKS: <code>kubectl get sc</code> lists <code>gp3</code> (<code>eks-gp3.yaml</code>), and the EBS CSI add-on is running? GKE has <code>standard-rwo</code> already. "Insufficient memory": add a node (EKS's <code>maxSize</code> allows 3).</dd>
+    <dt>Ghost keeps restarting: "ER_ACCESS_DENIED", or "ECONNREFUSED"/"ETIMEDOUT"</dt>
+    <dd>Access denied: <code>secrets/ghost.env</code>'s login (<code>secrets/puppi3.env</code> in a folder made before kit 1.2.0). Can't connect: on EKS, the database security group (port 3306 from the nodes' group) and <code>MYSQL_HOST</code>; on GKE, the proxy's log (<code>-c cloud-sql-proxy</code>) and <code>MYSQL_INSTANCE</code>.</dd>
+    <dt>Postiz or Temporal wait forever in <code>Init:</code></dt>
+    <dd>The <code>postgres-logins</code> Job's log: <code>kubectl -n mysite logs job/postgres-logins</code>. Usually <code>secrets/cloud.env</code>'s master login, or (EKS) the security group's port 5432.</dd>
+    <dt>Cloudflare shows 521 or 522</dt>
+    <dd>Cloudflare can't reach the cluster: does the DNS record point at <code>traefik</code>'s address (not <code>tinyice-source</code>'s), and is <code>kubectl -n mysite get pods -l app=traefik</code> Running?</dd>
+    <dt>Everything says 403</dt>
+    <dd>Cloudflare-only is turning you away. Before the DNS moved: your address isn't in <code>TRUSTED_EXTRA</code>, or it has changed. After: "keeps the visitor's address" in <a href="#first-time">the first time</a>.</dd>
+    <dt>Certificate warnings that don't go away</dt>
+    <dd>Traefik's log: <code>kubectl -n mysite logs deploy/traefik | grep -i acme</code>. Usually <code>CLOUDFLARE_DNS_API_TOKEN</code> in <code>secrets/traefik.env</code>.</dd>
+    <dt>No mail from Ghost</dt>
+    <dd><code>secrets/ghost-mail.env</code> is there and right? <code>kubectl -n mysite exec deploy/ghost -c ghost -- printenv | grep ^mail__</code>, then Ghost's log when you ask for a sign-in code.</dd>
+  </dl>
+</section>
+
+<section id="commands">
+  <h2>Command reference</h2>
+<div class="code"><pre>S=kit/sites/mysite-k8s
+k8s/up.sh $S eks --render                      # what would be applied, no cluster (data/k8s/rendered.yaml)
+k8s/up.sh $S eks                               # apply and wait (asks first; UP_TIMEOUT=&lt;s&gt; for a slow first start)
+k8s/up.sh $S eks --down                        # the site off the cluster (name the overlay: alone, --down means the local test cluster's)
+k8s/migrate/to-cloud.sh $S eks --from &lt;user&gt;@&lt;host&gt;:/path/to/mysite/data [-n]
+k8s/migrate/to-nas.sh   $S eks --to   &lt;user&gt;@&lt;host&gt;:/path/to/mysite/data [-n] [--no-start]
+kubectl -n mysite get pods                     # -w to watch
+kubectl -n mysite logs deploy/ghost -c ghost   # -c cloud-sql-proxy on GKE; --previous after a restart
+kubectl -n mysite get svc traefik tinyice-source
+kubectl -n mysite scale deploy/tinyice-relay --replicas 4
+kubectl -n mysite port-forward deploy/tinyice 8080:8080</pre></div>
+  <p>Use <code>gke</code> in place of <code>eks</code> on Google Cloud, and your own short name in place of <code>mysite</code>.</p>
+</section>
+</main>
+</div>
+
+<footer>Cloud Guide · Puppi3's Creator Kit 🐾</footer>
+</div>
+
+<!-- shared script: from docs/assets/docs.js, copied in by docs/build-docs.py -->
+<script>
+/* Shared by the docs pages, and copied into each one by docs/build-docs.py, so every guide is a
+   single file that works on its own (send just that file and search still works):
+   a top bar (a link to the front page, the guide's name, search, theme switch), search through this page, a contents list
+   that follows along, heading links, copy buttons and "back to top". Edit this file, not the
+   copies in the pages; the pre-commit hook rebuilds them. */
+(function () {
+  'use strict';
+
+  var store = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+  };
+  var esc = function (s) {
+    return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+  };
+  var el = function (tag, attrs, html) {
+    var n = document.createElement(tag);
+    for (var k in attrs || {}) n.setAttribute(k, attrs[k]);
+    if (html != null) n.innerHTML = html;
+    return n;
+  };
+
+  /* ---------- theme: auto / light / dark ---------- */
+  var THEMES = ['auto', 'light', 'dark'];
+  var THEME_LABEL = { auto: '◐ Auto', light: '☀ Light', dark: '☾ Dark' };
+  function applyTheme(t) {
+    if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    else document.documentElement.removeAttribute('data-theme');
+  }
+  var theme = store.get('docs-theme') || 'auto';
+  applyTheme(theme);
+
+  /* ---------- top bar ---------- */
+  var bar = el('div', { class: 'docbar' });
+  var inner = el('div', { class: 'docbar-in' });
+  var h1 = document.querySelector('h1');
+  var name = (h1 ? h1.textContent : document.title).replace(/\.\s*$/, '').trim();
+  // back to the front page, only when served (the docs site): a guide sent as a file has no index next to it
+  if (/^https?:$/.test(location.protocol)) {
+    inner.appendChild(el('a', { class: 'home', href: './', title: 'All the guides', 'aria-label': 'All guides' },
+      '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.5"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.5"/>' +
+      '<rect x="1.5" y="9" width="5.5" height="5.5" rx="1.5"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.5"/></svg><span>All guides</span>'));
+  }
+  inner.appendChild(el('a', { class: 'brand', href: '#', title: 'Back to the top' }, esc(name) + '<span>.</span>'));
+  inner.appendChild(el('div', { class: 'grow' }));
+  var search = el('div', { class: 'search' });
+  search.innerHTML =
+    '<svg class="glass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>' +
+    '<input type="search" placeholder="Search this guide" autocomplete="off" spellcheck="false" role="combobox" ' +
+    'aria-autocomplete="list" aria-expanded="false" aria-controls="doc-results" aria-label="Search this guide">' +
+    '<kbd>/</kbd><div class="results" id="doc-results" role="listbox" aria-label="Search results"></div>';
+  inner.appendChild(search);
+  var themeBtn = el('button', { class: 'iconbtn', type: 'button', title: 'Colour theme' }, THEME_LABEL[theme]);
+  themeBtn.addEventListener('click', function () {
+    theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
+    applyTheme(theme);
+    store.set('docs-theme', theme === 'auto' ? null : theme);
+    themeBtn.textContent = THEME_LABEL[theme];
+  });
+  inner.appendChild(themeBtn);
+  bar.appendChild(inner);
+  document.body.insertBefore(bar, document.body.firstChild);
+
+  /* ---------- this page in parts: each section's intro, then each h3's part ---------- */
+  // readable text: spaces between table cells, list items and blocks (textContent runs them together)
+  var BLOCK = /^(P|DIV|LI|TD|TH|TR|DT|DD|H\d|BLOCKQUOTE|PRE|BR|UL|OL|TABLE|FIGCAPTION|SECTION)$/;
+  function textOf(nodes) {
+    var parts = [];
+    var walk = function (n) {
+      if (n.nodeType === 3) { parts.push(n.nodeValue); return; }
+      if (n.nodeType !== 1 || /^(SCRIPT|STYLE|BUTTON|NAV)$/.test(n.nodeName) || (n.classList && n.classList.contains('anchor'))) return;
+      var block = BLOCK.test(n.nodeName);
+      if (block) parts.push(' ');
+      for (var c = n.firstChild; c; c = c.nextSibling) walk(c);
+      if (block) parts.push(' ');
+    };
+    nodes.forEach(walk);
+    return parts.join('').replace(/\s+/g, ' ').trim();
+  }
+  function headingText(h) { var c = h.cloneNode(true); c.querySelectorAll('.anchor').forEach(function (x) { x.remove(); }); return c.textContent.replace(/\s+/g, ' ').trim(); }
+  function pageEntries() {
+    var out = [];
+    document.querySelectorAll('main section[id]').forEach(function (sec) {
+      var h2 = sec.querySelector('h2'), title = h2 ? headingText(h2) : sec.id;
+      var chunk = { id: sec.id, h: title, nodes: [] };
+      out.push(chunk);
+      Array.prototype.forEach.call(sec.childNodes, function (n) {
+        if (n === h2) return;
+        if (n.nodeType === 1 && n.nodeName === 'H3' && n.id) {
+          chunk = { id: n.id, h: title + ' › ' + headingText(n), nodes: [] };
+          out.push(chunk);
+          return;
+        }
+        chunk.nodes.push(n);
+      });
+    });
+    return out.map(function (c) { var x = textOf(c.nodes); return { id: c.id, h: c.h, x: x, hl: c.h.toLowerCase(), xl: x.toLowerCase() }; });
+  }
+  var entries = null;
+  function allEntries() { return entries || (entries = pageEntries()); }
+
+  /* ---------- search ---------- */
+  var input = search.querySelector('input'), box = search.querySelector('.results');
+  var hits = [], active = -1;
+  function terms(q) { return q.toLowerCase().split(/\s+/).filter(function (t) { return t.length > 0; }); }
+  function count(hay, t) { var n = 0, i = hay.indexOf(t); while (i !== -1 && n < 6) { n++; i = hay.indexOf(t, i + t.length); } return n; }
+  var reEsc = function (t) { return t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); };
+  // highlight the words in plain text, escaping each piece (so words never match inside &amp; and the like)
+  function markup(text, ts) {
+    var re = new RegExp(ts.map(reEsc).join('|'), 'gi'), out = '', last = 0, m;
+    while ((m = re.exec(text))) {
+      out += esc(text.slice(last, m.index)) + '<mark>' + esc(m[0]) + '</mark>';
+      last = m.index + m[0].length;
+    }
+    return out + esc(text.slice(last));
+  }
+  function snippet(e, ts) {
+    var at = -1;
+    ts.forEach(function (t) { var i = e.xl.indexOf(t); if (i !== -1 && (at === -1 || i < at)) at = i; });
+    if (at === -1) return e.x.slice(0, 150) + (e.x.length > 150 ? '…' : '');
+    var start = Math.max(0, at - 60), end = Math.min(e.x.length, at + 120);
+    return (start > 0 ? '…' : '') + e.x.slice(start, end) + (end < e.x.length ? '…' : '');
+  }
+  function run(q) {
+    var ts = terms(q);
+    if (!ts.length) { close(); return; }
+    var list = allEntries(), scored = [];
+    list.forEach(function (e) {
+      var score = 0;
+      for (var i = 0; i < ts.length; i++) {
+        var t = ts[i], inH = e.hl.indexOf(t) !== -1, n = count(e.xl, t);
+        if (!inH && !n) return;                      // every word must appear
+        if (inH) score += 12 + (new RegExp('(^|[^a-z0-9])' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(e.hl) ? 6 : 0);
+        score += Math.min(n, 5);
+      }
+      scored.push({ e: e, s: score });
+    });
+    scored.sort(function (a, b) { return b.s - a.s; });
+    hits = scored.slice(0, 20).map(function (r) { return r.e; });
+    active = hits.length ? 0 : -1;
+    render(ts);
+  }
+  function hrefFor(e, ts) { return '?q=' + encodeURIComponent(ts.join(' ')) + '#' + encodeURIComponent(e.id); }
+  function render(ts) {
+    if (!hits.length) {
+      box.innerHTML = '<div class="hint">No matches for <b>' + esc(ts.join(' ')) + '</b>. Try fewer or different words.</div>';
+    } else {
+      box.innerHTML = hits.map(function (e, i) {
+        return '<a class="result" role="option" id="doc-hit-' + i + '" aria-selected="' + (i === active) + '" href="' + esc(hrefFor(e, ts)) + '" data-i="' + i + '">' +
+          '<span class="where">' + markup(e.h, ts) + '</span><span class="snip">' + markup(snippet(e, ts), ts) + '</span></a>';
+      }).join('') + '<div class="hint">↑ ↓ to choose · Enter to open · Esc to close</div>';
+    }
+    box.classList.add('open');
+    input.setAttribute('aria-expanded', 'true');
+    input.setAttribute('aria-activedescendant', active >= 0 ? 'doc-hit-' + active : '');
+  }
+  function close() { box.classList.remove('open'); input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); }
+  function move(d) {
+    if (!hits.length) return;
+    active = (active + d + hits.length) % hits.length;
+    box.querySelectorAll('.result').forEach(function (a, i) { a.setAttribute('aria-selected', String(i === active)); });
+    var cur = box.querySelector('#doc-hit-' + active);
+    if (cur) { cur.scrollIntoView({ block: 'nearest' }); input.setAttribute('aria-activedescendant', cur.id); }
+  }
+  function open(e, ts) {
+    close();
+    // keep the address in step where allowed (pages opened from disk may refuse), then land
+    try { history.replaceState(null, '', hrefFor(e, ts)); } catch (err) {}
+    land(e.id, ts); input.blur();
+  }
+  var timer;
+  input.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(function () { run(input.value); }, 60); });
+  input.addEventListener('focus', function () { if (input.value.trim()) run(input.value); });
+  input.addEventListener('keydown', function (ev) {
+    if (ev.key === 'ArrowDown') { ev.preventDefault(); move(1); }
+    else if (ev.key === 'ArrowUp') { ev.preventDefault(); move(-1); }
+    else if (ev.key === 'Enter') { ev.preventDefault(); if (active >= 0) open(hits[active], terms(input.value)); }
+    else if (ev.key === 'Escape') { if (box.classList.contains('open')) close(); else input.blur(); }
+  });
+  box.addEventListener('click', function (ev) {
+    var a = ev.target.closest('.result'); if (!a) return;
+    if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button === 1) return;   // new tab: let the link work
+    ev.preventDefault(); open(hits[+a.getAttribute('data-i')], terms(input.value));
+  });
+  document.addEventListener('click', function (ev) { if (!search.contains(ev.target)) close(); });
+  document.addEventListener('keydown', function (ev) {
+    var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.nodeName);
+    if ((ev.key === '/' && !typing) || ((ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === 'k')) {
+      ev.preventDefault(); input.focus(); input.select();
+    }
+  });
+
+  /* ---------- landing on a result: flash the heading and mark the words in its part ---------- */
+  function clearMarks() {
+    document.querySelectorAll('mark.hit').forEach(function (m) { m.replaceWith(document.createTextNode(m.textContent)); });
+    document.querySelectorAll('main section').forEach(function (s) { s.normalize(); });
+  }
+  function partOf(target) {
+    // the heading's part: an h3 up to the next h3; a section's intro up to its first h3
+    var nodes = [], sec = target.closest('section') || target;
+    var start = target.nodeName === 'SECTION' ? sec.firstChild : target.nextSibling;
+    for (var n = start; n; n = n.nextSibling) { if (n.nodeName === 'H3' && n !== target) break; nodes.push(n); }
+    return nodes;
+  }
+  function markIn(nodes, ts) {
+    if (!ts.length) return null;
+    var re = new RegExp(ts.map(function (t) { return t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|'), 'gi'), first = null;
+    nodes.forEach(function (root) {
+      var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode: function (n) { return n.parentNode.closest('button,script,style,mark,.anchor') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; }
+      }), texts = [];
+      if (root.nodeType === 3) texts.push(root); else while (walker.nextNode()) texts.push(walker.currentNode);
+      texts.forEach(function (tn) {
+        var s = tn.nodeValue; re.lastIndex = 0; if (!re.test(s)) return; re.lastIndex = 0;
+        var frag = document.createDocumentFragment(), last = 0, m;
+        while ((m = re.exec(s))) {
+          frag.appendChild(document.createTextNode(s.slice(last, m.index)));
+          var mk = el('mark', { class: 'hit' }); mk.textContent = m[0]; frag.appendChild(mk); if (!first) first = mk;
+          last = m.index + m[0].length;
+        }
+        frag.appendChild(document.createTextNode(s.slice(last)));
+        tn.parentNode.replaceChild(frag, tn);
+      });
+    });
+    return first;
+  }
+  function land(id, ts) {
+    var target = document.getElementById(id); if (!target) return;
+    clearMarks();
+    markIn(partOf(target), ts || []);
+    var h = target.nodeName === 'SECTION' ? target.querySelector('h2') || target : target;
+    h.scrollIntoView({ block: 'start' });
+    h.classList.remove('flash'); void h.offsetWidth; h.classList.add('flash');
+  }
+  var q0 = new URLSearchParams(location.search).get('q');
+  if (q0) input.value = q0;
+  if (location.hash.length > 1) {
+    var id0 = decodeURIComponent(location.hash.slice(1));
+    requestAnimationFrame(function () { land(id0, q0 ? terms(q0) : []); });
+  }
+
+  /* ---------- heading links (#) ---------- */
+  document.querySelectorAll('main section[id] > h2, main h3[id]').forEach(function (h) {
+    var id = h.nodeName === 'H2' ? h.parentNode.id : h.id;
+    var a = el('a', { class: 'anchor', href: '#' + id, 'aria-label': 'Link to this part' }, '#');
+    h.appendChild(a);
+  });
+
+  /* ---------- contents list that follows along, with the current section's sub-headings ---------- */
+  var toc = document.querySelector('nav.toc');
+  var tocLinks = {};
+  if (toc) {
+    toc.querySelectorAll('a[href^="#"]').forEach(function (a) {
+      var id = a.getAttribute('href').slice(1), sec = document.getElementById(id);
+      if (!sec) return;
+      tocLinks[id] = a;
+      var subs = sec.querySelectorAll('h3[id]');
+      if (!subs.length) return;
+      var ul = el('ul', { class: 'sub' });
+      subs.forEach(function (h) { var li = el('li'); li.appendChild(el('a', { href: '#' + h.id }, esc(headingText(h)))); ul.appendChild(li); });
+      a.parentNode.appendChild(ul);
+    });
+    var headings = Array.prototype.slice.call(document.querySelectorAll('main section[id], main h3[id]'));
+    var ticking = false;
+    var spy = function () {
+      ticking = false;
+      var line = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bar-h')) + 40 || 100, cur = null;
+      for (var i = 0; i < headings.length; i++) { if (headings[i].getBoundingClientRect().top <= line) cur = headings[i]; else break; }
+      var sec = cur ? (cur.nodeName === 'SECTION' ? cur : cur.closest('section')) : null;
+      toc.querySelectorAll('a[aria-current]').forEach(function (a) { a.removeAttribute('aria-current'); });
+      toc.querySelectorAll('li.open').forEach(function (li) { li.classList.remove('open'); });
+      if (!sec || !tocLinks[sec.id]) return;
+      tocLinks[sec.id].setAttribute('aria-current', 'true');
+      tocLinks[sec.id].parentNode.classList.add('open');
+      if (cur.nodeName === 'H3') { var s = toc.querySelector('ul.sub a[href="#' + cur.id + '"]'); if (s) s.setAttribute('aria-current', 'true'); }
+    };
+    addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(spy); } }, { passive: true });
+    addEventListener('resize', spy);
+    spy();
+  }
+
+  /* ---------- copy buttons on code blocks ---------- */
+  document.querySelectorAll('.code').forEach(function (codeBox) {
+    var pre = codeBox.querySelector('pre');
+    if (!pre || codeBox.querySelector('button')) return;
+    var b = el('button', { type: 'button', 'aria-label': 'Copy code' }, 'Copy');
+    b.addEventListener('click', function () {
+      var reset = function () { setTimeout(function () { b.textContent = 'Copy'; }, 1500); };
+      var select = function () {
+        var r = document.createRange(); r.selectNodeContents(pre);
+        var s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; reset();
+      };
+      try { navigator.clipboard.writeText(pre.innerText).then(function () { b.textContent = 'Copied'; reset(); }, select); } catch (e) { select(); }
+    });
+    codeBox.appendChild(b);
+  });
+
+  /* ---------- column names on each cell, for the phone layout (docs.css) ---------- */
+  document.querySelectorAll('.tablewrap table').forEach(function (t) {
+    // long paths in the first column may wrap after a "/" (docs.css keeps them from breaking mid-name)
+    t.querySelectorAll('td:first-child code').forEach(function (c) {
+      if (c.children.length || c.textContent.length < 30 || c.textContent.indexOf('/') === -1) return;
+      c.innerHTML = esc(c.textContent).replace(/\//g, '/<wbr>');
+    });
+    var names = Array.prototype.map.call(t.querySelectorAll('thead th'), function (th) { return th.textContent.trim(); });
+    t.querySelectorAll('tbody tr').forEach(function (tr) {
+      var col = 0;
+      Array.prototype.forEach.call(tr.children, function (td) {
+        // a cell spanning columns is labelled with all of them ("Production & Staging")
+        var label = names.slice(col, col + td.colSpan).filter(Boolean).join(' & ');
+        if (label) td.setAttribute('data-label', label);
+        col += td.colSpan;
+      });
+    });
+  });
+
+  /* ---------- back to top ---------- */
+  var up = el('button', { class: 'totop', type: 'button', 'aria-label': 'Back to top' }, '↑ Top');
+  up.addEventListener('click', function () { scrollTo({ top: 0 }); });
+  bar.querySelector('.brand').addEventListener('click', function (ev) { ev.preventDefault(); scrollTo({ top: 0 }); });
+  document.body.appendChild(up);
+  addEventListener('scroll', function () { up.classList.toggle('show', scrollY > 700); }, { passive: true });
+})();
+</script>
+<!-- /shared script -->
+</body>
+</html>

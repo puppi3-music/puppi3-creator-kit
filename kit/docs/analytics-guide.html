@@ -323,7 +323,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
       <tr><td><span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#E535C8;vertical-align:-1px;margin-right:6px"></span>Magenta</td><td>The site (Ghost) as a network: the magenta post markers for your posts on the site, the counts of posts published, and the site's own section on Platforms</td></tr>
       <tr><td><span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#B28CFF;vertical-align:-1px;margin-right:6px"></span>Violet</td><td>Your social posts, like the violet post markers</td></tr>
       <tr><td><span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#FADE2A;vertical-align:-1px;margin-right:6px"></span>Yellow</td><td>Likes, in the popup when you hover a Platforms <strong>reach &amp; engagement</strong> chart (comments and replies blue, shares and reposts plain, saves and quotes violet)</td></tr>
-      <tr><td><span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#FF4FA3;vertical-align:-1px;margin-right:6px"></span>Bright pink</td><td>The live stream</td></tr>
+      <tr><td><span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#FF4FA3;vertical-align:-1px;margin-right:6px"></span>Bright pink</td><td>The live stream (and a mascot's pets, on a site whose theme has one)</td></tr>
       <tr><td><span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#FF9830;vertical-align:-1px;margin-right:6px"></span>Orange</td><td>Worth a look: unsubscribes, emails that bounce</td></tr>
       <tr><td><span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:#F2495C;vertical-align:-1px;margin-right:6px"></span>Red</td><td>Something wrong: errors, failures, threats</td></tr>
       <tr><td><span aria-hidden="true" style="display:inline-block;width:.8em;height:.8em;border-radius:3px;background:currentColor;vertical-align:-1px;margin-right:6px"></span>Plain (the text colour)</td><td>A second number shown beside a coloured one, for comparison</td></tr>
@@ -353,7 +353,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
   <div class="tablewrap"><table>
     <thead><tr><th>Dashboard</th><th>What it answers</th><th>Look at first</th></tr></thead>
     <tbody>
-      <tr><td><span class="where">Overview</span></td><td>Is everything OK, and how's it going in general?</td><td>Alerts firing now, Unique visitors, Total members, Posts doing well, Best posts lately</td></tr>
+      <tr><td><span class="where">Overview</span></td><td>Is everything OK, and how's it going in general?</td><td>Alerts firing now, Unique visitors, Total members, Posts doing well, Best posts lately, and Puppies petted on a site whose theme has a mascot to pet</td></tr>
       <tr><td><span class="where">Health</span></td><td>Is the site up and fast? Am I on air?</td><td>Site, Uptime, On air, Listeners now, Errors, Live stream</td></tr>
       <tr><td><span class="where">Traffic</span></td><td>How many people visit, what do they read, and where from? Also Google Search and everything Cloudflare saw.</td><td>Unique visitors per day, Top pages, Top sources</td></tr>
       <tr><td><span class="where">Growth</span></td><td>Which networks, links and posts bring visitors <em>and members</em>?</td><td>Visitor → member, Top network, Sources, Tagged links</td></tr>
@@ -574,7 +574,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
     <li><strong>Deleted posts</strong>: they leave the posts tables. What was collected about them stays, and When to post still counts them.</li>
     <li><strong>Instagram's new followers per day</strong> while the account has under 100 followers: Instagram doesn't give them.</li>
     <li><strong>The last 2 to 3 days of Google Search</strong>: Google hasn't released them yet.</li>
-    
+    <li><strong>Puppies petted per day</strong> (a theme with a mascot to pet) before the per-day count began: only the all-time total goes back further.</li>
   </ul>
   <p><strong>Collected, not shown yet.</strong> The dashboards show only part of what's collected. Everything else each network offers is kept too, so a chart can be added later with its past already there. That includes the rest of each post's numbers, Instagram's daily reach split into followers and non-followers, who follows you on Threads and who Instagram reaches beyond your followers, YouTube viewers' countries, devices and ages, the searches and pages Google showed the site for each day (Google itself keeps only 16 months) and Postiz's numbers for every connected channel. A new chart is a change to the kit itself (changes made in Grafana don't stay): to ask for one, open an issue on <a href="https://github.com/puppi3-music/puppi3-creator-kit">the kit's GitHub page</a>.</p>
 </section>
@@ -583,7 +583,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
   <h2>Something looks wrong?</h2>
   <dl class="faq">
     <dt>A network's section is missing from Platforms.</dt>
-    <dd>It has no numbers yet: not set up, or every try so far has failed. The <strong>Networks not shown</strong> box at the bottom lists the hidden ones with the reason. What each network needs: the <a href="setup-guide.html#finish-numbers">Setup guide</a> (for most of them, connecting the channel in Postiz and allowing every permission is all it takes).</dd>
+    <dd>It has no numbers yet: not set up, or every try so far has failed. The <strong>Networks not shown</strong> box at the bottom lists the hidden ones with the reason. What each network needs: the <a href="networks-guide.html">Networks guide</a> (for most of them, connecting the channel in Postiz and allowing every permission is all it takes).</dd>
     <dt>A network's numbers look old, or its status panel shows an error.</dt>
     <dd>Each section has a <strong>status</strong> panel saying when the numbers were last collected and what went wrong. Often a channel needs reconnecting in Postiz. If they stop updating, an alert ("… numbers stopped updating") comes to your phone too.</dd>
     <dt>The site's posts on Platforms have no visitors.</dt>

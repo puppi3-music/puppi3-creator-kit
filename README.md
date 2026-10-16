@@ -10,8 +10,8 @@ live stream with a LIVE NOW bar, each post shared to your social networks, every
 Grafana dashboards, and alerts on your phone. It all runs on one machine with Docker Compose, or on Kubernetes (your
 own cluster, Amazon EKS or Google GKE).
 
-**Guides:** [Setup](kit/docs/setup-guide.html) · [Operations](kit/docs/operations-guide.html) ·
-[Theme](kit/docs/theme-guide.html) · [Posting](kit/docs/posting-guide.html) · [Analytics](kit/docs/analytics-guide.html) ·
+**Guides:** [Setup](kit/docs/setup-guide.html) · [Operations](kit/docs/operations-guide.html) · [Networks](kit/docs/networks-guide.html) ·
+[Cloud](kit/docs/cloud-guide.html) · [Theme](kit/docs/theme-guide.html) · [Posting](kit/docs/posting-guide.html) · [Analytics](kit/docs/analytics-guide.html) ·
 [Settings reference](kit/docs/settings-reference.html) (online at
 [puppi3-music.github.io/puppi3-creator-kit](https://puppi3-music.github.io/puppi3-creator-kit/kit/docs/))
 
@@ -175,6 +175,8 @@ guide](kit/docs/operations-guide.html#upgrade) has the details: a ZIP copy, Kube
 |---|---|
 | [Setup](kit/docs/setup-guide.html) | Setting up a site: Compose or Kubernetes, Cloudflare or not, every step to finish by hand |
 | [Operations](kit/docs/operations-guide.html) | Updating the kit, backups, moving the site between machines or to a cloud, troubleshooting |
+| [Networks](kit/docs/networks-guide.html) | Connecting each network for posts and numbers: the apps to make, their keys, checking the numbers arrive |
+| [Cloud](kit/docs/cloud-guide.html) | A busy stretch on Amazon EKS or Google GKE and back: the cache, the costs, each cloud set up step by step |
 | [Theme](kit/docs/theme-guide.html) | The theme's settings, the LIVE NOW bar, links to your other platforms, short links, another theme |
 | [Posting](kit/docs/posting-guide.html) | Whoever posts: tags, what each network gets, finishing Instagram and TikTok posts |
 | [Analytics](kit/docs/analytics-guide.html) | Reading the dashboards: which one answers what |
