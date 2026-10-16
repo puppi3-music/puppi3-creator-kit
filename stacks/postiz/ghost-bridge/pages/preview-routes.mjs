@@ -6,7 +6,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { esc, escAttr, previewPage, renderPreview, photosPage } from './preview-render.mjs';
-import { LIMITS, IMAGE_LIMITS, INSTAGRAM_IDS, TIKTOK_IDS, NO_LINK_IDS, CUSTOM_CHANNELS, CUSTOM_MAX, STICKER_TEXT_MAX, MANUAL_DRAFTS,
+import { LIMITS, IMAGE_LIMITS, INSTAGRAM_IDS, TIKTOK_IDS, NO_LINK_IDS, CUSTOM_CHANNELS, CUSTOM_MAX, STICKER_TEXT_MAX, SITE_TIMEZONE, MANUAL_DRAFTS,
   BIG_DROP_TAG, STORY_TAG, PREVIEW_DIR, PREVIEW_KEEP, PREVIEW_URL, log, channelKey, PHOTOS_FILE, PHOTOS_BASE,
   PHOTO_PAGE_DAYS, GHOST_API_URL, previewStore, DRAFT_BASE, DRAFT_PREVIEWS, editCustom, setCustom,
   setFrame, FEATURED_DOMAINS, SERVICE_NAMES, FEATURED_LINE, FEATURED_BIO_LINE, FEATURED_LABEL } from '../config.mjs';
@@ -21,7 +21,7 @@ import { handlePost } from '../share/share.mjs';
 // webhook in DRY_RUN, and used for draft previews.
 export const PREVIEW_SETTINGS = { LIMITS, IMAGE_LIMITS, INSTAGRAM_IDS, TIKTOK_IDS, NO_LINK_IDS, CUSTOM_CHANNELS, CUSTOM_MAX,
   MANUAL_DRAFTS, BIG_DROP_TAG, STORY_TAG, channelKey, FEATURED_DOMAINS, SERVICE_NAMES, FEATURED_LINE, FEATURED_BIO_LINE,
-  FEATURED_LABEL, STICKER_TEXT_MAX };
+  FEATURED_LABEL, STICKER_TEXT_MAX, SITE_TIMEZONE };
 
 export async function writePreview(pv) {
   await fs.mkdir(PREVIEW_DIR, { recursive: true });
@@ -303,6 +303,45 @@ async function saveSticker(req, res, uuid) {
   return sendJson(res, 200, { ok: true });
 }
 
+// 'YYYY-MM-DDTHH:MM' as a time in the zone tz (ms), or NaN: a first guess at the zone's offset, then once more from
+// that guess's own offset, which also gets the hours either side of a change of clocks
+export function zonedTime(local, tz) {
+  const m = /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)$/.exec(local || '');
+  if (!m) return NaN;
+  const wall = Date.UTC(+m[1], m[2] - 1, +m[3], +m[4], +m[5]);
+  const fmt = new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit',
+    day: '2-digit', hour: '2-digit', minute: '2-digit' });
+  const offset = (t) => {
+    const p = Object.fromEntries(fmt.formatToParts(new Date(t)).map((x) => [x.type, x.value]));
+    return Date.UTC(+p.year, p.month - 1, +p.day, +p.hour, +p.minute) - t;
+  };
+  const guess = wall - offset(wall);
+  return wall - offset(guess);
+}
+
+// POST /ghost/social-preview/<uuid>/story-at {at}: the Instagram Story's own time, 'YYYY-MM-DDTHH:MM' in SITE_TIMEZONE
+// ('' = with the post); within a year, not gone by
+async function saveStoryAt(req, res, uuid) {
+  const body = await readJson(req, res);
+  if (!body) return;
+  const local = typeof body.at === 'string' ? body.at.trim() : '';
+  let at = '';
+  if (local) {
+    const t = zonedTime(local, SITE_TIMEZONE);
+    if (!Number.isFinite(t)) return sendJson(res, 400, { error: 'not a date and time' });
+    if (t < Date.now() - 60_000) return sendJson(res, 400, { error: 'that time has gone by' });
+    if (t > Date.now() + 366 * 86_400_000) return sendJson(res, 400, { error: 'more than a year away' });
+    at = new Date(t).toISOString();
+  }
+  const hit = draftCache.get(uuid);
+  const post = hit?.post || await ghostPostByUuid(uuid);
+  if (!post) return sendJson(res, 404, { error: 'no post has that preview link' });
+  await editCustom(post.id, (m) => { if (at) m.storyAt = at; else delete m.storyAt; });
+  if (hit) hit.html = null;
+  log(`social preview: Instagram Story time for "${post.title}": ${at || 'with the post'}`);
+  return sendJson(res, 200, { ok: true });
+}
+
 // POST /ghost/social-preview/<uuid>/custom {channel, text}: save (or with an empty text, remove) a channel's own
 // text. Answers with the re-rendered page, which the page swaps that channel's cards from.
 async function saveCustomText(req, res, uuid) {
@@ -354,11 +393,11 @@ export async function serveDraftPreview(req, res, p) {
   }
   const media = new RegExp(`^${DRAFT_BASE}/(media/[\\w-][\\w.-]*\\.mp4)$`).exec(p);
   if (media) return serveFile(req, res, path.join(PREVIEW_DIR, media[1]));
-  const m = new RegExp(`^${DRAFT_BASE}/${UUID}/(custom|frame|listen|sticker)?$`).exec(p) || new RegExp(`^${DRAFT_BASE}/${UUID}()$`).exec(p);
+  const m = new RegExp(`^${DRAFT_BASE}/${UUID}/(custom|frame|listen|sticker|story-at)?$`).exec(p) || new RegExp(`^${DRAFT_BASE}/${UUID}()$`).exec(p);
   if (m?.[2] && req.method === 'POST') {
     // saves come from the preview page itself: a page on another site can't make your browser send one
     if (req.headers.origin !== await ghostSiteOrigin()) return sendJson(res, 403, { error: 'wrong origin' });
-    return ({ frame: saveFrame, listen: saveListen, sticker: saveSticker }[m[2]] || saveCustomText)(req, res, m[1]);
+    return ({ frame: saveFrame, listen: saveListen, sticker: saveSticker, 'story-at': saveStoryAt }[m[2]] || saveCustomText)(req, res, m[1]);
   }
   if (!m || m[2] || req.method !== 'GET') return res.writeHead(404, headers).end(draftPage('Not found', 'Open this from a post\'s Preview in Ghost.'));
   let html;

@@ -38,6 +38,10 @@ async function share(post) {
   return { ...pv, byLabel: Object.fromEntries(pv.entries.map((e) => [e.label, e])) };
 }
 const tags = (...names) => names.map((name) => ({ name }));
+// custom.json (what the Social preview saves) sits next to STATE_FILE, in this run's own folder
+const dataDir = path.dirname(process.env.STATE_FILE);
+await fs.mkdir(dataDir, { recursive: true });
+after(() => fs.rm(dataDir, { recursive: true, force: true }));
 
 test('a text post: Bluesky and Threads post themselves; Instagram and TikTok wait for you in the app', async () => {
   asked.length = 0;
@@ -89,10 +93,6 @@ test('#bigdrop with a video: a reminder to add the link-sticker Story', async ()
 });
 
 test('the link sticker set on the Social preview: its text on the card and in both reminders, turned off, turned on, another link, no link', async () => {
-  // custom.json sits next to STATE_FILE, in this run's own folder
-  const dataDir = path.dirname(process.env.STATE_FILE);
-  await fs.mkdir(dataDir, { recursive: true });
-  after(() => fs.rm(dataDir, { recursive: true, force: true }));
   await editCustom('p1', (m) => { m.sticker = 'LISTEN NOW'; });
   try {
     const { byLabel, notes } = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#bigdrop', '#autopost') });
@@ -169,4 +169,39 @@ test('musicRouting: Instagram and TikTok post themselves only when a tag says so
   assert.deepEqual(musicRouting([], 'video', false), { auto: false, why: 'IG_TIKTOK_MODE=manual' });
   assert.deepEqual(musicRouting(['#autopost'], 'image', false), { auto: true, why: '#autopost' });
   assert.deepEqual(musicRouting(['#autopost', '#manualpost'], 'video', false), { auto: false, why: '#manualpost' });
+});
+
+test('the Instagram Story at a time of its own: Postiz schedules one it posts, a reminder for one by hand comes then', async () => {
+  const at = Date.now() + 5 * 3_600_000;
+  await editCustom('p1', (m) => { m.storyAt = new Date(at).toISOString(); });
+  try {
+    // #story posted by Postiz: scheduled for then, the rest now
+    const auto = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#story', '#autopost') });
+    assert.equal(auto.byLabel['instagram-standalone:story'].storyAt, new Date(at).toISOString());
+    const log = auto.log.join('\n');
+    assert.match(log, new RegExp(`"type": "schedule",\\s*"date": "${new Date(at).toISOString()}"`));
+    assert.match(log, /"type": "now"/, 'the other networks go now');
+    // #bigdrop: its Story reminder comes then, saying so
+    const big = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#bigdrop', '#autopost') });
+    assert.equal(big.notes[0].at, at);
+    assert.match(big.notes[0].message, /^⏰ The time you set for it: /);
+    // #story by hand: its notification comes then
+    const byHand = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#story') });
+    assert.equal(byHand.notes.find((n) => n.title.includes('Instagram')).at, at);
+    assert.equal(byHand.notes.find((n) => n.title.includes('TikTok')).at, undefined);
+    // a time gone by: with the post
+    await editCustom('p1', (m) => { m.storyAt = new Date(Date.now() - 3_600_000).toISOString(); });
+    const late = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#bigdrop', '#autopost') });
+    assert.equal(late.byLabel['instagram-standalone:story'].storyLate, true);
+    assert.equal(late.notes[0].at, undefined);
+    // nothing set: the card shows the post's own time in Ghost (a scheduled post's), and it goes with the post
+    await editCustom('p1', (m) => { delete m.storyAt; });
+    const when = new Date(Date.now() + 86_400_000).toISOString();
+    const sched = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#bigdrop', '#autopost'), status: 'scheduled', published_at: when });
+    assert.equal(sched.byLabel['instagram-standalone:story'].postAt, when);
+    assert.equal(sched.byLabel['instagram-standalone:story'].storyAt, '');
+    assert.equal(sched.notes[0].at, undefined);
+  } finally {
+    await editCustom('p1', (m) => { delete m.storyAt; });
+  }
 });

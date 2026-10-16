@@ -18,7 +18,7 @@ The tests are beside the folder, in `stacks/postiz/ghost-bridge-test/` (`stacks/
 | Reading the post (`bodyText`, video, audio card, gallery, `postLinks`, `findListenLink`), #clip | `share/content.mjs` |
 | Captions (`buildLines`, `fitLines`, `withLinks`), short tagged links (`tagLink`, `SHORT_LINK_PREFIX`), `#campaign-` | `share/content.mjs` |
 | `IMAGE_RULES`, fitting photos per platform, Instagram crop / frames, audiogram (ffmpeg) | `share/media.mjs` |
-| ntfy notifications (IG/TikTok "post in the app", #bigdrop Story, take-off notice, `NTFY_STORY_GAP`) | `share/ntfy.mjs` |
+| ntfy notifications (IG/TikTok "post in the app", #bigdrop Story, take-off notice, `NTFY_STORY_GAP`, a Story's own time: later.json) | `share/ntfy.mjs` |
 | Seasonal profile pictures (ntfy reminder per season, data/pfp.json) | `share/pfp.mjs` |
 | Weekly summary on the phone (`WEEKLY_SUMMARY_AT`, `weekDoc`, data/weekly.json) | `share/weekly.mjs` |
 | Preview page HTML/CSS/JS (draws only; reads and writes nothing) | `pages/preview-render.mjs` |
@@ -90,8 +90,9 @@ the audiogram clip.
 - Imports: config, services (`uploadFile`), share/content
 
 ### `share/ntfy.mjs`
-Sending to ntfy (4096-byte cut), the "finish in the app" and #bigdrop Story notifications, take-off notices.
-- Exports: `notify`, `notifyManual`, `notifyBigDrop`, `fitMessage`, `STORY_GAP_MS`, `startTakeOffNotices`
+Sending to ntfy (4096-byte cut), the "finish in the app" and #bigdrop Story notifications, take-off notices, and
+notifications kept for a time (a Story's own: later.json, sent when due).
+- Exports: `notify`, `notifyManual`, `notifyBigDrop`, `fitMessage`, `STORY_GAP_MS`, `startTakeOffNotices`, `notifyAt`, `sendDueLater`, `startLaterNotices`, `whenText`
 - Imports: config, pages/previews (`photoPage`), share/content (`stickerLink`), stats/history
 
 ### `share/pfp.mjs`
@@ -117,10 +118,10 @@ Renders preview pages (each channel's mock-up) and the photos page, each with th
 Dry-run previews written to `data/previews/` and served; photo pages (photos.json, `PHOTO_PAGE_DAYS`); the draft
 Social preview (`staffSignedIn` via Ghost's session cookie, cached per a hash of the post Ghost sends) and its saves (custom text,
 featured link, frames).
-- Exports: `writePreview`, `servePreview`, `serveFile`, `PREVIEW_SETTINGS`, `draftPage`, `photoPage`, `servePhotos`, `serveDraftPreview`, `cleanDraftMedia`, `sendJson`
+- Exports: `writePreview`, `servePreview`, `serveFile`, `PREVIEW_SETTINGS`, `draftPage`, `photoPage`, `servePhotos`, `serveDraftPreview`, `cleanDraftMedia`, `sendJson`, `zonedTime`
 - Imports: config, services, pages/preview, share/content, share/share (`handlePost`, run fully dry)
 - Routes (called from ghost-bridge.mjs): `/previews/...`, `<PHOTOS_BASE>/<id>/[n]`, `/ghost/social-preview/<uuid>/` +
-  `POST .../custom`, `.../listen`, `.../frame`, `.../sticker`
+  `POST .../custom`, `.../listen`, `.../frame`, `.../sticker`, `.../story-at`
 
 ### `stats/stats.mjs`
 `startStats`: the generic `collector()` loop, Postiz channels/analytics for the collectors, runs the grouped
