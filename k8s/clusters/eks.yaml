@@ -1,9 +1,9 @@
 # An EKS cluster for the kit's eks overlay, with eksctl (you run it; Claude never does):
 #   eksctl create cluster -f k8s/clusters/eks.yaml        (about 20 minutes; change name, region, version first)
 #   kubectl apply -f k8s/clusters/eks-gp3.yaml            the gp3 StorageClass the overlay's volumes name
-#   the AWS Load Balancer Controller (its ServiceAccount is made here): see the Setup guide (kit/docs/setup-guide.html#cloud)
+#   the AWS Load Balancer Controller (its ServiceAccount is made here): see the Cloud guide (kit/docs/cloud-guide.html#aws)
 #   eksctl delete cluster -f k8s/clusters/eks.yaml        when the burst is over (after k8s/migrate/to-nas.sh)
-# Then, in the same VPC (the Setup guide): RDS for MySQL 8 and for Postgres, reachable only from the nodes'
+# Then, in the same VPC (the Cloud guide, each with its command): RDS for MySQL 8 and for Postgres, reachable only from the nodes'
 # security group (Postgres with rds.force_ssl=0), the site's bucket, Ghost's IAM role (IRSA, for ServiceAccount
 # "ghost" in the site's namespace), and ECR only for images you build yourself. Their names go in <site>/cloud-eks.env.
 # Not tested here: only a real AWS account can.

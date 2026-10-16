@@ -4,7 +4,7 @@
 #   PROJECT=<project> k8s/clusters/gke.sh down    when the burst is over (after k8s/migrate/to-nas.sh)
 # Standard, not Autopilot: Autopilot wants every pod's resources fitted to its rules. Workload Identity is on, so the Cloud SQL proxies act as the site's
 # Google service account with no key stored. standard-rwo (pd-balanced), the overlay's StorageClass, is GKE's own.
-# Then (the Setup guide, kit/docs/setup-guide.html#cloud): Cloud SQL for MySQL 8 and for Postgres, the site's bucket and its HMAC key, the Google
+# Then (the Cloud guide, kit/docs/cloud-guide.html#gcp): Cloud SQL for MySQL 8 and for Postgres, the site's bucket and its HMAC key, the Google
 # service account with the Cloud SQL Client role and its Workload Identity binding for Kubernetes service account
 # "cloud-sql" in the site's namespace (`up` prints the command), and Artifact Registry only for images you build. Their
 # names go in <site>/cloud-gke.env.
