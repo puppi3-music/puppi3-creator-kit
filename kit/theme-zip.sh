@@ -9,7 +9,7 @@ done
 ZIP=dist/puppi3-creator-kit-theme.zip
 mkdir -p dist
 rm -f "$ZIP"
-(cd theme && zip -rq "../$ZIP" . -x '*.map' -x '.gitattributes' -x '.DS_Store' -x 'KIT.md')
+(cd theme && zip -rq "../$ZIP" . -x '*.map' -x '.gitattributes' -x '.DS_Store' -x 'KIT.md' -x 'CLAUDE*.md')
 # No other site's values: the addresses and names of the site the kit was built for, its NAS, its owner's email
 leaks=$(unzip -Z1 "$ZIP" | while read -r f; do
           [ "${f%/}" = "$f" ] || continue   # folders

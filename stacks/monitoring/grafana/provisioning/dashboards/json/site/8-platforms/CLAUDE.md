@@ -65,7 +65,7 @@ along with the Infinity gotchas and the shared look). One row folder per section
   Ghost More/Less like this columns (+ sort options). Posts tables' columns `custom.minWidth` 70 so they fit.
 - Platforms' "When to post" row (panels 90, 91, 92 "what kind of post": timing.json `kinds`, one row per network and
   kind, `vs average` + its `tip`/`style`, only networks with two kinds or more;
-  before "Networks not shown", no rule) = `GET /timing.json` (the model: `stacks/postiz/CLAUDE.md`). Low
+  before "Networks not shown", no rule) = `GET /timing.json` (the model: `stacks/postiz/ghost-bridge/stats/CLAUDE.md`). Low
   faded + striped, Medium a little faded, via each slot's hidden `<slot> style` (CSS object, table override `custom.styleField`; no posts = transparent, not
   the threshold's red) and `<slot> tip` (`custom.tooltip.field`: nested table options are their own override ids, not
   `custom.tooltip: {field}`; Grafana 13.2 opens it from the cell's corner triangle);
