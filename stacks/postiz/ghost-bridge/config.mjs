@@ -61,7 +61,10 @@ export const DRY_RUN = (env.DRY_RUN || 'false') === 'true';
 export const STATE_FILE = env.STATE_FILE || '/data/posted.json';
 // Changes made on the draft preview: { <post id>: { bluesky|threads|instagram|tiktok: text,
 //   frames: { <image url>: [x%, y%] } (where each photo sits in Instagram's frame),
-//   listen: 'none' | <address> (the Listen link, instead of the one found in the post), at } }
+//   listen: 'none' | <address> (the Listen link, instead of the one found in the post),
+//   storyLink: true | false (an Instagram Story by hand gets a sticker; unset = only #bigdrop's),
+//   stickerLink: 'none' | <address> (the sticker's link, instead of the featured link / post; none = text only),
+//   sticker: the sticker's text (you type it in Instagram; the reminder gives it to copy), at } }
 export const CUSTOM_FILE = path.join(path.dirname(STATE_FILE), 'custom.json');
 export const CUSTOM_CHANNELS = ['bluesky', 'threads', 'instagram', 'tiktok'];
 // Instagram/TikTok notifications for several photos link a page with all of them and a "Share all" button
@@ -72,6 +75,7 @@ export const PHOTOS_FILE = path.join(path.dirname(STATE_FILE), 'photos.json');
 export const PHOTOS_BASE = '/social-preview/photos';
 export const PHOTO_PAGE_DAYS = Math.max(1, Number(env.PHOTO_PAGE_DAYS) || 14); // not a number = 14
 export const CUSTOM_MAX = 5000;
+export const STICKER_TEXT_MAX = 60;
 // Dry-run previews: an HTML page per webhook showing each channel's post, served at /previews/
 export const PREVIEWS = DRY_RUN && (env.PREVIEWS || 'true') === 'true';
 export const PREVIEW_DIR = env.PREVIEW_DIR || path.join(path.dirname(STATE_FILE), 'previews');
