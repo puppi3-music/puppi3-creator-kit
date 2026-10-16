@@ -7,6 +7,45 @@ From 1.2.2 on, each change has a `###` heading saying what it does, a short para
 (what to run, if anything) and **Restarts:** (what goes down, and for how long), each its own paragraph. The release workflow joins wrapped
 lines, since GitHub's release notes break wherever the text does.
 
+## 1.3.3 (not released yet)
+
+**All of it at once:** `kit/kit.sh <folder> up -d` (Compose) or `k8s/up.sh <folder> <overlay>` (Kubernetes) brings
+both changes below.
+
+### The Instagram Story's sticker: on or off, its link and its text
+
+On the Social preview, every Instagram Story you post by hand (a #bigdrop's, or a #story that comes to you to finish)
+has a Sticker checkbox: ticked by default for #bigdrop, and now a plain #story can have one too. Under it you choose
+the sticker's link (the featured link as before, no link at all for a sticker of text only, or any other address; a
+page on your own site gets the Instagram tag) and its text. Instagram doesn't let the bridge add a sticker, so the
+notification gives you the link and the text to copy, each with its own button.
+
+**Your site:** nothing more than the update above.
+
+**Restarts:** the bridge, a few seconds: publish nothing in Ghost meanwhile. The site stays up.
+
+### The Instagram Story at a time of its own
+
+Every Instagram Story card on the Social preview has a "Post the Story at" box, in the site's time zone. It starts at
+the post's own time in Ghost; pick a later one and the Story goes then: Postiz schedules a Story it posts itself, and
+the notification for one you post by hand arrives at that time. The bridge keeps those notifications itself and sends
+them when they're due, after a restart too, so nothing depends on the ntfy server holding them. A time that has gone
+by when the post goes out sends the Story with the post, and the card warns you beforehand.
+
+**Your site:** nothing more than the update above.
+
+**Restarts:** none of their own.
+
+### New guides: Networks and Cloud
+
+The Networks guide walks through connecting each network for posts and numbers (the app to make, its keys, checking
+the numbers arrive), and the Cloud guide through a busy stretch on Amazon EKS or Google GKE and back. Both are linked
+from the README and the other guides.
+
+**Your site:** nothing: they're docs.
+
+**Restarts:** none.
+
 ## 1.3.2
 
 ### The social bridge runs on Node 24
