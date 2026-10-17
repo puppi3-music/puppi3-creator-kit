@@ -7,7 +7,7 @@ From 1.2.2 on, each change has a `###` heading saying what it does, a short para
 (what to run, if anything) and **Restarts:** (what goes down, and for how long), each its own paragraph. The release workflow joins wrapped
 lines, since GitHub's release notes break wherever the text does.
 
-## 1.3.4 (not released yet)
+## 1.3.4
 
 ### A warning when the home-network-only pages refuse your own computer
 
