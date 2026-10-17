@@ -102,6 +102,8 @@ else
     if ! k3d cluster list -o json | grep -q '"name": *"creator-kit"'; then
         for port in 9080 9443 5111; do lsof -nP -iTCP:$port -sTCP:LISTEN >/dev/null 2>&1 && die "port $port is in use"; done
         made_cluster=1
+        # a new cluster pulls every image first (Postiz's alone took 3 of up.sh's 5 min): more time for the first up
+        export UP_TIMEOUT="${UP_TIMEOUT:-900}"
     fi
     "$K8S/test/k3d.sh" up >/dev/null || die "k3d.sh up failed"   # makes it, or makes its StorageClasses again
     export KUBECONFIG; KUBECONFIG="$(k3d kubeconfig write creator-kit)"

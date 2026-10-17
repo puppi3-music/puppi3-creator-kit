@@ -16,7 +16,7 @@ and its folders' CLAUDE.md files.
   that's really the tone (pitch from zero crossings), the source reconnecting with another tone heard through the relays, a
   relay pod killed, TinyIce's admin 403 public and open on `tinyice.<LAN_DOMAIN>`), the Ghost and MySQL pods killed and back with their data, no puppi3 in names, `BEHIND_CLOUDFLARE=false` open,
   and Ghost's pod untouched by that change. `--migrate` then: a fake NAS (`kit/sites/k8s-test-nas`: this site's profile, secrets and setup files on Compose, the base's Ghost image pulled to match the cluster's; databases and Prometheus running, the rest made but stopped; a fake ssh, a sudo that wants a password, a fake Keychain), to-nas.sh, checks there, `up.sh --down`, a fresh up of the other twin, to-cloud.sh, checks in the cluster (posts, site_uuid, theme, the picture's bytes, page hits, TinyIce's renamed mounts, the bridge's data, older Prometheus samples, Postiz, grafana_ro). Requests go through `curl --connect-to kit.test:443:127.0.0.1:9443`, so the
-  Host stays `kit.test`. Deletes the cluster only if it made it.
+  Host stays `kit.test`. Deletes the cluster only if it made it; when it made it, up.sh gets `UP_TIMEOUT=900` (unless set): a new cluster pulls every image inside up.sh's wait, and Postiz's alone took 3 of its 5 min.
 - `test.sh --render-only`: only the first checks (setup.sh's site, every overlay rendered and kubeconform'd, the
   twins' diff), no cluster, no image build (it renders with `k8s/images/built.env` as it is, or without one the published images); ~40 s, cleans up.
 - `image-pins.py`: every image the kit names (compose files, the kit's profiles, k8s's YAML, the Dockerfiles'
