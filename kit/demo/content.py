@@ -48,6 +48,21 @@ for i, (title, tag, paras) in enumerate(POSTS):
     json.dump(body, open(f"{d}/post{i}.json", "w"))
     out.append(("POST", "/posts/", f"{d}/post{i}.json"))
 
+# a draft, for the Social preview's shot (not a post*.json: visits.py gives those their visits)
+# with a music link, so the preview shows the featured link
+paras = ["Recorded on the roof last Saturday, rain and all.", "Two hours of warm house; the tracklist is below."]
+body = json.loads(lexical(paras))
+body["root"]["children"].append({"type": "paragraph", "version": 1, "direction": None, "format": "", "indent": 0,
+                                 "children": [{"type": "link", "version": 1, "rel": None, "target": None, "title": None,
+                                               "url": "https://soundcloud.com/example/night-owl-session-43",
+                                               "direction": None, "format": "", "indent": 0, "children": [
+                                                   {"type": "text", "version": 1, "text": "Listen on SoundCloud",
+                                                    "detail": 0, "format": 0, "mode": "normal", "style": ""}]}]})
+json.dump({"posts": [{"title": "Night Owl Session 43: back on the rooftop", "status": "draft", "feature_image": pics[3],
+                      "tags": [{"name": "mixes"}], "lexical": json.dumps(body), "custom_excerpt": paras[0]}]},
+          open(f"{d}/draft.json", "w"))
+out.append(("POST", "/posts/", f"{d}/draft.json"))
+
 
 nav = [{"label": l, "url": u} for l, u in [("SoundCloud", "https://soundcloud.com/example"),
                                              ("Mixcloud", "https://www.mixcloud.com/example/"),

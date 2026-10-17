@@ -27,8 +27,10 @@ own cluster, Amazon EKS or Google GKE).
 
 ![Grafana's Health: the site, Ghost, the stream server, the bridge, errors and disk at a glance](kit/docs/images/health.webp)
 
-*Screenshots from a made-up demo site.* Not pictured: when you publish a post, the bridge shares it to your networks,
-and Ghost's Preview of a draft gets a Social preview button that shows what each network would get.
+![The Social preview of a draft: what Bluesky, Threads, Instagram and TikTok would each get](kit/docs/images/social-preview.webp)
+
+*Screenshots from a made-up demo site.* When you publish a post, the bridge shares it to your networks; before that,
+Ghost's Preview of a draft gets a Social preview button that shows what each network would get (above).
 
 ## What you get
 

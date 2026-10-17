@@ -54,7 +54,7 @@ next to what you change, and keep it true in the same change.
 | Dashboards or alert rules | `python3 stacks/monitoring/grafana/style.py --check` and `ro-tables.py --check` (the hook runs both) | seconds |
 | An image's version (a compose file, k8s's YAML, a Dockerfile) | `python3 k8s/test/image-pins.py`: every image at an exact version, the same in every file (the hook runs it). A bump is one edit in all of them, with its `kit/CHANGELOG.md` line | seconds |
 | A new file, or anything with an address or name in it | `python3 kit/scrub.py --names` (no site's own names in the kit's files; without `--names` it also runs gitleaks for secrets, in Docker) | seconds |
-| The README's screenshots (after a visible change to the theme or the dashboards) | `kit/demo/demo.sh`: a made-up demo site, photographed and removed; writes `kit/docs/images/` | several minutes |
+| The README's screenshots (after a visible change to the theme, the dashboards or the Social preview) | `kit/demo/demo.sh`: a made-up demo site, photographed and removed; writes `kit/docs/images/` | several minutes |
 | Anything in `k8s/` | `k8s/test/test.sh --render-only` first; then `k8s/test/test.sh` (with `--overlay k3d-eks` or `k3d-gke` for a cloud overlay, `--migrate` for the migration) on a local k3d cluster (for now on a Mac with Docker Desktop: below) | 1-16 min |
 
 `kit/test.sh` and `kit/demo/demo.sh` run on Linux, a Mac, or Windows inside WSL2 (Ubuntu, with the repo cloned
