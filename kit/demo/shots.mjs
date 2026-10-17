@@ -3,6 +3,7 @@
 // certificate accepted) as a visitor arriving through Cloudflare:
 //   node kit/demo/shots.mjs visit <post slug>            one visit (a real page hit for visits.py to copy)
 //   GRAFANA_PASSWORD=… node kit/demo/shots.mjs shots <dir>   the screenshots, as <dir>/*.png
+//   GHOST_PASSWORD=… node kit/demo/shots.mjs preview <dir> <uuid>   a draft's Social preview, as <dir>/social-preview.png
 import { chromium } from '../theme-test/node_modules/playwright/index.mjs';
 
 const [mode, arg] = process.argv.slice(2);
@@ -53,8 +54,27 @@ try {
             await page.waitForTimeout(4000);
             await page.screenshot({ path: `${dir}/${name}.png`, ...(clip ? { clip } : {}) });
         }
+    } else if (mode === 'preview') {
+        // A draft's Social preview, as staff signed in to Ghost Admin (its session cookie, in this browser)
+        const [, dir, uuid] = process.argv.slice(2);
+        const ctx = await visitor({ viewport: { width: 1440, height: 1000 } });
+        const page = await ctx.newPage();
+        // (from the page: the browser's host rules map demo.test, Playwright's own requests don't)
+        await page.goto(`${BASE}/ghost/api/admin/site/`);
+        const login = await page.evaluate(password => fetch('/ghost/api/admin/session/', { method: 'POST',
+            headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: 'demo@example.com', password }) })
+            .then(r => r.status), process.env.GHOST_PASSWORD);
+        if (login >= 300) throw new Error(`Ghost sign-in: ${login}`);
+        await page.goto(`${BASE}/ghost/social-preview/${uuid}/`);
+        await page.locator('.card').first().waitFor({ timeout: 60000 });
+        await settle(page);
+        await page.waitForTimeout(1500);
+        // down to the end of the networks' cards (the ntfy notifications below them make it twice as tall)
+        const cards = await page.locator('.grid').boundingBox();
+        await page.screenshot({ path: `${dir}/social-preview.png`, fullPage: true,
+            clip: { x: 0, y: 0, width: 1440, height: Math.ceil(cards.y + cards.height + 24) } });
     } else {
-        throw new Error('usage: shots.mjs visit <slug> | shots <dir>');
+        throw new Error('usage: shots.mjs visit <slug> | shots <dir> | preview <dir> <draft uuid>');
     }
 } finally {
     await browser.close();

@@ -17,6 +17,8 @@ SP="${TMPDIR:-/tmp}/kit-demo.$$"
 die() { echo "kit/demo: $*" >&2; exit 1; }
 
 . "$KIT/local-site.sh"
+# the Social preview's stand-in for Postiz (below) isn't Compose's: removed first, or its network can't go
+trap '[ "$KEEP" = 1 ] || docker rm -f demo-postiz-standin >/dev/null 2>&1; cleanup' EXIT
 need ffmpeg ffmpeg ffmpeg
 need cwebp webp webp
 # (the list first: grep -q would stop ffmpeg mid-write, and pipefail counts that as failing)
@@ -112,6 +114,30 @@ echo "== screenshots"
 sleep 60   # Prometheus's first samples, Grafana's first scrape of the bridge
 mkdir -p "$OUT"
 GRAFANA_PASSWORD="$GP" node "$KIT/demo/shots.mjs" shots "$SP" || die "shots.mjs failed"
+
+echo "== the Social preview"
+# The bridge's Ghost key (a custom integration's), and a stand-in for Postiz that lists four connected networks (the
+# demo has no network accounts): the bridge runs dry, so the list is all it asks Postiz for. After Grafana's shots, so
+# the made-up networks are never in the numbers. The EXIT trap removes the stand-in (with --keep: docker rm -f it)
+admin POST /integrations/?include=api_keys -H 'Content-Type: application/json' -d '{"integrations":[{"name":"Social bridge"}]}' >"$SP/integration.json"
+key="$(python3 -c "import json,sys; k=[k for k in json.load(open(sys.argv[1]))['integrations'][0]['api_keys'] if k['type']=='admin'][0]
+print(k['secret'] if ':' in k['secret'] else k['id']+':'+k['secret'])" "$SP/integration.json")"   # (Ghost 6's secret is the whole key) || die "no Admin API key for the bridge"
+sedi "s|^GHOST_ADMIN_API_KEY=.*|GHOST_ADMIN_API_KEY=$key|" "$S/secrets/postiz.env"
+pz="$(docker ps -q --filter label=com.docker.compose.project=demo --filter label=com.docker.compose.service=postiz)"
+net="$(docker inspect -f '{{range $k, $v := .NetworkSettings.Networks}}{{println $k}}{{end}}' "$pz" | grep '_postiz$')"
+docker stop "$pz" >/dev/null
+docker run -d --name demo-postiz-standin --network "$net" --network-alias postiz node:24.22.0-alpine node -e '
+const ch = [["bluesky", "Night Owl Radio", "demo.test"], ["threads", "Night Owl Radio", "nightowl.demo"],
+    ["instagram-standalone", "Night Owl Radio", "nightowl.demo"], ["tiktok", "Night Owl Radio", "nightowl.demo"]]
+    .map(([identifier, name, profile], i) => ({ id: `demo${i}`, identifier, name, profile, picture: "", disabled: false }));
+require("http").createServer((q, s) => s.setHeader("Content-Type", "application/json") && s.end(JSON.stringify(
+    q.url.endsWith("/integrations") ? ch : q.url.includes("/notifications") ? { notifications: [] } : []))).listen(5000)' >/dev/null
+kit up -d --no-deps postiz-ghost-bridge >>"$SP/up.log" 2>&1 || { tail -20 "$SP/up.log"; die "the bridge didn't start again"; }
+draft="$(python3 -c "import json; print(json.load(open('$SP/draft.json.out'))['posts'][0]['uuid'])")"
+# 401: the bridge has its key and answers (signed out); 503 until then
+signed_out() { [ "$(curl "${R[@]}" -o /dev/null -w '%{http_code}' "https://demo.test/ghost/social-preview/$draft/")" = 401 ]; }
+wait_for "the bridge's Social preview" 30 signed_out
+GHOST_PASSWORD=night-owl-demo-1! node "$KIT/demo/shots.mjs" preview "$SP" "$draft" || die "the Social preview's shot failed"
 for f in "$SP"/*.png; do
     cwebp -quiet -q 82 "$f" -o "$OUT/$(basename "${f%.png}").webp"
 done

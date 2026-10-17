@@ -13,6 +13,12 @@ this shares with `kit/test.sh`).
   counts the table). Stand-ins, demo only: Traefik joins blackbox's network as demo.test and live.demo.test, and
   blackbox skips certificate checks (Traefik's own), so the uptime tiles read UP.
 - `shots.mjs` (muted Chromium, `kit/theme-test/`'s Playwright): the home page with the LIVE NOW bar on a laptop and a
-  phone, Grafana's Traffic and Overview (30 days) and Health's tiles (kiosk mode). No social preview shot: it needs
-  Postiz with real networks connected.
+  phone, Grafana's Traffic and Overview (30 days) and Health's tiles (kiosk mode); `preview`: a draft's Social preview
+  (`content.py`'s one draft, not a `post*.json` so it gets no visits), signed in to Ghost Admin from the page
+  (Playwright's own requests don't get the browser's `demo.test` mapping); the draft has a SoundCloud link, so the
+  featured link shows. For it, after Grafana's shots (so the made-up networks are never in the numbers), demo.sh gives
+  the bridge a Ghost custom integration's Admin API key and swaps Postiz for a stand-in (`demo-postiz-standin`, node,
+  alias `postiz` on the `_postiz` network; the EXIT trap removes it before the site, or its network can't go; `--keep`
+  leaves it: `docker rm -f` it first) that lists Bluesky, Threads, Instagram and TikTok: with DRY_RUN the bridge asks
+  Postiz only for that list, so no network accounts are needed.
 - Needs the same ports as test.sh (`LIVE_PORT` too), ffmpeg with `gradients` (4.4+), cwebp.
