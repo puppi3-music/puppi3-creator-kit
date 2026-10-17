@@ -7,6 +7,38 @@ From 1.2.2 on, each change has a `###` heading saying what it does, a short para
 (what to run, if anything) and **Restarts:** (what goes down, and for how long), each its own paragraph. The release workflow joins wrapped
 lines, since GitHub's release notes break wherever the text does.
 
+## 1.3.4 (not released yet)
+
+### A warning when the home-network-only pages refuse your own computer
+
+On Docker Desktop, `kit/kit.sh <folder> up` now checks that Traefik's dashboard answers from the computer itself. If
+it answers "Forbidden", the `proxy` and `monitoring` networks have gone stale: connections arrive from a network's
+gateway instead of Docker Desktop's usual address, so Traefik's dashboard, TinyIce's admin and Grafana at home all
+refuse you. kit.sh says so and how to fix it: stop the site, remove the two networks (kit.sh makes them again), start
+it. The Setup guide's "The home-network-only names" has the same.
+
+**Your site:** nothing: the check runs at your next `up`, on Docker Desktop only.
+
+**Restarts:** none.
+
+### The README shows the Social preview
+
+The README's screenshots now include a draft's Social preview (Bluesky, Threads, Instagram and TikTok cards), and
+the others were taken again.
+
+**Your site:** nothing: it's docs.
+
+**Restarts:** none.
+
+### For whoever changes the kit: the Kubernetes test on a new cluster
+
+`k8s/test/test.sh` gives the site 15 minutes to be ready, instead of 5, when it makes its own k3d cluster: a new
+cluster downloads every image first.
+
+**Your site:** nothing.
+
+**Restarts:** none.
+
 ## 1.3.3
 
 **All of it at once:** `kit/kit.sh <folder> up -d` (Compose) or `k8s/up.sh <folder> <overlay>` (Kubernetes) brings
