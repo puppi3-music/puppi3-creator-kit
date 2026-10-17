@@ -89,7 +89,7 @@ to move anything. Nothing of a site goes in
   off since (Compose's `up` leaves services outside the active profiles running); makes `proxy`/`monitoring` with the label `creatorkit.site` and notes one
   that was there already; on `up`, `lan_check` warns when the site's `lan-only.yml` lets in an IPv4 gateway of
   `proxy`/`monitoring` (Docker's relay hands connections over from there), or on Docker Desktop `192.168.65.1` (every
-  connection's address there: the names can't be home-only, fine unless 80/443 are forwarded to it); copies the kit's Traefik files into `data/traefik/dynamic/`
+  connection's address there: the names can't be home-only, fine unless 80/443 are forwarded to it); then, after an `up` on Docker Desktop with that address let in, `lan_probe` asks for `traefik.<LAN_DOMAIN>` on `HTTP_PORT` from this computer and on a 403 says how to make `proxy`/`monitoring` again (`down`, `docker network rm`, `up`): seen 2026-10-17, two-day-old networks handed connections over from their gateway (a Docker Desktop restart alone doesn't do it; cause unknown), so every home-network-only page answered 403 (kit/test.sh's Grafana checks with them); copies the kit's Traefik files into `data/traefik/dynamic/`
   as `kit-*.yml` (`puppi3.yml` as `kit-site.yml`; never staging.yml, staging-bar.yml or the NAS's lan-only.yml);
   without `live` it exports `LIVE_STATS=false` (the bridge's live-show polling;
   the shell's value wins over site.env's), with it `LIVE_MOUNT` = the source mount from TinyIce's `config.json` (its mp3
