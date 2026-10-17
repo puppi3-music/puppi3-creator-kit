@@ -154,7 +154,8 @@ lan_check() {
     [ -f "$f" ] || return 0
     for n in proxy monitoring; do gws="$gws $(docker network inspect -f '{{range .IPAM.Config}}{{.Gateway}} {{end}}' "$n" 2>/dev/null)"; done
     docker info -f '{{.OperatingSystem}}' 2>/dev/null | grep -q 'Docker Desktop' && desktop=1
-    python3 - "$f" "$desktop" $gws <<'PY' || true
+    # exit 10: Docker Desktop, and the file lets in 192.168.65.1 (lan_probe checks it really arrives from there)
+    python3 - "$f" "$desktop" $gws <<'PY' || { [ $? = 10 ] && desktop_open=1; true; }
 import ipaddress, re, sys
 f, desktop, gws = sys.argv[1], sys.argv[2] == "1", sys.argv[3:]
 nets = []
@@ -168,9 +169,11 @@ def lets_in(a):
 say = lambda s: print(s, file=sys.stderr)
 if desktop:
     n = lets_in("192.168.65.1")
-    if n: say(f"kit.sh: note: on Docker Desktop every connection looks like it comes from 192.168.65.1, which lan-only.yml lets in ({n}):\n"
-              "  the home-network-only pages answer anyone who reaches this machine's ports. Fine on a computer at home;\n"
-              "  don't forward ports 80/443 to it from your router (the Setup guide, \"The home-network-only names\").")
+    if n:
+        say(f"kit.sh: note: on Docker Desktop every connection looks like it comes from 192.168.65.1, which lan-only.yml lets in ({n}):\n"
+            "  the home-network-only pages answer anyone who reaches this machine's ports. Fine on a computer at home;\n"
+            "  don't forward ports 80/443 to it from your router (the Setup guide, \"The home-network-only names\").")
+        sys.exit(10)
 else:
     for g in (g for g in gws if "." in g):   # IPv4: Docker relays IPv6 into IPv4-only networks, from their gateway
         n = lets_in(g)
@@ -182,7 +185,31 @@ else:
             break
 PY
 }
+desktop_open=""
 [ "${1:-}" = up ] && lan_check
+
+# After an up on Docker Desktop: connections are meant to arrive from 192.168.65.1, but on a proxy or monitoring
+# network that has gone stale (seen once, with networks two days old; a restart of Docker Desktop alone doesn't do it)
+# they arrive from the network's gateway, which lan-only.yml rightly leaves out: every home-network-only page then answers 403. Asks for
+# traefik.<LAN_DOMAIN> from this computer as a browser would (404 or nothing = Traefik hasn't read its routes yet).
+lan_probe() {
+    [ "${1:-}" = up ] && [ "$desktop_open" = 1 ] && command -v curl >/dev/null || return 0
+    [ "$(docker inspect -f '{{.State.Running}}' traefik 2>/dev/null)" = true ] || return 0
+    local lan port code="" n
+    lan="$(val LAN_DOMAIN)"; lan="${lan:-localhost}"; port="$(val HTTP_PORT)"; port="${port:-80}"
+    for _ in $(seq 1 15); do
+        code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 --resolve "traefik.$lan:$port:127.0.0.1" \
+            "http://traefik.$lan:$port/dashboard/" 2>/dev/null)" || true
+        case "$code" in 000|404|502) sleep 2 ;; *) break ;; esac
+    done
+    [ "$code" = 403 ] || return 0
+    n="$(docker network ls -q --filter label=creatorkit.site="$ID_PREFIX" | wc -l | tr -d ' ')"
+    echo "kit.sh: warning: the home-network-only pages (traefik.$lan, grafana.$lan, tinyice.$lan) answer 403 from this" >&2
+    echo "  computer: Docker Desktop hands its connections over from a network's gateway, not 192.168.65.1, as an" >&2
+    echo "  older proxy or monitoring network sometimes does. Make them again:" >&2
+    echo "  kit/kit.sh $SITE_DIR down, then docker network rm proxy monitoring (once nothing else is on them), then up." >&2
+    [ "$n" = 2 ] || echo "  (They weren't made by this site: another site's may use them too.)" >&2
+}
 
 compose() { docker compose "${args[@]}" "$@"; }
 # A module switched off since its containers were made: up leaves them running (Compose skips services outside the
@@ -231,6 +258,7 @@ else
     compose "$@"
 fi
 site_uuid "$@"
+lan_probe "$@"
 # Prometheus's jobs changed (a module on or off): it reads its config again
 if [ "${1:-}" = up ] && [ -n "${mon:-}" ] && [ "$(cksum < "$mon/prometheus/prometheus.yml")" != "${prom_before:-}" ] &&
     [ "$(docker inspect -f '{{.State.Running}}' "$ID_PREFIX-prometheus" 2>/dev/null)" = true ]; then
