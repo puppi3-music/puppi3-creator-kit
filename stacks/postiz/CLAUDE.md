@@ -35,7 +35,8 @@ the settings it passes, and Postiz.
   Staging's bridge reads the same variables with the same defaults. The collectors' `<NAME>_STATS` switches and
   `POSTIZ_STATS*` stay fixed (`NETWORKS` picks networks per site).
 - postiz: Postiz (pinned `v2.24.0`: the bridge's photo rules were checked against it), Postgres, Redis, Temporal (+ Postgres, which also holds its searchable records: `ENABLE_ES=false` and `SKIP_ADD_CUSTOM_SEARCH_ATTRIBUTES=true`, unlike Postiz's own compose file; Elasticsearch held ~0.7 GB. Postgres has 3 searchable text fields, Postiz adds `postId` and `organizationId` at start and finds a post's running job by `postId`; jobs scheduled before the kit 1.3.1 switch aren't found by that search), and `postiz-ghost-bridge` (`ghost-bridge/`, its own CLAUDE.md): compose mounts the folder
-  read-only at /app, so a new module (subfolders too) needs no compose line; healthcheck every 5 s (Traefik routes
+  read-only at /app, so a new module (subfolders too) needs no compose line; `user: root` (as the kit's profile: an
+  image built from `ghost-bridge/Dockerfile`, USER node, couldn't write `data/`; staging's bridge too); healthcheck every 5 s (Traefik routes
   only to healthy); `stop_grace_period: 5m` (the bridge finishes a share in progress); registration defaults closed
   (`POSTIZ_DISABLE_REGISTRATION:-true`).
 - On Kubernetes the bridge's whole environment is this compose.yaml's, rendered by `k8s/up.sh`

@@ -97,6 +97,9 @@ services:
     image: postiz-ghost-bridge:local
     pull_policy: build
     container_name: postiz-ghost-bridge
+    # as root, like the kit's (kit/profiles/postiz.yaml): data/ belongs to whoever made it. Said here too, because an
+    # image built from ghost-bridge/Dockerfile instead (USER node) can't write there (EACCES, 2026-10-21)
+    user: root
     restart: unless-stopped
     command: ["node", "/app/ghost-bridge.mjs"]
     environment:

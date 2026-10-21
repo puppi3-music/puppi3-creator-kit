@@ -19,6 +19,17 @@ show just the name, as the "per day" charts do.
 
 **Restarts:** none.
 
+### The postiz stack run on its own keeps its bridge as root
+
+Run on its own (one stack under a stack manager, not through `kit/kit.sh`), the postiz stack builds its bridge's
+image itself. A newer Docker Compose could build it from the bridge's own Dockerfile, which runs as the `node` user,
+and the bridge then couldn't save its files ("EACCES: permission denied" in its log). The stack now says `user: root`
+for the bridge, as the kit's own setup always has.
+
+**Your site:** nothing: a site run through `kit/kit.sh` already ran it as root.
+
+**Restarts:** none.
+
 ## 1.3.4
 
 ### A warning when the home-network-only pages refuse your own computer
