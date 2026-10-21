@@ -307,6 +307,10 @@
                 {
                   "id": "custom.fillOpacity",
                   "value": 10
+                },
+                {
+                  "id": "displayName",
+                  "value": "${__field.name}"
                 }
               ]
             }

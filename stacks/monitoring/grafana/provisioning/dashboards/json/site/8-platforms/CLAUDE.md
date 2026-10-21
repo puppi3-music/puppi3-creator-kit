@@ -45,7 +45,7 @@ along with the Infinity gotchas and the shared look). One row folder per section
   totals as they stood, gains = `new<Key>` or `<key>` (today-so-far differences), `engagement` = the WEEKLY `hourly` keys
   added up (Instagram's `newPost<Likes|Comments|Shares|Saves>` and Threads' `newPost<Likes|Replies|Reposts|Quotes>`: the posts'
   summed gains, since their account insights come in late and read flat); no 7-day lines or rate there. The last override, `byFrameRefID` B, makes B's lines linear, 2px, solid,
-  fill 10 (else they'd be the faint dashed "each day" style; not stepped: user saw steps over mostly-0 hours as bars). Only YouTube's Minutes watched and Shares have no hourly
+  fill 10 (else they'd be the faint dashed "each day" style; not stepped: user saw steps over mostly-0 hours as bars), and `displayName` `${__field.name}` (A and B share column names, so Grafana would put "B " before each hover name). Only YouTube's Minutes watched and Shares have no hourly
   (Analytics: per day, 2-3 days late). No panel `timeFrom`. Grids can't show/hide panels by variable, hence one panel
   per chart for both views.
 - Stat tiles: each network's numbers are 2-3 tiles of 3-4 numbers (ids: the old one first, then 105/106, 17/18, 75, 66,
