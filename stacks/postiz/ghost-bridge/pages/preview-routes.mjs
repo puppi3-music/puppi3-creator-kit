@@ -10,7 +10,7 @@ import { esc, escAttr, previewPage, renderPreview, photosPage, sharedPage } from
 import { LIMITS, IMAGE_LIMITS, INSTAGRAM_IDS, TIKTOK_IDS, NO_LINK_IDS, CUSTOM_CHANNELS, CUSTOM_MAX, STICKER_TEXT_MAX, SITE_TIMEZONE, MANUAL_DRAFTS,
   BIG_DROP_TAG, STORY_TAG, PREVIEW_DIR, PREVIEW_KEEP, PREVIEW_URL, log, channelKey, PHOTOS_FILE, PHOTOS_BASE,
   PHOTO_PAGE_DAYS, GHOST_API_URL, previewStore, DRAFT_BASE, DRAFT_PREVIEWS, editCustom, setCustom,
-  setFrame, loadState, DRY_RUN, FEATURED_DOMAINS, SERVICE_NAMES, FEATURED_LINE, FEATURED_BIO_LINE, FEATURED_LABEL } from '../config.mjs';
+  setFrame, loadState, loadCustom, DRY_RUN, FEATURED_DOMAINS, SERVICE_NAMES, FEATURED_LINE, FEATURED_BIO_LINE, FEATURED_LABEL } from '../config.mjs';
 import { ghostPostByUuid, ghostSiteOrigin, ghostAdmin, GHOST_KEY_FIX } from '../services.mjs';
 import { cleanLink } from '../share/content.mjs';
 import { handlePost } from '../share/share.mjs';
@@ -371,16 +371,31 @@ async function saveCustomText(req, res, uuid) {
 const SHARED_PAGE_SIZE = 30;
 const COMING_MAX = 20;
 const postList = (filter, order, limit, page = 1) => ghostAdmin(`/posts/?${new URLSearchParams({ filter, order,
-  fields: 'id,uuid,title,url,published_at,updated_at', limit: String(limit), page: String(page) })}`);
+  fields: 'id,uuid,title,url,published_at,updated_at', include: 'tags', limit: String(limit), page: String(page) })}`);
+// A Story at its own later time: posted.json's storyAt, or for a post shared before the bridge noted it, the time set on
+// the Social preview (custom.json) when it was after the share. Such a share noted no #bigdrop Story by hand, and a
+// #story by hand under Instagram's own name: both made the Story, by hand, here
+function withStoryAt(post, shared, custom) {
+  if (!shared) return null;
+  const tags = (post.tags || []).map((t) => String(t.name).toLowerCase());
+  const story = tags.includes(STORY_TAG) || tags.includes(BIG_DROP_TAG);
+  const set = custom?.storyAt && Date.parse(custom.storyAt) > Date.parse(shared.at) + 60_000 ? custom.storyAt : null;
+  const storyAt = shared.storyAt || (story ? set : null);
+  const ig = Object.keys(shared.results || {}).map((l) => l.split(':')[0]).find((i) => INSTAGRAM_IDS.includes(i));
+  if (!storyAt || !ig || shared.storyAt || shared.results[`${ig}:story`]) return { ...shared, storyAt };
+  const results = { ...shared.results };
+  if (tags.includes(STORY_TAG)) { results[`${ig}:story`] = results[ig]; delete results[ig]; } else results[`${ig}:story`] = 'manual';
+  return { ...shared, results, storyAt };
+}
 async function sharedPosts(page, sharing) {
   const none = { posts: [] };
-  const [{ posts = [], meta }, state, scheduled, drafts] = await Promise.all([
-    postList('status:published', 'published_at desc', SHARED_PAGE_SIZE, page), loadState(),
+  const [{ posts = [], meta }, state, customs, scheduled, drafts] = await Promise.all([
+    postList('status:published', 'published_at desc', SHARED_PAGE_SIZE, page), loadState(), loadCustom(),
     page === 1 ? postList('status:scheduled', 'published_at asc', COMING_MAX) : none,
     page === 1 ? postList('status:draft', 'updated_at desc', COMING_MAX) : none]);
   return sharedPage({
     scheduled: scheduled.posts || [], drafts: drafts.posts || [],
-    posts: posts.map((post) => ({ ...post, shared: state[post.id] || null, sharing: sharing.has(post.id) })),
+    posts: posts.map((post) => ({ ...post, shared: withStoryAt(post, state[post.id], customs[post.id]), sharing: sharing.has(post.id) })),
     page, next: meta?.pagination?.next || null, dryRun: DRY_RUN, timeZone: SITE_TIMEZONE,
   });
 }

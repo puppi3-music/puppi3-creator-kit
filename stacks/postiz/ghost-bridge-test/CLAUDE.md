@@ -10,7 +10,7 @@ links, the featured link, #clip, captions fitted to every network's limit, tagLi
 `kit/redirects.yaml`'s rules), `stats` (history.mjs's helpers: gains per day, 30-day sums, sitePath/siteLinks),
 `schedule` (WEEKLY_SUMMARY_AT, seasons, ntfy's cut), `later` (notifications kept for a Story's own time, against a fake ntfy; `zonedTime`), `share` (`handlePost` run as a draft preview, fully dry, against a
 fake Postiz that only lists channels: each network's status, caption, media and notifications), `shared` (sharing
-again: handlePost's `again`, `only` (some networks, or #bigdrop's Story apart from Instagram's feed post; the rest keep their results) and posted.json's `earlier`, the Shared posts page (scheduled and drafts on page 1 only) and `POST .../share`'s checks, through
+again: handlePost's `again`, `only` (some networks, or #bigdrop's Story apart from Instagram's feed post; the rest keep their results) and posted.json's `earlier`, a Story set for later (`storyAt`, "not yet" on the list until then), the Shared posts page (scheduled and drafts on page 1 only) and `POST .../share`'s checks, through
 serveDraftPreview against fake-web's Ghost and Postiz), `postgres` (pgQuery's
 three sign-ins, a forged SCRAM server, errors). The numbers collectors, one poll each against made-up answers in the
 APIs' real shapes: `social` (Bluesky, Threads, TikTok, Mixcloud, Postiz's own), `site` (Ghost + Tinybird, Cloudflare,

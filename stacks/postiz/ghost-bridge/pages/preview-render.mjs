@@ -293,7 +293,7 @@ border:1px solid var(--line);border-radius:8px;padding:5px 8px;max-width:100%}.l
 pre{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;font-size:12px}
 ul.list{list-style:none;padding:0}ul.list li{background:var(--card);border:1px solid var(--line);border-radius:10px;
 padding:10px 14px;margin:8px 0}
-ul.list .how{display:block;font-size:13px;margin-top:3px}.how .error{color:var(--skip)}
+ul.list .how{display:block;font-size:13px;margin-top:3px}.how .error{color:var(--skip)}.how .later{color:var(--manual)}
 .again{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:28px}
 .again h2{font-size:16px;margin:0 0 6px}.again p{margin:0 0 12px}
 .again button{font:inherit;font-weight:600;padding:10px 18px;border-radius:10px;border:1px solid #1d6ff2;background:#1d6ff2;
@@ -635,15 +635,19 @@ export function renderPreview(pv, s) {
 const DID = { ok: 'posted', manual: 'in the app', error: 'error', 'dry-run': 'dry run' };
 export function sharedPage(d) {
   const when = (t) => esc(new Date(t).toLocaleString('en-GB', { timeZone: d.timeZone, dateStyle: 'medium', timeStyle: 'short' }));
-  const how = (results = {}) => Object.entries(results).map(([label, r]) => {
+  const now = d.now ?? Date.now();
+  // a Story set for its own time that hasn't come yet: still to go out (Postiz's schedule) or to post (your reminder then)
+  const how = (results = {}, storyAt) => Object.entries(results).map(([label, r]) => {
     const [idf, story] = label.split(':');
     const name = `${(PLATFORMS[idf] || { name: idf }).name}${story ? ' Story' : ''}`;
-    return `<span class="${r === 'error' ? 'error' : ''}">${esc(name)}: ${esc(DID[r] || r)}</span>`;
+    const later = story && storyAt && Date.parse(storyAt) > now && (r === 'ok' || r === 'manual');
+    const did = later ? (r === 'ok' ? `not yet, posts itself ${when(storyAt)}` : `not yet, your reminder comes ${when(storyAt)}`) : esc(DID[r] || r);
+    return `<span class="${r === 'error' ? 'error' : later ? 'later' : ''}">${esc(name)}: ${did}</span>`;
   }).join(', ');
   const items = d.posts.map((p) => {
     const sh = p.shared;
     const state = p.sharing ? 'Being shared now…'
-      : sh ? `Shared ${when(sh.at)}${sh.earlier?.length ? ` (shared ${sh.earlier.length + 1} times in all)` : ''}: ${how(sh.results)}`
+      : sh ? `Shared ${when(sh.at)}${sh.earlier?.length ? ` (shared ${sh.earlier.length + 1} times in all)` : ''}: ${how(sh.results, sh.storyAt)}`
       : 'Not shared by the bridge';
     return `<li><a href="${escAttr(p.uuid)}/">${esc(p.title || '(no title)')}</a>
       <span class="dim"> · published ${when(p.published_at)}</span><span class="how dim">${state}</span></li>`;

@@ -265,7 +265,7 @@ export async function handlePost(post, { again = false, only = null } = {}) {
       if (!wants(isIG && asStory ? `${idf}:story` : idf)) continue;
       const entry = { platform: isIG ? 'Instagram' : 'TikTok', idf, drafted: false };
       if (!manual.some((m) => m.platform === entry.platform)) manual.push(entry);
-      results[idf] = 'manual';
+      results[isIG && asStory ? `${idf}:story` : idf] = 'manual';
       log(`  ${idf}: draft + ntfy - finish it in the app`);
       addPreview(integ, isIG && asStory ? `${idf}:story` : idf, 'manual', { caption: captionFor(idf, isIG && asStory), why,
         ...(isIG && asStory ? { ...stickerInfo, ...storyTime } : {}) });
@@ -383,7 +383,12 @@ export async function handlePost(post, { again = false, only = null } = {}) {
     const before = state[id];
     const earlier = before ? [...(before.earlier || []), { at: before.at, results: before.results }] : undefined;
     const kept = only && before ? Object.fromEntries(Object.entries(before.results || {}).filter(([label]) => !only.includes(label))) : {};
-    await recordShared(id, { title, url, at: new Date().toISOString(), media: audiogram ? 'audio-clip' : kind, results: { ...kept, ...results }, earlier });
+    // a Story at its own later time (Postiz's schedule, or the reminder in later.json): the Shared posts page says it's to come.
+    // Shared again without the Story: the earlier share's time stays
+    const storyShared = Object.keys(results).some((label) => label.endsWith(':story'));
+    const storyLater = storyShared ? (storyAt ? new Date(storyAt).toISOString() : undefined) : before?.storyAt;
+    await recordShared(id, { title, url, at: new Date().toISOString(), media: audiogram ? 'audio-clip' : kind, results: { ...kept, ...results },
+      ...(storyLater && { storyAt: storyLater }), earlier });
   }
 }
 

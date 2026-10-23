@@ -13,7 +13,7 @@ const POSTIZ = 'http://postiz.test';
 Object.assign(process.env, { GHOST_API_URL: GHOST, POSTIZ_API_URL: POSTIZ,
   GHOST_ADMIN_API_KEY: `${'a'.repeat(24)}:${'b'.repeat(64)}` });
 const { handlePost } = await import('../ghost-bridge/share/share.mjs');
-const { loadState, recordShared, STATE_FILE } = await import('../ghost-bridge/config.mjs');
+const { loadState, recordShared, editCustom, STATE_FILE } = await import('../ghost-bridge/config.mjs');
 const { serveDraftPreview } = await import('../ghost-bridge/pages/preview-routes.mjs');
 
 await fs.mkdir(path.dirname(STATE_FILE), { recursive: true });
@@ -88,6 +88,44 @@ test("#bigdrop shared again: Instagram's Story reminder and its feed post are ti
   assert.deepEqual((await loadState()).p1.results, first.results, 'the feed post fixed, the Story as it was');
 });
 
+test("a Story set for later: the Shared posts page says it's still to come, until its time", async () => {
+  web.on(`${POSTIZ}/integrations`, [{ id: 'c1', identifier: 'bluesky', name: 'Bluesky', disabled: false },
+    { id: 'c3', identifier: 'instagram-standalone', name: 'Instagram', disabled: false }]);
+  web.on(`${POSTIZ}/upload-from-url`, { id: 'm1', path: 'https://uploads.example.com/clip.mp4' });
+  const at = new Date(Date.now() + 3 * 3_600_000).toISOString();
+  await editCustom('p1', (m) => { m.storyAt = at; });
+  try {
+    const drop = { ...POST, html: '<p>Big one.</p><video src="/content/media/clip.mp4"></video>', tags: [{ name: '#bigdrop' }, { name: '#autopost' }] };
+    await handlePost(drop);
+    assert.equal((await loadState()).p1.storyAt, at);
+    const list = async () => (await ask('GET', '/ghost/social-preview/', { sharer: sharer() })).body;
+    assert.match(await list(), /<span class="">Instagram: posted<\/span>, <span class="later">Instagram Story: not yet, your reminder comes \d+ \w+ 2026, \d\d:\d\d<\/span>/);
+
+    await handlePost(drop, { again: true, only: ['bluesky'] });
+    assert.equal((await loadState()).p1.storyAt, at, 'shared again without the Story: its time stays');
+
+    await recordShared('p1', { ...(await loadState()).p1, storyAt: new Date(Date.now() - 60_000).toISOString() });
+    assert.match(await list(), /<span class="">Instagram Story: in the app<\/span>/, 'its time has come');
+  } finally {
+    await editCustom('p1', (m) => { delete m.storyAt; });
+  }
+});
+
+test('#story by hand, set for later: noted as the Story, still to come', async () => {
+  web.on(`${POSTIZ}/integrations`, [{ id: 'c3', identifier: 'instagram-standalone', name: 'Instagram', disabled: false }]);
+  web.on(`${POSTIZ}/upload-from-url`, { id: 'm1', path: 'https://uploads.example.com/pic.jpg' });
+  const at = new Date(Date.now() + 3_600_000).toISOString();
+  await editCustom('p1', (m) => { m.storyAt = at; });
+  try {
+    await handlePost({ ...POST, feature_image: 'https://example.com/content/images/pic.jpg', tags: [{ name: '#story' }] });
+    const entry = (await loadState()).p1;
+    assert.deepEqual(entry.results, { 'instagram-standalone:story': 'manual' });
+    assert.equal(entry.storyAt, at);
+  } finally {
+    await editCustom('p1', (m) => { delete m.storyAt; });
+  }
+});
+
 // serveDraftPreview with a request and a response that note what was answered
 async function ask(method, url, { cookie = 'ghost-admin-api-session=s1', origin = 'https://example.com', body, sharer } = {}) {
   const req = Readable.from(body == null ? [] : [Buffer.from(JSON.stringify(body))]);
@@ -119,6 +157,31 @@ test('the Shared posts page: each published post, what each network got, a link 
   assert.deepEqual(web.calls(`${GHOST}/ghost/api/admin/posts/?`).map((c) => new URL(c.url).searchParams.get('page')), ['2']);
 
   assert.equal((await ask('GET', '/ghost/social-preview/', { cookie: null })).status, 401, 'staff only');
+});
+
+test('shared before the bridge noted the Story\'s time: the Social preview\'s time says it\'s still to come', async () => {
+  const at = new Date(Date.now() + 50 * 60_000).toISOString();
+  const sharedAt = new Date(Date.now() - 90 * 60_000).toISOString();
+  await editCustom('p1', (m) => { m.storyAt = at; });
+  try {
+    const bigdrop = { ...POST, tags: [{ name: '#BigDrop' }] };
+    const story = { ...POST, id: 'p2', uuid: UUID.replace('1', '9'), title: 'Old mix', tags: [{ name: '#story' }] };
+    await editCustom('p2', (m) => { m.storyAt = at; });
+    web.on(`${GHOST}/ghost/api/admin/posts/?`, (u) => (u.searchParams.get('filter') === 'status:published'
+      ? { posts: [bigdrop, story], meta: { pagination: {} } } : { posts: [] }));
+    await recordShared('p1', { title: 'New mix', at: sharedAt, results: { bluesky: 'ok', 'instagram-standalone': 'manual' } });
+    await recordShared('p2', { title: 'Old mix', at: sharedAt, results: { 'instagram-standalone': 'manual' } });
+    const body = (await ask('GET', '/ghost/social-preview/', { sharer: sharer() })).body;
+    assert.match(body, /New mix<\/a>.*Instagram: in the app<\/span>, <span class="later">Instagram Story: not yet, your reminder comes/s, '#bigdrop: its Story by hand added');
+    assert.match(body, /Old mix<\/a>.*Shared [^<]*: <span class="later">Instagram Story: not yet, your reminder comes[^<]*<\/span><\/span>/s, '#story by hand: Instagram was the Story');
+
+    await editCustom('p1', (m) => { m.storyAt = new Date(Date.parse(sharedAt) - 60_000).toISOString(); });
+    assert.doesNotMatch((await ask('GET', '/ghost/social-preview/', { sharer: sharer() })).body, /New mix<\/a>.*Story.*Old mix/s,
+      'a time gone by when it was shared: the Story went with the post');
+  } finally {
+    await editCustom('p1', (m) => { delete m.storyAt; });
+    await editCustom('p2', (m) => { delete m.storyAt; });
+  }
 });
 
 test('Share again now: only from the page itself, only a published post, one share at a time', async () => {

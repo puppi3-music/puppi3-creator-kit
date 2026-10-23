@@ -58,7 +58,10 @@ change.
   without opening a post): `GET /ghost/social-preview/` (same sign-in as the Social preview, same Traefik route) lists,
   on its first page, the scheduled posts (soonest first) and drafts (last edited first; 20 of each; user asked to see
   what's coming), each opening its Social preview; then the site's published posts (Admin API, 30 a page, `?page=`) with posted.json's results per network (`earlier`: the
-  shares before) or "Being shared now" (ghost-bridge.mjs's `sharing`). Each opens its Social preview, which for a
+  shares before) or "Being shared now" (ghost-bridge.mjs's `sharing`). A Story at its own later time (user asked: the
+  post out, its Story not yet) is "not yet, posts itself <time>" (Postiz scheduled it) or "not yet, your reminder comes
+  <time>" (by hand) until then: posted.json's `storyAt`, written when a Story was shared at a later time (kept when
+  shared again without the Story). A #story by hand is noted as `<identifier>:story`, like the others. A post shared before the bridge noted either (`withStoryAt` in preview-routes.mjs) takes the time set on the Social preview (custom.json's `storyAt`) when it's after the share and the post has #story or #bigdrop (user saw no note on one): #bigdrop's Story by hand added, #story's Instagram entry read as its Story. Each opens its Social preview, which for a
   published post has "Share again now" (or "Share now" if never shared) with a box per card it would post,
   all ticked (user asked: share again on just one or two, and Instagram's Story apart from its feed post): a
   channel's identifier for its feed post, `<identifier>:story` for its Story (#story's, #bigdrop's auto one, and
