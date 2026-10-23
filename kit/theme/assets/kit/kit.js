@@ -3,7 +3,8 @@
    - Click beacons: links followed to other sites (kind=out), and the LIVE NOW bar's plays and hiccups (live-bar.js),
      counted by the kit's bridge at POST /.site/click (which page and which link, nothing about the visitor).
    - The Social preview button on Ghost's draft previews (/p/<uuid>/): opens the bridge's preview of what publishing
-     would post, for staff signed in to Ghost Admin.
+     would post, for staff signed in to Ghost Admin. In Ghost Admin's View site, a Shared posts button: the bridge's
+     list of posts shared, where one can be shared again.
    - Icons beside links to the other platforms a creator is on (SoundCloud, Patreon, Substack, Vimeo…) in the footer's
      secondary navigation: Ghost's own social accounts don't cover them, so a site adds them as navigation links and the kit recognises the address. */
 (function () {
@@ -43,6 +44,23 @@
         button.rel = 'noopener';
         button.textContent = 'Social preview';
         document.body.appendChild(button);
+    }
+
+    /* The Shared posts button: only inside Ghost Admin's View site (the site in a frame on /ghost/; Settings' design
+       previews are /ghost/ pages or about:srcdoc themselves, so they don't get it) */
+    var inAdmin = false;
+    try {
+        inAdmin = window.parent !== window && window.parent.location.pathname.indexOf('/ghost') === 0
+            && /^https?:$/.test(location.protocol) && location.pathname.indexOf('/ghost') !== 0;
+    } catch (e) { /* framed by another site */ }
+    if (inAdmin) {
+        var shared = document.createElement('a');
+        shared.className = 'kit-preview-button';
+        shared.href = '/ghost/social-preview/';
+        shared.target = '_blank';
+        shared.rel = 'noopener';
+        shared.textContent = 'Shared posts';
+        document.body.appendChild(shared);
     }
 
     /* Links to other platforms in the footer's navigation get their service's icon (partials/kit/icons.hbs) */

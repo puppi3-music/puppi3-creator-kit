@@ -7,7 +7,8 @@ theme instead (the Theme guide, `kit/docs/theme-guide.html`; `KIT.md` lists the 
 This file and `KIT.md` are the kit's notes, not the theme's: `kit/theme-zip.sh` leaves both out of the zip.
 
 - Source as released (the files `KIT.md` lists left out; its README is `SOURCE-README.md`), plus `assets/kit/`
-  (`kit.js`: `window.site`, `/.site/click` beacons for links out, the Social preview button on `/p/<uuid>/`, icons on
+  (`kit.js`: `window.site`, `/.site/click` beacons for links out, the Social preview button on `/p/<uuid>/`, the Shared posts button (to the bridge's `/ghost/social-preview/`) only inside
+  Ghost Admin's View site (framed by a `/ghost/` page, not a `/ghost/` page or srcdoc itself, so not Settings' design previews), icons on
   links to other platforms (Patreon, Substack, Vimeo, SoundCloud...: `.kit-platform-link`) in the footer's secondary
   navigation; `live-bar.js`: the LIVE NOW player (no mascot); live = any source but the mp3 it plays and TinyIce's own
   `/_…`, so the source mount can be renamed (a `data-mount` attribute would name it) (a theme may add

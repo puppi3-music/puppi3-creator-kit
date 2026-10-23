@@ -48,7 +48,8 @@
 .live-bar__volume { width: 96px; accent-color: #fff; cursor: pointer; }
 @media (hover: none), (pointer: coarse) { .live-bar__volume { display: none; } }
 
-/* The Social preview button on Ghost's draft previews (/p/<uuid>/, kit.js): opens what the bridge would post */
+/* The Social preview button on Ghost's draft previews (/p/<uuid>/, kit.js): opens what the bridge would post; and the
+   Shared posts button in Ghost Admin's View site */
 .kit-preview-button {
     position: fixed; right: 20px; bottom: 20px; z-index: 1000; padding: 12px 18px; border-radius: 999px;
     background: var(--ghost-accent-color, #ff1a75); color: #fff; font-size: 1.5rem; font-weight: 700;

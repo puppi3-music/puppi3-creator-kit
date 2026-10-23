@@ -152,6 +152,26 @@ try {
     await page.goto(`${BASE}/${published.slug}/`);
     check(await page.locator('a.kit-preview-button').count() === 0, 'a published post has no Social preview button');
 
+    // Ghost Admin's View site (the site in a frame on /ghost/) gets the Shared posts button; Settings' design previews don't
+    const [name, value] = cookie.split(/=(.*)/);
+    await context.addCookies([{ name, value, domain: new URL(BASE).hostname, path: '/ghost' }]);
+    const admin = await context.newPage();
+    await admin.goto(`${BASE}/ghost/#/site`);
+    let shared = null;   // the View site frame's button, once its page has run kit.js
+    for (let i = 0; i < 60 && !shared; i++) {
+        const frame = admin.frames().find(f => new URL(f.url()).searchParams.get('admin') === '1');
+        if (frame && await frame.locator('a.kit-preview-button').count().catch(() => 0)) shared = frame.locator('a.kit-preview-button');
+        else await admin.waitForTimeout(500);
+    }
+    check(!!shared && await shared.count() === 1 && (await shared.getAttribute('href')) === '/ghost/social-preview/' &&
+        (await shared.textContent()) === 'Shared posts', "Ghost Admin's View site has the Shared posts button");
+    await admin.goto(`${BASE}/ghost/#/settings/design/edit`);
+    await admin.waitForTimeout(8000);
+    let inPreviews = 0;
+    for (const f of admin.frames()) if (f !== admin.mainFrame()) inPreviews += await f.locator('a.kit-preview-button').count().catch(() => 0);
+    check(inPreviews === 0, "Settings' design previews have no Shared posts button");
+    await admin.close();
+
     // Turned off: no Live stream URL, no bar
     await call('PUT', '/custom_theme_settings/', {
         custom_theme_settings: themeSettings.custom_theme_settings.map(s =>
