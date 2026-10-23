@@ -511,8 +511,7 @@ kit/kit.sh kit/sites/mysite exec postiz-temporal temporal task-queue describe --
     <dt>Lines in Postiz's log that don't matter</dt>
     <dd><code>upstream timed out … /copilot/chat</code> is Postiz's AI assistant, which has no key, and <code>Email sender information not found</code> means Postiz has no mail service set up, which it doesn't need.</dd>
     <dt>A post should be shared again</dt>
-    <dd>The bridge shares each post once: republishing it in Ghost does nothing, because the post is listed in <code>data/postiz/ghost-bridge/data/posted.json</code> as already shared. Take it off that list by its title (<code>sudo</code> on Linux), then unpublish the post in Ghost and publish it again:</dd>
-    <dd><div class="code"><pre>python3 -c 'import json,sys; f,t=sys.argv[1:]; s=json.load(open(f)); k=[i for i in s if s[i].get("title")==t]; [s.pop(i) for i in k]; json.dump(s,open(f,"w"),indent=2); print(len(k),"removed")' kit/sites/mysite/data/postiz/ghost-bridge/data/posted.json "The post's title"</pre></div></dd>
+    <dd>The bridge shares each post once: republishing it in Ghost does nothing, because the post is listed in <code>data/postiz/ghost-bridge/data/posted.json</code> as already shared. Share it again from the <strong>Shared posts</strong> page instead (the <a href="posting-guide.html#writing-sharing-a-post-again">Posting guide</a> says how): it goes past that list on the networks you tick, and keeps the earlier share's results in <code>posted.json</code> under <code>earlier</code>. The page is <code>/ghost/social-preview/</code> on your site; the kit's theme links it from Ghost Admin's View site.</dd>
     <dt>A network shows as an alert error in Grafana</dt>
     <dd>It's in <code>NETWORKS</code> but what its numbers need isn't set up yet (the <a href="networks-guide.html">Networks guide</a> says what each one needs). Set it up, or take it out of <code>NETWORKS</code>.</dd>
   </dl>

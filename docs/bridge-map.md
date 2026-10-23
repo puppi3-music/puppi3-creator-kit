@@ -22,7 +22,7 @@ The tests are beside the folder, in `stacks/postiz/ghost-bridge-test/` (`stacks/
 | Seasonal profile pictures (ntfy reminder per season, data/pfp.json) | `share/pfp.mjs` |
 | Weekly summary on the phone (`WEEKLY_SUMMARY_AT`, `weekDoc`, data/weekly.json) | `share/weekly.mjs` |
 | Preview page HTML/CSS/JS (draws only; reads and writes nothing) | `pages/preview-render.mjs` |
-| Dry-run previews, "All N photos" pages (photos.json), draft Social preview + its saves, `staffSignedIn` | `pages/preview-routes.mjs` |
+| Dry-run previews, "All N photos" pages (photos.json), draft Social preview + its saves, `staffSignedIn`, the Shared posts page + Share again now | `pages/preview-routes.mjs` |
 | Starting collectors (`collector()`), `/account.json`, `/metrics` text, `*_STATS_MINUTES` | `stats/stats.mjs` |
 | stats.db history (`trackPosts`, `trackEarly`, `readHistory`), `NETWORKS`, `POST_KIND`, take-offs (`surgingRefs`) | `stats/history.mjs` |
 | Shared stats helpers: dates, JSON files, `archive()`, IG/Threads insights (`askLearned`), `withHistory`, `siteLinks`, Tinybird (`tbPipe`) | `stats/history.mjs` |
@@ -73,7 +73,7 @@ Admin API (JWT from `GHOST_ADMIN_API_KEY`).
 - Imports: config, share/ntfy
 
 ### `share/share.mjs`
-`handlePost`: channels, media, captions, auto-post vs draft + ntfy, recording; `musicRouting` (IG/TikTok mode);
+`handlePost`: channels, media, captions, auto-post vs draft + ntfy, recording (`again`: past posted.json, earlier shares kept; `only`: just those cards, a Story apart from its feed post); `musicRouting` (IG/TikTok mode);
 `upNextDoc` for `/upnext.json` (same rules, nothing uploaded).
 - Exports: `handlePost`, `musicRouting`, `upNextDoc`
 - Imports: config, services, share/content, share/media, share/ntfy
@@ -110,8 +110,8 @@ checks), best posts (`performanceDoc`), most-read pages (Tinybird) and live show
 - Imports: config, share/ntfy (`notify`), stats/history, stats/performance (`performanceDoc`)
 
 ### `pages/preview-render.mjs`
-Renders preview pages (each channel's mock-up) and the photos page, each with the kit's "Source" link (`SOURCE_URL`, the AGPL's offer); rendering only.
-- Exports: `esc`, `escAttr`, `previewPage`, `photosPage`, `renderPreview`
+Renders preview pages (each channel's mock-up, and a published post's Share again now), the Shared posts page and the photos page, each with the kit's "Source" link (`SOURCE_URL`, the AGPL's offer); rendering only.
+- Exports: `esc`, `escAttr`, `previewPage`, `photosPage`, `renderPreview`, `sharedPage`
 - Imports: nothing of the bridge's
 
 ### `pages/preview-routes.mjs`
@@ -120,8 +120,9 @@ Social preview (`staffSignedIn` via Ghost's session cookie, cached per a hash of
 featured link, frames).
 - Exports: `writePreview`, `servePreview`, `serveFile`, `PREVIEW_SETTINGS`, `draftPage`, `photoPage`, `servePhotos`, `serveDraftPreview`, `cleanDraftMedia`, `sendJson`, `zonedTime`
 - Imports: config, services, pages/preview, share/content, share/share (`handlePost`, run fully dry)
-- Routes (called from ghost-bridge.mjs): `/previews/...`, `<PHOTOS_BASE>/<id>/[n]`, `/ghost/social-preview/<uuid>/` +
-  `POST .../custom`, `.../listen`, `.../frame`, `.../sticker`, `.../story-at`
+- Routes (called from ghost-bridge.mjs): `/previews/...`, `<PHOTOS_BASE>/<id>/[n]`, `/ghost/social-preview/` (Shared posts),
+  `/ghost/social-preview/<uuid>/` + `POST .../custom`, `.../listen`, `.../frame`, `.../sticker`, `.../story-at`, `.../share`
+  (with ghost-bridge.mjs's `sharing` and its share, passed in: no import of it)
 
 ### `stats/stats.mjs`
 `startStats`: the generic `collector()` loop, Postiz channels/analytics for the collectors, runs the grouped

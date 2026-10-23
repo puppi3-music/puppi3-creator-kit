@@ -286,7 +286,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
   <p>The kit's theme is <b>Source</b>, the theme Ghost itself makes and ships, with a few things added so the site works with the rest of the kit. Anything Ghost's own help says about Source is true here too. The kit adds:</p>
   <ul>
     <li>the <a href="#live">LIVE NOW bar</a>, which shows while you're streaming and plays the stream on the page;</li>
-    <li>the <a href="#preview">Social preview</a> button on a draft's preview, which shows what publishing would post to each network;</li>
+    <li>the <a href="#preview">Social preview</a> button on a draft's preview, which shows what publishing would post to each network, and a Shared posts button in Ghost Admin's View site;</li>
     <li>icons beside the <a href="#platforms">links to your other platforms</a> in the footer;</li>
     <li>counting: which links visitors follow off the site, and plays and hiccups on the LIVE NOW bar. These go to the dashboards (the <a href="analytics-guide.html#questions-do-people-click-through-to-my-music">Analytics guide</a> says where), with nothing about who the visitor is.</li>
     <li>a credit line in the footer, under "Powered by Ghost": <i>Theme: Puppi3's Creator Kit by DJ Puppi3</i>. The kit is free to use and change, and its licence asks for one thing in return: keep that line.</li>
@@ -365,6 +365,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
   <h2>Social preview</h2>
   <p>With the <code>social</code> module, a draft's preview has a <b>Social preview</b> button in the bottom corner, in your accent colour. In the editor, click <b>Preview</b>, then the button: a new tab shows each network's post as it would go out if you published now, and lets you change it. The <a href="posting-guide.html#writing-checking-the-social-posts-before-you-publish">Posting guide</a> has the rest.</p>
   <p>It works only where you're signed in to Ghost Admin. Anyone you send the preview link to sees the draft, and the button, but not the social preview.</p>
+  <p>In Ghost Admin's <b>View site</b>, a <b>Shared posts</b> button sits in the same corner. It opens the list of what was posted to each network, with your scheduled posts and drafts, where a post can be shared again (the <a href="posting-guide.html#writing-sharing-a-post-again">Posting guide</a> says how). It shows only inside Ghost Admin: visitors, and Settings' design previews, don't get it.</p>
 </section>
 
 <section id="platforms">
@@ -406,6 +407,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
     <tbody>
       <tr><td>LIVE NOW bar</td><td>No bar; the stream still plays at its own address, for anyone who has it</td></tr>
       <tr><td>Social preview button</td><td>The social preview is still there: on a draft's preview page, change <code>/p/</code> in the address to <code>/ghost/social-preview/</code></td></tr>
+      <tr><td>Shared posts button</td><td>The page is still there, at <code>/ghost/social-preview/</code> on your site</td></tr>
       <tr><td>Link and play counting</td><td>The dashboards' links followed off the site, and the bar's plays and hiccups, stay empty</td></tr>
       <tr><td>Platform link icons</td><td>The links show as the theme shows them</td></tr>
     </tbody>

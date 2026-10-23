@@ -471,6 +471,14 @@ header.top .pup svg{display:block;width:100%;height:auto}
   <p>If the time has gone by when the post goes out (say, the post was moved later in Ghost), the Story goes with the post, and the card warns you beforehand.</p>
   <p><strong>Different text for one channel:</strong> tick <strong>Modify text for Bluesky</strong> (or Threads, Instagram, TikTok) on that channel's card. A box opens with your post text; change it there. It saves as you type and the mock-up updates. When you publish, that channel gets your own text instead of the post text. The post link (or on Instagram and TikTok, the "link in bio" line) is still added after it, unless your text already has it. Untick it to go back to the post text. Until you actually change the text, nothing is saved, so that channel keeps following the post: later edits in Ghost still reach it. It's handy for Bluesky's 300 characters.</p>
   <p>Nothing is posted. It shows the post as last saved, so after changing something, wait for Ghost to say <em>Saved</em> and refresh the tab. A post with an audio card takes a few seconds, while the clip is made.</p>
+  <h3 id="writing-sharing-a-post-again">Sharing a post again</h3>
+  <p>Each post is shared once, when you first publish it: unpublishing it to fix something and publishing it again shares nothing. To send a post out again, say after a mistake, or to one network where it failed, use the <strong>Shared posts</strong> page:</p>
+  <ul>
+    <li><strong>Getting there:</strong> in Ghost Admin, click <strong>View site</strong> in the menu, then the <strong>Shared posts</strong> button in the bottom corner. It opens in a new tab, and like the Social preview it works only where you're signed in to Ghost Admin. Visitors never see the button.</li>
+    <li><strong>What it lists:</strong> your scheduled posts (with when each goes out) and drafts (when each was last edited) at the top, then the published posts, newest first, with what each network got: <em>posted</em>, <em>in the app</em> (one that came to you to finish, the Instagram Story you post by hand included), <em>error</em>, or "Not shared by the bridge". Click a title to open its Social preview.</li>
+    <li><strong>Sharing it:</strong> a published post's Social preview has <strong>Share again now</strong> above the cards (<strong>Share now</strong> if it was never shared), with a box for each network it would go to, all ticked. Untick the ones that went out fine, to resend only one or two. Instagram's Story has its own box, apart from the Instagram post. Click the button and say yes: the post goes out as Ghost has it now, with its tags and what you set on the Social preview (texts, featured link, photo crops, the Story's sticker), and you get the notifications for those networks as on the day.</li>
+  </ul>
+  <p>It doesn't take down what went out before (delete the old post in the app first, if it was wrong), and Ghost's newsletter isn't sent again. The networks you left unticked keep what they had on the list.</p>
 </section>
 
 <section id="tags">
@@ -759,7 +767,7 @@ Caption:
   <h2>Something went wrong?</h2>
   <dl class="faq">
     <dt>I published, but nothing went out anywhere.</dt>
-    <dd>Check that the post is <strong>Public</strong> and doesn't have <span class="tag">#nosocial</span>. Posts that were already shared once won't go out again. If none of that is it, ask whoever runs the site to check the bridge's log.</dd>
+    <dd>Check that the post is <strong>Public</strong> and doesn't have <span class="tag">#nosocial</span>. A post that was already shared once won't go out again by publishing it again (see <a href="#writing-sharing-a-post-again">Sharing a post again</a>). If none of that is it, ask whoever runs the site to check the bridge's log.</dd>
     <dt>Bluesky or Threads says posted, but I can't see it.</dt>
     <dd>Give it a minute, then check your profile, not the home feed. If you got a ⚠️ notification, the post failed, so resend it from Postiz. If there's no warning and it still isn't there after 10 minutes, tell whoever runs the site: the part of Postiz that sends posts may need a restart.</dd>
     <dt>I didn't get the Instagram or TikTok notification.</dt>
@@ -769,7 +777,7 @@ Caption:
     <dt>My video wasn't used; the post went out with the image.</dt>
     <dd>Only MP4 videos are used. Convert other formats to MP4 and upload them again in a video card.</dd>
     <dt>I want to share an old post again.</dt>
-    <dd>Post it from Postiz, or ask whoever runs the site to take it off the bridge's "already shared" list (the <a href="operations-guide.html#trouble-social">Operations guide</a> says how); then unpublish it in Ghost and publish it again, and it's shared like a new post.</dd>
+    <dd>Open it from the Shared posts page and click <strong>Share again now</strong>, with only the networks you want ticked (see <a href="#writing-sharing-a-post-again">Sharing a post again</a>). Or post it yourself from Postiz.</dd>
   </dl>
 </section>
 

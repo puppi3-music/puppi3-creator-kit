@@ -49,7 +49,11 @@ export function musicRouting(tags, kind, audiogram) {
 }
 
 // ---------- main handler ----------
-export async function handlePost(post) {
+// again: shared even though posted.json has it (the Shared posts page's "Share again now"); the new entry keeps
+// the earlier shares in `earlier`. only: just these, by the Social preview's card labels (a channel's identifier for its
+// feed post, `<identifier>:story` for its Story, the #bigdrop one by hand included); the others' results are kept as they were
+export async function handlePost(post, { again = false, only = null } = {}) {
+  const wants = (label) => !only || only.includes(label);
   const id = post.id;
   const title = (post.title || '').trim();
   const url = post.url;
@@ -85,14 +89,16 @@ export async function handlePost(post) {
   if (previewStore.getStore()) Object.assign(previewStore.getStore(), { custom });
 
   const state = await loadState();
-  if (state[id] && !draftPreview) return log(`  skip: already shared on ${state[id].at}`);
-  if (state[id]) previewStore.getStore().shared = state[id].at;
+  if (state[id] && !draftPreview && !again) return log(`  skip: already shared on ${state[id].at}`);
+  if (state[id] && again) log(`  sharing again (first shared on ${state[id].at})`);
+  if (state[id] && draftPreview) previewStore.getStore().shared = state[id].at;
 
   log('  looking up Postiz channels...');
   const all = await postizChannels();
   log(`  Postiz channels: ${all.map((i) => `${i.identifier}${i.disabled ? ' (disabled)' : ''}`).join(', ') || 'none'}`);
-  const integrations = all.filter((i) => CHANNELS.includes(i.identifier) && !i.disabled);
-  if (!integrations.length) return log('  no matching Postiz channels found - check CHANNELS');
+  const integrations = all.filter((i) => CHANNELS.includes(i.identifier) && !i.disabled && (!only || only.some((l) => l.split(':')[0] === i.identifier)));
+  if (only) log(`  only: ${only.join(', ')}`);
+  if (!integrations.length) return log(only ? '  none of those channels is connected' : '  no matching Postiz channels found - check CHANNELS');
 
   const bigDrop = tags.includes(BIG_DROP_TAG);
   const asStory = tags.includes(STORY_TAG);
@@ -256,6 +262,7 @@ export async function handlePost(post) {
     const settings = settingsFor(idf, { story: isIG && asStory });
 
     if ((isIG || isTT) && !musicAuto) {
+      if (!wants(isIG && asStory ? `${idf}:story` : idf)) continue;
       const entry = { platform: isIG ? 'Instagram' : 'TikTok', idf, drafted: false };
       if (!manual.some((m) => m.platform === entry.platform)) manual.push(entry);
       results[idf] = 'manual';
@@ -298,7 +305,7 @@ export async function handlePost(post) {
       jobs.push([`${idf}:story`, post_(integ, '', settingsFor(idf, { story: true }), 'now', [], true, storyAt)]);
     }
 
-    for (const [label, body] of jobs) {
+    for (const [label, body] of jobs.filter(([label]) => wants(label))) {
       addPreview(integ, label, 'auto', { caption: captionFor(idf, label.endsWith(':story')), ...(label.endsWith(':story') ? storyTime : {}) });
       if (isDry()) {
         log(`  [dry run] ${label} (${integ.name}) with ${mediaLabel(body)}:\n${JSON.stringify(body, null, 2)}`);
@@ -318,7 +325,8 @@ export async function handlePost(post) {
 
   // #bigdrop: the (link-sticker) Story you add by hand (the API can't add stickers)
   const ig = integrations.find((i) => INSTAGRAM_IDS.includes(i.identifier));
-  if (pv && bigDrop && ig && media && !asStory && !pv.entries.some((e) => e.label === `${ig.identifier}:story`)) {
+  const storyWanted = !!ig && wants(`${ig.identifier}:story`);
+  if (pv && bigDrop && ig && media && !asStory && storyWanted && !pv.entries.some((e) => e.label === `${ig.identifier}:story`)) {
     addPreview(ig, `${ig.identifier}:story`, 'manual', { caption: '', ...stickerInfo, ...storyTime,
       note: stickerOn ? `${BIG_DROP_TAG}: you add this Story in the app with ${igSticker ? 'a link sticker' : 'its text'} (your ntfy reminder has the media and ${igSticker ? 'link' : 'text'})`
         : `${BIG_DROP_TAG}: you add this Story in the app (your ntfy reminder has the media)` });
@@ -334,7 +342,9 @@ export async function handlePost(post) {
   const failed = Object.entries(results).filter(([, r]) => r === 'error').map(([k]) => k);
   // more to come after a Story notification: wait STORY_GAP_MS so the Story arrives first
   const storyGap = async (more) => { if (more && STORY_GAP_MS) await new Promise((r) => setTimeout(r, STORY_GAP_MS)); };
-  if (bigDrop && ig && !igStoryByHand && (manual.length || Object.values(results).some((r) => r === 'ok' || r === 'dry-run'))) {
+  // shared again with only the Story ticked: the reminder is all there is to send
+  if (bigDrop && ig && !igStoryByHand && storyWanted && (manual.length || (only && !asStory) || Object.values(results).some((r) => r === 'ok' || r === 'dry-run'))) {
+    if (!isDry() && !results[`${ig.identifier}:story`]) results[`${ig.identifier}:story`] = 'manual';
     if (await notifyBigDrop({ title, url, listen, campaign, stickerUrl: igSticker, stickerText, stickerOn, kind, isClip: audiogram, at: storyAt,
       attachment: kind === 'image' && String(igStory[0]?.path).startsWith('http') ? igStory[0].path : attachment })) await storyGap(manual.length || (failed.length && NOTIFY_ERRORS));
   }
@@ -370,7 +380,10 @@ export async function handlePost(post) {
   }
 
   if (!isDry() && Object.values(results).some((r) => r === 'ok' || r === 'manual')) {
-    await recordShared(id, { title, url, at: new Date().toISOString(), media: audiogram ? 'audio-clip' : kind, results });
+    const before = state[id];
+    const earlier = before ? [...(before.earlier || []), { at: before.at, results: before.results }] : undefined;
+    const kept = only && before ? Object.fromEntries(Object.entries(before.results || {}).filter(([label]) => !only.includes(label))) : {};
+    await recordShared(id, { title, url, at: new Date().toISOString(), media: audiogram ? 'audio-clip' : kind, results: { ...kept, ...results }, earlier });
   }
 }
 

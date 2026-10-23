@@ -54,6 +54,23 @@ change.
   (centred otherwise). It also fits every channel's photos to what Postiz and the platform accept (`IMAGE_RULES`:
   Postiz posts only png/jpg/gif/webp; Instagram JPEG <=1440 wide; Threads JPEG/PNG; TikTok JPEG/WebP, shorter
   side <=1080): ffmpeg converts only the ones that don't fit and uploads them; the rest go as they are.
+- Shared posts (user asked: share a post again from a page, not by editing posted.json; reached from Ghost Admin
+  without opening a post): `GET /ghost/social-preview/` (same sign-in as the Social preview, same Traefik route) lists,
+  on its first page, the scheduled posts (soonest first) and drafts (last edited first; 20 of each; user asked to see
+  what's coming), each opening its Social preview; then the site's published posts (Admin API, 30 a page, `?page=`) with posted.json's results per network (`earlier`: the
+  shares before) or "Being shared now" (ghost-bridge.mjs's `sharing`). Each opens its Social preview, which for a
+  published post has "Share again now" (or "Share now" if never shared) with a box per card it would post,
+  all ticked (user asked: share again on just one or two, and Instagram's Story apart from its feed post): a
+  channel's identifier for its feed post, `<identifier>:story` for its Story (#story's, #bigdrop's auto one, and
+  #bigdrop's by-hand reminder, which is also noted in posted.json's results as `<identifier>:story: manual`; with
+  only the Story ticked, the reminder is all that's sent). A confirm naming the ticked ones, then `POST .../share`
+  {networks: [those labels]} (Origin = the site, like the saves;
+  published only, 409 while it's being shared, 400 for none or a bad name; no list = all) runs the post as Ghost has
+  it through the webhook's own path with `handlePost(post, { again: true, only })`: past posted.json's check, only
+  those cards (and only their notifications), same tags, saved texts and framing; the new entry replaces the old
+  one, keeps it in `earlier`, and keeps the networks left out at their old results. Answers 202 at once. It can't take down what was posted before (posted.json has no Postiz post ids) and
+  Ghost's newsletter isn't sent again; the page says both. A DRY_RUN bridge (staging) writes a dry-run preview instead.
+  The kit's theme adds a "Shared posts" button inside Ghost Admin's View site (`kit/theme/CLAUDE.md`; a site's own theme can too).
 - Captions (`bodyText`): bullets "• ", numbered lists "1. ", quotes in “ ”; links in the text become "text (address)" on
   Bluesky/Threads only when the whole caption still fits (`buildLines` -> `fitLines`), else link text only (always on
   IG/TikTok); the preview's "Modify text" box starts from each channel's version (`autoText` per channel key).

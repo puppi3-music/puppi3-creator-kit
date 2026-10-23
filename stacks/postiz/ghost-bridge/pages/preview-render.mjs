@@ -292,7 +292,14 @@ border:1px solid var(--line);border-radius:8px;padding:5px 8px;max-width:100%}.l
 .note .buttons{display:block;margin-top:8px;font-size:13px;color:var(--dim);white-space:normal}
 pre{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;font-size:12px}
 ul.list{list-style:none;padding:0}ul.list li{background:var(--card);border:1px solid var(--line);border-radius:10px;
-padding:10px 14px;margin:8px 0}`;
+padding:10px 14px;margin:8px 0}
+ul.list .how{display:block;font-size:13px;margin-top:3px}.how .error{color:var(--skip)}
+.again{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:28px}
+.again h2{font-size:16px;margin:0 0 6px}.again p{margin:0 0 12px}
+.again button{font:inherit;font-weight:600;padding:10px 18px;border-radius:10px;border:1px solid #1d6ff2;background:#1d6ff2;
+color:#fff;cursor:pointer}.again button:disabled{opacity:.6;cursor:default}.again .said{margin-left:10px}
+.again .said.err{color:var(--skip)}
+main>h2{font-size:17px;margin:24px 0 4px}.again .nets{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0 0 14px}.again .nets label{cursor:pointer}.pages{margin-top:16px}`;
 
 // Carousels (arrows, counter, pausing videos you scroll away from) and, on draft previews, "Modify text"
 const PREVIEW_JS = `(function () {
@@ -434,6 +441,21 @@ if (storyAt) {
   storyAt.addEventListener('blur', saveStoryAt);
   storyAt.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); saveStoryAt(); } });
 }
+// Share again now (a published post): on the networks ticked, asking once and naming them; the share itself takes minutes
+document.addEventListener('click', function (e) {
+  var b = e.target.closest('[data-share]'); if (!b) return;
+  var said = document.querySelector('.again .said');
+  var ticked = [].slice.call(document.querySelectorAll('[data-share-on]:checked'));
+  if (!ticked.length) { said.textContent = 'Tick at least one network.'; said.classList.add('err'); return; }
+  var names = ticked.map(function (t) { return t.getAttribute('data-name'); }).join(', ');
+  if (!confirm(b.getAttribute('data-confirm').replace('{networks}', names))) return;
+  b.disabled = true; said.textContent = 'Starting…'; said.classList.remove('err');
+  fetch(location.pathname.replace(/[/]?$/, '/') + 'share', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ networks: ticked.map(function (t) { return t.value; }) }) })
+    .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || r.status); }, function () { if (!r.ok) throw new Error(r.status); }); })
+    .then(function () { said.innerHTML = b.getAttribute('data-done'); })
+    .catch(function (err) { b.disabled = false; said.textContent = "Couldn't share it: " + err.message; said.classList.add('err'); });
+});
 // Saves that change the cards and notifications: then the page reloads
 function saveMore(what, body, said) {
   function say(t, err) { if (said) { said.textContent = t; said.classList.toggle('err', !!err); } }
@@ -575,16 +597,67 @@ export function renderPreview(pv, s) {
   const notes = pv.notes.length ? `<div class="notes"><h2>ntfy notifications you'd get</h2>${pv.notes.map((n) =>
     `<div class="note"><b>${esc(n.title || '')}</b>\n${richText(n.message || '', { links: true })}${noteButtons(n)}</div>`).join('')}</div>` : '';
   const status = { draft: 'a draft', scheduled: 'scheduled', published: 'published' }[post.status] || post.status;
-  const banner = !pv.draft ? ''
+  const published = pv.draft && post.status === 'published';
+  const when = (t) => esc(new Date(t).toLocaleString('en-GB', { timeZone: s.SITE_TIMEZONE, dateStyle: 'medium', timeStyle: 'short' }));
+  const banner = !pv.draft ? '' : published
+    ? `<div class="banner">Nothing has been posted. This is what the bridge would post if you shared this post again now
+      (as Ghost has it).${pv.shared ? ` It was shared on ${when(pv.shared)}.` : ' The bridge hasn\'t shared it.'}
+      <a href="">Refresh</a> after saving changes in Ghost.</div>`
     : `<div class="banner">Nothing has been posted. This is what the bridge would do if this post (${esc(status)},
-      as last saved) were published now.${pv.shared ? ` It was already shared on ${esc(new Date(pv.shared).toLocaleString('en-GB'))},
+      as last saved) were published now.${pv.shared ? ` It was already shared on ${when(pv.shared)},
       so publishing it again wouldn't post it again.` : ''} <a href="">Refresh</a> after saving changes in Ghost.</div>`;
+  // what it would post, a box for each card (a channel's feed post, and its Story apart), all ticked
+  const going = [...new Map(pv.entries.filter((e) => e.status !== 'skip').map((e) => [e.label,
+    `${(PLATFORMS[e.idf] || { name: e.idf }).name}${e.label.endsWith(':story') ? ' Story' : ''}`]))];
+  const boxes = going.map(([idf, name]) => `<label><input type="checkbox" data-share-on value="${escAttr(idf)}" data-name="${escAttr(name)}" checked> ${esc(name)}</label>`).join('');
+  const again = !published || !going.length ? '' : `<div class="again"><h2>${pv.shared ? 'Share it again' : 'Share it'}</h2>
+    <p>${s.DRY_RUN ? 'This bridge is a dry run: it writes a preview and posts nothing. ' : ''}Posts it now on the networks ticked,
+    as shown above, and sends their notifications. ${pv.shared ? 'What it posted before stays up: delete that on each network first. ' : ''}Ghost's
+    email newsletter isn't sent again.</p>
+    <div class="nets">${boxes}</div>
+    <button type="button" data-share data-confirm="${escAttr(`Share "${post.title || 'this post'}" ${pv.shared ? 'again ' : ''}on {networks} now?`)}"
+      data-done="${escAttr(`Sharing it now. It takes a few minutes; the bridge's notifications come as usual. <a href="../">Back to Shared posts</a>`)}">${pv.shared ? 'Share again now' : 'Share now'}</button><span class="said"></span></div>`;
   const openLink = pv.draft ? pv.ghostPreview : post.url;
   return previewPage(`${pv.draft ? 'Social preview' : 'Preview'}: ${post.title || 'post'}`, `
     <h1>${esc(post.title || '(no title)')}</h1>
     <div class="meta"><span>${esc(pv.at.toLocaleString('en-GB'))}</span>
     ${openLink ? `<span><a href="${escAttr(openLink)}" target="_blank" rel="noopener">Open the post</a></span>` : ''}
-    ${flags.map((f) => `<span>${esc(f)}</span>`).join('')}${pv.draft ? '' : '<span><a href="./">All previews</a></span>'}</div>
-    ${banner}${pv.draft && pv.listen ? listenPicker(pv, s) : ''}<div class="grid">${cards}</div>${notes}
+    ${flags.map((f) => `<span>${esc(f)}</span>`).join('')}<span><a href="${pv.draft ? '../' : './'}">${pv.draft ? 'Shared posts' : 'All previews'}</a></span></div>
+    ${banner}${pv.draft && pv.listen ? listenPicker(pv, s) : ''}<div class="grid">${cards}</div>${notes}${again}
     <details class="log"><summary>Bridge log</summary><pre>${esc(pv.log.join('\n'))}</pre></details>`);
+}
+
+// The Shared posts page (/ghost/social-preview/): the site's published posts, newest first, and what the bridge did with
+// each on every network (posted.json's results; `earlier` for the shares before). Each opens the post's Social preview,
+// which has "Share again now". Above them, on the first page, the scheduled posts and drafts, each opening its Social
+// preview. d: { posts: [{ uuid, title, url, published_at, shared, sharing }], scheduled, drafts: [{ uuid, title,
+// published_at, updated_at }], page, next, dryRun, timeZone }
+const DID = { ok: 'posted', manual: 'in the app', error: 'error', 'dry-run': 'dry run' };
+export function sharedPage(d) {
+  const when = (t) => esc(new Date(t).toLocaleString('en-GB', { timeZone: d.timeZone, dateStyle: 'medium', timeStyle: 'short' }));
+  const how = (results = {}) => Object.entries(results).map(([label, r]) => {
+    const [idf, story] = label.split(':');
+    const name = `${(PLATFORMS[idf] || { name: idf }).name}${story ? ' Story' : ''}`;
+    return `<span class="${r === 'error' ? 'error' : ''}">${esc(name)}: ${esc(DID[r] || r)}</span>`;
+  }).join(', ');
+  const items = d.posts.map((p) => {
+    const sh = p.shared;
+    const state = p.sharing ? 'Being shared now…'
+      : sh ? `Shared ${when(sh.at)}${sh.earlier?.length ? ` (shared ${sh.earlier.length + 1} times in all)` : ''}: ${how(sh.results)}`
+      : 'Not shared by the bridge';
+    return `<li><a href="${escAttr(p.uuid)}/">${esc(p.title || '(no title)')}</a>
+      <span class="dim"> · published ${when(p.published_at)}</span><span class="how dim">${state}</span></li>`;
+  });
+  const coming = (posts, label, at) => (posts?.length ? `<h2>${label}</h2><ul class="list">${posts.map((p) =>
+    `<li><a href="${escAttr(p.uuid)}/">${esc(p.title || '(no title)')}</a><span class="dim"> · ${at(p)}</span></li>`).join('')}</ul>` : '');
+  const ahead = coming(d.scheduled, 'Scheduled', (p) => `goes out ${when(p.published_at)}`)
+    + coming(d.drafts, 'Drafts', (p) => `last edited ${when(p.updated_at)}`);
+  const pages = [d.page > 1 && `<a href="?page=${d.page - 1}">Newer posts</a>`, d.next && `<a href="?page=${d.next}">Older posts</a>`]
+    .filter(Boolean).join(' · ');
+  return previewPage('Shared posts', `<h1>Shared posts</h1>
+    <div class="meta">What the bridge will post and what it posted on each network${d.dryRun ? ' (this bridge is a dry run: it posts nothing)' : ''}.
+    Open a post for its Social preview: what a scheduled post or a draft will post, or a published one, to share it again. <a href="/ghost/">Ghost Admin</a></div>
+    ${ahead}${ahead ? '<h2>Published</h2>' : ''}
+    ${items.length ? `<ul class="list">${items.join('')}</ul>` : '<p>No published posts yet.</p>'}
+    ${pages ? `<div class="pages">${pages}</div>` : ''}`);
 }

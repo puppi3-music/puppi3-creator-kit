@@ -84,17 +84,18 @@ function verifySignature(raw, header) {
 
 // Posts being shared right now: a second "published" webhook for one (unpublished and published again
 // within the minutes an upload takes) would pass the posted.json check and post it twice.
+// The Shared posts page's "Share again now" goes through here too (opts.again), so the two can't overlap.
 export const sharing = new Set();
-async function handleWebhookPost(post) {
+async function handleWebhookPost(post, opts = {}) {
   if (sharing.has(post.id)) return log(`skip "${post.title}": it's still being shared from the last webhook`);
   sharing.add(post.id);
-  try { await shareOrPreview(post); } finally { sharing.delete(post.id); }
+  try { await shareOrPreview(post, opts); } finally { sharing.delete(post.id); }
 }
-async function shareOrPreview(post) {
-  if (!PREVIEWS) return handlePost(post);
+async function shareOrPreview(post, opts) {
+  if (!PREVIEWS) return handlePost(post, opts);
   const pv = { post, at: new Date(), entries: [], notes: [], log: [], files: [], media: null, base: '/previews' };
   await previewStore.run(pv, async () => {
-    try { await handlePost(post); } catch (e) { log(`ERROR: ${e.message}`); }
+    try { await handlePost(post, opts); } catch (e) { log(`ERROR: ${e.message}`); }
     await writePreview(pv).catch((e) => log(`WARNING: couldn't write the preview: ${e.message}`));
   });
 }
@@ -240,7 +241,7 @@ http.createServer((req, res) => {
     return;
   }
   if ((req.method === 'GET' || req.method === 'POST') && /^\/(ghost\/)?social-preview\//.test(req.url)) {
-    serveDraftPreview(req, res, req.url.split('?')[0]).catch((e) => {
+    serveDraftPreview(req, res, req.url.split('?')[0], { sharing, share: (post, only) => handleWebhookPost(post, { again: true, only }) }).catch((e) => {
       log(`social preview: ${e.message}`);
       if (!res.headersSent) res.writeHead(500).end();
     });

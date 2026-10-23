@@ -1,16 +1,17 @@
 // pages/preview-routes.mjs: the pages the bridge serves (pages/preview-render.mjs draws them): dry-run previews (staging), the
-// page with all of a post's photos that a notification links to, and the Social preview of a draft with its saves.
+// page with all of a post's photos that a notification links to, the Social preview of a draft with its saves, and the
+// Shared posts page (a published post shared again).
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { createReadStream } from 'node:fs';
-import { esc, escAttr, previewPage, renderPreview, photosPage } from './preview-render.mjs';
+import { esc, escAttr, previewPage, renderPreview, photosPage, sharedPage } from './preview-render.mjs';
 import { LIMITS, IMAGE_LIMITS, INSTAGRAM_IDS, TIKTOK_IDS, NO_LINK_IDS, CUSTOM_CHANNELS, CUSTOM_MAX, STICKER_TEXT_MAX, SITE_TIMEZONE, MANUAL_DRAFTS,
   BIG_DROP_TAG, STORY_TAG, PREVIEW_DIR, PREVIEW_KEEP, PREVIEW_URL, log, channelKey, PHOTOS_FILE, PHOTOS_BASE,
   PHOTO_PAGE_DAYS, GHOST_API_URL, previewStore, DRAFT_BASE, DRAFT_PREVIEWS, editCustom, setCustom,
-  setFrame, FEATURED_DOMAINS, SERVICE_NAMES, FEATURED_LINE, FEATURED_BIO_LINE, FEATURED_LABEL } from '../config.mjs';
-import { ghostPostByUuid, ghostSiteOrigin, GHOST_KEY_FIX } from '../services.mjs';
+  setFrame, loadState, DRY_RUN, FEATURED_DOMAINS, SERVICE_NAMES, FEATURED_LINE, FEATURED_BIO_LINE, FEATURED_LABEL } from '../config.mjs';
+import { ghostPostByUuid, ghostSiteOrigin, ghostAdmin, GHOST_KEY_FIX } from '../services.mjs';
 import { cleanLink } from '../share/content.mjs';
 import { handlePost } from '../share/share.mjs';
 
@@ -21,7 +22,7 @@ import { handlePost } from '../share/share.mjs';
 // webhook in DRY_RUN, and used for draft previews.
 export const PREVIEW_SETTINGS = { LIMITS, IMAGE_LIMITS, INSTAGRAM_IDS, TIKTOK_IDS, NO_LINK_IDS, CUSTOM_CHANNELS, CUSTOM_MAX,
   MANUAL_DRAFTS, BIG_DROP_TAG, STORY_TAG, channelKey, FEATURED_DOMAINS, SERVICE_NAMES, FEATURED_LINE, FEATURED_BIO_LINE,
-  FEATURED_LABEL, STICKER_TEXT_MAX, SITE_TIMEZONE };
+  FEATURED_LABEL, STICKER_TEXT_MAX, SITE_TIMEZONE, DRY_RUN };
 
 export async function writePreview(pv) {
   await fs.mkdir(PREVIEW_DIR, { recursive: true });
@@ -363,7 +364,49 @@ async function saveCustomText(req, res, uuid) {
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }).end(html);
 }
 
-export async function serveDraftPreview(req, res, p) {
+// The Shared posts page (/ghost/social-preview/): on its first page the posts still to come (scheduled, soonest first;
+// drafts, last edited first, COMING_MAX of each), then the site's published posts, newest first, SHARED_PAGE_SIZE a
+// page, each with what posted.json says the bridge did with it (and the shares before, `earlier`); each opens the
+// post's Social preview, where a published post gets "Share again now" (shareAgain).
+const SHARED_PAGE_SIZE = 30;
+const COMING_MAX = 20;
+const postList = (filter, order, limit, page = 1) => ghostAdmin(`/posts/?${new URLSearchParams({ filter, order,
+  fields: 'id,uuid,title,url,published_at,updated_at', limit: String(limit), page: String(page) })}`);
+async function sharedPosts(page, sharing) {
+  const none = { posts: [] };
+  const [{ posts = [], meta }, state, scheduled, drafts] = await Promise.all([
+    postList('status:published', 'published_at desc', SHARED_PAGE_SIZE, page), loadState(),
+    page === 1 ? postList('status:scheduled', 'published_at asc', COMING_MAX) : none,
+    page === 1 ? postList('status:draft', 'updated_at desc', COMING_MAX) : none]);
+  return sharedPage({
+    scheduled: scheduled.posts || [], drafts: drafts.posts || [],
+    posts: posts.map((post) => ({ ...post, shared: state[post.id] || null, sharing: sharing.has(post.id) })),
+    page, next: meta?.pagination?.next || null, dryRun: DRY_RUN, timeZone: SITE_TIMEZONE,
+  });
+}
+
+// POST /ghost/social-preview/<uuid>/share: shares a published post again now, as Ghost has it, through the webhook's own
+// path (share: one share of a post at a time). Answers at once; the share takes minutes (uploads) and sends the usual
+// notifications. The earlier share stays in posted.json until the new one is recorded over it.
+async function shareAgain(req, res, uuid, { sharing, share }) {
+  const body = await readJson(req, res);
+  if (!body) return;
+  // networks: the cards ticked (a channel's Postiz identifier, `<identifier>:story` for its Story); left out = all of them
+  const only = body.networks == null ? null : Array.isArray(body.networks) && body.networks.every((n) => typeof n === 'string' && /^[\w-]{1,60}(:story)?$/.test(n))
+    ? [...new Set(body.networks)] : undefined;
+  if (only === undefined) return sendJson(res, 400, { error: 'networks must be a list of channel names' });
+  if (only && !only.length) return sendJson(res, 400, { error: 'tick at least one network' });
+  const post = await ghostPostByUuid(uuid);
+  if (!post) return sendJson(res, 404, { error: 'no post has that preview link' });
+  if (post.status !== 'published') return sendJson(res, 409, { error: `only a published post can be shared from here (this one is ${post.status})` });
+  if (sharing.has(post.id)) return sendJson(res, 409, { error: "it's being shared right now" });
+  log(`share again: "${post.title}" (from the Shared posts page)${only ? ` on ${only.join(', ')}` : ''}`);
+  draftCache.delete(uuid);
+  share(post, only).catch((e) => log(`ERROR: ${e.message}`)).finally(() => draftCache.delete(uuid));
+  sendJson(res, 202, { ok: true });
+}
+
+export async function serveDraftPreview(req, res, p, sharer = { sharing: new Set(), share: async () => {} }) {
   const headers = {
     'Content-Type': 'text/html; charset=utf-8',
     'Cache-Control': 'no-store, private',
@@ -393,10 +436,19 @@ export async function serveDraftPreview(req, res, p) {
   }
   const media = new RegExp(`^${DRAFT_BASE}/(media/[\\w-][\\w.-]*\\.mp4)$`).exec(p);
   if (media) return serveFile(req, res, path.join(PREVIEW_DIR, media[1]));
-  const m = new RegExp(`^${DRAFT_BASE}/${UUID}/(custom|frame|listen|sticker|story-at)?$`).exec(p) || new RegExp(`^${DRAFT_BASE}/${UUID}()$`).exec(p);
+  if (p === `${DRAFT_BASE}/` && req.method === 'GET') {
+    const page = Math.max(1, Number(new URL(req.url, 'http://x').searchParams.get('page')) || 1);
+    try { return res.writeHead(200, headers).end(await sharedPosts(page, sharer.sharing)); } catch (e) {
+      log(`shared posts: ${e.message}`);
+      if (e.keyRejected) return res.writeHead(502, headers).end(keyRejectedPage(e));
+      return res.writeHead(502, headers).end(draftPage('Couldn\'t load the posts', e.message));
+    }
+  }
+  const m = new RegExp(`^${DRAFT_BASE}/${UUID}/(custom|frame|listen|sticker|story-at|share)?$`).exec(p) || new RegExp(`^${DRAFT_BASE}/${UUID}()$`).exec(p);
   if (m?.[2] && req.method === 'POST') {
     // saves come from the preview page itself: a page on another site can't make your browser send one
     if (req.headers.origin !== await ghostSiteOrigin()) return sendJson(res, 403, { error: 'wrong origin' });
+    if (m[2] === 'share') return shareAgain(req, res, m[1], sharer);
     return ({ frame: saveFrame, listen: saveListen, sticker: saveSticker, 'story-at': saveStoryAt }[m[2]] || saveCustomText)(req, res, m[1]);
   }
   if (!m || m[2] || req.method !== 'GET') return res.writeHead(404, headers).end(draftPage('Not found', 'Open this from a post\'s Preview in Ghost.'));

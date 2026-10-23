@@ -9,6 +9,23 @@ lines, since GitHub's release notes break wherever the text does.
 
 ## 1.3.5 (not released yet)
 
+### Shared posts: share a post again, on the networks you pick
+
+The bridge shares each post once, so fixing a mistake and publishing again shared nothing; the only way round it
+was editing the bridge's `posted.json` by hand. A new **Shared posts** page, at `/ghost/social-preview/` on your
+site, lists your scheduled posts and drafts, then each published post with what every network got (posted, in the
+app, error). A published post's Social preview now has **Share again now**, with a box for each network it would go
+to (Instagram's Story apart from its feed post): it sends the post again on the ones ticked, as Ghost has it now,
+and the others keep their earlier results. It can't take down what went out before, and the newsletter isn't sent
+again. The kit's theme adds a **Shared posts** button inside Ghost Admin's View site; like the Social preview, the
+page is only for staff signed in to Ghost Admin.
+
+**Your site:** `kit/kit.sh <folder> up` after updating brings the new bridge and its page. For the button, upload
+the new theme zip in Ghost (the Operations guide's update steps); without it the page is still at
+`/ghost/social-preview/`. The Posting guide's "Sharing a post again" says how to use it.
+
+**Restarts:** the bridge, for a few seconds (a share in progress finishes first).
+
 ### Platforms: the hourly charts' hover names without "B"
 
 On the Platforms dashboard, a network's charts drawn "hour by hour" (a time range of 7 days or less) showed "B "

@@ -23,7 +23,7 @@ exports, import rules); keep it current when files or exports change (pre-commit
   another doesn't export) and the map (`.githooks/bridge-check.mjs`).
 - SIGTERM exits at once, or after a share in progress (compose's `stop_grace_period: 5m`).
 - The webhook: fails closed without `GHOST_WEBHOOK_SECRET` (compose requires it too), bodies >8 MB get 413. Ghost sends `post.published` only on the move to published, never for edits; a republish sends it
-  again, but `posted.json` stops a repeat, and one that arrives while that post is still being shared is skipped
+  again, but `posted.json` stops a repeat (the Shared posts page's "Share again now" goes past it: `share/CLAUDE.md`), and one that arrives while that post is still being shared is skipped
   (`sharing`); shares at the same time each add their own entry, one write at a time. `X-Ghost-Signature` is
   `sha256=<hex>, t=<ms>`, hex = HMAC-SHA256(secret, rawBody + t), refused more than 10 minutes off. Ghost takes only
   .mp4/.webm/.ogv video and .mp3/.wav/.ogg/.m4a audio, and converts nothing.
