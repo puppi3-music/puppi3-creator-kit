@@ -38,7 +38,7 @@ of the kit: `kit/CLAUDE.md`.
   through `kit.sh create` so Compose owns the volumes; Kubernetes), moving (another machine; `to-cloud.sh`/`to-nas.sh`
   for a kit site: a second folder for the cluster, same `ID_PREFIX` and secrets), troubleshooting (the alerts and
   what each means, `#trouble-alerts`: keep it current with `stacks/monitoring/grafana/alerts.yml`; sharing a post
-  again: its entry out of the bridge's `posted.json`, a one-liner by title; Postiz's publishing jobs in Temporal, and
+  again: points to the Posting guide's Shared posts page (no more editing `posted.json`); Postiz's publishing jobs in Temporal, and
   its page on the host's 127.0.0.1:8233), commands. Its
   backup and restore commands were tried on a throwaway site: keep them true to `kit.sh`, the stacks' volumes and
   `k8s/migrate/`. Putting a nightly copy back was tried on `kit/test.sh --keep`'s site: Ghost's posts and files came
