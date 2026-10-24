@@ -7,7 +7,9 @@ rebuilt: the kit's additions are files of their own, plus the few edits listed b
 ## What the kit adds (its own files)
 - `assets/kit/kit.js`: `window.site` (`beacon`, `sendClick`), click beacons for links followed to other sites
   (`POST /.site/click?kind=out&to=&from=`, counted by the kit's bridge), the **Social preview** button on draft
-  previews (`/p/<uuid>/` -> `/ghost/social-preview/<uuid>/`, the bridge's page, staff only), and icons beside links
+  previews (`/p/<uuid>/` -> `/ghost/social-preview/<uuid>/`, the bridge's page, staff only), the **Shared posts**
+  button inside Ghost Admin's View site only (-> `/ghost/social-preview/`, the bridge's list of posts shared, where
+  one can be shared again; not for visitors or Settings' design previews), and icons beside links
   to the other platforms a creator is on (Vimeo, Twitch, Discord, Patreon, Ko-fi, Substack, Etsy, Behance, Apple
   Podcasts, SoundCloud, Mixcloud, Bandcamp, Spotify, Beatport, Resident Advisor) in the footer's secondary
   navigation (Ghost Admin -> Settings -> Navigation -> Secondary). Ghost's own social accounts (Settings -> General)

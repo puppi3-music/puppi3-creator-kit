@@ -41,7 +41,7 @@ The site is always there. Each other part is a module you switch on in your site
 | (always on) | Ghost 6 with MySQL, behind Traefik (https, and optionally only reachable through Cloudflare); the kit's theme (Ghost's Source with the kit's extras) | A domain and its DNS; an email address for Let's Encrypt |
 | `analytics` | Ghost's own web analytics (Tinybird, run locally), with each visitor's country | Nothing |
 | `live` | A live audio stream (TinyIce) for a radio show, a live podcast or a DJ set: your streaming software sends to it, and the site shows a LIVE NOW bar that plays it | Software that streams Ogg to Icecast (butt, Mixxx, Traktor, ffmpeg...) |
-| `social` | Postiz, plus a bridge that shares each Ghost post to your networks, draws social previews of drafts, counts clicks and collects every network's numbers | A developer app for each network you post to (their keys go in `secrets/postiz.env`); optional keys for SoundCloud, Cloudflare and Search Console numbers |
+| `social` | Postiz, plus a bridge that shares each Ghost post to your networks, draws social previews of drafts, lists what each post got on every network (and shares one again on the networks you pick), counts clicks and collects every network's numbers | A developer app for each network you post to (their keys go in `secrets/postiz.env`); optional keys for SoundCloud, Cloudflare and Search Console numbers |
 | `monitoring` | Grafana with the dashboards (traffic, growth, members, content, social, each platform, each post) and alerts to your phone; Prometheus, which collects the numbers they show | Nothing (a DNS name for Grafana if you want it outside home) |
 
 Phone notifications go through ntfy: [ntfy.sh](https://ntfy.sh) on a private topic that setup makes up, or your own
