@@ -47,6 +47,15 @@ for the bridge, as the kit's own setup always has.
 
 **Restarts:** none.
 
+### For whoever changes the kit: the demo stops when Ghost gives no key
+
+`kit/demo/demo.sh` stops with "no Admin API key for the bridge" when Ghost's answer has no key, instead of carrying
+on with an empty one and failing half a minute later at the Social preview's shot.
+
+**Your site:** nothing.
+
+**Restarts:** none.
+
 ## 1.3.4
 
 ### A warning when the home-network-only pages refuse your own computer

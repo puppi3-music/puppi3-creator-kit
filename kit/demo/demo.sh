@@ -121,7 +121,8 @@ echo "== the Social preview"
 # the made-up networks are never in the numbers. The EXIT trap removes the stand-in (with --keep: docker rm -f it)
 admin POST /integrations/?include=api_keys -H 'Content-Type: application/json' -d '{"integrations":[{"name":"Social bridge"}]}' >"$SP/integration.json"
 key="$(python3 -c "import json,sys; k=[k for k in json.load(open(sys.argv[1]))['integrations'][0]['api_keys'] if k['type']=='admin'][0]
-print(k['secret'] if ':' in k['secret'] else k['id']+':'+k['secret'])" "$SP/integration.json")"   # (Ghost 6's secret is the whole key) || die "no Admin API key for the bridge"
+print(k['secret'] if ':' in k['secret'] else k['id']+':'+k['secret'])" "$SP/integration.json")" \
+    && [ -n "$key" ] || die "no Admin API key for the bridge"   # (Ghost 6's secret is the whole key)
 sedi "s|^GHOST_ADMIN_API_KEY=.*|GHOST_ADMIN_API_KEY=$key|" "$S/secrets/postiz.env"
 pz="$(docker ps -q --filter label=com.docker.compose.project=demo --filter label=com.docker.compose.service=postiz)"
 net="$(docker inspect -f '{{range $k, $v := .NetworkSettings.Networks}}{{println $k}}{{end}}' "$pz" | grep '_postiz$')"
