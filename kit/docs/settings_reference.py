@@ -9,7 +9,7 @@ It also checks the settings themselves, and stops (exit 1) when:
 - a compose file, profile or Traefik template reads a variable no example documents (and isn't in SET_FOR_YOU)
 - an example documents a variable nothing reads any more
 - an optional key's default in an example (#KEY=value) isn't the compose files' own (${KEY:-value})
-- the reference would carry puppi3.party's own names (PRIVATE_WORDS)
+- the reference would carry a private name of the site the kit is sent from (PRIVATE_WORDS)
 
     python3 kit/docs/settings_reference.py           # write the page
     python3 kit/docs/settings_reference.py --check   # exit 1 if the page is stale or a check fails
@@ -76,9 +76,22 @@ SET_FOR_YOU = {
     "ENTRYPOINT": "Traefik's entry point for the site's routers (https unless a second site needs another).",
 }
 
-# What the reference must never say: the names of the site the kit was built for, and its NAS (the kit's guides are
-# for anyone)
-PRIVATE_WORDS = re.compile(r"puppi3\.party|REDACTED|butterwoof|Dockge|REDACTED|REDACTED|Traktor", re.I)
+# What the reference must never say: the names of the site the kit is sent from, its NAS and owner (the kit's guides
+# are for anyone). That site keeps them in private-words.txt at its repo's top, which the kit never carries, so the kit
+# names none of them itself; without the file (the kit's own repo) nothing is checked for.
+PRIVATE_WORDS_FILE = os.path.join(REPO, "private-words.txt")
+
+
+def private_words():
+    try:
+        with open(PRIVATE_WORDS_FILE, encoding="utf-8") as fh:
+            words = [w.strip() for w in fh if w.strip() and not w.lstrip().startswith("#")]
+    except FileNotFoundError:
+        words = []
+    return re.compile("|".join(words) or "(?!)", re.I)
+
+
+PRIVATE_WORDS = private_words()
 
 # The files that read settings, for the checks: a ${VAR} or Traefik's env "VAR" there must be documented
 READERS = ["stacks/traefik/compose.yaml", "stacks/ghost/compose.yaml", "stacks/postiz/compose.yaml",

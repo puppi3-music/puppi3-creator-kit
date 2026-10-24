@@ -51,8 +51,14 @@ PLACEHOLDERS = {
     "NTFY_TOPIC": "its topic (NTFY_TOPIC, else <ID_PREFIX>-alerts)",
 }
 PLACEHOLDER = re.compile(r"@([A-Z][A-Z0-9_]*)@")
-# what the source must not name (it says @NAME@ there instead): puppi3's own values
-SOURCE_PRIVATE = re.compile(r"(?i)puppi3\.party|REDACTED|REDACTED|REDACTED|Traktor|butterwoof|REDACTED-")
+# what the source must not name (it says @NAME@ there instead): the private names of the site the kit is sent from,
+# from its private-words.txt (at its repo's top; the kit never carries it, so without it there are none)
+try:
+    _words = (pathlib.Path(__file__).resolve().parents[3] / "private-words.txt").read_text(encoding="utf-8")
+except FileNotFoundError:
+    _words = ""
+SOURCE_PRIVATE = re.compile("|".join(w.strip() for w in _words.splitlines()
+                                     if w.strip() and not w.lstrip().startswith("#")) or "(?!)", re.I)
 
 
 def fill(text, values, what):

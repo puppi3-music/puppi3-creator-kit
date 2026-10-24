@@ -7,6 +7,20 @@ From 1.2.2 on, each change has a `###` heading saying what it does, a short para
 (what to run, if anything) and **Restarts:** (what goes down, and for how long), each its own paragraph. The release workflow joins wrapped
 lines, since GitHub's release notes break wherever the text does.
 
+## 1.4.1 (not released yet)
+
+### For whoever changes the kit: the private-name checks read their words from the site's repo
+
+The checks that keep a site's own names out of the kit (`kit/scrub.py`, the guides' build, `kit/theme-zip.sh` and
+the dashboards' `render.py`) no longer carry a list of those names, since a list in the kit names what it's meant to
+keep out. A site that sends the kit from its own repo lists them in a `private-words.txt` at that repo's top (one
+pattern per line), which the kit never carries; in the kit's own repo there is none, and those checks find nothing
+(CONTRIBUTING.md).
+
+**Your site:** nothing.
+
+**Restarts:** none.
+
 ## 1.4.0
 
 ### Shared posts: share a post again, on the networks you pick

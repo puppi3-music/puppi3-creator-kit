@@ -37,7 +37,8 @@ other seven (Page included), and everything the dashboards share (files, gotchas
   `@GHOST_SITE_UUID@`, `@DISK_MOUNT@`, `@DJ_SOFTWARE@`, `@NTFY_URL@`, `@NTFY_TOPIC@` (render.py's `PLACEHOLDERS`; a new
   one goes there and in the kit's `values`). So a site's link is `https://@SITE_HOST@/...`, a query's time zone
   `@SITE_TIMEZONE@`. Every profile fills them in (`render.fill`); one with no value stops it. The kit's render also
-  stops on a real site's values left in the source (`SOURCE_PRIVATE`), as does the commit hook (a render for
+  stops on a real site's values left in the source (`SOURCE_PRIVATE`: the sending site's `private-words.txt`,
+  `kit/CLAUDE.md`), as does the commit hook (a render for
   `instances/example.env`). The uids, counters and container names keep the ID_PREFIX default `puppi3`, which the
   kit's swaps rename. The `@` form, because Grafana already uses `${}`, `$x`, `[[x]]` and `{{x}}`.
 - Health's router list is `puppi3-[a-z-]+@file|live-status@docker|puppi3-social-preview@docker` in the source (the

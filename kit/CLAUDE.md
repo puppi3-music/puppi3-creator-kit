@@ -9,11 +9,17 @@ header with the copyright, what it covers, and the section 7(b) term (keep the t
 copyright line). `CONTRIBUTING.md`: where things are, what goes with a change, which test fits.
 
 `scrub.py`: no secrets and no private names in the kit. It runs gitleaks (Docker, pinned) over the repo's whole history
-and every file, then looks in every file for `PRIVATE_WORDS` (settings_reference's) plus `EXTRA` (more names,
-addresses and paths that mustn't be in it), apart from what `ALLOW` keeps on purpose (the copyright and author credit,
-the checks' own word lists, the guides' swaps); then the repo's whole history the same way (every version of every
-file, the messages, author and committer both the theme's author). `--names` skips Docker, `-v` prints each line. It
-only reports; a mention meant to stay goes in `ALLOW` with its reason.
+and every file, then looks in every file for `PRIVATE_WORDS` (settings_reference's), apart from what `ALLOW` keeps on
+purpose (the copyright and author credit, the word lists the kit once carried, the guides' swaps); then the repo's
+whole history the same way (every version of every file, the messages, author and committer both the theme's author).
+`--names` skips Docker, `-v` prints each line. It only reports; a mention meant to stay goes in `ALLOW` with its
+reason.
+
+The private words (a site's names, NAS, home network, owner) are in `private-words.txt` at the top of the site repo
+that sends the kit, never in the kit: one ERE pattern per line, `#` comments, matched ignoring case. Its readers:
+`settings_reference.PRIVATE_WORDS` (and through it scrub.py and the guides' build), `theme-zip.sh` (`grep -f`, beside
+its own `window.puppi3` and `/.puppy/`) and the Grafana `render.py`'s `SOURCE_PRIVATE`. Without the file (the kit's
+own repo) there are no words, and those checks find nothing: a word list in the kit would itself name what it hides.
 
 `check.sh [--here <repo>]`: the checks that need no Docker, in seconds: `check_refs.py` (every repo path a file names
 is in the repo, every Traefik plugin a file loads is there: one missing turns them all off; `ALLOW` for a mention

@@ -35,7 +35,8 @@ next to what you change, and keep it true in the same change.
    - **The theme**: keep the kit's parts in their own files where you can; any edit to Source's own files goes in
      `kit/theme/KIT.md`, so an upgrade of Source can put it back.
    - **Names**: nothing site-specific in the kit (no real addresses, accounts or home-network names, comments
-     included). Use `example.com`. The build and `kit/theme-zip.sh` fail on the names they know.
+     included). Use `example.com`. The build and `kit/theme-zip.sh` fail on the names they know: a site that sends
+     the kit lists its own in a `private-words.txt` at its repo's top, which the kit never carries.
 3. Update the guide that describes what you changed (`kit/docs/`), in the same plain style: for someone setting up
    or running a site, not for someone reading the code.
 4. Run the checks that fit (below), and say in the pull request which ones you ran.
@@ -53,7 +54,7 @@ next to what you change, and keep it true in the same change.
 | The Compose kit, a stack, the bridge | `kit/test.sh`: a throwaway site, `kit.test`, checked end to end (the site, the theme, a stream, the bridge, the dashboards), then removed | several minutes |
 | Dashboards or alert rules | `python3 stacks/monitoring/grafana/style.py --check` and `ro-tables.py --check` (the hook runs both) | seconds |
 | An image's version (a compose file, k8s's YAML, a Dockerfile) | `python3 k8s/test/image-pins.py`: every image at an exact version, the same in every file (the hook runs it). A bump is one edit in all of them, with its `kit/CHANGELOG.md` line | seconds |
-| A new file, or anything with an address or name in it | `python3 kit/scrub.py --names` (no site's own names in the kit's files; without `--names` it also runs gitleaks for secrets, in Docker) | seconds |
+| A new file, or anything with an address or name in it | `python3 kit/scrub.py --names` (no site's own names in the kit's files, from that `private-words.txt` when there is one, and who made each commit; without `--names` it also runs gitleaks for secrets, in Docker) | seconds |
 | The README's screenshots (after a visible change to the theme, the dashboards or the Social preview) | `kit/demo/demo.sh`: a made-up demo site, photographed and removed; writes `kit/docs/images/` | several minutes |
 | Anything in `k8s/` | `k8s/test/test.sh --render-only` first; then `k8s/test/test.sh` (with `--overlay k3d-eks` or `k3d-gke` for a cloud overlay, `--migrate` for the migration) on a local k3d cluster (for now on a Mac with Docker Desktop: below) | 1-16 min |
 

@@ -18,6 +18,6 @@ This file and `KIT.md` are the kit's notes, not the theme's: `kit/theme-zip.sh` 
 - Upgrading Source: copy the new tag over and re-apply those edits (`KIT.md`). Use Source's classes (`gh-outer`,
   `gh-inner`, `--ghost-accent-color`) so the kit's parts follow its layout and the site's accent colour.
 - `kit/theme-zip.sh`: builds `kit/dist/puppi3-creator-kit-theme.zip` (git-ignored; needs zip and unzip, which a
-  minimal Linux lacks), fails if another site's names are in it (the list is in the script: keep comments generic
-  too), then runs gscan. `kit/test.sh`, k8s's test and the release (`.github/workflows/release.yml`) build it with it.
+  minimal Linux lacks), fails if another site's names are in it (the sending site's `private-words.txt`, `kit/CLAUDE.md`, plus a site
+  theme's hooks; keep comments generic too), then runs gscan. `kit/test.sh`, k8s's test and the release (`.github/workflows/release.yml`) build it with it.
 - The short links are `kit/redirects.yaml`, uploaded on their own, not in the zip (`kit/CLAUDE.md`).

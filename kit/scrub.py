@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """The scrub check before the kit goes public: are the files the kit's own repo will carry, and everything its public
-history has ever carried, free of secrets and of puppi3.party's own names, NAS and owner? This repo's whole history
+history has ever carried, free of secrets and of the private names of the site it's sent from? This repo's whole history
 is scanned for secrets too, in case it's ever made public.
 
 1. Secrets: gitleaks (in Docker, pinned below) over this repo's whole git history, and over the kit's files.
-2. Private names: puppi3.party's addresses, NAS, home network and owner (settings_reference.PRIVATE_WORDS plus
-   EXTRA below) in the kit's files, apart from the few mentions ALLOW lists on purpose. In a site's repo that sends
+2. Private names: the site's addresses, NAS, home network and owner (settings_reference.PRIVATE_WORDS, from the
+   private-words.txt at the site's repo's top, which the kit never carries, so the kit names none of them; without
+   it, as in the kit's own repo, there are none to find) in the kit's files, apart from the mentions ALLOW lists. In a site's repo that sends
    the kit (with scripts/kit-sync.py), the kit's files are those it sends; in the kit's own repo, every file it has.
 3. History: the kit's repo's every commit (here, the one beside this repo or KIT_REPO, when it's there; in the kit's
    own repo, itself): every version of every file, the commit messages (private names, as in 2), and who made each
@@ -35,14 +36,13 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GITLEAKS = "ghcr.io/gitleaks/gitleaks:v8.30.1"
 SYNC = os.path.join(REPO, "scripts", "kit-sync.py")   # only in a site's repo that sends the kit
 
-# Beyond PRIVATE_WORDS (which the guides' build uses too): the owner's names and email, the home network, the NAS's paths
-EXTRA = re.compile(r"REDACTED|REDACTED|REDACTED\.|/home/REDACTED|REDACTED@", re.I)
-
 # Mentions meant to stay: (file pattern, line pattern, why)
 ALLOW = [
     ("kit/scrub.py", r".", "this check's own lists"),
-    ("kit/docs/settings_reference.py", r"PRIVATE_WORDS", "the guides' list of private words"),
-    ("kit/theme-zip.sh", r"grep -n -i -E", "the theme zip's list of private words"),
+    ("kit/docs/settings_reference.py", r"PRIVATE_WORDS",
+     "the guides' list of private words (in the history: when the kit carried the lists)"),
+    ("kit/theme-zip.sh", r"grep -n -i -E",
+     "the theme zip's list of private words (in the history: when the kit carried the lists)"),
     ("docs/build-docs.py", r"KIT_SUBS|\(\"puppi3\.party\"",
      "the guides' swaps of a site's addresses for example.com's (in the history: before 1.2.1)"),
     ("*", r"Copyright \(c\) 2026 puppi3-music \(DJ Puppi3\)", "the copyright line"),
@@ -52,7 +52,7 @@ ALLOW = [
     ("kit/theme/package.json", r"\"(name|email)\": \"(\d+\+)?puppi3-music", "the theme's author (GitHub's no-reply address)"),
     ("README.md", r"Mixxx, Traktor|Traktor, Mixxx", "a list of streaming software (Traktor, Mixxx: before 1.1.0)"),
     ("stacks/monitoring/grafana/render.py", r"^SOURCE_PRIVATE = |^LEFTOVERS_CLOUD = ",
-     "the dashboards' own checks for names that mustn't be in them"),
+     "the dashboards' own checks for names that mustn't be in them (SOURCE_PRIVATE: when the kit carried the lists)"),
 ]
 
 
@@ -95,7 +95,7 @@ def names(files, verbose, where=""):
             continue   # images, fonts
         hits = []
         for n, line in enumerate(lines, 1):
-            w = sorted(set(m.group(0).lower() for r in (words, EXTRA) for m in r.finditer(line)))
+            w = sorted(set(m.group(0).lower() for m in words.finditer(line)))
             if w and not allowed(f, line):
                 hits.append((n, w, line))
         if hits:
@@ -135,12 +135,12 @@ def history(repo, verbose):
     for c in commits:
         who = git("log", "-1", "--format=%an <%ae>%n%cn <%ce>", c).decode().split("\n")[:2]
         for role, ident in zip(("author", "committer"), who):
-            bad = [m.group(0) for r in (words, EXTRA) for m in r.finditer(ident)]
+            bad = [m.group(0) for m in words.finditer(ident)]
             if bad or c not in pushed and not ident.endswith(f"<{email}>"):
                 found += 1
                 print(f"commit {c[:8]}: its {role} is {ident}, not the kit's author <{email}>")
         msg = git("log", "-1", "--format=%B", c).decode()
-        w = sorted(set(m.group(0).lower() for r in (words, EXTRA) for m in r.finditer(msg)))
+        w = sorted(set(m.group(0).lower() for m in words.finditer(msg)))
         if w:
             found += 1
             print(f"commit {c[:8]}: its message names " + ", ".join(w))

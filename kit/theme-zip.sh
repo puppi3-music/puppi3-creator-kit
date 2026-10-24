@@ -10,11 +10,14 @@ ZIP=dist/puppi3-creator-kit-theme.zip
 mkdir -p dist
 rm -f "$ZIP"
 (cd theme && zip -rq "../$ZIP" . -x '*.map' -x '.gitattributes' -x '.DS_Store' -x 'KIT.md' -x 'CLAUDE*.md')
-# No other site's values: the addresses and names of the site the kit was built for, its NAS, its owner's email
+# No other site's values: a site theme's own hooks, and the private names of the site the kit is sent from (its
+# private-words.txt, at its repo's top; the kit never carries it)
+words=$(mktemp); trap 'rm -f "$words"' EXIT
+printf '%s\n' 'window\.puppi3' '/\.puppy/' > "$words"
+if [ -f ../private-words.txt ]; then grep -v -E '^[[:space:]]*(#|$)' ../private-words.txt >> "$words" || true; fi
 leaks=$(unzip -Z1 "$ZIP" | while read -r f; do
           [ "${f%/}" = "$f" ] || continue   # folders
-          unzip -p "$ZIP" "$f" | grep -n -i -E 'puppi3\.party|butterwoof|REDACTED|REDACTED|window\.puppi3|/\.puppy/' \
-            | sed "s|^|$f:|" || true
+          unzip -p "$ZIP" "$f" | grep -n -i -E -f "$words" | sed "s|^|$f:|" || true
         done)
 if [ -n "$leaks" ]; then
   echo "theme-zip: site-specific values in the kit's theme:" >&2

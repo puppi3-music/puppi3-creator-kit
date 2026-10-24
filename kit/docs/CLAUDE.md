@@ -6,7 +6,8 @@ of the kit: `kit/CLAUDE.md`.
 - build-docs' `KIT_PAGES`: the shared styles and script, their own neutral header, a blue palette and Puppi3's puppy
   as the mark: her theme's `puppi3-icon.png`, the headphones puppy, drawn flat (`images/kit-puppy.svg`; the same SVG
   is each page's header mark and, inline, its tab icon, and the README's top); build-docs also fails on
-  `PRIVATE_WORDS` anywhere in a kit page or the shared assets.
+  `PRIVATE_WORDS` (from the sending site's `private-words.txt`, `kit/CLAUDE.md`) anywhere in a kit page or the shared
+  assets.
 - A site that keeps the kit in its repo links its own guides to these online (the kit's GitHub Pages: build-docs'
   `KIT_ONLINE`), and build-docs checks every such link against this folder: renaming a section here means
   repointing them.
