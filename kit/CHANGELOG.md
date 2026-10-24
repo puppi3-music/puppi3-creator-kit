@@ -7,7 +7,7 @@ From 1.2.2 on, each change has a `###` heading saying what it does, a short para
 (what to run, if anything) and **Restarts:** (what goes down, and for how long), each its own paragraph. The release workflow joins wrapped
 lines, since GitHub's release notes break wherever the text does.
 
-## 1.3.5 (not released yet)
+## 1.4.0
 
 ### Shared posts: share a post again, on the networks you pick
 
