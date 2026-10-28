@@ -139,6 +139,8 @@ export function zoneHour(date, hour, from, to) {
 // was recorded too, and none when the total went down (e.g. a post deleted)
 export function withHistory(prev, totals, keys, days) {
   const history = { ...(prev || {}) };
+  const latest = Object.keys(history).sort().at(-1);
+  if (latest) keepLastOverZero(totals, history[latest], keys, 'totals');
   if (keys.some((k) => totals[k] != null)) history[day(Date.now())] = Object.fromEntries(keys.map((k) => [k, totals[k] ?? null]));
   const keep = Object.keys(history).sort().slice(-days);
   const daily = keep.map((date) => {
@@ -194,7 +196,8 @@ export function gainsByDay(dataDir, network, keys) {
         if (before != null) gains[k] = (gains[k] || 0) + Math.max(0, now[k] - before);
         else gains[k] ??= 0;
       }
-      last = { ...last, ...Object.fromEntries(keys.filter((k) => now[k] != null).map((k) => [k, now[k]])) };
+      // the most it had: a count that dips (a network answering 0 for a day) and comes back gained nothing
+      last = { ...last, ...Object.fromEntries(keys.filter((k) => now[k] != null).map((k) => [k, Math.max(now[k], last?.[k] ?? -Infinity)])) };
     }
   }
   return Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
@@ -219,6 +222,26 @@ let storeLog = () => {};
 export const setStoreLog = (fn) => { storeLog = fn; };
 const DB_BACKUPS = Math.max(0, Number.isFinite(Number(process.env.STATS_DB_BACKUPS)) && process.env.STATS_DB_BACKUPS !== '' ? Number(process.env.STATS_DB_BACKUPS) : 7);
 export const storeFor = (dataDir) => openStore(dataDir, { backups: DB_BACKUPS, log: (m) => storeLog(m) });
+
+// A network now and then answers 0 for a count that was well above it (TikTok once did for every video's views, for
+// one check): a count that drops from ZERO_FROM or more to 0 keeps its last number, so the 0 is never kept, drawn or
+// measured from (a take-off from nothing, a day's gain of the whole total). Returns how many it kept.
+const ZERO_FROM = 5;
+export function keepLastOverZero(now, last, keys, what) {
+  const kept = keys.filter((k) => now?.[k] === 0 && last?.[k] >= ZERO_FROM);
+  for (const k of kept) { storeLog(`${what}: ${k} came back 0 (it had ${last[k]}): kept ${last[k]}`); now[k] = last[k]; }
+  return kept.length;
+}
+// The same for each post, against its last check in stats.db
+function keepPostsOverZero(dataDir, network, items, keys) {
+  const store = storeFor(dataDir);
+  let n = 0;
+  for (const p of items) {
+    const ref = p?.ref || (p && postRef(p.id));
+    if (ref) n += keepLastOverZero(p, store.post(network, ref)?.vals, keys, `${network} ${ref}`);
+  }
+  return n;
+}
 
 // What each network's file lists its posts under, the numbers kept, and the names Ghost's analytics give its
 // visitors (the referrer's name, its address, or our link tag: utm_source). perDay networks keep real numbers per day
@@ -284,10 +307,13 @@ export function everyText(mins) {
   return mins === 60 ? 'every hour' : `every ${mins / 60} hours`;
 }
 
+// Returns how many numbers came back 0 and were kept at their last (keepLastOverZero), for the file's errors
 export async function trackPosts(dataDir, network, items, keys) {
+  const kept = keepPostsOverZero(dataDir, network, items, keys);
   const list = items.map((p) => ({ ...p, ref: p.ref || postRef(p.id) }));
   storeFor(dataDir).recordDay(network, list, keys);
   await trackEarly(dataDir, network, list, keys);
+  return kept;
 }
 
 // What kind of post it is, where a network has more than one (the verdicts and When to post compare within it)
@@ -474,6 +500,7 @@ let takeOffNotice = null;
 export const setTakeOffNotice = (fn) => { takeOffNotice = fn; };
 // Keeps this check of each item (its numbers, at its `checked` time or now), then looks for older posts taking off
 export async function trackEarly(dataDir, network, items, keys) {
+  keepPostsOverZero(dataDir, network, items, keys);
   const now = Date.now();
   const store = storeFor(dataDir);
   const list = items.filter(Boolean).map((p) => ({ ...p, ref: p.ref || postRef(p.id) }));
@@ -493,7 +520,11 @@ export async function trackEarly(dataDir, network, items, keys) {
     const week = day1 && (at(now - 8 * 24 * HOUR)
       || (first && first[1][key] != null && day1[0] - first[0] >= 4 * 24 * HOUR ? [first[0], first[1][key]] : null));
     const usual = week ? Math.max(0, day1[1] - week[1]) / ((day1[0] - week[0]) / (24 * HOUR)) : null;
-    const from = [at(now - 4 * HOUR), day1].find((x) => x && v - x[1] >= SURGE_MIN && v - x[1] >= SURGE_SHARE * x[1]
+    // measured from the most it had by then: a count doesn't go down, so a dip that comes back (TikTok once answered 0
+    // views for every video for one check) isn't a gain
+    const earlier = [day1, week, first && first[1][key] != null ? [first[0], first[1][key]] : null].filter(Boolean);
+    const most = (x) => x && [x[0], Math.max(x[1], ...earlier.filter((y) => y[0] < x[0]).map((y) => y[1]))];
+    const from = [most(at(now - 4 * HOUR)), most(day1)].find((x) => x && v - x[1] >= SURGE_MIN && v - x[1] >= SURGE_SHARE * x[1]
       && (usual == null || v - x[1] >= 3 * usual * ((now - x[0]) / (24 * HOUR))));
     const s = store.lastSurge(network, p.ref);
     if (!from) continue;

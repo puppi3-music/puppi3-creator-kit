@@ -6,7 +6,7 @@ import path from 'node:path';
 import { env, STATE_FILE, log, networkOn } from '../config.mjs';
 import { PG, pgQuery } from '../services.mjs';
 import { storeFor, postRef, siteLinks, withOlder, trackEarly, historyKeys, trackAccount, withWeekly, withPostedMs, everyText,
-  archive, archiveRead } from './history.mjs';
+  archive, archiveRead, keepLastOverZero } from './history.mjs';
 import { withPerformance } from './performance.mjs';
 
 // ---------- YouTube numbers -> Grafana ----------
@@ -199,6 +199,7 @@ export async function pollYouTubeStats() {
       if (!s.hiddenSubscriberCount && s.subscriberCount != null) out.totals.subscribers = Number(s.subscriberCount);
       if (s.viewCount != null) out.totals.viewsAllTime = Number(s.viewCount);
       if (s.videoCount != null) out.totals.videos = Number(s.videoCount);
+      keepLastOverZero(out.totals, prev.totals, ['subscribers', 'viewsAllTime'], 'youtube totals');
       uploads = c.contentDetails?.relatedPlaylists?.uploads || '';
     } catch (e) { out.errors.push(`channel: ${e.message}`); }
 

@@ -2,8 +2,11 @@
 import './env.mjs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { DAY, day, num, median, withHistory, mergeDaily, totalsByDate, perDay, last30, posts30, insightValue, zoneHour,
-  postRef, sitePath, siteLinks } from '../ghost-bridge/stats/history.mjs';
+  postRef, sitePath, siteLinks, trackEarly, setTakeOffNotice, gainsByDay, storeFor, keepLastOverZero } from '../ghost-bridge/stats/history.mjs';
 
 test('withHistory: a total per day, and each day\'s gain on the day before', () => {
   const now = Date.now();
@@ -95,4 +98,51 @@ test('siteLinks: the site\'s pages a post links to, with or without https://', (
   assert.deepEqual(siteLinks(['Out now: example.com/my-post/ and https://www.example.com/b/other.',
     'elsewhere.com/x and example.com/my-post', 'example.com']), ['/my-post/', '/other/', '/']);
   assert.deepEqual(siteLinks(['notexample.com/x']), []);
+});
+
+test('trackEarly: an older post taking off, from the most it had (a check at 0 that comes back is no take-off)', async (t) => {
+  const HOUR = 3_600_000;
+  const start = Date.parse('2026-10-01T00:00:00Z');
+  t.mock.timers.enable({ apis: ['Date'], now: start });
+  const dir = mkdtempSync(join(tmpdir(), 'takeoff-'));
+  const notices = [];
+  setTakeOffNotice((x) => notices.push(x));
+  t.after(() => setTakeOffNotice(null));
+  const post = { id: 'v1', ref: 'v1', time: start - 20 * DAY };
+  const check = async (h, views) => {
+    t.mock.timers.setTime(start + h * HOUR);
+    await trackEarly(dir, 'tiktok', [{ ...post, views }], ['views']);
+  };
+  // 10 days of about 24 views a day, a check an hour
+  for (let h = 0; h < 240; h++) await check(h, 1000 + h);
+  // one check where the network answers 0, then the real number again
+  await check(240, 0);
+  await check(241, 1241);
+  await check(242, 1242);
+  assert.deepEqual(notices, []);
+  // a real jump is still one
+  await check(243, 1600);
+  assert.deepEqual(notices.map((x) => [x.network, x.post.ref, x.was, x.now]), [['tiktok', 'v1', 1239, 1600]]);
+});
+
+test('gainsByDay: a day kept at 0 that comes back gains nothing', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'gains-'));
+  const store = storeFor(dir);
+  const p = { ref: 'v1', time: Date.parse('2026-09-01T12:00:00Z') };
+  for (const [date, views] of [['2026-10-01', 1000], ['2026-10-02', 1020], ['2026-10-03', 0], ['2026-10-04', 1050]]) {
+    store.recordDay('tiktok', [{ ...p, views }], ['views'], date);
+  }
+  assert.deepEqual(gainsByDay(dir, 'tiktok', ['views']).map((d) => [d.date, d.views]),
+    [['2026-10-01', 0], ['2026-10-02', 20], ['2026-10-03', 0], ['2026-10-04', 30]]);
+});
+
+test('keepLastOverZero: a count back at 0 from 5 or more keeps its last; withHistory\'s totals too', () => {
+  const now = { followers: 0, likes: 0, plays: 0, views: 12 };
+  assert.equal(keepLastOverZero(now, { followers: 480, likes: 2, views: 10 }, ['followers', 'likes', 'plays', 'views'], 'test'), 1);
+  assert.deepEqual(now, { followers: 480, likes: 0, plays: 0, views: 12 }, 'a small count can really go to 0; nothing before, nothing kept');
+  const d1 = day(Date.now() - DAY);
+  const totals = { followers: 0 };
+  const { daily } = withHistory({ [d1]: { followers: 480 } }, totals, ['followers'], 30);
+  assert.equal(totals.followers, 480);
+  assert.deepEqual(daily.at(-1), { date: day(Date.now()), followers: 480, newFollowers: 0 });
 });

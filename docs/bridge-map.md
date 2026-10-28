@@ -24,7 +24,7 @@ The tests are beside the folder, in `stacks/postiz/ghost-bridge-test/` (`stacks/
 | Preview page HTML/CSS/JS (draws only; reads and writes nothing) | `pages/preview-render.mjs` |
 | Dry-run previews, "All N photos" pages (photos.json), draft Social preview + its saves, `staffSignedIn`, the Shared posts page + Share again now | `pages/preview-routes.mjs` |
 | Starting collectors (`collector()`), `/account.json`, `/metrics` text, `*_STATS_MINUTES` | `stats/stats.mjs` |
-| stats.db history (`trackPosts`, `trackEarly`, `readHistory`), `NETWORKS`, `POST_KIND`, take-offs (`surgingRefs`) | `stats/history.mjs` |
+| stats.db history (`trackPosts`, `trackEarly`, `readHistory`), a count back at 0 kept at its last (`keepLastOverZero`), `NETWORKS`, `POST_KIND`, take-offs (`surgingRefs`) | `stats/history.mjs` |
 | Shared stats helpers: dates, JSON files, `archive()`, IG/Threads insights (`askLearned`), `withHistory`, `siteLinks`, Tinybird (`tbPipe`) | `stats/history.mjs` |
 | "vs your usual" / "vs industry" verdicts (`SIGNALS`, `INDUSTRY`, `judge`), `/performance.json` (`performanceDoc`) | `stats/performance.mjs` |
 | When to post (`fitModel`, `numbersByAge`, `SPREAD_GRID`), `/timing.json` | `stats/timing.mjs` |
@@ -135,7 +135,7 @@ collector now (the tests).
 Helpers (dates, JSON files, Tinybird, `archive()`, insights, per-day records) and each post over time in stats.db: `NETWORKS`,
 `LABELS`, `POST_KIND`, tracking, account checks, first-days checks, take-offs, site links.
 - Exports: `DAY`, `day`, `num`, `text`, `readJson`, `writeJson`, `writeJsonSync`, `fetchJson`, `TB`, `tbPipe`, `archive`, `archiveFile`, `archiveRead`, `askLearned`, `insightValue`, `insightBreakdown`, `audienceLists`, `zoneHour`, `withHistory`, `last30`, `posts30`, `perDay`, `gainsByDay`, `mergeDaily`
-- Exports: `storeFor`, `setStoreLog`, `NETWORKS`, `NETWORK_ALIASES`, `LABELS`, `POST_KIND`, `historyKeys`, `postKeys`, `postRef`, `withPostedMs`, `everyText`, `trackPosts`, `trackAccount`, `importAccountDays`, `ACCOUNT_KEYS`, `ACCOUNT_DAYS`, `accountGains`, `WEEKLY`, `withWeekly`, `EARLY_HOURS`, `trackEarly`, `setTakeOffNotice`, `takeOffWords`, `surgingRefs`, `earlyAt`, `readHistory`, `thin`, `hoursOld`, `withOlder`, `toCheck`, `META_CALLS_PER_HOUR`, `postsPerPoll`, `totalsByDate`, `median`, `addSiteHosts`, `sitePath`, `siteLinks`
+- Exports: `storeFor`, `setStoreLog`, `NETWORKS`, `NETWORK_ALIASES`, `LABELS`, `POST_KIND`, `historyKeys`, `postKeys`, `postRef`, `withPostedMs`, `everyText`, `trackPosts`, `keepLastOverZero`, `trackAccount`, `importAccountDays`, `ACCOUNT_KEYS`, `ACCOUNT_DAYS`, `accountGains`, `WEEKLY`, `withWeekly`, `EARLY_HOURS`, `trackEarly`, `setTakeOffNotice`, `takeOffWords`, `surgingRefs`, `earlyAt`, `readHistory`, `thin`, `hoursOld`, `withOlder`, `toCheck`, `META_CALLS_PER_HOUR`, `postsPerPoll`, `totalsByDate`, `median`, `addSiteHosts`, `sitePath`, `siteLinks`
 - Imports: config (`SITE_HOSTS`), stats/store
 
 ### `stats/performance.mjs`

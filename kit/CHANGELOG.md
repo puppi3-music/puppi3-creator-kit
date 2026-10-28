@@ -21,6 +21,19 @@ pattern per line), which the kit never carries; in the kit's own repo there is n
 
 **Restarts:** none.
 
+### A number a network answers 0 for no longer looks like a take-off
+
+Now and then a network answers 0 for numbers it had: TikTok once did for every video's views, for one check. The
+bridge kept those 0s, so the next right answer looked like every video gaining all its views at once, and your
+phone got a "📈 … is taking off" notification for each. Now a number of 5 or more that comes back as 0 keeps its
+last value, on every network, for each post and the account's totals (followers and so on); that network's status
+panel says so. The take-off watch and the per-day gains also measure from the most a post had reached, so a dip
+that comes back isn't a gain.
+
+**Your site:** `kit/kit.sh <folder> up` after updating brings the new bridge.
+
+**Restarts:** the bridge, for a few seconds (a share in progress finishes first).
+
 ## 1.4.0
 
 ### Shared posts: share a post again, on the networks you pick

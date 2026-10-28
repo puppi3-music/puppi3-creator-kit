@@ -7,7 +7,7 @@ import { env, STATE_FILE, log, networkOn, POSTIZ_KEY, INSTAGRAM_IDS, SITE_TIMEZO
 import { PG, pgQuery, postiz } from '../services.mjs';
 import { trackAccount, withWeekly, trackPosts, surgingRefs, postsPerPoll, META_CALLS_PER_HOUR, siteLinks, postRef, withOlder,
   toCheck, historyKeys, withPostedMs, everyText, archive, archiveRead, askLearned, insightValue, insightBreakdown,
-  audienceLists, zoneHour } from './history.mjs';
+  audienceLists, zoneHour, keepLastOverZero } from './history.mjs';
 import { withPerformance } from './performance.mjs';
 
 // ---------- Instagram numbers -> Grafana ----------
@@ -333,6 +333,7 @@ export async function pollInstagramStats() {
 
   // Total followers per day: Instagram only gives today's count, so each poll keeps it in followerHistory
   // (carried over from the last instagram.json, last count of each UTC day, IG_FOLLOWER_DAYS kept) and daily[] gets it.
+  keepLastOverZero(out.totals, prev.totals, ['followers'], 'instagram totals');
   const history = { ...prev.followerHistory };
   if (out.totals.followers != null) history[new Date().toISOString().slice(0, 10)] = out.totals.followers;
   const keep = Object.keys(history).sort().slice(-IG_FOLLOWER_DAYS);

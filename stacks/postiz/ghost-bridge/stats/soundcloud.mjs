@@ -5,7 +5,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { env, STATE_FILE, log, networkOn } from '../config.mjs';
 import { postRef, siteLinks, withOlder, trackPosts, historyKeys, trackAccount, withWeekly, withPostedMs, everyText,
-  archive } from './history.mjs';
+  archive, keepLastOverZero } from './history.mjs';
 import { withPerformance } from './performance.mjs';
 
 // ---------- SoundCloud numbers -> Grafana ----------
@@ -149,6 +149,7 @@ export async function pollSoundCloudStats() {
   } catch (e) { out.errors.push(e.message); }
 
   // Totals per day, kept from poll to poll (the API only gives today's)
+  keepLastOverZero(out.totals, prev.totals, ['followers', 'plays', 'likes', 'reposts', 'comments'], 'soundcloud totals');
   const history = { ...prev.history };
   if (out.totals.followers != null && out.totals.plays != null) {
     const { followers, plays, likes, reposts, comments } = out.totals;

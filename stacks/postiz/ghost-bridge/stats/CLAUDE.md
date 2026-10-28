@@ -93,10 +93,16 @@ whole: `stacks/postiz/ghost-bridge/CLAUDE.md`; the settings compose passes: `sta
   case, 150 posts all changing at every 10-minute check, is ~135 MB per network every 90 days. A bridge from before
   stats.db reads the old history files again, so going back to one misses the days since. To PostgreSQL later: copy
   the tables (pgloader reads SQLite), then a Postgres client in place of `DatabaseSync` in `stats/store.mjs`.
+- A count back at 0 from 5 or more (`keepLastOverZero`, stats/history.mjs; user saw every TikTok video "taking off" from
+  one check where TikTok answered 0 views, 2026-10-28, and asked for it on every collector): keeps its last number, logged.
+  Each post's numbers against its last check in stats.db (`trackPosts`, `trackEarly`: every network's posts; trackPosts
+  returns how many, and `keepPosts` puts a note in the file's `errors`); the account totals against the last day kept
+  (`withHistory`: Bluesky, Threads, TikTok, Mixcloud, Ghost) or the last file's `totals` (Instagram followers, YouTube
+  subscribers and views, SoundCloud's totals).
 - Every collector lists all the account's posts (paged, 50 pages max;
   `withOlder`: a short listing keeps the last file's older ones, a full one drops deleted posts from the list, not the history);
   `trackEarly` records the check, then for posts past their first days looks up the main number 4 h/18 h/8 d ago (`store.at`):
-  gain >= 5% and >= 10 and >= 3x the week's usual -> `surges` (72 h+, every check kept)
+  gain >= 5% and >= 10 and >= 3x the week's usual, from the most it had by then (a dip that comes back is no gain) -> `surges` (72 h+, every check kept)
   (`surgingRefs` -> `toCheck`'s `also`: IG/Threads ask it every poll; a new one -> ntfy "📈 … is taking off" via
   `setTakeOffNotice`, `TAKEOFF_NTFY` [true], button to the Post dashboard at `GRAFANA_URL` (none without it),
   `-staging` uid under DRY_RUN; posting guide `#notifications-taking-off`); compose passes every `*_STATS_MINUTES` (min 10),
@@ -185,7 +191,7 @@ whole: `stacks/postiz/ghost-bridge/CLAUDE.md`; the settings compose passes: `sta
   db token: `followers_count`, posts' insights, and the account's insights per day (`thDays`: likes etc. + link clicks,
   winning over Postiz's); `daily` keeps the last file's days, so nothing drops off past 30 days), `tiktok` (Postiz analytics first: Postiz's
   `checkAnalytics` renews the 23 h token; then the db token: user/info + video/list; Postiz's app has user.info.stats +
-  video.list; `daily` views/comments/shares = what the videos gained each UTC day, `gainsByDay` as Bluesky's; likes per
+  video.list; `daily` views/comments/shares = what the videos gained each UTC day, `gainsByDay` as Bluesky's (from the most each had: a day kept at 0 gains nothing); likes per
   day = `newLikes` from the account total), `mixcloud` (`MIXCLOUD_USER`, public; `history` keeps followers, plays,
   favorites, reposts, comments -> `new<Key>`), `cloudflare` (GraphQL httpRequests1dGroups, `CLOUDFLARE_API_TOKEN`
   Zone Analytics Read + `CLOUDFLARE_ZONE_ID`; 30 days first run, then 3), `search` (Search Console, service account JWT

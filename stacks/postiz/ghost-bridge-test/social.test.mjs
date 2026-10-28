@@ -188,6 +188,19 @@ test('TikTok: a permission the sign-in lacks says to reconnect; Postiz\'s number
   assert.equal(out.totals.followers, 500, 'from the user info, before the videos failed');
 });
 
+test('TikTok: a video that comes back with 0 views, after it had some, keeps its last number (any network\'s posts do)', async () => {
+  tiktok();
+  const out1 = await c.poll('tiktok');
+  assert.deepEqual(out1.posts.map((p) => [p.id, p.views]), [['1', 200], ['2', 100], ['3', 1000]]);
+  web.on(`${TT}/video/list/`, (url, req) => (JSON.parse(req.body).cursor
+    ? { data: { videos: [video('3', 90, 0)], has_more: false }, error: { code: 'ok' } }
+    : { data: { videos: [video('1', 1, 0), video('2', 5, 100)], has_more: true, cursor: 1234 }, error: { code: 'ok' } }));
+  const out = await c.poll('tiktok', out1);
+  assert.deepEqual(out.posts.map((p) => [p.id, p.views]), [['1', 200], ['2', 100], ['3', 1000]]);
+  assert.equal(out.totals.views, 1300, 'the totals add up the kept numbers');
+  assert.deepEqual(out.errors, ['2 number(s) came back 0 after being well above it: kept the last ones']);
+});
+
 // ---------- Mixcloud ----------
 const MC = 'https://api.mixcloud.com';
 const upload = (key, days, plays) => ({ key, name: `Mix ${key}`, created_time: ago(days), audio_length: 3600, play_count: plays,

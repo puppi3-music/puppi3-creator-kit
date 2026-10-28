@@ -586,6 +586,8 @@ header.top .pup svg{display:block;width:100%;height:auto}
     <dd>It has no numbers yet: not set up, or every try so far has failed. The <strong>Networks not shown</strong> box at the bottom lists the hidden ones with the reason. What each network needs: the <a href="networks-guide.html">Networks guide</a> (for most of them, connecting the channel in Postiz and allowing every permission is all it takes).</dd>
     <dt>A network's numbers look old, or its status panel shows an error.</dt>
     <dd>Each section has a <strong>status</strong> panel saying when the numbers were last collected and what went wrong. Often a channel needs reconnecting in Postiz. If they stop updating, an alert ("… numbers stopped updating") comes to your phone too.</dd>
+    <dt>A status panel says some numbers "came back 0 after being well above it".</dt>
+    <dd>Now and then a network answers 0 for a number it had (all of a TikTok account's views at once, say). The bridge doesn't believe it: it keeps the last real number, so the charts don't dip to nothing and the next check doesn't look like a sudden jump. Nothing to do; the note goes at the next check that's right.</dd>
     <dt>The site's posts on Platforms have no visitors.</dt>
     <dd>Their status panel says why. "needs TINYBIRD_TOKEN" means the bridge can't read the site's visitor counts, usually because the <code>analytics</code> module is off: tell whoever runs the site. A brand-new post gets its first numbers within the hour.</dd>
     <dt>The charts are empty or show a single bar.</dt>

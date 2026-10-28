@@ -46,7 +46,10 @@ export function startStats({ env, dataDir, log, postiz, pgQuery, PG, ghostPosts,
   const file = (name) => path.join(dataDir, `${name}.json`);
   // keeps a collector's posts per day; a failure is that file's error, not the poll's
   const keepPosts = async (out, network, items) => {
-    try { await trackPosts(dataDir, network, items, historyKeys(network)); } catch (e) { out.errors.push(`history: ${e.message}`); }
+    try {
+      const kept = await trackPosts(dataDir, network, items, historyKeys(network));
+      if (kept) out.errors.push(`${kept} number(s) came back 0 after being well above it: kept the last ones`);
+    } catch (e) { out.errors.push(`history: ${e.message}`); }
   };
   const minutes = (v) => Math.max(10, Number(v) || 60);
   // the stats database: opened now, so the old JSON files are brought in before the first poll, and copied once a day
