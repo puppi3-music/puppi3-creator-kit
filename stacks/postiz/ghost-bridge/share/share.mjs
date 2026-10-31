@@ -8,7 +8,7 @@ import { CHANNELS, SKIP_TAG, BIG_DROP_TAG, BIG_DROP_AUTO_STORY, MUSIC_MODE, AUTO
   IMAGE_LIMITS, previewStore, log, isDry, loadState, recordShared, loadCustom, channelKey, DRAFT_BASE, DRAFT_PREVIEWS,
   GHOST_API_URL } from '../config.mjs';
 import { postiz, postizChannels, uploadMedia, ghostToken, ghostSiteOrigin } from '../services.mjs';
-import { notify, notifyBigDrop, notifyManual, STORY_GAP_MS } from './ntfy.mjs';
+import { notify, notifyBigDrop, notifyManual, moveLater, STORY_GAP_MS } from './ntfy.mjs';
 import { bodyText, findVideo, findAudio, findGalleryImages, postLinks, findListenLink, chosenListen, splitHashtags,
   channelText, buildLines, buildContent, campaignOf, stickerLink, tagLink } from './content.mjs';
 import { uploadAsJpeg, fitImages, fitContext, makeAudiogram, POSTABLE, IMAGE_RULES, pathOf } from './media.mjs';
@@ -137,8 +137,11 @@ export async function handlePost(post, { again = false, only = null } = {}) {
   if (custom.storyAt) log(storyAt ? `  Instagram Story at ${new Date(storyAt).toISOString()} (set on the Social preview)`
     : `  Instagram Story time ${custom.storyAt} has gone by: it goes with the post`);
   // postAt: the post's own time in Ghost (scheduled or published; a draft has none yet), the Story's by default
+  // storyShared: a draft preview of a shared post, 'later' while its Story is still to come (a new time moves it:
+  // moveStory), else 'out'
   const storyTime = { storyAt: custom.storyAt || '', storyLate: !!custom.storyAt && !storyAt,
-    postAt: post.status === 'scheduled' || post.status === 'published' ? post.published_at || '' : '' };
+    postAt: post.status === 'scheduled' || post.status === 'published' ? post.published_at || '' : '',
+    storyShared: draftPreview && state[id] ? (storyToCome(state[id], custom) ? 'later' : 'out') : '' };
   // on, with something to add: a link, or (no link) its text
   const stickerOn = storyLink && !!(igSticker || stickerText);
   const stickerInfo = { stickerOn, stickerUrl: igSticker, stickerAuto: autoSticker, stickerChosen: chosenSticker, stickerText,
@@ -240,6 +243,7 @@ export async function handlePost(post, { again = false, only = null } = {}) {
 
   const manual = []; // [{ platform, idf, drafted }] - platforms you'll finish yourself
   const results = {};
+  let storyJob = null;
   // at: a time for it (ms): a post to go now is scheduled for then instead, a draft dated then
   const post_ = (integ, content, settings, type = 'now', postTags = [], story = false, at = null) => ({
     type: at && type === 'now' ? 'schedule' : type,
@@ -318,9 +322,11 @@ export async function handlePost(post, { again = false, only = null } = {}) {
         continue;
       }
       try {
-        await postiz('POST', '/posts', body);
+        const made = await postiz('POST', '/posts', body);
         log(`  ${body.type === 'schedule' ? `scheduled for ${body.date}` : 'queued'} on ${label} (${integ.name}) with ${mediaLabel(body)}`);
         results[label] = 'ok';
+        // a Story Postiz holds for later: its id and what was sent, so a new time can make it again (moveStory)
+        if (label.endsWith(':story') && body.type === 'schedule') storyJob = { label, id: made?.[0]?.postId || null, body };
       } catch (e) {
         log(`  ERROR on ${label}: ${e.message}`);
         results[label] = 'error';
@@ -350,7 +356,7 @@ export async function handlePost(post, { again = false, only = null } = {}) {
   // shared again with only the Story ticked: the reminder is all there is to send
   if (bigDrop && ig && !igStoryByHand && storyWanted && (manual.length || (only && !asStory) || Object.values(results).some((r) => r === 'ok' || r === 'dry-run'))) {
     if (!isDry() && !results[`${ig.identifier}:story`]) results[`${ig.identifier}:story`] = 'manual';
-    if (await notifyBigDrop({ title, url, listen, campaign, stickerUrl: igSticker, stickerText, stickerOn, caption: storyCaption, kind, isClip: audiogram, at: storyAt,
+    if (await notifyBigDrop({ title, url, listen, campaign, stickerUrl: igSticker, stickerText, stickerOn, caption: storyCaption, kind, isClip: audiogram, at: storyAt, key: id,
       attachment: kind === 'image' && String(igStory[0]?.path).startsWith('http') ? igStory[0].path : attachment })) await storyGap(manual.length || (failed.length && NOTIFY_ERRORS));
   }
 
@@ -361,7 +367,7 @@ export async function handlePost(post, { again = false, only = null } = {}) {
     for (const [n, m] of ordered.entries()) {
       const sent = await notifyManual({
         platform: m.platform, drafted: m.drafted,
-        title, url, listen, campaign, stickerUrl: igSticker, stickerText, bigDrop, stickerOn, story: m.platform === 'Instagram' && asStory, kind, audiogram, at: storyAt,
+        title, url, listen, campaign, stickerUrl: igSticker, stickerText, bigDrop, stickerOn, story: m.platform === 'Instagram' && asStory, kind, audiogram, at: storyAt, key: id,
         attachment: m.platform === 'Instagram' && !asStory && igFeed[0] && igFeed[0] !== images[0] && igFeed[0].path.startsWith('http')
           ? igFeed[0].path : attachment,
         count: kind === 'image' ? imagesFor(m.idf, m.platform === 'Instagram' && asStory).length : 1,
@@ -392,9 +398,46 @@ export async function handlePost(post, { again = false, only = null } = {}) {
     // Shared again without the Story: the earlier share's time stays
     const storyShared = Object.keys(results).some((label) => label.endsWith(':story'));
     const storyLater = storyShared ? (storyAt ? new Date(storyAt).toISOString() : undefined) : before?.storyAt;
+    const jobLater = storyShared ? storyJob : before?.storyJob;
     await recordShared(id, { title, url, at: new Date().toISOString(), media: audiogram ? 'audio-clip' : kind, results: { ...kept, ...results },
-      ...(storyLater && { storyAt: storyLater }), earlier });
+      ...(storyLater && { storyAt: storyLater }), ...(storyLater && jobLater && { storyJob: jobLater }), earlier });
   }
+}
+
+// ---------- a shared post's Story, still to come, at a new time ----------
+// When a shared post's Story is still to come (ms), or 0: posted.json's storyAt, or for a share from before it was
+// noted, the time set on the Social preview when it was after the share (as the Shared posts page reads it)
+export function storyToCome(entry, custom = {}) {
+  const set = Date.parse(entry?.storyAt || '') || (Date.parse(custom.storyAt || '') > Date.parse(entry?.at || '') + 60_000
+    ? Date.parse(custom.storyAt) : 0);
+  return set > Date.now() ? set : 0;
+}
+// The Social preview's new time for a shared post's Story (at: ms; null = now): its reminder in later.json moves (one
+// kept before reminders had the post's id: by the post's title), and one Postiz holds is deleted there and made again
+// for then (Postiz can't change a post's date). Answers '' when it moved, else why not
+export async function moveStory(post, at) {
+  const entry = (await loadState())[post.id];
+  if (!entry) return '';
+  if (!storyToCome(entry, (await loadCustom())[post.id])) return 'gone';
+  const iso = at ? new Date(at).toISOString() : undefined;
+  const moved = await moveLater((item) => (item.key ? item.key === post.id : String(item.msg?.title || '').includes(`"${entry.title}"`)), at);
+  let { storyJob } = entry;
+  if (storyJob?.id) {
+    await postiz('DELETE', `/posts/${storyJob.id}`);
+    const body = { ...storyJob.body, type: at ? 'schedule' : 'now', date: iso || new Date().toISOString() };
+    try {
+      const made = await postiz('POST', '/posts', body);
+      storyJob = at ? { ...storyJob, id: made?.[0]?.postId || null, body } : undefined;
+      log(`  ${storyJob ? `rescheduled for ${body.date}` : 'queued now'}: ${storyJob?.label || 'the Story'} of "${entry.title}"`);
+    } catch (e) {
+      // the old one is gone already: the page says to share the Story again
+      await recordShared(post.id, { ...entry, storyAt: undefined, storyJob: undefined });
+      throw new Error(`Postiz took the old Story down but didn't take the new one (${e.message}): share again with only the Story ticked`);
+    }
+  } else if (!moved) return entry.results && Object.entries(entry.results).some(([l, r]) => l.endsWith(':story') && r === 'ok')
+    ? 'postiz' : 'none';
+  await recordShared(post.id, { ...entry, storyAt: iso, storyJob: at ? storyJob : undefined });
+  return '';
 }
 
 // ---------- Ghost's scheduled posts and where they'll go (GET /upnext.json, Social dashboard's "Up next") ----------

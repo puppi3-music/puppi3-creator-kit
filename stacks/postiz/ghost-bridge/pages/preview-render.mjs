@@ -191,7 +191,9 @@ function previewCard(e, pv, s) {
       + `<span class="lsaved tsaved" aria-live="polite"></span>`
       + `<div class="hint">${esc(tz)} time. ${e.storyAt ? '' : e.postAt ? 'The same time as the post in Ghost, until you change it. '
         : 'The same time as the post: when you publish it, until you set a time. '}${e.status === 'auto' ? 'Postiz posts it then.'
-        : 'Your reminder for it comes then.'}${e.storyLate ? ' <b>That time comes before the post goes out, so the Story goes with the post.</b>' : ''}</div></div>`;
+        : 'Your reminder for it comes then.'}${e.storyShared === 'later' ? ` <b>Shared, its Story still to come: a new time moves it${e.storyAt
+        ? ', and "With the post" sends it now' : ''}.</b>` : e.storyShared === 'out' ? ' <b>Its Story went out already: a time here is for'
+        + ' "Share again now" with only the Story ticked.</b>' : e.storyLate ? ' <b>That time comes before the post goes out, so the Story goes with the post.</b>' : ''}</div></div>`;
   // Draft previews, any Instagram Story: its caption (pv.custom.storyCaption), saved on leaving the box. Instagram's
   // API takes no text with a Story, so it's for one you post by hand: the reminder gives it to copy
   const storyCaption = pv.custom?.storyCaption || '';

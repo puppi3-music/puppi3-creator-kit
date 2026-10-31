@@ -55,7 +55,17 @@ change.
   is shared (a draft preview of a scheduled post compares with its time) = with the post, and the card says so
   (`storyLate`). The bridge keeps those reminders itself in `data/later.json` (`startLaterNotices`, every 30 s,
   a restart sends what came due; ntfy down = tried again, dropped a day late), not ntfy's delay: ntfy keeps a
-  delayed message only in its cache and for at most 3 days, and a server with no cache file loses it on a restart. On the Instagram
+  delayed message only in its cache and for at most 3 days, and a server with no cache file loses it on a restart.
+  A new time once the post is shared (user saw: changing it after publishing did nothing, as only custom.json changed):
+  `saveStoryAt` on a published post calls `moveStory` first. Its Story still to come (`storyToCome`: posted.json's
+  `storyAt` ahead, or the old custom.json reading) = moved: later.json's reminder (`moveLater`; items carry `key` = the
+  post id, older ones found by `"<title>"` in theirs) gets the new time and ⏰ line, and a Story Postiz holds is
+  `DELETE /posts/<id>` then `POST /posts` again with the new date (Postiz's public API can't change a date; delete stops
+  its Temporal job). handlePost keeps that Postiz id + body as posted.json's `storyJob` (from `POST /posts`' `[{ postId }]`).
+  "With the post" ('') sends/queues it now. The new one refused after the delete = 502 saying share again with only the
+  Story ticked, `storyAt` dropped; a Postiz Story from before `storyJob` = 409 "move it in Postiz's calendar", nothing
+  saved. Gone out already = saved, nothing moved, for "Share again now". The box's hint says which (`storyShared`
+  'later'/'out'). On the Instagram
   card you drag photos within the frame (`POST .../frame`, saved as `frames` in `custom.json`); on publish
   the bridge crops Instagram's feed photos (ffmpeg) to the first photo's shape (4:5-1.91:1) at that framing
   (centred otherwise). It also fits every channel's photos to what Postiz and the platform accept (`IMAGE_RULES`:

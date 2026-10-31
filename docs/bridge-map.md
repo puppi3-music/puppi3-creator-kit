@@ -74,8 +74,8 @@ Admin API (JWT from `GHOST_ADMIN_API_KEY`).
 
 ### `share/share.mjs`
 `handlePost`: channels, media, captions, auto-post vs draft + ntfy, recording (`again`: past posted.json, earlier shares kept; `only`: just those cards, a Story apart from its feed post); `musicRouting` (IG/TikTok mode);
-`upNextDoc` for `/upnext.json` (same rules, nothing uploaded).
-- Exports: `handlePost`, `musicRouting`, `upNextDoc`
+`upNextDoc` for `/upnext.json` (same rules, nothing uploaded); `moveStory`: a shared post's Story still to come, at a new time.
+- Exports: `handlePost`, `musicRouting`, `upNextDoc`, `storyToCome`, `moveStory`
 - Imports: config, services, share/content, share/media, share/ntfy
 
 ### `share/content.mjs`
@@ -92,7 +92,7 @@ the audiogram clip.
 ### `share/ntfy.mjs`
 Sending to ntfy (4096-byte cut), the "finish in the app" and #bigdrop Story notifications, take-off notices, and
 notifications kept for a time (a Story's own: later.json, sent when due).
-- Exports: `notify`, `notifyManual`, `notifyBigDrop`, `fitMessage`, `STORY_GAP_MS`, `startTakeOffNotices`, `notifyAt`, `sendDueLater`, `startLaterNotices`, `whenText`
+- Exports: `notify`, `notifyManual`, `notifyBigDrop`, `fitMessage`, `STORY_GAP_MS`, `startTakeOffNotices`, `notifyAt`, `moveLater`, `sendDueLater`, `startLaterNotices`, `whenText`
 - Imports: config, pages/previews (`photoPage`), share/content (`stickerLink`), stats/history
 
 ### `share/pfp.mjs`
@@ -119,7 +119,7 @@ Dry-run previews written to `data/previews/` and served; photo pages (photos.jso
 Social preview (`staffSignedIn` via Ghost's session cookie, cached per a hash of the post Ghost sends) and its saves (custom text,
 featured link, frames, the Story's sticker, time and caption).
 - Exports: `writePreview`, `servePreview`, `serveFile`, `PREVIEW_SETTINGS`, `draftPage`, `photoPage`, `servePhotos`, `serveDraftPreview`, `cleanDraftMedia`, `sendJson`, `zonedTime`
-- Imports: config, services, pages/preview, share/content, share/share (`handlePost`, run fully dry)
+- Imports: config, services, pages/preview, share/content, share/share (`handlePost`, run fully dry; `moveStory`)
 - Routes (called from ghost-bridge.mjs): `/previews/...`, `<PHOTOS_BASE>/<id>/[n]`, `/ghost/social-preview/` (Shared posts),
   `/ghost/social-preview/<uuid>/` + `POST .../custom`, `.../listen`, `.../frame`, `.../sticker`, `.../story-at`, `.../story-caption`, `.../share`
   (with ghost-bridge.mjs's `sharing` and its share, passed in: no import of it)

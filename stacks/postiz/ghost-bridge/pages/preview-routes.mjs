@@ -13,7 +13,7 @@ import { LIMITS, IMAGE_LIMITS, INSTAGRAM_IDS, TIKTOK_IDS, NO_LINK_IDS, CUSTOM_CH
   setFrame, loadState, loadCustom, DRY_RUN, FEATURED_DOMAINS, SERVICE_NAMES, FEATURED_LINE, FEATURED_BIO_LINE, FEATURED_LABEL } from '../config.mjs';
 import { ghostPostByUuid, ghostSiteOrigin, ghostAdmin, GHOST_KEY_FIX } from '../services.mjs';
 import { cleanLink } from '../share/content.mjs';
-import { handlePost } from '../share/share.mjs';
+import { handlePost, moveStory } from '../share/share.mjs';
 
 // ---------- dry-run previews ----------
 // Dry-run previews (staging): a page per post shared, written to data/previews/ and served at
@@ -321,7 +321,7 @@ export function zonedTime(local, tz) {
 }
 
 // POST /ghost/social-preview/<uuid>/story-at {at}: the Instagram Story's own time, 'YYYY-MM-DDTHH:MM' in SITE_TIMEZONE
-// ('' = with the post); within a year, not gone by
+// ('' = with the post); within a year, not gone by. A shared post's Story still to come moves to it ('' = now: moveStory)
 async function saveStoryAt(req, res, uuid) {
   const body = await readJson(req, res);
   if (!body) return;
@@ -337,9 +337,16 @@ async function saveStoryAt(req, res, uuid) {
   const hit = draftCache.get(uuid);
   const post = hit?.post || await ghostPostByUuid(uuid);
   if (!post) return sendJson(res, 404, { error: 'no post has that preview link' });
+  let why;
+  try { why = post.status === 'published' ? await moveStory(post, at ? Date.parse(at) : null) : ''; } catch (e) {
+    log(`social preview: ERROR moving the Story of "${post.title}": ${e.message}`);
+    if (hit) hit.html = null;
+    return sendJson(res, 502, { error: e.message });
+  }
+  if (why === 'postiz') return sendJson(res, 409, { error: 'Postiz has this Story scheduled from before the bridge kept its id, so move it in Postiz\'s calendar' });
   await editCustom(post.id, (m) => { if (at) m.storyAt = at; else delete m.storyAt; });
   if (hit) hit.html = null;
-  log(`social preview: Instagram Story time for "${post.title}": ${at || 'with the post'}`);
+  log(`social preview: Instagram Story time for "${post.title}": ${at || 'with the post'}${why === 'gone' ? ' (its Story went out already: for sharing again)' : ''}`);
   return sendJson(res, 200, { ok: true });
 }
 

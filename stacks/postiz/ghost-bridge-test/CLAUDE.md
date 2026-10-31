@@ -8,7 +8,7 @@ down, and the image takes every `.mjs` at any depth), Node's own runner, nothing
 environment (the bridge's defaults, `SITE_HOST=example.com`), as config.mjs reads it once at load. `content` (bodyText,
 links, the featured link, #clip, captions fitted to every network's limit, tagLink's short links against
 `kit/redirects.yaml`'s rules), `stats` (history.mjs's helpers: gains per day, 30-day sums, sitePath/siteLinks, the take-off check against a real stats.db, a count back at 0 kept at its last),
-`schedule` (WEEKLY_SUMMARY_AT, seasons, ntfy's cut), `later` (notifications kept for a Story's own time, against a fake ntfy; `zonedTime`), `share` (`handlePost` run as a draft preview, fully dry, against a
+`schedule` (WEEKLY_SUMMARY_AT, seasons, ntfy's cut), `later` (notifications kept for a Story's own time, against a fake ntfy; `zonedTime`), `story-time` (a shared post's Story still to come at a new time: `moveStory` moving the reminder or remaking Postiz's, through serveDraftPreview against fake-web's Ghost, Postiz and ntfy), `share` (`handlePost` run as a draft preview, fully dry, against a
 fake Postiz that only lists channels: each network's status, caption, media and notifications), `shared` (sharing
 again: handlePost's `again`, `only` (some networks, or #bigdrop's Story apart from Instagram's feed post; the rest keep their results) and posted.json's `earlier`, a Story set for later (`storyAt`, "not yet" on the list until then), the Shared posts page (scheduled and drafts on page 1 only) and `POST .../share`'s checks, through
 serveDraftPreview against fake-web's Ghost and Postiz), `postgres` (pgQuery's

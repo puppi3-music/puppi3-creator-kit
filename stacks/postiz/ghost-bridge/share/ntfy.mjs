@@ -84,18 +84,39 @@ function editLater(change) {
   laterQueue = run.catch(() => {});
   return run;
 }
+const atLine = (at) => `⏰ The time you set for it: ${whenText(at)}\n\n`;
 // msg at `at` (ms): now when that's under a minute away (or unset), else kept for then. A draft preview only shows it.
-export async function notifyAt(msg, at) {
+// key: the Ghost post's id, so a time changed after the share moves it (moveLater)
+export async function notifyAt(msg, at, key = null) {
   if (!at || at <= Date.now() + 60_000) return notify(msg);
-  msg = { ...msg, message: `⏰ The time you set for it: ${whenText(at)}\n\n${msg.message || ''}` };
+  msg = { ...msg, message: `${atLine(at)}${msg.message || ''}` };
   const store = previewStore.getStore();
   store?.notes.push({ ...msg, at });
   const sendAnyway = DRY_RUN && DRY_RUN_NTFY && !store?.draft;
   if (!NTFY_URL || store?.draft) return false;
   if (isDry() && !sendAnyway) { log(`  [dry run] ntfy at ${whenText(at)}: ${msg.title}`); return false; }
-  await editLater((list) => { list.push({ at, msg }); });
+  await editLater((list) => { list.push({ at, msg, ...(key && { key }) }); });
   log(`  ntfy notification kept for ${whenText(at)}: ${msg.title}`);
   return true;
+}
+// The kept notifications `match` picks, moved to `at` (ms; null or under a minute away = sent now, kept to try
+// again if ntfy refuses). Answers how many it found
+export async function moveLater(match, at) {
+  let found = 0;
+  await editLater(async (list) => {
+    const keep = [];
+    for (const item of list) {
+      if (!match(item)) { keep.push(item); continue; }
+      found++;
+      const message = String(item.msg.message || '').replace(/^⏰ [^\n]*\n\n/, '');
+      if (at && at > Date.now() + 60_000) {
+        keep.push({ ...item, at, msg: { ...item.msg, message: `${atLine(at)}${message}` } });
+        log(`ntfy: the notification kept for ${whenText(item.at)} moved to ${whenText(at)}: ${item.msg.title}`);
+      } else if (!(await notify({ ...item.msg, message }))) keep.push({ ...item, at: Date.now(), msg: { ...item.msg, message } });
+    }
+    return keep;
+  });
+  return found;
 }
 // Sends what's due (now: for the tests), keeps the rest
 export async function sendDueLater(now = Date.now()) {
@@ -121,7 +142,7 @@ export function startLaterNotices() {
 // notification keeps its buttons and attachment. Attached: the Story's photo (the first, uncropped) or video.
 // stickerOn false: the sticker was turned off on the Social preview, so it's a plain Story. stickerUrl: the sticker's
 // link (left out = the featured link, else the post; null = none: a sticker of text only, stickerText).
-export async function notifyBigDrop({ title, url, listen, campaign, stickerUrl, stickerText, stickerOn = true, caption = '', attachment, isClip, kind, at = null }) {
+export async function notifyBigDrop({ title, url, listen, campaign, stickerUrl, stickerText, stickerOn = true, caption = '', attachment, isClip, kind, at = null, key = null }) {
   const link = stickerUrl === undefined ? stickerLink(listen, url, campaign) : stickerUrl;
   const text = stickerOn && stickerText;
   const linked = stickerOn && !!link;
@@ -158,11 +179,11 @@ export async function notifyBigDrop({ title, url, listen, campaign, stickerUrl, 
       : linked ? [linkCopy, instagram, text ? copyText : open]
       : text ? [copyText, instagram, open] : [instagram, open],
     ...(attachment ? { attach: attachment, ...(isClip || kind === 'video' ? { filename: isClip ? 'story-clip.mp4' : 'story.mp4' } : {}) } : {}),
-  }, at);
+  }, at, key);
 }
 
 // "Finish it yourself" notification - one per platform (Instagram / TikTok)
-export async function notifyManual({ platform, title, url, listen, campaign, stickerUrl, stickerText, bigDrop, stickerOn = bigDrop, story, caption, attachment, kind, audiogram, drafted, count = 1, photos = [], at = null }) {
+export async function notifyManual({ platform, title, url, listen, campaign, stickerUrl, stickerText, bigDrop, stickerOn = bigDrop, story, caption, attachment, kind, audiogram, drafted, count = 1, photos = [], at = null, key = null }) {
   const isIG = platform === 'Instagram';
   const what = isIG
     ? (story ? 'Story' : kind === 'video' ? 'Reel' : count > 1 ? `carousel (${count} photos)` : 'feed post')
@@ -222,7 +243,7 @@ export async function notifyManual({ platform, title, url, listen, campaign, sti
     // no click target: tapping opens the message in ntfy, where the attachment and buttons are
     actions: actions.slice(0, 3),
     ...(attachment ? { attach: attachment, ...(kind === 'video' ? { filename: `${platform.toLowerCase()}.mp4` } : {}) } : {}),
-  }, isIG && story ? at : null);
+  }, isIG && story ? at : null, key);
   // Without the page: an ntfy message carries one attachment, so each further photo comes as its own quiet one, in order
   for (let i = 1; !page && i < photos.length; i++) {
     await notify({

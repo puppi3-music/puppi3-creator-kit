@@ -20,6 +20,19 @@ itself (#story with #autopost) goes without it, and its card says so (Posting gu
 
 **Restarts:** the bridge, for a few seconds (a share in progress finishes first).
 
+### The Story's time can be changed after the post is out
+
+Changing **Post the Story at** on the Social preview once the post was published saved the new time but moved
+nothing: the Story still came at the old one. Now, while the Story is still waiting, a new time moves it. The
+reminder for a Story you post by hand comes then, and a Story that posts itself is taken off Postiz's calendar
+and put back for the new time. *With the post* sends it now. A Story that has gone out already moves nothing, and
+its card says the time is for sharing the Story again (Posting guide, "Checking the social posts"). A Story that
+posts itself and was scheduled before this update can't be moved from here: move it on Postiz's calendar.
+
+**Your site:** `kit/kit.sh <folder> up` after updating brings the new bridge.
+
+**Restarts:** the bridge, for a few seconds (a share in progress finishes first).
+
 ## 1.4.1
 
 ### For whoever changes the kit: the private-name checks read their words from the site's repo
