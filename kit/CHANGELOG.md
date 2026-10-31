@@ -9,6 +9,9 @@ lines, since GitHub's release notes break wherever the text does.
 
 ## 1.4.2 (not released yet)
 
+**All of it at once:** `kit/kit.sh <folder> up -d` (Compose) or `k8s/up.sh <folder> <overlay>` (Kubernetes) brings
+all three changes below: the bridge and the site's Grafana restart, for a few seconds each.
+
 ### A caption for the Instagram Story
 
 Every Instagram Story card on the Social preview has a new **Story caption** box, for text to go on the Story.
@@ -16,7 +19,7 @@ Instagram doesn't let anything but its app put text on a Story, so it's for a St
 notification gives you the caption with a "Copy caption" button, to add with Aa in the app. A Story that posts
 itself (#story with #autopost) goes without it, and its card says so (Posting guide, "Checking the social posts").
 
-**Your site:** `kit/kit.sh <folder> up` after updating brings the new bridge.
+**Your site:** `kit/kit.sh <folder> up -d` after updating brings the new bridge (on Kubernetes, `k8s/up.sh`).
 
 **Restarts:** the bridge, for a few seconds (a share in progress finishes first).
 
@@ -29,7 +32,7 @@ and put back for the new time. *With the post* sends it now. A Story that has go
 its card says the time is for sharing the Story again (Posting guide, "Checking the social posts"). A Story that
 posts itself and was scheduled before this update can't be moved from here: move it on Postiz's calendar.
 
-**Your site:** `kit/kit.sh <folder> up` after updating brings the new bridge.
+**Your site:** `kit/kit.sh <folder> up -d` after updating brings the new bridge (on Kubernetes, `k8s/up.sh`).
 
 **Restarts:** the bridge, for a few seconds (a share in progress finishes first).
 
@@ -41,7 +44,7 @@ through in 3 days although Ghost was answering. "Ghost's analytics have no page 
 page views to have got through in the last day, so a quiet day doesn't set it off either (Operations guide, "The
 alerts").
 
-**Your site:** `kit/kit.sh <folder> up` after updating brings the new rules (on Kubernetes, `k8s/up.sh`).
+**Your site:** `kit/kit.sh <folder> up -d` after updating brings the new rules (on Kubernetes, `k8s/up.sh`).
 
 **Restarts:** the site's Grafana, for a few seconds: `up` restarts it when the alert rules changed, as they're read
 only when it starts.
