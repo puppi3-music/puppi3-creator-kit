@@ -86,6 +86,10 @@ export async function handlePost(post, { again = false, only = null } = {}) {
   if (own.length) log(`  modified text for: ${own.join(', ')}`);
   if (custom.frames) log(`  instagram framing set for ${Object.keys(custom.frames).length} photo(s)`);
   const stickerText = custom.sticker || '';
+  // the Instagram Story's own caption (Social preview): Instagram's API takes no text with a Story, so it's for one
+  // posted by hand (the reminder gives it to copy)
+  const storyCaption = custom.storyCaption || '';
+  if (storyCaption) log('  Story caption set on the Social preview');
   if (previewStore.getStore()) Object.assign(previewStore.getStore(), { custom });
 
   const state = await loadState();
@@ -228,7 +232,7 @@ export async function handlePost(post, { again = false, only = null } = {}) {
     media: status === 'skip' ? [] : mediaFor(integ.identifier, label.endsWith(':story')).map((m) => ({ kind, url: m.path, src: m.src })),
     ...extra,
   });
-  const captionFor = (idf, story) => (story ? '' : buildLines(idf, say(idf)).join('\n'));
+  const captionFor = (idf, story) => (story ? storyCaption : buildLines(idf, say(idf)).join('\n'));
 
   const hasMusicChannels = integrations.some((i) => INSTAGRAM_IDS.includes(i.identifier) || TIKTOK_IDS.includes(i.identifier));
   if (hasMusicChannels) log(`  Instagram/TikTok: ${musicAuto ? 'auto-post' : 'draft + ntfy'} - ${why}`);
@@ -306,7 +310,8 @@ export async function handlePost(post, { again = false, only = null } = {}) {
     }
 
     for (const [label, body] of jobs.filter(([label]) => wants(label))) {
-      addPreview(integ, label, 'auto', { caption: captionFor(idf, label.endsWith(':story')), ...(label.endsWith(':story') ? storyTime : {}) });
+      // a Story Postiz posts goes without the caption (Instagram's API takes none)
+      addPreview(integ, label, 'auto', { caption: label.endsWith(':story') ? '' : captionFor(idf, false), ...(label.endsWith(':story') ? storyTime : {}) });
       if (isDry()) {
         log(`  [dry run] ${label} (${integ.name}) with ${mediaLabel(body)}:\n${JSON.stringify(body, null, 2)}`);
         results[label] = 'dry-run';
@@ -327,7 +332,7 @@ export async function handlePost(post, { again = false, only = null } = {}) {
   const ig = integrations.find((i) => INSTAGRAM_IDS.includes(i.identifier));
   const storyWanted = !!ig && wants(`${ig.identifier}:story`);
   if (pv && bigDrop && ig && media && !asStory && storyWanted && !pv.entries.some((e) => e.label === `${ig.identifier}:story`)) {
-    addPreview(ig, `${ig.identifier}:story`, 'manual', { caption: '', ...stickerInfo, ...storyTime,
+    addPreview(ig, `${ig.identifier}:story`, 'manual', { caption: storyCaption, ...stickerInfo, ...storyTime,
       note: stickerOn ? `${BIG_DROP_TAG}: you add this Story in the app with ${igSticker ? 'a link sticker' : 'its text'} (your ntfy reminder has the media and ${igSticker ? 'link' : 'text'})`
         : `${BIG_DROP_TAG}: you add this Story in the app (your ntfy reminder has the media)` });
   }
@@ -345,7 +350,7 @@ export async function handlePost(post, { again = false, only = null } = {}) {
   // shared again with only the Story ticked: the reminder is all there is to send
   if (bigDrop && ig && !igStoryByHand && storyWanted && (manual.length || (only && !asStory) || Object.values(results).some((r) => r === 'ok' || r === 'dry-run'))) {
     if (!isDry() && !results[`${ig.identifier}:story`]) results[`${ig.identifier}:story`] = 'manual';
-    if (await notifyBigDrop({ title, url, listen, campaign, stickerUrl: igSticker, stickerText, stickerOn, kind, isClip: audiogram, at: storyAt,
+    if (await notifyBigDrop({ title, url, listen, campaign, stickerUrl: igSticker, stickerText, stickerOn, caption: storyCaption, kind, isClip: audiogram, at: storyAt,
       attachment: kind === 'image' && String(igStory[0]?.path).startsWith('http') ? igStory[0].path : attachment })) await storyGap(manual.length || (failed.length && NOTIFY_ERRORS));
   }
 
@@ -363,7 +368,7 @@ export async function handlePost(post, { again = false, only = null } = {}) {
         // each photo as that app gets it (Instagram's cropped and scaled), for the extra notifications
         photos: kind === 'image' && !(m.platform === 'Instagram' && asStory)
           ? imagesFor(m.idf, false).map((p) => (String(p.path).startsWith('http') ? p.path : p.src)) : [],
-        caption: m.platform === 'Instagram' && asStory ? null : buildLines(m.idf, say(m.idf)).join('\n'),
+        caption: m.platform === 'Instagram' && asStory ? storyCaption || null : buildLines(m.idf, say(m.idf)).join('\n'),
       });
       if (sent && !storyFirst(m)) await storyGap(n < ordered.length - 1 || (failed.length && NOTIFY_ERRORS));
     }
@@ -479,6 +484,7 @@ export async function upNextDoc() {
     if (custom.stickerLink) notes.push(`sticker link ${custom.stickerLink === 'none' ? 'none' : custom.stickerLink}`);
     if (custom.sticker) notes.push(`sticker text "${custom.sticker}"`);
     if (custom.storyAt) notes.push(`Instagram Story at ${custom.storyAt}`);
+    if (custom.storyCaption) notes.push('Story caption set');
     row.notes = notes.join('; ');
   }
   upNext = { at: Date.now(), doc };

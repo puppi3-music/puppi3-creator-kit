@@ -117,11 +117,11 @@ Renders preview pages (each channel's mock-up, and a published post's Share agai
 ### `pages/preview-routes.mjs`
 Dry-run previews written to `data/previews/` and served; photo pages (photos.json, `PHOTO_PAGE_DAYS`); the draft
 Social preview (`staffSignedIn` via Ghost's session cookie, cached per a hash of the post Ghost sends) and its saves (custom text,
-featured link, frames).
+featured link, frames, the Story's sticker, time and caption).
 - Exports: `writePreview`, `servePreview`, `serveFile`, `PREVIEW_SETTINGS`, `draftPage`, `photoPage`, `servePhotos`, `serveDraftPreview`, `cleanDraftMedia`, `sendJson`, `zonedTime`
 - Imports: config, services, pages/preview, share/content, share/share (`handlePost`, run fully dry)
 - Routes (called from ghost-bridge.mjs): `/previews/...`, `<PHOTOS_BASE>/<id>/[n]`, `/ghost/social-preview/` (Shared posts),
-  `/ghost/social-preview/<uuid>/` + `POST .../custom`, `.../listen`, `.../frame`, `.../sticker`, `.../story-at`, `.../share`
+  `/ghost/social-preview/<uuid>/` + `POST .../custom`, `.../listen`, `.../frame`, `.../sticker`, `.../story-at`, `.../story-caption`, `.../share`
   (with ghost-bridge.mjs's `sharing` and its share, passed in: no import of it)
 
 ### `stats/stats.mjs`

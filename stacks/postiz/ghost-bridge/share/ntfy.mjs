@@ -121,7 +121,7 @@ export function startLaterNotices() {
 // notification keeps its buttons and attachment. Attached: the Story's photo (the first, uncropped) or video.
 // stickerOn false: the sticker was turned off on the Social preview, so it's a plain Story. stickerUrl: the sticker's
 // link (left out = the featured link, else the post; null = none: a sticker of text only, stickerText).
-export async function notifyBigDrop({ title, url, listen, campaign, stickerUrl, stickerText, stickerOn = true, attachment, isClip, kind, at = null }) {
+export async function notifyBigDrop({ title, url, listen, campaign, stickerUrl, stickerText, stickerOn = true, caption = '', attachment, isClip, kind, at = null }) {
   const link = stickerUrl === undefined ? stickerLink(listen, url, campaign) : stickerUrl;
   const text = stickerOn && stickerText;
   const linked = stickerOn && !!link;
@@ -135,22 +135,27 @@ export async function notifyBigDrop({ title, url, listen, campaign, stickerUrl, 
       ? ', then tap "Customize sticker text" and paste its text (tap "Copy sticker text")' : ''}.`
       : text ? '2. In Instagram: + → Story, pick it, and add its text with Aa (tap "Copy sticker text").'
       : '2. In Instagram: + → Story, and pick it.',
-    '3. Post the Story.',
+    caption ? '3. Add its caption with Aa (tap "Copy caption"), and post the Story.' : '3. Post the Story.',
   ];
   if (linked) lines.push('', `Sticker link:\n${link}`);
   if (text) lines.push('', `Sticker text:\n${text}`);
   if (listen || !linked) lines.push('', `Post:\n${url}`);
+  if (caption) lines.push('', 'Caption:', caption);
   const open = listen ? { action: 'view', label: `Open ${listen.name}`, url: listen.url } : { action: 'view', label: 'Open post', url };
   const instagram = { action: 'view', label: 'Open Instagram', url: 'https://www.instagram.com/', clear: false };
   const copyText = { action: 'copy', label: 'Copy sticker text', value: text, clear: false };
+  const copyCaption = caption && { action: 'copy', label: 'Copy caption', value: caption, clear: false };
+  const linkCopy = linked && { action: 'copy', label: 'Copy sticker link', value: link, clear: false };
   return notifyAt({
     title: `${FEATURED_ICON} Big drop: add the ${linked ? 'link ' : ''}Story for "${title}"`,
-    message: lines.join('\n'),
+    // the caption comes last, so a long one is what gets cut
+    message: fitMessage(lines.join('\n'), caption ? '\n(Cut short here: "Copy caption" has all of it.)' : ''),
     tags: ['loudspeaker'],
     priority: 4,
     // no click target: tapping opens the message in ntfy, where the attachment and buttons are
-    // (ntfy allows max 3 buttons; set sticker text takes the third button's place)
-    actions: linked ? [{ action: 'copy', label: 'Copy sticker link', value: link, clear: false }, instagram, text ? copyText : open]
+    // (ntfy allows max 3 buttons; set sticker text takes the third button's place, a caption the next one free)
+    actions: caption ? [linkCopy, text && copyText, copyCaption, instagram, open].filter(Boolean).slice(0, 3)
+      : linked ? [linkCopy, instagram, text ? copyText : open]
       : text ? [copyText, instagram, open] : [instagram, open],
     ...(attachment ? { attach: attachment, ...(isClip || kind === 'video' ? { filename: isClip ? 'story-clip.mp4' : 'story.mp4' } : {}) } : {}),
   }, at);
@@ -185,7 +190,8 @@ export async function notifyManual({ platform, title, url, listen, campaign, sti
     kind === 'video'
       ? `2. Add your @tags${isIG && story ? ' (mention stickers work here)' : ''} - it already has sound.`
       : `2. Add your @tags and music${isIG && story ? ' (stickers work here)' : ''}.`,
-    story && isIG ? '3. Post the Story.' : '3. Paste the caption (tap "Copy caption") and post.',
+    story && isIG ? (caption ? '3. Add its caption with Aa (tap "Copy caption"), and post the Story.' : '3. Post the Story.')
+      : '3. Paste the caption (tap "Copy caption") and post.',
   ];
   if (drafted) lines.push('', `${isIG ? 'An' : 'A'} ${platform} draft is in Postiz too${DRAFT_TAG ? ` (tagged "${DRAFT_TAG}")` : ''} - keep it as your record, or post it from Postiz if it needs nothing.`);
   const lead = bigDrop ? `${FEATURED_ICON} Big drop: add` : '🔗 Add';

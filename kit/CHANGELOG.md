@@ -7,6 +7,19 @@ From 1.2.2 on, each change has a `###` heading saying what it does, a short para
 (what to run, if anything) and **Restarts:** (what goes down, and for how long), each its own paragraph. The release workflow joins wrapped
 lines, since GitHub's release notes break wherever the text does.
 
+## 1.4.2 (not released yet)
+
+### A caption for the Instagram Story
+
+Every Instagram Story card on the Social preview has a new **Story caption** box, for text to go on the Story.
+Instagram doesn't let anything but its app put text on a Story, so it's for a Story you post by hand: your
+notification gives you the caption with a "Copy caption" button, to add with Aa in the app. A Story that posts
+itself (#story with #autopost) goes without it, and its card says so (Posting guide, "Checking the social posts").
+
+**Your site:** `kit/kit.sh <folder> up` after updating brings the new bridge.
+
+**Restarts:** the bridge, for a few seconds (a share in progress finishes first).
+
 ## 1.4.1
 
 ### For whoever changes the kit: the private-name checks read their words from the site's repo

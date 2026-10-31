@@ -7,8 +7,8 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { esc, escAttr, previewPage, renderPreview, photosPage, sharedPage } from './preview-render.mjs';
-import { LIMITS, IMAGE_LIMITS, INSTAGRAM_IDS, TIKTOK_IDS, NO_LINK_IDS, CUSTOM_CHANNELS, CUSTOM_MAX, STICKER_TEXT_MAX, SITE_TIMEZONE, MANUAL_DRAFTS,
-  BIG_DROP_TAG, STORY_TAG, PREVIEW_DIR, PREVIEW_KEEP, PREVIEW_URL, log, channelKey, PHOTOS_FILE, PHOTOS_BASE,
+import { LIMITS, IMAGE_LIMITS, INSTAGRAM_IDS, TIKTOK_IDS, NO_LINK_IDS, CUSTOM_CHANNELS, CUSTOM_MAX, STICKER_TEXT_MAX, STORY_CAPTION_MAX, SITE_TIMEZONE, MANUAL_DRAFTS,
+  BIG_DROP_TAG, STORY_TAG, MANUALPOST_TAG, PREVIEW_DIR, PREVIEW_KEEP, PREVIEW_URL, log, channelKey, PHOTOS_FILE, PHOTOS_BASE,
   PHOTO_PAGE_DAYS, GHOST_API_URL, previewStore, DRAFT_BASE, DRAFT_PREVIEWS, editCustom, setCustom,
   setFrame, loadState, loadCustom, DRY_RUN, FEATURED_DOMAINS, SERVICE_NAMES, FEATURED_LINE, FEATURED_BIO_LINE, FEATURED_LABEL } from '../config.mjs';
 import { ghostPostByUuid, ghostSiteOrigin, ghostAdmin, GHOST_KEY_FIX } from '../services.mjs';
@@ -22,7 +22,7 @@ import { handlePost } from '../share/share.mjs';
 // webhook in DRY_RUN, and used for draft previews.
 export const PREVIEW_SETTINGS = { LIMITS, IMAGE_LIMITS, INSTAGRAM_IDS, TIKTOK_IDS, NO_LINK_IDS, CUSTOM_CHANNELS, CUSTOM_MAX,
   MANUAL_DRAFTS, BIG_DROP_TAG, STORY_TAG, channelKey, FEATURED_DOMAINS, SERVICE_NAMES, FEATURED_LINE, FEATURED_BIO_LINE,
-  FEATURED_LABEL, STICKER_TEXT_MAX, SITE_TIMEZONE, DRY_RUN };
+  FEATURED_LABEL, STICKER_TEXT_MAX, STORY_CAPTION_MAX, MANUALPOST_TAG, SITE_TIMEZONE, DRY_RUN };
 
 export async function writePreview(pv) {
   await fs.mkdir(PREVIEW_DIR, { recursive: true });
@@ -343,6 +343,22 @@ async function saveStoryAt(req, res, uuid) {
   return sendJson(res, 200, { ok: true });
 }
 
+// POST /ghost/social-preview/<uuid>/story-caption {text}: the Instagram Story's caption ('' = none)
+async function saveStoryCaption(req, res, uuid) {
+  const body = await readJson(req, res);
+  if (!body) return;
+  if (typeof body.text !== 'string') return sendJson(res, 400, { error: 'no text' });
+  const text = body.text.trim();
+  if (Array.from(text).length > STORY_CAPTION_MAX) return sendJson(res, 400, { error: `longer than ${STORY_CAPTION_MAX} characters` });
+  const hit = draftCache.get(uuid);
+  const post = hit?.post || await ghostPostByUuid(uuid);
+  if (!post) return sendJson(res, 404, { error: 'no post has that preview link' });
+  await editCustom(post.id, (m) => { if (text) m.storyCaption = text; else delete m.storyCaption; });
+  if (hit) hit.html = null;
+  log(`social preview: Story caption for "${post.title}": ${text ? `${Array.from(text).length} characters` : 'none'}`);
+  return sendJson(res, 200, { ok: true });
+}
+
 // POST /ghost/social-preview/<uuid>/custom {channel, text}: save (or with an empty text, remove) a channel's own
 // text. Answers with the re-rendered page, which the page swaps that channel's cards from.
 async function saveCustomText(req, res, uuid) {
@@ -459,12 +475,12 @@ export async function serveDraftPreview(req, res, p, sharer = { sharing: new Set
       return res.writeHead(502, headers).end(draftPage('Couldn\'t load the posts', e.message));
     }
   }
-  const m = new RegExp(`^${DRAFT_BASE}/${UUID}/(custom|frame|listen|sticker|story-at|share)?$`).exec(p) || new RegExp(`^${DRAFT_BASE}/${UUID}()$`).exec(p);
+  const m = new RegExp(`^${DRAFT_BASE}/${UUID}/(custom|frame|listen|sticker|story-at|story-caption|share)?$`).exec(p) || new RegExp(`^${DRAFT_BASE}/${UUID}()$`).exec(p);
   if (m?.[2] && req.method === 'POST') {
     // saves come from the preview page itself: a page on another site can't make your browser send one
     if (req.headers.origin !== await ghostSiteOrigin()) return sendJson(res, 403, { error: 'wrong origin' });
     if (m[2] === 'share') return shareAgain(req, res, m[1], sharer);
-    return ({ frame: saveFrame, listen: saveListen, sticker: saveSticker, 'story-at': saveStoryAt }[m[2]] || saveCustomText)(req, res, m[1]);
+    return ({ frame: saveFrame, listen: saveListen, sticker: saveSticker, 'story-at': saveStoryAt, 'story-caption': saveStoryCaption }[m[2]] || saveCustomText)(req, res, m[1]);
   }
   if (!m || m[2] || req.method !== 'GET') return res.writeHead(404, headers).end(draftPage('Not found', 'Open this from a post\'s Preview in Ghost.'));
   let html;

@@ -149,6 +149,31 @@ test('the link sticker set on the Social preview: its text on the card and in bo
   }
 });
 
+test('the Story caption set on the Social preview: in the reminders for a Story by hand, not on one Postiz posts', async () => {
+  await editCustom('p1', (m) => { m.storyCaption = 'Out now, link in bio'; });
+  try {
+    // #story by hand: on the card and in its reminder, to copy
+    const byHand = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#story') });
+    assert.equal(byHand.byLabel['instagram-standalone:story'].caption, 'Out now, link in bio');
+    const ig = byHand.notes.find((n) => n.title.includes('Instagram'));
+    assert.match(ig.message, /Add its caption with Aa[^]*Caption:\nOut now, link in bio/);
+    assert.ok(ig.actions.some((a) => a.label === 'Copy caption' && a.value === 'Out now, link in bio'));
+    // #bigdrop's own Story reminder: the sticker's buttons first, then the caption's
+    const big = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#bigdrop', '#autopost') });
+    assert.equal(big.byLabel['instagram-standalone:story'].caption, 'Out now, link in bio');
+    assert.match(big.notes[0].message, /Caption:\nOut now, link in bio/);
+    assert.deepEqual(big.notes[0].actions.map((a) => a.label), ['Copy sticker link', 'Copy caption', 'Open Instagram']);
+    // a Story Postiz posts (#story #autopost): Instagram's API takes no text with it
+    const auto = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#story', '#autopost') });
+    assert.equal(auto.byLabel['instagram-standalone:story'].status, 'auto');
+    assert.equal(auto.byLabel['instagram-standalone:story'].caption, '');
+    // the feed posts keep their own captions
+    assert.equal(auto.byLabel.bluesky.caption, 'New mix\n\nhttps://example.com/b/new-mix');
+  } finally {
+    await editCustom('p1', (m) => { delete m.storyCaption; });
+  }
+});
+
 test('#story by hand without #bigdrop: no link sticker unless turned on', async () => {
   const { byLabel, notes } = await share({ html: '<video src="/v.mp4"></video>', tags: tags('#story') });
   assert.equal(byLabel['instagram-standalone:story'].stickerOn, false);

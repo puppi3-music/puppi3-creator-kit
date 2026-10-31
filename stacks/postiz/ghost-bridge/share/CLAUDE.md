@@ -35,6 +35,13 @@ change.
   off (`stickerOn`). Off: a plain Story (`notifyBigDrop` without the sticker steps; `notifyManual` without the line).
   Text: shown on the card, and since the API can't set it, the reminders give it with "Copy sticker text" (in place of
   `notifyBigDrop`'s Open link button; first with no link). Stories the bridge posts itself can't have one.
+- An Instagram Story's caption (user asked: set a caption for the Story): every Story card on the Social preview has a
+  "Story caption" box (`POST .../story-caption` {text}, saved on leaving it; `storyCaption` in `custom.json`, '' removes it,
+  `STORY_CAPTION_MAX` [2200]). Instagram's Graph API takes no text with a Story (no caption on STORIES media), so it's for a
+  Story posted by hand: the card's caption, the reminder's "Caption:" lines + "Copy caption" + "add it with Aa" (`notifyManual`
+  for a #story by hand, `notifyBigDrop` for #bigdrop's; its buttons then: sticker link, sticker text, caption, Open
+  Instagram, Open link, first 3). A Story Postiz posts (#story #autopost, `BIG_DROP_AUTO_STORY`) still goes with `''`; its
+  card says the caption isn't used and names `MANUALPOST_TAG`.
 - An Instagram Story's own time (user asked: post the Story at a different time): every Story card on the Social
   preview has "Post the Story at" (datetime-local in `SITE_TIMEZONE`; `POST .../story-at` {at}, `zonedTime` turns it
   into a time, refused when gone by or more than a year away; `storyAt` ISO in `custom.json`; "With the post" clears

@@ -97,7 +97,7 @@ function mediaSet(list, { grid = false, cls = '', ...opts } = {}) {
 
 function previewCard(e, pv, s) {
   const { LIMITS, IMAGE_LIMITS, INSTAGRAM_IDS, TIKTOK_IDS, NO_LINK_IDS, CUSTOM_CHANNELS, CUSTOM_MAX, STICKER_TEXT_MAX, MANUAL_DRAFTS,
-    channelKey } = s;
+    channelKey, STORY_CAPTION_MAX = 2200 } = s;
   const p = PLATFORMS[e.idf] || { name: e.idf, hard: 500 };
   const story = e.label.endsWith(':story');
   const isIG = INSTAGRAM_IDS.includes(e.idf);
@@ -192,8 +192,20 @@ function previewCard(e, pv, s) {
       + `<div class="hint">${esc(tz)} time. ${e.storyAt ? '' : e.postAt ? 'The same time as the post in Ghost, until you change it. '
         : 'The same time as the post: when you publish it, until you set a time. '}${e.status === 'auto' ? 'Postiz posts it then.'
         : 'Your reminder for it comes then.'}${e.storyLate ? ' <b>That time comes before the post goes out, so the Story goes with the post.</b>' : ''}</div></div>`;
+  // Draft previews, any Instagram Story: its caption (pv.custom.storyCaption), saved on leaving the box. Instagram's
+  // API takes no text with a Story, so it's for one you post by hand: the reminder gives it to copy
+  const storyCaption = pv.custom?.storyCaption || '';
+  const captionEditor = !pv.draft || !story ? ''
+    : `<div class="editor"><label class="toggle" for="story-caption">Story caption</label>`
+      + `<span class="lsaved csaved" aria-live="polite"></span><div class="box">`
+      + `<textarea id="story-caption" data-story-caption rows="3" maxlength="${STORY_CAPTION_MAX}" spellcheck="true"`
+      + ` placeholder="Text for the Story (optional)">${esc(storyCaption)}</textarea>`
+      + `<div class="hint">${e.status === 'auto' ? `<b>Postiz posts this Story, and Instagram's API takes no text with a Story,`
+        + ` so this isn't used.</b> Add ${esc(s.MANUALPOST_TAG || '#manualpost')} to post it yourself with it.`
+        : 'Instagram\'s API can\'t put text on a Story, so your reminder gives it to copy: add it with Aa in the app.'}`
+      + ' Saves when you click away.</div></div></div>';
   // Draft previews: the channel's own text, behind a checkbox (saved as you type)
-  const editor = !pv.draft ? '' : story ? timeEditor + stickerEditor : e.status === 'skip' || !CUSTOM_CHANNELS.includes(key) ? ''
+  const editor = !pv.draft ? '' : story ? timeEditor + captionEditor + stickerEditor :e.status === 'skip' || !CUSTOM_CHANNELS.includes(key) ? ''
     : `<div class="editor"><label class="toggle"><input type="checkbox" data-custom="${key}"${own ? ' checked' : ''}>`
       + ` Modify text for ${esc(p.name)}</label><div class="box"${own ? '' : ' hidden'}>`
       + `<textarea data-channel="${key}" data-auto="${escAttr(auto)}" rows="5" maxlength="${CUSTOM_MAX}" spellcheck="true">${esc(own || auto)}</textarea>`
@@ -480,6 +492,7 @@ document.addEventListener('change', function (e) {
     addr.hidden = true; saveMore('sticker', { link: e.target.value }, document.querySelector('.ssaved'));
   } else if (e.target.matches('[data-sticker-other]') && e.target.value.trim()) saveMore('sticker', { link: e.target.value.trim() }, document.querySelector('.ssaved'));
   else if (e.target.matches('[data-sticker]')) saveMore('sticker', { text: e.target.value.trim() }, document.querySelector('.ssaved'));
+  else if (e.target.matches('[data-story-caption]')) saveMore('story-caption', { text: e.target.value.trim() }, document.querySelector('.csaved'));
 });
 })();`;
 

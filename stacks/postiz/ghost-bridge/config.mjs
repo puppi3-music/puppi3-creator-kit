@@ -77,6 +77,7 @@ export const PHOTOS_BASE = '/social-preview/photos';
 export const PHOTO_PAGE_DAYS = Math.max(1, Number(env.PHOTO_PAGE_DAYS) || 14); // not a number = 14
 export const CUSTOM_MAX = 5000;
 export const STICKER_TEXT_MAX = 60;
+export const STORY_CAPTION_MAX = 2200; // Instagram's caption limit
 // Dry-run previews: an HTML page per webhook showing each channel's post, served at /previews/
 export const PREVIEWS = DRY_RUN && (env.PREVIEWS || 'true') === 'true';
 export const PREVIEW_DIR = env.PREVIEW_DIR || path.join(path.dirname(STATE_FILE), 'previews');
