@@ -185,40 +185,45 @@ groups:
           __panelId__: "116"
         notification_settings: { receiver: puppi3 ntfy }
 
-      # Ghost's tracker posts each page view to /.ghost/analytics (puppi3.yml -> page-hit-country -> traffic-analytics).
-      # No successful page hit in 12 hours while Ghost served plenty of pages = the route, a plugin or
-      # traffic-analytics is broken and visitors aren't being counted. (Quiet hours: no data = OK.)
-      # 12 h, not 6: with a few dozen visitors a day, 6 h without one is normal (overnight). Ghost's 200s
-      # include images, CSS and bots, so the >100 guard only says Ghost was up and being asked for things.
+      # Ghost's tracker posts each page view to /.ghost/analytics (puppi3.yml -> page-hits route -> page-hit-country ->
+      # traffic-analytics). With a few dozen visitors a day, hours without one are normal, so a quiet spell alone
+      # isn't a fault: it fires when (1) the route answered 3+ errors and no success in 12 h (visitors are trying,
+      # their hits fail), or (2) no hit got through in 3 days although Ghost answered over 300 requests then (Ghost's
+      # 200s include images, CSS and bots, so the guard only says it was up; catches the route missing altogether).
+      # Either way 1 when broken, 0 when fine.
       - uid: puppi3-page-hits-stopped
         title: Visitors aren't being counted
         condition: B
         data:
           - refId: A
-            relativeTimeRange: { from: 43200, to: 0 }
+            relativeTimeRange: { from: 259200, to: 0 }
             datasourceUid: prometheus
             model:
               refId: A
               instant: true
               range: false
               expr: >-
-                (sum(increase(traefik_router_requests_total{router="puppi3-page-hits@file",code=~"2.."}[12h])) or vector(0))
-                and on() sum(increase(traefik_router_requests_total{router="puppi3-ghost@file",code="200"}[12h])) > 100
+                (((sum(increase(traefik_router_requests_total{router="puppi3-page-hits@file",code!~"2.."}[12h])) >= 3)
+                unless on() (sum(increase(traefik_router_requests_total{router="puppi3-page-hits@file",code=~"2.."}[12h])) >= 1)) * 0 + 1)
+                or on() ((((sum(increase(traefik_router_requests_total{router="puppi3-page-hits@file",code=~"2.."}[3d])) or vector(0)) < 1)
+                and on() (sum(increase(traefik_router_requests_total{router="puppi3-ghost@file",code="200"}[3d])) > 300)) * 0 + 1)
+                or on() vector(0)
           - refId: B
             datasourceUid: __expr__
-            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: lt, params: [1] } }] }
+            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [0] } }] }
         for: 30m
         noDataState: OK
         execErrState: Error
         labels: { project: puppi3 }
         annotations:
-          summary: "No page hit has reached Ghost's analytics in 12 hours although Ghost answered over 100 requests: check the puppi3-page-hits route, the page-hit-country and real-ip plugins, and traffic-analytics."
+          summary: "Page hits are failing (errors and no success in 12 hours), or none got through in 3 days although Ghost was answering: check the puppi3-page-hits route, the page-hit-country and real-ip plugins, and traffic-analytics."
           __dashboardUid__: puppi3-traffic
           __panelId__: "306"
         notification_settings: { receiver: puppi3 ntfy }
 
-      # The other half: page hits arrive but Tinybird has none since yesterday (tinybird-local or the
-      # forwarding from traffic-analytics is broken).
+      # The other half: page hits got through the route in the last 24 h but Tinybird has none for yesterday and
+      # today (tinybird-local or the forwarding from traffic-analytics is broken). No hits at all = a quiet day, not
+      # this (the rule above watches the route). Tinybird not answering = no data = Alerting.
       - uid: puppi3-tinybird-empty
         title: Ghost's analytics have no page views since yesterday
         condition: B
@@ -242,15 +247,23 @@ groups:
                   - { key: date_from, value: "${__from:date:YYYY-MM-DD}" }
                   - { key: date_to, value: "${__to:date:YYYY-MM-DD}" }
               root_selector: "$sum([data.pageviews])"
+          - refId: C
+            relativeTimeRange: { from: 86400, to: 0 }
+            datasourceUid: prometheus
+            model:
+              refId: C
+              instant: true
+              range: false
+              expr: 'sum(increase(traefik_router_requests_total{router="puppi3-page-hits@file",code=~"2.."}[24h])) or vector(0)'
           - refId: B
             datasourceUid: __expr__
-            model: { refId: B, type: threshold, expression: A, conditions: [{ evaluator: { type: lt, params: [1] } }] }
+            model: { refId: B, type: math, expression: "$A < 1 && $C >= 1" }
         for: 2h
         noDataState: Alerting
         execErrState: Error
         labels: { project: puppi3 }
         annotations:
-          summary: "Tinybird counts no page views for yesterday and today: tinybird-local, tinybird-sync or traffic-analytics' forwarding may be broken (the Traffic dashboard will be empty)."
+          summary: "Page hits got through in the last 24 hours but Tinybird counts no page views for yesterday and today: tinybird-local, tinybird-sync or traffic-analytics' forwarding may be broken (the Traffic dashboard will be empty)."
           __dashboardUid__: puppi3-traffic
           __panelId__: "306"
         notification_settings: { receiver: puppi3 ntfy }

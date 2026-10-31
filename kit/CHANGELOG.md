@@ -33,6 +33,19 @@ posts itself and was scheduled before this update can't be moved from here: move
 
 **Restarts:** the bridge, for a few seconds (a share in progress finishes first).
 
+### Fewer false "Visitors aren't being counted" alerts on a quiet site
+
+On a small site, hours without a visitor are normal, and the alert took 12 quiet hours for broken counting. It now
+fires when visitors' page views are failing (3 or more errors and none through in 12 hours), or when none got
+through in 3 days although Ghost was answering. "Ghost's analytics have no page views since yesterday" now needs
+page views to have got through in the last day, so a quiet day doesn't set it off either (Operations guide, "The
+alerts").
+
+**Your site:** `kit/kit.sh <folder> up` after updating brings the new rules (on Kubernetes, `k8s/up.sh`).
+
+**Restarts:** the site's Grafana, for a few seconds: `up` restarts it when the alert rules changed, as they're read
+only when it starts.
+
 ## 1.4.1
 
 ### For whoever changes the kit: the private-name checks read their words from the site's repo
