@@ -7,6 +7,18 @@ From 1.2.2 on, each change has a `###` heading saying what it does, a short para
 (what to run, if anything) and **Restarts:** (what goes down, and for how long), each its own paragraph. The release workflow joins wrapped
 lines, since GitHub's release notes break wherever the text does.
 
+## 1.5.1 (not released yet)
+
+### "Back to the usual pfp" can bring the usual picture
+
+When a seasonal outfit ends, the "🐶 Back to the usual pfp" notification now has your everyday profile picture
+attached, with a Save picture button, the same way the outfit's own reminder does, when the site's theme has one
+(`assets/images/pfp/usual.png`). A theme without it, like the kit's own, gets the reminder's text alone, as before.
+
+**Your site:** `kit/kit.sh <folder> up -d` after updating brings the new bridge (on Kubernetes, `k8s/up.sh`).
+
+**Restarts:** the bridge, for a few seconds (a share in progress finishes first).
+
 ## 1.5.0
 
 **All of it at once:** `kit/kit.sh <folder> up -d` (Compose) or `k8s/up.sh <folder> <overlay>` (Kubernetes) brings
