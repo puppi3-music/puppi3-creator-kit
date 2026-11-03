@@ -22,7 +22,12 @@ whole: `stacks/postiz/ghost-bridge/CLAUDE.md`; the settings compose passes: `sta
 
 ## Instagram, YouTube, SoundCloud numbers
 - Instagram numbers (posts are made by hand, so Postiz doesn't know them): `IG_STATS` [true] polls every `IG_STATS_MINUTES`
-  [60, min 10] (needs `POSTIZ_KEY`; read-only, runs in DRY_RUN too): account new followers/reach per day + 30-day totals from
+  [60, min 10] (needs `POSTIZ_KEY`; read-only, runs in DRY_RUN too). The followers' audience (age, gender, country, city: `audience`
+  = `audienceLists`) and when they're online (`onlineByHour`) every `IG_AUDIENCE_MINUTES` [20, min 10] on a timer of its own
+  (`pollInstagramAudience`, user asked 2026-11-02: 5 calls, only into instagram.json's `audience`/`onlineByHour`/`audienceAt`;
+  serialised with the poll, both write the file; counted in `postsPerPoll`'s budget, scaled to the poll's interval; needs the db
+  token). Under 100 followers (Instagram has none) neither it nor the poll asks. The poll still asks all three demographics
+  (followers, engaged, reached) once a UTC day for the archive. Instagram itself updates them about daily. Account new followers/reach per day + 30-day totals from
   Postiz's analytics (Instagram's `follower_count` = new follows per day, absent under 100 followers: stored as `newFollowers`),
   the follower total per day (`followerHistory`, kept from poll to poll in instagram.json, 400 days; needs the db token below,
   so staging has none), profile views + profile link taps per day (`igProfileDays`: Graph `/me/insights?metric=profile_views,
@@ -53,7 +58,7 @@ whole: `stacks/postiz/ghost-bridge/CLAUDE.md`; the settings compose passes: `sta
   like social media researchers would, per network, and against industry standards too, shown as its own verdict): `withPerformance` (stats/performance.mjs) runs before every network file is written (collector(); IG/YT/SC writes in
   stats/instagram, youtube, soundcloud.mjs), reads that poll's history file and adds `perf` (0-100/null), `perf_label`, `perf_why` (= `perf_tip`),
   `perf_industry_label` (Well above/Above/About/Below/Well below typical + "· 7.4% vs 3.2%", or Too few to tell, Too soon, No numbers yet,
-  No benchmark, Not a newsletter: `industryVerdict`, never blank, the reason in `perf_industry`; Post's tiles say why when there's no verdict at all; `perf_label` = level + "· better than k in 10"), `perf_industry` to each post (IG `stories` among Stories). `SIGNALS[network]` = what the network ranks on, weighted: rates per
+  No benchmark, Not a newsletter: `industryVerdict`, never blank, the reason in `perf_industry`; Post's tiles say why when there's no verdict at all; `perf_label` = level + "· better than k in 10"), `perf_industry` to each post (IG `stories` among Stories). `SIGNALS[network]` = what the network ranks on, weighted (Instagram's saves per reach 2, user asked: save rate matters to her; its posts also get a plain `saveRate`, saves per 100 reached, rounded to 0.1, null under `SAVE_RATE_MIN_REACH` 30, written by `withSaveRate` in instagram.mjs for Platforms' Save rate column, with `saveRateTip` and `saveRateStyle` (CSS) from `SAVE_RATE_BANDS`, × the account's usual = `totals.saveRateUsual`, the median of the newest 20 posts with a rate, once 5 have; user asked to make a good number obvious, so against her own usual, not an industry figure): rates per
   reach/view/play/follower (`rate()`, follower count at posting time interpolated from the file's history) and counts at the
   same age (`count()`, `numbersAt` ±1-3 days; all "as now" past `PERF_SETTLED` 28 d); vs the `PERF_BASE` 20 posts nearest in
   time (same `POST_KIND` if `PERF_MIN` 5), rates shrunk by `prior` exposures toward the group's pooled rate, percentile per
@@ -205,6 +210,13 @@ whole: `stacks/postiz/ghost-bridge/CLAUDE.md`; the settings compose passes: `sta
   get 400), all-time only, in clicks.json `totals.hiccups` (key kind\twhy\ttab\tdevice\tbrowser) and as counters
   `puppi3_live_stalls_total` / `puppi3_live_reconnects_total{why,tab=shown|hidden,device,browser}` (Health's live stream panels);
   staging: label `puppi3-staging-clicks`).
+- Postiz's channel list (`channel()`/`channels()` in stats/stats.mjs, Bluesky's handle, Threads, TikTok) is kept in
+  `data/channels.json`: while Postiz answers an error (a 502 for minutes after the server starts, as after a power cut,
+  2026-11-01) they use the last list, so the numbers straight from the network still come in, and the file's `errors`
+  say "Postiz: ... (used the channels it last listed)". `postiz()` (services.mjs) gives a proxy's HTML error page as its title.
+- `accountGains` smooths what comes in lumps (`WEEKLY[network].smooth`, only Instagram: reach, profile views, link taps, the posts' likes/comments/shares/saves
+  gains and their engagement; user asked 2026-11-02, the hour-by-hour lines were spikes between 0s): each check's value = the average of
+  the checks in the `SMOOTH_HOURS` [6] ending there. Followers stay as they came.
 - Every network file's `daily` also gets, just before it's written (`withWeekly(network, out)` beside each
   `trackAccount`), what Platforms' charts draw (`WEEKLY` in stats/history.mjs): `<key>7` = the 7-day average of each
   `avg` key (the days kept among the 7 ending that day, by date; null under 4 of them), `engagement` = the network's

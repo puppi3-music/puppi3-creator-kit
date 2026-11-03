@@ -53,3 +53,8 @@ the settings it passes, and Postiz.
   Add Channel with an account Postiz already has upserts on `(organizationId, internalId)`, so its posts stay
   attached; "Reconnect channel" shows only when Postiz flags a token. `postiz-temporal-ui` listens on the host's
   127.0.0.1:8233, no sign-in (an ssh tunnel from elsewhere).
+- Postiz's healthcheck asks the page and the API (`/api/public/v1/integrations`, a 401 is up): Postiz runs its
+  backend, frontend and orchestrator under pm2 in one container, and after a power cut the server starts every
+  container at once (depends_on is only `compose up`'s), so the backend can die on Redis not being up yet
+  (2026-11-01: hours of 502s while the page loaded). Unhealthy doesn't restart it: `docker exec postiz pm2 restart
+  backend` (or restart postiz) does.

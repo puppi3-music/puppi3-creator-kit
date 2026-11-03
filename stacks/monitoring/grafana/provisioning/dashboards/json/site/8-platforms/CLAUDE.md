@@ -44,7 +44,7 @@ along with the Infinity gotchas and the shared look). One row folder per section
   per day does, so B's columns carry A's names (A's byName overrides style both) from the bridge's `accountGains`:
   totals as they stood, gains = `new<Key>` or `<key>` (today-so-far differences), `engagement` = the WEEKLY `hourly` keys
   added up (Instagram's `newPost<Likes|Comments|Shares|Saves>` and Threads' `newPost<Likes|Replies|Reposts|Quotes>`: the posts'
-  summed gains, since their account insights come in late and read flat); no 7-day lines or rate there. The last override, `byFrameRefID` B, makes B's lines linear, 2px, solid,
+  summed gains, since their account insights come in late and read flat); Instagram's reach, profile views, link taps and engagement there are a 6-hour average (`smooth`, `SMOOTH_HOURS` in stats/history.mjs: they came in lumps); no 7-day lines or rate there. The last override, `byFrameRefID` B, makes B's lines linear, 2px, solid,
   fill 10 (else they'd be the faint dashed "each day" style; not stepped: user saw steps over mostly-0 hours as bars), and `displayName` `${__field.name}` (A and B share column names, so Grafana would put "B " before each hover name). Only YouTube's Minutes watched and Shares have no hourly
   (Analytics: per day, 2-3 days late). No panel `timeFrom`. Grids can't show/hide panels by variable, hence one panel
   per chart for both views.
@@ -57,8 +57,8 @@ along with the Infinity gotchas and the shared look). One row folder per section
   published, Post.
 - Shown on Platforms (user asked: useful without clutter): Instagram row's posts table (panel 26, "Instagram posts & Stories": `posts` + `stories` appended,
   Type Story, Replies/Taps/Profile visits columns; Story rows open Post too: `NETWORKS.instagram.stories`, kept as
-  `instagram-stories`, compared only with Stories) + Stories/Story views tiles (`stories30`/`storyViews30`), posts table Follows + Avg watch (ms),
-  a row of Followers by country/age/gender (horizontal barcharts 29/20/21, `audience` = `audienceLists`; barcharts, not bargauges: an empty bargauge draws its no-data text as a bar, a barchart centres it) + "When followers are online"
+  `instagram-stories`, compared only with Stories) + Stories/Story views tiles (`stories30`/`storyViews30`), posts table Follows + Avg watch (ms) + Save rate (the bridge's `saveRate`, unit percent, after Saves; a Sort by option; coloured from hidden `Save rate style` via `custom.styleField`, hover `Save rate tip`, like When to post; user asked),
+  a row of Followers by country/age/gender (horizontal barcharts 29/20/21, `audience` = `audienceLists`, every `IG_AUDIENCE_MINUTES` [20] from 100 followers; barcharts, not bargauges: an empty bargauge draws its no-data text as a bar, a barchart centres it) + "When followers are online"
   (barchart 22, `onlineByHour`: IG's hours taken as Pacific, `zoneHour` -> SITE_TIMEZONE); Threads Link clicks (daily
   `linkClicks` from the archive's insights days, `linkClicks30`); YouTube "Where YouTube views come from" (barchart 34 beside
   the per-day chart, `sources28` from the archive's `trafficSources`, `YT_SOURCES` names); Bluesky Saves, Mixcloud Listeners,

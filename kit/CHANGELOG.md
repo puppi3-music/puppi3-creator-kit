@@ -19,6 +19,30 @@ attached, with a Save picture button, the same way the outfit's own reminder doe
 
 **Restarts:** the bridge, for a few seconds (a share in progress finishes first).
 
+### Postiz shows as unhealthy when its server has died
+
+After a power cut, Postiz could start before its Redis: its page still loaded, but everything else answered 502
+for hours. Its health check now asks its API too, so that shows as unhealthy (on Kubernetes the pod restarts
+itself), and the bridge's numbers carry on meanwhile with the channels Postiz last listed (Operations guide,
+Troubleshooting).
+
+**Your site:** `kit/kit.sh <folder> up -d` after updating (on Kubernetes, `k8s/up.sh`). If it shows unhealthy:
+`kit/kit.sh <folder> restart postiz`.
+
+**Restarts:** Postiz, for about a minute, and the bridge, for a few seconds.
+
+### Instagram: a Save rate column, smoother hourly lines, fresher audience
+
+Instagram's posts table on Platforms has a **Save rate** (saves per 100 people reached), coloured against your
+own usual, and a Sort by choice for it; saves now count double in "Doing best". Hour by hour, Instagram's reach,
+profile views, link taps and reactions are a 6-hour average instead of spikes. Followers by age, gender, country
+and when they're online are asked every 20 minutes (`IG_AUDIENCE_MINUTES`) instead of once a day.
+
+**Your site:** `kit/kit.sh <folder> up -d` after updating brings the new bridge and dashboards (on Kubernetes,
+`k8s/up.sh`).
+
+**Restarts:** the bridge and the site's Grafana, for a few seconds each.
+
 ## 1.5.0
 
 **All of it at once:** `kit/kit.sh <folder> up -d` (Compose) or `k8s/up.sh <folder> <overlay>` (Kubernetes) brings

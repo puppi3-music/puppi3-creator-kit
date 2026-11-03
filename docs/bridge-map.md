@@ -165,7 +165,7 @@ All SQL lives here.
 
 ### `stats/instagram.mjs`
 Instagram account + posts + Stories + profile days, straight from Graph with Postiz's token; writes instagram.json.
-- Exports: `IG_STATS`, `IG_STATS_FILE`, `startInstagramStats`, `pollInstagramStats` (one poll: the tests)
+- Exports: `IG_STATS`, `IG_STATS_FILE`, `startInstagramStats`, `pollInstagramStats` (one poll: the tests), `pollInstagramAudience` (one audience check: the tests)
 - Imports: config, services (`PG`, `pgQuery`, `postiz`), stats/history, stats/performance
 
 ### `stats/youtube.mjs`
