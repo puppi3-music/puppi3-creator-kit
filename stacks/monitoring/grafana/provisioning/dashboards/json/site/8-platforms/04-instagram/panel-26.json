@@ -3,7 +3,7 @@
   "spec": {
     "id": 26,
     "title": "Instagram posts & Stories",
-    "description": "Every post on the account, and every Story the bridge saw while it was up (Type: Story), with its numbers from Instagram. Likes and comments are fresh at each check (${every_instagram}); views, reach, saves and shares are asked per post, for the newest 25 (IG_STATS_POSTS) and as many older ones at each check, so an older post's can be a few hours old. Instagram gives a Story's numbers only for the 24 hours it's up and nothing after, so a Story's are its numbers at the bridge's last check before it went (up to one check early); Stories from before the bridge collected them, or up for less than one check, aren't here. Needs POSTIZ_DB_PASSWORD in the postiz .env: the bridge reads the Instagram channel's token from Postiz's database; without it only the account numbers above are collected. Click a row for that post or Story up close (the Post dashboard): its numbers per day and what it did for the site (a Story is compared with your other Stories). The Sort by and Show dropdowns at the top of the section pick the order and which posts. Follows = people who followed you from that post; Avg watch = how long a Reel was watched on average (Reels only); Replies, Taps (forward, back, to exit or to the next account) and Profile visits are Stories' (Profile visits also posts' where Instagram gives it). Link opens it on Instagram (a Story only while it's up, or from your archive). vs your usual: this post against your other posts on this network, on what the network ranks posts by (hover for why); vs industry: against the published average for this network (hover for the numbers); Sort by \"Doing best first\".",
+    "description": "Every post on the account, and every Story the bridge saw while it was up (Type: Story), with its numbers from Instagram. Likes and comments are fresh at each check (${every_instagram}); views, reach, saves and shares are asked per post, for the newest 25 (IG_STATS_POSTS) and as many older ones at each check, so an older post's can be a few hours old. Instagram gives a Story's numbers only for the 24 hours it's up and nothing after, so a Story's are its numbers at the bridge's last check before it went (up to one check early); Stories from before the bridge collected them, or up for less than one check, aren't here. Needs POSTIZ_DB_PASSWORD in the postiz .env: the bridge reads the Instagram channel's token from Postiz's database; without it only the account numbers above are collected. Click a row for that post or Story up close (the Post dashboard): its numbers per day and what it did for the site (a Story is compared with your other Stories). The Sort by and Show dropdowns at the top of the section pick the order and which posts. Save rate = saves per 100 people reached (a post that 2,000 saw with 80 saves, 4%, beats one 50,000 saw with 200, 0.4%), blank under 30 reached, where one save would read as a big rate. Coloured against your usual save rate (the median of your newest 20 posts with one, once 5 have): strong green from 1.5\u00d7, green from 1.1\u00d7, plain about the usual, red under 0.9\u00d7; hover (corner triangle) for the numbers; Follows = people who followed you from that post; Avg watch = how long a Reel was watched on average (Reels only); Replies, Taps (forward, back, to exit or to the next account) and Profile visits are Stories' (Profile visits also posts' where Instagram gives it). Link opens it on Instagram (a Story only while it's up, or from your archive). vs your usual: this post against your other posts on this network, on what the network ranks posts by (hover for why); vs industry: against the published average for this network (hover for the numbers); Sort by \"Doing best first\".",
     "links": [],
     "data": {
       "kind": "QueryGroup",
@@ -65,6 +65,21 @@
                       "selector": "saved",
                       "text": "Saves",
                       "type": "number"
+                    },
+                    {
+                      "selector": "saveRate",
+                      "text": "Save rate",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "saveRateTip",
+                      "text": "Save rate tip",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "saveRateStyle",
+                      "text": "Save rate style",
+                      "type": "string"
                     },
                     {
                       "selector": "follows",
@@ -166,19 +181,22 @@
                   "Comments": 8,
                   "Shares": 9,
                   "Saves": 10,
-                  "Follows": 11,
-                  "Avg watch": 12,
-                  "Replies": 13,
-                  "Taps": 14,
-                  "Profile visits": 15,
-                  "Link": 16,
-                  "ref": 17,
-                  "posted_ms": 18,
+                  "Follows": 12,
+                  "Avg watch": 13,
+                  "Replies": 14,
+                  "Taps": 15,
+                  "Profile visits": 16,
+                  "Link": 17,
+                  "ref": 18,
+                  "posted_ms": 19,
                   "vs your usual": 3,
-                  "Score": 19,
-                  "perf_tip": 20,
+                  "Score": 20,
+                  "perf_tip": 21,
                   "vs industry": 4,
-                  "industry_tip": 21
+                  "industry_tip": 22,
+                  "Save rate": 11,
+                  "Save rate tip": 23,
+                  "Save rate style": 24
                 },
                 "excludeByName": {},
                 "renameByName": {}
@@ -562,6 +580,42 @@
                     "legend": false,
                     "tooltip": false
                   }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Save rate"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "percent"
+                },
+                {
+                  "id": "decimals",
+                  "value": 1
+                },
+                {
+                  "id": "custom.styleField",
+                  "value": "Save rate style"
+                },
+                {
+                  "id": "custom.tooltip.field",
+                  "value": "Save rate tip"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byRegexp",
+                "options": "/^Save rate (tip|style)$/"
+              },
+              "properties": [
+                {
+                  "id": "custom.hidden",
+                  "value": true
                 }
               ]
             }

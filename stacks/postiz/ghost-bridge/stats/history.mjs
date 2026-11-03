@@ -366,7 +366,7 @@ export function trackAccount(dataDir, network, out) {
 export function accountGains(checks, network) {
   const last = {};
   const sum = WEEKLY[network]?.hourly;
-  return checks.map(([t, vals]) => {
+  const rows = checks.map(([t, vals]) => {
     const row = { time: t, ...vals };
     for (const [k, v] of Object.entries(vals)) {
       if (!Number.isFinite(v)) continue;
@@ -383,6 +383,25 @@ export function accountGains(checks, network) {
     }
     return row;
   });
+  return smoothed(rows, WEEKLY[network]?.smooth);
+}
+
+// Lumpy gains (Instagram's reach comes in batches, a post's shares and saves when its turn comes) drawn as each check's
+// average over the checks of the SMOOTH_HOURS ending there, so an hour's lump spreads over the hours it built up in
+// instead of a spike between flat 0s. Only the keys listed (`smooth` in WEEKLY); the rest stay as they came.
+export const SMOOTH_HOURS = 6;
+function smoothed(rows, keys) {
+  if (!keys?.length) return rows;
+  return rows.map((row, i) => {
+    const out = { ...row };
+    for (const k of keys) {
+      if (!Number.isFinite(row[k])) continue;
+      const vals = [];
+      for (let j = i; j >= 0 && rows[j].time > row.time - SMOOTH_HOURS * 3_600_000; j--) if (Number.isFinite(rows[j][k])) vals.push(rows[j][k]);
+      out[k] = Math.round((vals.reduce((a, v) => a + v, 0) / vals.length) * 10) / 10;
+    }
+    return out;
+  });
 }
 
 // ---------- the Platforms charts' 7-day lines ----------
@@ -391,12 +410,14 @@ export function accountGains(checks, network) {
 // WEEKLY[network]: `avg` = the per-day keys to average (the reach chart's lines); `engagement` = the keys added up into
 // each day's `engagement` (likes, comments, shares, saves in each network's words); `per` = what the rate divides by
 // (per day, summed over the same 7 days), or `followers` (Bluesky has no views: per 100 followers, that day's count);
-// `hourly` = the same engagement keys in /account.json's checks (accountGains' names), added up into each check's `engagement`.
+// `hourly` = the same engagement keys in /account.json's checks (accountGains' names), added up into each check's `engagement`;
+// `smooth` = the checks' keys drawn as a SMOOTH_HOURS average (accountGains), the ones that come in lumps.
 export const WEEKLY = {
   ghost: { avg: ['visitors'], engagement: ['newMembers', 'newComments', 'linkClicks', 'livePlays'], per: 'visitors',
     hourly: ['newMembers', 'newComments', 'newLinkClicks', 'newLivePlays'] },
   instagram: { avg: ['reach', 'profileViews', 'linkTaps'], engagement: ['likes', 'comments', 'shares', 'saves'], per: 'reach',
-    hourly: ['newPostLikes', 'newPostComments', 'newPostShares', 'newPostSaves'] },
+    hourly: ['newPostLikes', 'newPostComments', 'newPostShares', 'newPostSaves'],
+    smooth: ['reach', 'profileViews', 'linkTaps', 'newPostLikes', 'newPostComments', 'newPostShares', 'newPostSaves', 'engagement'] },
   tiktok: { avg: ['views'], engagement: ['newLikes', 'comments', 'shares'], per: 'views', hourly: ['newLikes', 'newComments', 'newShares'] },
   threads: { avg: ['views', 'linkClicks'], engagement: ['likes', 'replies', 'reposts', 'quotes'], per: 'views',
     hourly: ['newPostLikes', 'newPostReplies', 'newPostReposts', 'newPostQuotes'] },

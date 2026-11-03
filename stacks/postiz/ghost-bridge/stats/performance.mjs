@@ -38,7 +38,7 @@ export const SIGNALS = {
     count('watch', 'Avg watch time', 'avgWatchMs', 3, { aged: false, scale: 0.001, unit: ' s' }),
     rate('sends', 'Sends per reach', ['shares'], 'reach', 3),
     rate('likes', 'Likes per reach', ['likes'], 'reach', 3),
-    rate('saves', 'Saves per reach', ['saved'], 'reach', 1),
+    rate('saves', 'Saves per reach', ['saved'], 'reach', 2),
     rate('comments', 'Comments per reach', ['comments'], 'reach', 1),
     rate('follows', 'Follows per reach', ['follows'], 'reach', 1),
     count('reach', 'Reach', 'reach', 2),

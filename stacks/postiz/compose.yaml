@@ -163,6 +163,7 @@ services:
       # SELECT, nothing written). Empty POSTIZ_DB_PASSWORD = account numbers only.
       IG_STATS: "true"               # "false" = no Instagram numbers
       IG_STATS_MINUTES: "${IG_STATS_MINUTES:-60}"   # minutes between checks, min 10 (all the *_STATS_MINUTES: set in .env)
+      IG_AUDIENCE_MINUTES: "${IG_AUDIENCE_MINUTES:-20}"   # followers by age/gender/country and when they're online, min 10 (from 100 followers)
       IG_STATS_POSTS: "${IG_STATS_POSTS:-25}"       # at most this many newest posts asked each check, + as many older ones (a call each)
       META_CALLS_PER_HOUR: "${META_CALLS_PER_HOUR:-120}"  # Instagram/Threads: fewer posts each check when the interval would go past this
       POSTIZ_DB_HOST: "postiz-postgres"
