@@ -188,6 +188,17 @@ test('TikTok: a permission the sign-in lacks says to reconnect; Postiz\'s number
   assert.equal(out.totals.followers, 500, 'from the user info, before the videos failed');
 });
 
+test('TikTok: Postiz down (a 502 after the server starts) uses the channels it last listed; TikTok\'s own numbers still come', async () => {
+  tiktok();
+  await c.poll('tiktok'); // Postiz up: its channel list kept
+  web.on(`${POSTIZ}/integrations`, { status: 502, body: '<html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body></body></html>' });
+  web.on(`${POSTIZ}/analytics/c-tt`, { status: 502, body: '<html><head><title>502 Bad Gateway</title></head></html>' });
+  const out = await c.poll('tiktok');
+  assert.deepEqual(out.errors, ['Postiz: GET /integrations -> 502: 502 Bad Gateway (used the channels it last listed)',
+    'Postiz analytics: GET /analytics/c-tt?date=7 -> 502: 502 Bad Gateway']);
+  assert.deepEqual([out.totals.followers, out.totals.likes, out.posts.length], [500, 950, 3]);
+});
+
 test('TikTok: a video that comes back with 0 views, after it had some, keeps its last number (any network\'s posts do)', async () => {
   tiktok();
   const out1 = await c.poll('tiktok');

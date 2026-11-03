@@ -36,21 +36,22 @@ spec:
                 name: postiz-env
           ports:
             - {name: http, containerPort: 5000}
-          # Compose's check: any answer under 500 (an httpGet would count its 4xx as down)
+          # Compose's check: the page and the API, any answer under 500 (an httpGet would count the API's 401 as down);
+          # a dead backend fails liveness, so the pod restarts
           startupProbe:
             exec:
-              command: [node, -e, "const r=require('http').get('http://localhost:5000/',res=>process.exit(res.statusCode<500?0:1));r.on('error',()=>process.exit(1));r.setTimeout(4000,()=>{r.destroy();process.exit(1)})"]
+              command: [node, -e, "const ok=(p)=>new Promise((y,n)=>{const r=require('http').get('http://localhost:5000'+p,(res)=>{res.resume();res.statusCode<500?y():n()});r.on('error',n);r.setTimeout(4000,()=>{r.destroy();n()})});Promise.all([ok('/'),ok('/api/public/v1/integrations')]).then(()=>process.exit(0),()=>process.exit(1))"]
             periodSeconds: 5
             timeoutSeconds: 10
             failureThreshold: 60
           readinessProbe:
             exec:
-              command: [node, -e, "const r=require('http').get('http://localhost:5000/',res=>process.exit(res.statusCode<500?0:1));r.on('error',()=>process.exit(1));r.setTimeout(4000,()=>{r.destroy();process.exit(1)})"]
+              command: [node, -e, "const ok=(p)=>new Promise((y,n)=>{const r=require('http').get('http://localhost:5000'+p,(res)=>{res.resume();res.statusCode<500?y():n()});r.on('error',n);r.setTimeout(4000,()=>{r.destroy();n()})});Promise.all([ok('/'),ok('/api/public/v1/integrations')]).then(()=>process.exit(0),()=>process.exit(1))"]
             periodSeconds: 30
             timeoutSeconds: 10
           livenessProbe:
             exec:
-              command: [node, -e, "const r=require('http').get('http://localhost:5000/',res=>process.exit(res.statusCode<500?0:1));r.on('error',()=>process.exit(1));r.setTimeout(4000,()=>{r.destroy();process.exit(1)})"]
+              command: [node, -e, "const ok=(p)=>new Promise((y,n)=>{const r=require('http').get('http://localhost:5000'+p,(res)=>{res.resume();res.statusCode<500?y():n()});r.on('error',n);r.setTimeout(4000,()=>{r.destroy();n()})});Promise.all([ok('/'),ok('/api/public/v1/integrations')]).then(()=>process.exit(0),()=>process.exit(1))"]
             periodSeconds: 30
             timeoutSeconds: 10
             failureThreshold: 5

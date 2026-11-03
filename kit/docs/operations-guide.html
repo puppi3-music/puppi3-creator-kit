@@ -499,6 +499,8 @@ kit/kit.sh kit/sites/mysite restart ghost</pre></div>
     <dt>Instagram or TikTok drafts don't arrive on the phone</dt>
     <dd>The ntfy app is subscribed to <code>NTFY_TOPIC</code> on <code>NTFY_URL</code>, and the bridge's first lines in its log say <code>ntfy: &lt;the server&gt;/&lt;the topic&gt;</code>, not <code>ntfy: off</code> (off: <code>NTFY_URL</code> was empty when it started, or it's a dry run). Send a test from the bridge:</dd>
     <dd><div class="code"><pre>kit/kit.sh kit/sites/mysite exec postiz-ghost-bridge sh -c 'wget -qO- --post-data test "$NTFY_URL/$NTFY_TOPIC"'</pre></div></dd>
+    <dt>Postiz's page loads but it gives 502 errors, and <code>postiz</code> shows as unhealthy</dt>
+    <dd>Postiz's own server inside the container died, usually because it started before its Redis after the computer came back from a power cut. Start it again: <code>kit/kit.sh &lt;folder&gt; restart postiz</code> (on Kubernetes the pod restarts by itself). Meanwhile the numbers keep coming: the bridge uses the channels Postiz last listed, and the dashboards' errors say so.</dd>
     <dt>Postiz can't schedule: "no mapping defined for search attribute postId"</dt>
     <dd>Postiz adds the two fields it searches Temporal by when it starts, so it started before Temporal's records were made new (the update to kit 1.3.1, or Temporal's database started over). Start it again: <code>kit/kit.sh &lt;folder&gt; restart postiz</code>.</dd>
     <dt>Postiz says a post went out (or still shows it queued), but it never appears</dt>

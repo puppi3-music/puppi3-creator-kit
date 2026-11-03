@@ -99,9 +99,24 @@ export function startStats({ env, dataDir, log, postiz, pgQuery, PG, ghostPosts,
   }
 
   // ---------- Postiz channels (Threads, TikTok, Bluesky's handle) ----------
-  async function channel(ids, label) {
+  // Postiz's list kept in channels.json: while Postiz is down (a 502 for minutes after the NAS starts, as after a power
+  // cut) a collector uses the last list, so the numbers straight from the network still come in; out's errors say so
+  let channelsKept = null;
+  async function channels(out) {
+    try {
+      const list = await postiz('GET', '/integrations');
+      if (Array.isArray(list)) { channelsKept = list; await writeJson(file('channels'), list).catch(() => {}); }
+      return list;
+    } catch (e) {
+      if (!channelsKept) { const kept = await readJson(file('channels')); channelsKept = Array.isArray(kept) && kept.length ? kept : null; }
+      if (!channelsKept) throw e;
+      out?.errors.push(`Postiz: ${e.message} (used the channels it last listed)`);
+      return channelsKept;
+    }
+  }
+  async function channel(ids, label, out) {
     if (!postiz) throw new Error('needs POSTIZ_API_KEY (to find the channel in Postiz)');
-    const ch = (await postiz('GET', '/integrations')).find((c) => ids.includes(c.identifier) && !c.disabled);
+    const ch = (await channels(out)).find((c) => ids.includes(c.identifier) && !c.disabled);
     if (!ch) throw new Error(`no ${label} channel in Postiz`);
     return ch;
   }
