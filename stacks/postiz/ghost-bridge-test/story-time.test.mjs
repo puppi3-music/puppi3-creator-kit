@@ -15,6 +15,8 @@ const NTFY = 'http://ntfy.test';
 Object.assign(process.env, { GHOST_API_URL: GHOST, POSTIZ_API_URL: POSTIZ, NTFY_URL: NTFY, NTFY_TOPIC: 'test',
   GHOST_ADMIN_API_KEY: `${'a'.repeat(24)}:${'b'.repeat(64)}` });
 const { handlePost } = await import('../ghost-bridge/share/share.mjs');
+// the tests' videos aren't real: ffprobe would fetch their made-up addresses (media.mjs's own test reads real ones)
+(await import('../ghost-bridge/share/media.mjs')).videoTools.probe = async () => ({ streams: [] });
 const { loadState, recordShared, editCustom, STATE_FILE } = await import('../ghost-bridge/config.mjs');
 const { serveDraftPreview } = await import('../ghost-bridge/pages/preview-routes.mjs');
 
@@ -148,4 +150,30 @@ test('its Story went out already: the time is saved for sharing again, nothing m
   assert.equal((await moveTo(Date.now() + 2 * 3_600_000)).status, 200);
   assert.deepEqual(web.calls(`${POSTIZ}/posts`), []);
   assert.deepEqual(await kept(), []);
+});
+
+// (not a Story: the Social preview's cover upload, which shares this file's preview harness)
+test('a cover of your own: uploaded to Ghost\'s images, picked, and shown among the cover choices', async () => {
+  const send = (type, bytes, name) => {
+    const req = Readable.from([bytes]);
+    Object.assign(req, { method: 'POST', url: `/ghost/social-preview/${UUID}/cover-upload`, headers: { cookie: 'ghost-admin-api-session=s1',
+      origin: 'https://example.com', 'content-type': type, 'x-file-name': encodeURIComponent(name) } });
+    const res = { status: 0, body: '', writeHead(code) { this.status = code; return this; }, end(b = '') { this.body = String(b); return this; } };
+    return serveDraftPreview(req, res, req.url, { sharing: new Set(), share: async () => {} }).then(() => res);
+  };
+  const mine = 'https://example.com/content/images/2026/11/my-cover.jpg';
+  web.on(`${GHOST}/ghost/api/admin/images/upload/`, { images: [{ url: mine }] });
+  assert.equal((await send('text/plain', Buffer.from('hi'), 'a.txt')).status, 415, 'only a picture');
+  assert.deepEqual(web.calls(`${GHOST}/ghost/api/admin/images/upload/`), []);
+  const res = await send('image/jpeg', Buffer.from([0xff, 0xd8, 0xff]), 'My cover.JPG');
+  assert.equal(res.status, 200, res.body);
+  assert.equal(JSON.parse(res.body).src, mine);
+  assert.equal(web.calls(`${GHOST}/ghost/api/admin/images/upload/`)[0].method, 'POST');
+  let saved; await editCustom('p1', (m) => { saved = m.cover; });
+  assert.equal(saved, mine, 'saved as the cover');
+  const page = (await ask('GET', `/ghost/social-preview/${UUID}/`)).body;
+  assert.match(page, new RegExp(`<label class="cover on"[^>]*><input type="radio"[^>]*value="${mine.replace(/[.]/g, '\\.')}" checked`), 'the upload shows, picked');
+  assert.match(page, /data-cover-upload/, 'and the Upload tile is there');
+  web.on(`${GHOST}/ghost/api/admin/images/upload/`, { status: 413, body: { errors: [{ message: 'File is too large.' }] } });
+  assert.equal((await send('image/png', Buffer.from([1]), 'x.png')).status, 502, 'Ghost refusing it says so');
 });

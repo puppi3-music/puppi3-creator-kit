@@ -90,6 +90,27 @@ export function findGalleryImages(html, postUrl) {
   return out;
 }
 
+// The images a Reel/TikTok cover can be picked from (the Social preview): the feature image, then every picture in
+// the post (image and gallery cards, a video card's thumbnail, an audio card's artwork), each once; not bookmark icons
+export function findCoverImages(html, postUrl, featureImage) {
+  const out = [];
+  const add = (u) => {
+    try {
+      const abs = new URL(u.replace(/&amp;/g, '&'), postUrl).toString();
+      const same = (v) => v.replace(/\/size\/w\d+(h\d+)?\//, '/').split('?')[0];
+      if (/^https?:/.test(abs) && !out.some((v) => same(v) === same(abs))) out.push(abs);
+    } catch { /* bad URL, skip it */ }
+  };
+  if (featureImage) add(featureImage);
+  for (const m of (html || '').matchAll(/<(img|video)\b[^>]*>/gi)) {
+    const tag = m[0];
+    if (/class="[^"]*bookmark/i.test(tag)) continue;
+    const src = (m[1].toLowerCase() === 'img' ? /\ssrc="([^"]+)"/i : /\sposter="([^"]+)"/i).exec(tag);
+    if (src) add(src[1]);
+  }
+  return out;
+}
+
 // First Ghost-hosted audio file from an audio card
 export function findAudio(html, postUrl) {
   if (!html) return null;

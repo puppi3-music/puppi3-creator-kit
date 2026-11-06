@@ -7,6 +7,37 @@ From 1.2.2 on, each change has a `###` heading saying what it does, a short para
 (what to run, if anything) and **Restarts:** (what goes down, and for how long), each its own paragraph. The release workflow joins wrapped
 lines, since GitHub's release notes break wherever the text does.
 
+## 1.6.1 (not released yet)
+
+**All of it at once:** `kit/kit.sh <folder> up -d` (Compose) or `k8s/up.sh <folder> <overlay>` (Kubernetes) brings
+both changes below: the bridge restarts, for a few seconds.
+
+### Videos made to fit every network
+
+A video one of the networks would refuse is now shared as a copy that fits them all, instead of failing after the
+upload (Threads turned down a 4K HEVC clip with FLAC sound and a camera's data tracks with only "UNKNOWN"). One
+that's over 1920 pixels on its long side, over 60 frames a second, 10-bit, not H.264 or HEVC, with sound that isn't
+AAC or is over 48 kHz, or with extra tracks becomes H.264 at most 1920 on the long side with AAC sound, changing only
+what has to change; the website keeps the original. Making it takes a few minutes when the post goes out, and the
+Social preview's media line says what will be changed. A video that can't be read goes as it is, as before
+(Posting guide, "Adding sound").
+
+**Your site:** `kit/kit.sh <folder> up -d` after updating brings the new bridge (on Kubernetes, `k8s/up.sh`).
+
+**Restarts:** the bridge, for a few seconds (a share in progress finishes first).
+
+### A cover for a Reel or a TikTok
+
+A video post's Instagram and TikTok cards on the Social preview have a new **Cover** row: the video's first frame,
+one of the post's pictures, or one you upload. Neither network lets anything but its app set a cover, so the video
+goes as it is and a "🖼️ Cover" notification brings the picture, with the steps to set it in the app. A TikTok that
+posts straight away (`TIKTOK_METHOD=DIRECT_POST`) gets none, since its cover can't be changed after (Posting guide,
+"Checking the social posts" and "🖼️ Cover").
+
+**Your site:** `kit/kit.sh <folder> up -d` after updating brings the new bridge (on Kubernetes, `k8s/up.sh`).
+
+**Restarts:** the bridge, for a few seconds (a share in progress finishes first).
+
 ## 1.6.0
 
 **All of it at once:** for boosts, add the ad account's settings first (Boosts, below), then

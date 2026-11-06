@@ -1,5 +1,5 @@
 // share/media.mjs: the photos and video a post shares: photos made to fit each platform (ffmpeg: type, size, Instagram's
-// crop) and the audio clip ("audiogram") made from an audio card.
+// crop), the video made to fit every network (VIDEO_RULES) and the audio clip ("audiogram") made from an audio card.
 
 import fs from 'node:fs/promises';
 import os from 'node:os';
@@ -143,6 +143,91 @@ export function fitContext() {
     dir: () => dir || (dir = mkdtempSync(path.join(os.tmpdir(), 'photos-'))),
     done: () => dir && fs.rm(dir, { recursive: true, force: true }),
   };
+}
+
+// What a video must be for every network to take it, the strictest of them (Postiz sends the file as it is, and a
+// network that can't use it fails the post after the upload, Threads with only "UNKNOWN"): Threads at most 1920 on
+// the long side and 23-60 fps; Meta and TikTok H.264 or HEVC in 8-bit 4:2:0, AAC audio at up to 48 kHz; and only one
+// video and one audio track (a camera's data tracks, or a second picture, get it refused too).
+export const VIDEO_RULES = { codecs: ['h264', 'hevc'], pixFmts: ['yuv420p', 'yuvj420p'], maxSide: 1920, maxFps: 60,
+  audio: ['aac'], maxRate: 48000 };
+const fps = (r) => { const [a, b] = String(r || '').split('/').map(Number); return b ? a / b : a || 0; };
+
+// What a video (ffprobe's JSON: streams, format) needs changing to fit VIDEO_RULES: { video: reasons, audio: reasons,
+// extra: the tracks to drop, v, a: the tracks kept }, or null when it goes as it is (or can't be read)
+export function videoFixes(info) {
+  const streams = info?.streams || [];
+  const v = streams.find((s) => s.codec_type === 'video' && !s.disposition?.attached_pic);
+  if (!v) return null;
+  const a = streams.find((s) => s.codec_type === 'audio');
+  const R = VIDEO_RULES;
+  const video = [
+    !R.codecs.includes(v.codec_name) && `${String(v.codec_name).toUpperCase()} video`,
+    Math.max(v.width, v.height) > R.maxSide && `${v.width}x${v.height}`,
+    fps(v.r_frame_rate) > R.maxFps + 0.5 && `${Math.round(fps(v.r_frame_rate))} fps`,
+    v.pix_fmt && !R.pixFmts.includes(v.pix_fmt) && v.pix_fmt,
+  ].filter(Boolean);
+  const audio = !a ? [] : [
+    !R.audio.includes(a.codec_name) && `${String(a.codec_name).toUpperCase()} audio`,
+    Number(a.sample_rate) > R.maxRate && `${Number(a.sample_rate) / 1000} kHz`,
+  ].filter(Boolean);
+  const extra = streams.filter((s) => s !== v && s !== a);
+  if (!video.length && !audio.length && !extra.length) return null;
+  return { video, audio, extra, v, a };
+}
+
+// The ffmpeg arguments that make the fixed copy: only what breaks a rule is re-encoded (1080p-ish H.264 at CRF 20,
+// AAC 256k), the rest copied; the picture fitted inside maxSide x maxSide after the camera's rotation
+export function videoArgs(src, fix, file) {
+  const R = VIDEO_RULES;
+  const vf = [Math.max(fix.v.width, fix.v.height) > R.maxSide
+    && `scale=${R.maxSide}:${R.maxSide}:force_original_aspect_ratio=decrease:force_divisible_by=2`,
+    fps(fix.v.r_frame_rate) > R.maxFps + 0.5 && `fps=${R.maxFps}`].filter(Boolean);
+  return ['-hide_banner', '-loglevel', 'error', '-y', '-i', src, '-map', `0:${fix.v.index}`,
+    ...(fix.a ? ['-map', `0:${fix.a.index}`] : []),
+    ...(fix.video.length ? [...(vf.length ? ['-vf', vf.join(',')] : []), '-c:v', 'libx264', '-preset', 'medium', '-crf', '20',
+      '-pix_fmt', 'yuv420p'] : ['-c:v', 'copy']),
+    ...(!fix.a ? [] : fix.audio.length ? ['-c:a', 'aac', '-b:a', '256k', '-ar', String(R.maxRate)] : ['-c:a', 'copy']),
+    '-map_metadata', '-1', '-movflags', '+faststart', file];
+}
+
+// ffprobe's view of a video; tests swap probe for a made-up answer (their videos aren't real)
+export const videoTools = {
+  probe: async (url) => JSON.parse(await run('ffprobe', ['-v', 'error', '-show_entries',
+    'stream=index,codec_type,codec_name,width,height,r_frame_rate,pix_fmt,sample_rate:stream_disposition=attached_pic',
+    '-of', 'json', url], 2 * 60_000)),
+};
+
+// The video every network gets: Ghost's own when it fits VIDEO_RULES (null: upload it as it is), else a copy made
+// here and uploaded ({ id, path, src, fixed: what was changed }). The draft Social preview only says what would be
+// changed (path stays Ghost's video: no minutes of ffmpeg on every look); a DRY_RUN preview makes it, to play.
+export async function fitVideo(url, slug = 'video') {
+  let info;
+  try { info = await videoTools.probe(url); } catch (e) {
+    log(`  couldn't read the video (${e.message.slice(0, 160)}), so it goes as it is`);
+    return null;
+  }
+  const fix = videoFixes(info);
+  if (!fix) return null;
+  const fixed = [...fix.video, ...fix.audio, fix.extra.length && `${fix.extra.length} extra track${fix.extra.length > 1 ? 's' : ''}`]
+    .filter(Boolean).join(', ');
+  const to = [fix.video.length && 'H.264 at most 1920', fix.audio.length && 'AAC'].filter(Boolean).join(', ') || 'one video and one audio track';
+  if (previewStore.getStore()?.draft) {
+    log(`  video would be made to fit every network (${fixed} -> ${to})`);
+    return { id: 'dry-run', path: url, src: url, fixed: `${fixed} -> ${to}` };
+  }
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'video-'));
+  try {
+    const file = path.join(dir, 'video.mp4');
+    const t0 = Date.now();
+    await run('ffmpeg', videoArgs(url, fix, file), 30 * 60_000);
+    const size = (await fs.stat(file)).size;
+    log(`  video made to fit every network in ${((Date.now() - t0) / 1000).toFixed(0)}s (${fixed} -> ${to}; ${(size / 1048576).toFixed(1)} MB)`);
+    const name = `${String(slug).replace(/[^a-z0-9-]/gi, '').slice(0, 60) || 'video'}.mp4`;
+    return { ...(await uploadFile(file, name, 'video/mp4')), src: url, fixed: `${fixed} -> ${to}` };
+  } finally {
+    await fs.rm(dir, { recursive: true, force: true });
+  }
 }
 
 // Render a 1080x1920 MP4 in dir: blurred artwork background, artwork in the middle, live waveform below.

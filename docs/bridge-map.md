@@ -17,7 +17,7 @@ The tests are beside the folder, in `stacks/postiz/ghost-bridge-test/` (`stacks/
 | What gets shared where (`handlePost`), `musicRouting`, #bigdrop / #story / #autopost rules, `/upnext.json` | `share/share.mjs` |
 | Reading the post (`bodyText`, video, audio card, gallery, `postLinks`, `findListenLink`), #clip | `share/content.mjs` |
 | Captions (`buildLines`, `fitLines`, `withLinks`), short tagged links (`tagLink`, `SHORT_LINK_PREFIX`), `#campaign-` | `share/content.mjs` |
-| `IMAGE_RULES`, fitting photos per platform, Instagram crop / frames, audiogram (ffmpeg) | `share/media.mjs` |
+| `IMAGE_RULES`, fitting photos per platform, Instagram crop / frames, `VIDEO_RULES` (a video made to fit every network), audiogram (ffmpeg) | `share/media.mjs` |
 | ntfy notifications (IG/TikTok "post in the app", #bigdrop Story, take-off notice, `NTFY_STORY_GAP`, a Story's own time: later.json) | `share/ntfy.mjs` |
 | Seasonal profile pictures (ntfy reminder per season, data/pfp.json) | `share/pfp.mjs` |
 | Weekly summary on the phone (`WEEKLY_SUMMARY_AT`, `weekDoc`, data/weekly.json) | `share/weekly.mjs` |
@@ -70,7 +70,7 @@ Every setting from the environment (UPPER_CASE exports, one per variable or deri
 ### `services.mjs`
 Postiz's public API and its notifications passed on to ntfy; a minimal Postgres client for Postiz's database; Ghost's
 Admin API (JWT from `GHOST_ADMIN_API_KEY`).
-- Exports: `postiz`, `postizChannels`, `uploadMedia`, `uploadFile`, `startPostizAlerts`, `PG`, `pgQuery`, `ghostToken`, `GHOST_KEY_FIX`, `ghostPostByUuid`, `ghostSiteOrigin`, `ghostAdmin`, `ghostMembers`, `checkGhostKey`, `ghostPublished`
+- Exports: `postiz`, `postizChannels`, `uploadMedia`, `uploadFile`, `startPostizAlerts`, `PG`, `pgQuery`, `ghostToken`, `GHOST_KEY_FIX`, `ghostPostByUuid`, `ghostSiteOrigin`, `ghostAdmin`, `ghostUploadImage`, `ghostMembers`, `checkGhostKey`, `ghostPublished`
 - Imports: config, share/ntfy
 
 ### `share/share.mjs`
@@ -81,19 +81,19 @@ Admin API (JWT from `GHOST_ADMIN_API_KEY`).
 
 ### `share/content.mjs`
 Reading Ghost's HTML, then each channel's caption fitted to its limits, the featured link's line (`featuredLine`), tagged links.
-- Exports: `bodyText`, `LINK_RE`, `findVideo`, `findAudio`, `findAudioThumb`, `findGalleryImages`, `clipFromTags`, `cleanLink`, `postLinks`, `findListenLink`, `chosenListen`, `featuredLine`, `splitHashtags`, `channelText`, `buildLines`, `buildContent`, `tagLink`, `campaignOf`, `stickerLink`
+- Exports: `bodyText`, `LINK_RE`, `findVideo`, `findCoverImages`, `findAudio`, `findAudioThumb`, `findGalleryImages`, `clipFromTags`, `cleanLink`, `postLinks`, `findListenLink`, `chosenListen`, `featuredLine`, `splitHashtags`, `channelText`, `buildLines`, `buildContent`, `tagLink`, `campaignOf`, `stickerLink`
 - Imports: config, pages/preview (`esc`)
 
 ### `share/media.mjs`
 Photos converted only where a platform needs it (`IMAGE_RULES`, `POSTABLE`), Instagram's crop at the saved framing,
-the audiogram clip.
-- Exports: `IMAGE_RULES`, `POSTABLE`, `fitImages`, `fitContext`, `uploadAsJpeg`, `makeAudiogram`, `pathOf`
+the video made to fit every network when it doesn't (`VIDEO_RULES`, `fitVideo`), the audiogram clip.
+- Exports: `IMAGE_RULES`, `POSTABLE`, `fitImages`, `fitContext`, `uploadAsJpeg`, `VIDEO_RULES`, `videoFixes`, `videoArgs`, `videoTools`, `fitVideo`, `makeAudiogram`, `pathOf`
 - Imports: config, services (`uploadFile`), share/content
 
 ### `share/ntfy.mjs`
 Sending to ntfy (4096-byte cut), the "finish in the app" and #bigdrop Story notifications, take-off notices, and
 notifications kept for a time (a Story's own: later.json, sent when due).
-- Exports: `notify`, `notifyManual`, `notifyBigDrop`, `fitMessage`, `STORY_GAP_MS`, `startTakeOffNotices`, `notifyAt`, `moveLater`, `sendDueLater`, `startLaterNotices`, `whenText`
+- Exports: `notify`, `notifyManual`, `notifyBigDrop`, `notifyCover`, `fitMessage`, `STORY_GAP_MS`, `startTakeOffNotices`, `notifyAt`, `moveLater`, `sendDueLater`, `startLaterNotices`, `whenText`
 - Imports: config, pages/previews (`photoPage`), share/content (`stickerLink`), stats/history
 
 ### `share/pfp.mjs`
@@ -118,11 +118,11 @@ Renders preview pages (each channel's mock-up, and a published post's Share agai
 ### `pages/preview-routes.mjs`
 Dry-run previews written to `data/previews/` and served; photo pages (photos.json, `PHOTO_PAGE_DAYS`); the draft
 Social preview (`staffSignedIn` via Ghost's session cookie, cached per a hash of the post Ghost sends) and its saves (custom text,
-featured link, frames, the Story's sticker, time and caption).
+featured link, frames, the Reel/TikTok cover (picked, or uploaded to Ghost's images), the Story's sticker, time and caption).
 - Exports: `writePreview`, `servePreview`, `serveFile`, `PREVIEW_SETTINGS`, `draftPage`, `photoPage`, `servePhotos`, `serveDraftPreview`, `cleanDraftMedia`, `sendJson`, `zonedTime`
 - Imports: config, services, pages/preview, share/content, share/share (`handlePost`, run fully dry; `moveStory`), stats/ads (`serveBoosts`)
 - Routes (called from ghost-bridge.mjs): `/previews/...`, `<PHOTOS_BASE>/<id>/[n]`, `/ghost/social-preview/` (Shared posts),
-  `/ghost/social-preview/<uuid>/` + `POST .../custom`, `.../listen`, `.../frame`, `.../sticker`, `.../story-at`, `.../story-caption`, `.../share`
+  `/ghost/social-preview/<uuid>/` + `POST .../custom`, `.../listen`, `.../frame`, `.../cover`, `.../cover-upload`, `.../sticker`, `.../story-at`, `.../story-caption`, `.../share`
   (with ghost-bridge.mjs's `sharing` and its share, passed in: no import of it)
 
 ### `stats/stats.mjs`
