@@ -301,6 +301,22 @@ export async function ghostSiteOrigin() {
   return siteOrigin;
 }
 
+// A picture uploaded to Ghost's own images (the Social preview's uploaded Reel/TikTok cover): its address on the site
+export async function ghostUploadImage(bytes, type, name) {
+  const form = new FormData();
+  form.append('file', new Blob([bytes], { type }), name);
+  form.append('purpose', 'image');
+  const res = await fetch(`${GHOST_API_URL}/ghost/api/admin/images/upload/`, {
+    method: 'POST',
+    headers: { Authorization: `Ghost ${ghostToken()}`, 'Accept-Version': 'v6.0', 'X-Forwarded-Proto': 'https' },
+    body: form,
+    redirect: 'manual',
+    signal: AbortSignal.timeout(60_000),
+  });
+  if (!res.ok) throw await ghostError(res, ' /images/upload/');
+  return (await res.json()).images[0].url;
+}
+
 // A GET on Ghost's Admin API with the integration key (stats/site.mjs: the site's own posts and members)
 export async function ghostAdmin(pathAndQuery) {
   const res = await fetch(`${GHOST_API_URL}/ghost/api/admin${pathAndQuery}`, {

@@ -42,6 +42,19 @@ change.
   for a #story by hand, `notifyBigDrop` for #bigdrop's; its buttons then: sticker link, sticker text, caption, Open
   Instagram, Open link, first 3). A Story Postiz posts (#story #autopost, `BIG_DROP_AUTO_STORY`) still goes with `''`; its
   card says the caption isn't used and names `MANUALPOST_TAG`.
+- A Reel/TikTok cover (user asked: change the cover image; not a frame in front of the video, which flashes as it
+  plays and loops): a video post's Instagram and TikTok cards on the Social preview have a "Cover" row, the post's
+  own images (`findCoverImages`: feature image, image/gallery cards, the video card's thumbnail, audio artwork; no
+  bookmark icons) or "First frame" (`POST .../cover` {src}; `cover` in `custom.json`, '' removes it), or "Upload…", a
+  picture of her own (user asked: must be able to upload one): `POST .../cover-upload` sends the file itself (JPEG, PNG,
+  WebP, up to 20 MB), which `ghostUploadImage` puts in Ghost's images (Admin API `images/upload/`, so ntfy can attach it
+  from the site) and saves as `cover`; a cover that isn't one of the post's images joins the choices, picked. The row
+  shows even when the post has no images. Neither API takes a
+  cover image through Postiz (v2.24.0: Instagram only `thumb_offset`, a frame; TikTok nothing), so the video goes as it
+  is and `notifyCover` sends the picture last, with the steps: Instagram's Edit cover after it's up (or as you post it),
+  TikTok's Select cover -> Upload in the inbox (`TIKTOK_METHOD=UPLOAD`) or by hand. Left out where it didn't go, for an
+  Instagram Story (no feed post), and for a TikTok posted straight away (`DIRECT_POST`: its cover can't be changed after).
+  Real videos only: an audio clip's cover is its artwork. The cards show it as the video's poster.
 - An Instagram Story's own time (user asked: post the Story at a different time): every Story card on the Social
   preview has "Post the Story at" (datetime-local in `SITE_TIMEZONE`; `POST .../story-at` {at}, `zonedTime` turns it
   into a time, refused when gone by or more than a year away; `storyAt` ISO in `custom.json`; "With the post" clears
@@ -71,6 +84,14 @@ change.
   (centred otherwise). It also fits every channel's photos to what Postiz and the platform accept (`IMAGE_RULES`:
   Postiz posts only png/jpg/gif/webp; Instagram JPEG <=1440 wide; Threads JPEG/PNG; TikTok JPEG/WebP, shorter
   side <=1080): ffmpeg converts only the ones that don't fit and uploads them; the rest go as they are.
+  A video gets the same (`fitVideo`, `VIDEO_RULES`, the strictest network's: <=1920 on the long side, <=60 fps, H.264/HEVC
+  8-bit 4:2:0, AAC <=48 kHz, one video + one audio track; user saw Threads refuse a 4K HEVC clip with FLAC audio and two
+  data tracks as only "UNKNOWN" after the upload, 2026-11-06): ffprobe first; one that breaks a rule becomes one copy
+  for every network (the bridge shares no YouTube, so no network loses the original), re-encoding only what breaks a
+  rule (H.264 CRF 20 fitted in 1920x1920 after rotation, AAC 256k), uploaded with `upload`; a video ffprobe can't
+  read, or a failed conversion, goes as it is. The draft Social preview only says what would change (no minutes of
+  ffmpeg per look; Media line "made to fit every network: …"); a DRY_RUN preview makes it. 10-bit HDR becomes 8-bit
+  without tone mapping (a bit flat).
 - Shared posts (user asked: share a post again from a page, not by editing posted.json; reached from Ghost Admin
   without opening a post): `GET /ghost/social-preview/` (same sign-in as the Social preview, same Traefik route) lists,
   on its first page, the scheduled posts (soonest first) and drafts (last edited first; 20 of each; user asked to see

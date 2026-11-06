@@ -183,6 +183,28 @@ export async function notifyBigDrop({ title, url, listen, campaign, stickerUrl, 
 }
 
 // "Finish it yourself" notification - one per platform (Instagram / TikTok)
+// A Reel/TikTok cover picked on the Social preview (custom.cover): neither API takes a cover image through Postiz, so
+// it comes as its own notification, attached, for you to set in the app. on: [{ platform, auto }] where it's going:
+// a posted Reel's cover can be changed after (Edit -> Edit cover); TikTok's only while you finish it in the app (in
+// your inbox with TIKTOK_METHOD=UPLOAD, or posting it yourself)
+export async function notifyCover({ title, cover, on }) {
+  const steps = on.map(({ platform, auto }) => (platform === 'Instagram'
+    ? (auto ? '- Instagram: once the Reel is up, open it, tap ⋯ → Edit → Edit cover → Add from camera roll, and pick it.'
+      : '- Instagram: when you post the Reel, tap Edit cover → Add from camera roll, and pick it.')
+    : (auto ? '- TikTok: it waits in your TikTok inbox: open it, tap Select cover → Upload, and pick it before you post.'
+      : '- TikTok: when you post the video, tap Select cover → Upload, and pick it.')));
+  if (!steps.length) return false;
+  const ext = (/\.(jpe?g|png|webp|gif)(\?|$)/i.exec(cover)?.[1] || 'jpg').toLowerCase();
+  return notify({
+    title: `🖼️ Cover for "${title}"`,
+    message: ['1. Save the attached picture: tap ⋯ → Save file.', '2. Set it as the cover:', ...steps].join('\n'),
+    tags: ['frame_with_picture'],
+    priority: 3,
+    attach: cover,
+    filename: `cover.${ext}`,
+  });
+}
+
 export async function notifyManual({ platform, title, url, listen, campaign, stickerUrl, stickerText, bigDrop, stickerOn = bigDrop, story, caption, attachment, kind, audiogram, drafted, count = 1, photos = [], at = null, key = null }) {
   const isIG = platform === 'Instagram';
   const what = isIG

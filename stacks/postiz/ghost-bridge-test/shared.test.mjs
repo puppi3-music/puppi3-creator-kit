@@ -13,6 +13,8 @@ const POSTIZ = 'http://postiz.test';
 Object.assign(process.env, { GHOST_API_URL: GHOST, POSTIZ_API_URL: POSTIZ,
   GHOST_ADMIN_API_KEY: `${'a'.repeat(24)}:${'b'.repeat(64)}` });
 const { handlePost } = await import('../ghost-bridge/share/share.mjs');
+// the tests' videos aren't real: ffprobe would fetch their made-up addresses (media.mjs's own test reads real ones)
+(await import('../ghost-bridge/share/media.mjs')).videoTools.probe = async () => ({ streams: [] });
 const { loadState, recordShared, editCustom, STATE_FILE } = await import('../ghost-bridge/config.mjs');
 const { serveDraftPreview } = await import('../ghost-bridge/pages/preview-routes.mjs');
 

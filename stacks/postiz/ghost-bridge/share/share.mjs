@@ -8,10 +8,10 @@ import { CHANNELS, SKIP_TAG, BIG_DROP_TAG, BIG_DROP_AUTO_STORY, MUSIC_MODE, AUTO
   IMAGE_LIMITS, previewStore, log, isDry, loadState, recordShared, loadCustom, channelKey, DRAFT_BASE, DRAFT_PREVIEWS,
   GHOST_API_URL } from '../config.mjs';
 import { postiz, postizChannels, uploadMedia, ghostToken, ghostSiteOrigin } from '../services.mjs';
-import { notify, notifyBigDrop, notifyManual, moveLater, STORY_GAP_MS } from './ntfy.mjs';
+import { notify, notifyBigDrop, notifyManual, notifyCover, moveLater, STORY_GAP_MS } from './ntfy.mjs';
 import { bodyText, findVideo, findAudio, findGalleryImages, postLinks, findListenLink, chosenListen, splitHashtags,
-  channelText, buildLines, buildContent, campaignOf, stickerLink, tagLink } from './content.mjs';
-import { uploadAsJpeg, fitImages, fitContext, makeAudiogram, POSTABLE, IMAGE_RULES, pathOf } from './media.mjs';
+  channelText, buildLines, buildContent, campaignOf, stickerLink, tagLink, findCoverImages } from './content.mjs';
+import { uploadAsJpeg, fitImages, fitContext, fitVideo, makeAudiogram, POSTABLE, IMAGE_RULES, pathOf } from './media.mjs';
 
 function settingsFor(identifier, { story = false } = {}) {
   // Instagram: video -> Reel automatically; story -> Story (image or video)
@@ -159,8 +159,24 @@ export async function handlePost(post, { again = false, only = null } = {}) {
   const videoUrl = SHARE_VIDEO ? findVideo(post.html, url) : null;
   if (videoUrl) {
     log(`  found video: ${videoUrl}`);
-    try { media = await uploadMedia(videoUrl, 'video'); kind = 'video'; }
-    catch (e) { log(`  WARNING: video upload failed: ${e.message}`); }
+    // a video a network can't take (4K, FLAC audio, a camera's data track...) goes as a copy made to fit them all
+    let fitted = null;
+    try { fitted = await fitVideo(videoUrl, post.slug); }
+    catch (e) { log(`  WARNING: couldn't make the video fit every network (${e.message}), so it goes as it is`); }
+    if (fitted) { media = fitted; kind = 'video'; }
+    else {
+      try { media = await uploadMedia(videoUrl, 'video'); kind = 'video'; }
+      catch (e) { log(`  WARNING: video upload failed: ${e.message}`); }
+    }
+  }
+  // the Reel/TikTok cover picked on the Social preview (custom.cover): the video goes as it is (neither API takes a
+  // cover image through Postiz), and notifyCover sends the picture to set in the app
+  const cover = media && custom.cover ? custom.cover : '';
+  if (previewStore.getStore()) {
+    // (a cover you uploaded isn't one of the post's images: it joins them, so it shows as picked)
+    const options = findCoverImages(post.html, url, post.feature_image);
+    if (custom.cover && !options.includes(custom.cover)) options.push(custom.cover);
+    previewStore.getStore().coverPick = { video: !!media, chosen: custom.cover || '', options };
   }
   if (!media && AUDIOGRAM && findAudio(post.html, url)) {
     try {
@@ -223,16 +239,17 @@ export async function handlePost(post, { again = false, only = null } = {}) {
     if (TIKTOK_IDS.includes(idf)) return tiktokImages;
     return images.slice(0, story ? 1 : IMAGE_LIMITS[idf] ?? 4);
   };
+  const coverFor = (idf, story) => !!cover && !story && (INSTAGRAM_IDS.includes(idf) || TIKTOK_IDS.includes(idf));
   const mediaFor = (idf, story) => (kind === 'image' ? imagesFor(idf, story) : media ? [media] : []);
 
   // Instagram/TikTok: auto-post only with sound, unless a tag says otherwise
   const { auto: musicAuto, why } = musicRouting(tags, kind, audiogram);
   const pv = previewStore.getStore();
-  if (pv) Object.assign(pv, { media: media && { kind, url: media.path, audiogram, count: images.length || 1 }, bigDrop, asStory });
+  if (pv) Object.assign(pv, { media: media && { kind, url: media.path, audiogram, count: images.length || 1, ...(media.fixed && { fixed: media.fixed }) }, bigDrop, asStory });
   const addPreview = (integ, label, status, extra = {}) => pv?.entries.push({
     label, idf: integ.identifier, name: integ.name, picture: integ.picture,
     handle: integ.profile || integ.display || '', status,
-    media: status === 'skip' ? [] : mediaFor(integ.identifier, label.endsWith(':story')).map((m) => ({ kind, url: m.path, src: m.src })),
+    media: status === 'skip' ? [] : mediaFor(integ.identifier, label.endsWith(':story')).map((m) => ({ kind, url: m.path, src: m.src, ...(coverFor(integ.identifier, label.endsWith(':story')) && { cover }) })),
     ...extra,
   });
   const captionFor = (idf, story) => (story ? storyCaption : buildLines(idf, say(idf)).join('\n'));
@@ -378,6 +395,16 @@ export async function handlePost(post, { again = false, only = null } = {}) {
       });
       if (sent && !storyFirst(m)) await storyGap(n < ordered.length - 1 || (failed.length && NOTIFY_ERRORS));
     }
+  }
+
+  // the cover, last: for each Reel/TikTok that went (or waits for you), unless TikTok posted it straight away
+  // (TIKTOK_METHOD=DIRECT_POST: a posted TikTok's cover can't be changed)
+  if (cover) {
+    const went = (r) => r === 'ok' || r === 'manual' || r === 'dry-run';
+    const on = integrations.filter((i) => coverFor(i.identifier, false) && went(results[i.identifier])
+      && !(TIKTOK_IDS.includes(i.identifier) && results[i.identifier] !== 'manual' && TIKTOK_METHOD === 'DIRECT_POST'))
+      .map((i) => ({ platform: INSTAGRAM_IDS.includes(i.identifier) ? 'Instagram' : 'TikTok', auto: results[i.identifier] !== 'manual' }));
+    if (on.length) { await storyGap(manual.length); await notifyCover({ title, cover, on }); }
   }
 
   if (failed.length && NOTIFY_ERRORS) {

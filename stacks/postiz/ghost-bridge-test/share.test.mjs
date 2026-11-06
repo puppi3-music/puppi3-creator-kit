@@ -27,6 +27,11 @@ process.env.POSTIZ_API_URL = `http://127.0.0.1:${postiz.address().port}`;
 
 // the bridge reads its settings when it loads: after the fake's address is set
 const { handlePost, musicRouting } = await import('../ghost-bridge/share/share.mjs');
+// the tests' videos aren't real: ffprobe gets a made-up answer (a video that fits, unless a test says otherwise)
+const { videoTools } = await import('../ghost-bridge/share/media.mjs');
+const fitsAsItIs = async () => ({ streams: [{ index: 0, codec_type: 'video', codec_name: 'h264', width: 1080, height: 1920,
+  r_frame_rate: '30/1', pix_fmt: 'yuv420p' }, { index: 1, codec_type: 'audio', codec_name: 'aac', sample_rate: '48000' }] });
+videoTools.probe = fitsAsItIs;
 const { previewStore, editCustom } = await import('../ghost-bridge/config.mjs');
 
 // handlePost as a draft preview: { entries (one per network: label, status, caption, why, media), notes (the ntfy
@@ -71,6 +76,54 @@ test('#autopost with a video: every network posts it, the video attached', async
   for (const label of ['bluesky', 'threads', 'instagram-standalone', 'tiktok']) {
     assert.equal(byLabel[label].status, 'auto', label);
     assert.deepEqual(byLabel[label].media, [{ kind: 'video', url: 'https://example.com/content/media/clip.mp4', src: 'https://example.com/content/media/clip.mp4' }], label);
+  }
+});
+
+test('a 4K video with FLAC audio and a camera\'s data tracks: the preview says it\'s made to fit every network', async () => {
+  // what ffprobe said of a phone clip Threads refused ("UNKNOWN") on 2026-11-06
+  videoTools.probe = async () => ({ streams: [
+    { index: 0, codec_type: 'video', codec_name: 'hevc', width: 3840, height: 2160, r_frame_rate: '30000/1001', pix_fmt: 'yuv420p' },
+    { index: 1, codec_type: 'audio', codec_name: 'flac', sample_rate: '48000' },
+    { index: 2, codec_type: 'data', codec_name: 'none' }, { index: 3, codec_type: 'data', codec_name: 'none' }] });
+  try {
+    const pv = await share({ html: '<video src="/content/media/clip.mp4"></video>', tags: tags('#AutoPost') });
+    assert.equal(pv.media.fixed, '3840x2160, FLAC audio, 2 extra tracks -> H.264 at most 1920, AAC');
+    assert.deepEqual(pv.byLabel.threads.media.map((m) => m.kind), ['video'], 'still posted, as the fitted copy');
+    assert.ok(pv.log.some((l) => l.includes('video would be made to fit every network')), 'a draft preview only says so');
+  } finally { videoTools.probe = fitsAsItIs; }
+});
+
+test('a cover picked for a video: the video goes as it is, and a notification brings the picture for the Reel and TikTok', async () => {
+  const html = '<figure class="kg-card kg-image-card"><img src="/content/images/still.jpg" class="kg-image"></figure>'
+    + '<video src="/content/media/clip.mp4" poster="/content/images/thumb.jpg"></video>'
+    + '<figure class="kg-bookmark-card"><img class="kg-bookmark-icon" src="https://other.example/icon.png"></figure>';
+  const post = { html, tags: tags('#AutoPost'), feature_image: 'https://example.com/content/images/size/w1200/still.jpg' };
+  const thumb = 'https://example.com/content/images/thumb.jpg';
+  const video = 'https://example.com/content/media/clip.mp4';
+  const none = await share(post);
+  assert.deepEqual(none.coverPick, { video: true, chosen: '', options: [post.feature_image, thumb] },
+    'the feature image once (a bigger size of the same picture), the video\'s thumbnail, no bookmark icons');
+  assert.equal(none.notes.some((n) => n.title.startsWith('🖼️')), false, 'no cover picked: no cover notification');
+  await editCustom('p1', (m) => { m.cover = thumb; });
+  try {
+    const { byLabel, coverPick, notes } = await share(post);
+    assert.equal(coverPick.chosen, thumb);
+    for (const label of ['instagram-standalone', 'tiktok']) {
+      assert.deepEqual(byLabel[label].media, [{ kind: 'video', url: video, src: video, cover: thumb }], label);
+    }
+    for (const label of ['bluesky', 'threads']) assert.deepEqual(byLabel[label].media, [{ kind: 'video', url: video, src: video }], label);
+    const note = notes.find((n) => n.title === '🖼️ Cover for "New mix"');
+    assert.equal(note.attach, thumb);
+    assert.equal(note.filename, 'cover.jpg');
+    assert.match(note.message, /Instagram: once the Reel is up, .*Edit cover/);
+    assert.match(note.message, /TikTok: it waits in your TikTok inbox/);
+    const byHand = await share({ ...post, tags: [] });
+    assert.match(byHand.notes.at(-1).message, /Instagram: when you post the Reel, tap Edit cover/, 'last, after the "post it in the app" ones');
+    const story = await share({ ...post, tags: tags('#story', '#AutoPost') });
+    assert.equal(story.byLabel['instagram-standalone:story'].media[0].cover, undefined, 'a Story has no cover');
+    assert.doesNotMatch(story.notes.find((n) => n.title.startsWith('🖼️')).message, /Instagram/);
+  } finally {
+    await editCustom('p1', (m) => { delete m.cover; });
   }
 });
 

@@ -10,8 +10,8 @@ import { esc, escAttr, previewPage, renderPreview, photosPage, sharedPage } from
 import { LIMITS, IMAGE_LIMITS, INSTAGRAM_IDS, TIKTOK_IDS, NO_LINK_IDS, CUSTOM_CHANNELS, CUSTOM_MAX, STICKER_TEXT_MAX, STORY_CAPTION_MAX, SITE_TIMEZONE, MANUAL_DRAFTS,
   BIG_DROP_TAG, STORY_TAG, MANUALPOST_TAG, PREVIEW_DIR, PREVIEW_KEEP, PREVIEW_URL, log, channelKey, PHOTOS_FILE, PHOTOS_BASE,
   PHOTO_PAGE_DAYS, GHOST_API_URL, previewStore, DRAFT_BASE, DRAFT_PREVIEWS, editCustom, setCustom,
-  setFrame, loadState, loadCustom, DRY_RUN, FEATURED_DOMAINS, SERVICE_NAMES, FEATURED_LINE, FEATURED_BIO_LINE, FEATURED_LABEL } from '../config.mjs';
-import { ghostPostByUuid, ghostSiteOrigin, ghostAdmin, GHOST_KEY_FIX } from '../services.mjs';
+  setFrame, loadState, loadCustom, DRY_RUN, TIKTOK_METHOD, FEATURED_DOMAINS, SERVICE_NAMES, FEATURED_LINE, FEATURED_BIO_LINE, FEATURED_LABEL } from '../config.mjs';
+import { ghostPostByUuid, ghostSiteOrigin, ghostAdmin, ghostUploadImage, GHOST_KEY_FIX } from '../services.mjs';
 import { cleanLink } from '../share/content.mjs';
 import { handlePost, moveStory } from '../share/share.mjs';
 import { serveBoosts } from '../stats/ads.mjs';
@@ -23,7 +23,7 @@ import { serveBoosts } from '../stats/ads.mjs';
 // webhook in DRY_RUN, and used for draft previews.
 export const PREVIEW_SETTINGS = { LIMITS, IMAGE_LIMITS, INSTAGRAM_IDS, TIKTOK_IDS, NO_LINK_IDS, CUSTOM_CHANNELS, CUSTOM_MAX,
   MANUAL_DRAFTS, BIG_DROP_TAG, STORY_TAG, channelKey, FEATURED_DOMAINS, SERVICE_NAMES, FEATURED_LINE, FEATURED_BIO_LINE,
-  FEATURED_LABEL, STICKER_TEXT_MAX, STORY_CAPTION_MAX, MANUALPOST_TAG, SITE_TIMEZONE, DRY_RUN };
+  FEATURED_LABEL, STICKER_TEXT_MAX, STORY_CAPTION_MAX, MANUALPOST_TAG, SITE_TIMEZONE, DRY_RUN, TIKTOK_METHOD };
 
 export async function writePreview(pv) {
   await fs.mkdir(PREVIEW_DIR, { recursive: true });
@@ -252,6 +252,50 @@ async function saveFrame(req, res, uuid) {
   await setFrame(post.id, src, pos && pos.map((v) => Math.round(v * 10) / 10));
   if (hit) hit.html = null;
   return sendJson(res, 200, { ok: true });
+}
+
+// POST /ghost/social-preview/<uuid>/cover {src}: the Reel/TikTok cover, one of the post's images ('' = none: the
+// video's first frame, as the networks pick it)
+async function saveCover(req, res, uuid) {
+  const body = await readJson(req, res);
+  if (!body) return;
+  const src = typeof body.src === 'string' ? body.src.trim() : null;
+  if (src === null || (src && (!/^https?:\/\//.test(src) || src.length > 2048))) return sendJson(res, 400, { error: 'bad image' });
+  const hit = draftCache.get(uuid);
+  const post = hit?.post || await ghostPostByUuid(uuid);
+  if (!post) return sendJson(res, 404, { error: 'no post has that preview link' });
+  await editCustom(post.id, (m) => { if (src) m.cover = src; else delete m.cover; });
+  if (hit) hit.html = null;
+  log(`social preview: Reel/TikTok cover for "${post.title}": ${src ? src.split('/').pop() : 'the first frame'}`);
+  return sendJson(res, 200, { ok: true });
+}
+
+// POST /ghost/social-preview/<uuid>/cover-upload (the picture itself, Content-Type image/jpeg|png|webp; X-File-Name):
+// a Reel/TikTok cover of your own, put in Ghost's images (the notification attaches it from there) and picked
+const COVER_TYPES = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
+const COVER_MAX = 20 * 1024 * 1024;
+async function uploadCover(req, res, uuid) {
+  const type = (req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
+  if (!COVER_TYPES[type]) return sendJson(res, 415, { error: 'send a JPEG, PNG or WebP picture' });
+  const chunks = [];
+  let size = 0;
+  for await (const c of req) { size += c.length; if (size > COVER_MAX) return sendJson(res, 413, { error: 'the picture is over 20 MB' }); chunks.push(c); }
+  if (!size) return sendJson(res, 400, { error: 'no picture' });
+  const hit = draftCache.get(uuid);
+  const post = hit?.post || await ghostPostByUuid(uuid);
+  if (!post) return sendJson(res, 404, { error: 'no post has that preview link' });
+  let name = String(req.headers['x-file-name'] || '');
+  try { name = decodeURIComponent(name); } catch { /* as it came */ }
+  const base = name.replace(/\.[^.]*$/, '').replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+  let src;
+  try { src = await ghostUploadImage(Buffer.concat(chunks), type, `${base || 'cover'}.${COVER_TYPES[type]}`); } catch (e) {
+    log(`social preview: cover upload for "${post.title}": ${e.message}`);
+    return sendJson(res, 502, { error: `Ghost didn't take the picture: ${e.message}` });
+  }
+  await editCustom(post.id, (m) => { m.cover = src; });
+  if (hit) hit.html = null;
+  log(`social preview: Reel/TikTok cover for "${post.title}": uploaded ${src.split('/').pop()}`);
+  return sendJson(res, 200, { ok: true, src });
 }
 
 // POST /ghost/social-preview/<uuid>/listen {url}: the post's featured link: '' = found automatically,
@@ -487,12 +531,12 @@ export async function serveDraftPreview(req, res, p, sharer = { sharing: new Set
       return res.writeHead(502, headers).end(draftPage('Couldn\'t load the posts', e.message));
     }
   }
-  const m = new RegExp(`^${DRAFT_BASE}/${UUID}/(custom|frame|listen|sticker|story-at|story-caption|share)?$`).exec(p) || new RegExp(`^${DRAFT_BASE}/${UUID}()$`).exec(p);
+  const m = new RegExp(`^${DRAFT_BASE}/${UUID}/(custom|frame|cover|cover-upload|listen|sticker|story-at|story-caption|share)?$`).exec(p) || new RegExp(`^${DRAFT_BASE}/${UUID}()$`).exec(p);
   if (m?.[2] && req.method === 'POST') {
     // saves come from the preview page itself: a page on another site can't make your browser send one
     if (req.headers.origin !== await ghostSiteOrigin()) return sendJson(res, 403, { error: 'wrong origin' });
     if (m[2] === 'share') return shareAgain(req, res, m[1], sharer);
-    return ({ frame: saveFrame, listen: saveListen, sticker: saveSticker, 'story-at': saveStoryAt, 'story-caption': saveStoryCaption }[m[2]] || saveCustomText)(req, res, m[1]);
+    return ({ frame: saveFrame, cover: saveCover, 'cover-upload': uploadCover, listen: saveListen, sticker: saveSticker, 'story-at': saveStoryAt, 'story-caption': saveStoryCaption }[m[2]] || saveCustomText)(req, res, m[1]);
   }
   if (!m || m[2] || req.method !== 'GET') return res.writeHead(404, headers).end(draftPage('Not found', 'Open this from a post\'s Preview in Ghost.'));
   let html;

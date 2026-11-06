@@ -78,7 +78,8 @@ const icons = (...names) => names.map((n) => (n === '|' ? '<span class="grow"></
 // With frames (Instagram), a photo sits where it was placed; pan = it can be dragged there (no link then)
 function mediaTag(m, cls = '', { frames = null, pan = false } = {}) {
   if (!m?.url) return '';
-  if (m.kind === 'video') return `<video class="${cls}" src="${escAttr(m.url)}#t=0.1" controls playsinline preload="metadata"></video>`;
+  // a picked cover (m.cover) shows until it plays, as it will once you've set it in the app
+  if (m.kind === 'video') return `<video class="${cls}" src="${escAttr(m.url)}${m.cover ? `" poster="${escAttr(m.cover)}` : '#t=0.1'}" controls playsinline preload="metadata"></video>`;
   const at = frames?.[m.src || m.url];
   const img = `<img class="${cls}" src="${escAttr(m.url)}" alt="" loading="lazy" draggable="false"`
     + `${frames ? ` data-src="${escAttr(m.src || m.url)}"` : ''}${at ? ` style="object-position:${at[0]}% ${at[1]}%"` : ''}>`;
@@ -206,9 +207,26 @@ function previewCard(e, pv, s) {
         + ` so this isn't used.</b> Add ${esc(s.MANUALPOST_TAG || '#manualpost')} to post it yourself with it.`
         : 'Instagram\'s API can\'t put text on a Story, so your reminder gives it to copy: add it with Aa in the app.'}`
       + ' Saves when you click away.</div></div></div>';
+  // Draft previews, a video's Instagram/TikTok feed post: its cover, one of the post's images (pv.coverPick), or none
+  const cp = pv.coverPick;
+  const coverEditor = !pv.draft || story || e.status === 'skip' || !(isIG || isTT) || !cp?.video ? ''
+    : `<div class="editor"><span class="toggle">Cover</span><span class="lsaved vsaved" aria-live="polite"></span>`
+      + `<div class="covers" role="radiogroup" aria-label="Cover">`
+      + [['', ''], ...cp.options.map((u) => [u, u])].map(([u]) => `<label class="cover${(cp.chosen || '') === u ? ' on' : ''}"`
+        + ` title="${escAttr(u ? u.split('/').pop() : 'The first frame of the video')}"><input type="radio" name="cover-${escAttr(e.label)}"`
+        + ` data-cover value="${escAttr(u)}"${(cp.chosen || '') === u ? ' checked' : ''}>`
+        + (u ? `<img src="${escAttr(u)}" alt="" loading="lazy">` : '<span class="cic">▶</span><span>First<br>frame</span>') + '</label>').join('')
+      + '<label class="cover up" title="A picture of your own (JPEG, PNG or WebP; 1080×1920 fits a Reel and a TikTok)">'
+      + '<input type="file" accept="image/jpeg,image/png,image/webp" data-cover-upload><span class="cic">+</span><span>Upload</span></label>'
+      + `</div><div class="hint">${cp.chosen ? 'The video goes as it is, and a notification brings this picture for you to set as'
+        + ` the cover in the app (${isIG ? (e.status === 'manual' ? 'Edit cover as you post the Reel' : 'once the Reel is up: ⋯ → Edit → Edit cover')
+        : e.status === 'manual' || s.TIKTOK_METHOD !== 'DIRECT_POST' ? 'Select cover → Upload before you post it' : '<b>not on TikTok: it posts straight away'
+        + ' (TIKTOK_METHOD=DIRECT_POST), and a posted TikTok\'s cover can\'t be changed</b>'}).`
+        : 'The networks use the video\'s first frame. Pick a picture and a notification brings it to set as the cover in the app.'}`
+      + ' Their APIs can\'t set a cover image.</div></div>';
   // Draft previews: the channel's own text, behind a checkbox (saved as you type)
-  const editor = !pv.draft ? '' : story ? timeEditor + captionEditor + stickerEditor :e.status === 'skip' || !CUSTOM_CHANNELS.includes(key) ? ''
-    : `<div class="editor"><label class="toggle"><input type="checkbox" data-custom="${key}"${own ? ' checked' : ''}>`
+  const editor = !pv.draft ? '' : story ? timeEditor + captionEditor + stickerEditor : e.status === 'skip' || !CUSTOM_CHANNELS.includes(key) ? coverEditor
+    : coverEditor + `<div class="editor"><label class="toggle"><input type="checkbox" data-custom="${key}"${own ? ' checked' : ''}>`
       + ` Modify text for ${esc(p.name)}</label><div class="box"${own ? '' : ' hidden'}>`
       + `<textarea data-channel="${key}" data-auto="${escAttr(auto)}" rows="5" maxlength="${CUSTOM_MAX}" spellcheck="true">${esc(own || auto)}</textarea>`
       + `<div class="emeta"><span class="len"></span><span class="saved" aria-live="polite">${own ? 'Saved' : ''}</span></div>`
@@ -295,6 +313,16 @@ background:var(--bg);color:var(--text);font:inherit;font-size:14px;padding:8px 1
 .hint{font-size:12px;color:var(--dim);margin-top:4px}.card.busy .mock{opacity:.6;transition:opacity .2s}
 .editor .box label[for]{display:block;margin-top:8px;font-weight:600}
 .linkish{font:inherit;background:none;border:0;color:var(--link);cursor:pointer;padding:0 4px;text-decoration:underline}
+.covers{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;margin-top:8px}
+.cover{position:relative;flex:0 0 auto;width:56px;aspect-ratio:9/16;border:2px solid var(--line);border-radius:8px;overflow:hidden;cursor:pointer;
+display:flex;flex-direction:column;gap:2px;align-items:center;justify-content:center;font-size:10px;line-height:1.2;text-align:center;color:var(--dim)}
+.cover:hover{border-color:var(--dim)}.cover.on{border-color:var(--link)}
+.cover.on::after{content:'✓';position:absolute;top:3px;right:3px;width:16px;height:16px;border-radius:50%;background:var(--link);color:#fff;
+font-size:10px;line-height:16px;font-weight:700}
+.cover input{position:absolute;opacity:0;pointer-events:none}.cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cover .cic{font-size:16px;line-height:1}
+.cover.up{border-style:dashed;margin-left:6px}.cover.up:hover{color:var(--link);border-color:var(--link)}
+.cover:focus-within{outline:2px solid var(--link);outline-offset:1px}
 #story-at,#sticker-link,#sticker-text,[data-sticker-other]{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:5px 8px;width:100%;margin-top:6px}
 .listen{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 20px}
 .listen label{font-weight:600;margin-right:8px}.listen select,.listen input{font:inherit;color:inherit;background:var(--bg);
@@ -471,6 +499,16 @@ document.addEventListener('click', function (e) {
     .catch(function (err) { b.disabled = false; said.textContent = "Couldn't share it: " + err.message; said.classList.add('err'); });
 });
 // Saves that change the cards and notifications: then the page reloads
+// an uploaded cover: the picture itself goes, and the bridge puts it in Ghost's images
+function uploadCover(file, said) {
+  function say(t, err) { said.textContent = t; said.classList.toggle('err', !!err); }
+  if (file.size > 20 * 1024 * 1024) return say("Couldn't save: the picture is over 20 MB", true);
+  say('Uploading…');
+  fetch(location.pathname.replace(/[/]?$/, '/') + 'cover-upload', { method: 'POST',
+    headers: { 'Content-Type': file.type, 'X-File-Name': encodeURIComponent(file.name) }, body: file })
+    .then(function (r) { if (r.ok) return location.reload(); return r.json().then(function (j) { throw new Error(j.error || r.status); }, function () { throw new Error(r.status); }); })
+    .catch(function (e) { say("Couldn't save: " + e.message, true); });
+}
 function saveMore(what, body, said) {
   function say(t, err) { if (said) { said.textContent = t; said.classList.toggle('err', !!err); } }
   say('Saving…');
@@ -494,6 +532,8 @@ document.addEventListener('change', function (e) {
     addr.hidden = true; saveMore('sticker', { link: e.target.value }, document.querySelector('.ssaved'));
   } else if (e.target.matches('[data-sticker-other]') && e.target.value.trim()) saveMore('sticker', { link: e.target.value.trim() }, document.querySelector('.ssaved'));
   else if (e.target.matches('[data-sticker]')) saveMore('sticker', { text: e.target.value.trim() }, document.querySelector('.ssaved'));
+  else if (e.target.matches('[data-cover]')) saveMore('cover', { src: e.target.value }, e.target.closest('.editor').querySelector('.vsaved'));
+  else if (e.target.matches('[data-cover-upload]') && e.target.files[0]) uploadCover(e.target.files[0], e.target.closest('.editor').querySelector('.vsaved'));
   else if (e.target.matches('[data-story-caption]')) saveMore('story-caption', { text: e.target.value.trim() }, document.querySelector('.csaved'));
 });
 })();`;
@@ -602,7 +642,7 @@ export function renderPreview(pv, s) {
   const post = pv.post;
   const m = pv.media;
   const flags = [
-    m ? `Media: ${m.audiogram ? 'audio clip (rendered from the audio card)' : m.kind === 'image' && m.count > 1 ? `${m.count} images` : m.kind}` : 'Media: none',
+    m ? `Media: ${m.audiogram ? 'audio clip (rendered from the audio card)' : m.kind === 'image' && m.count > 1 ? `${m.count} images` : m.kind}${m.fixed ? ` (made to fit every network: ${m.fixed})` : ''}` : 'Media: none',
     pv.bigDrop && `${BIG_DROP_TAG}`, pv.asStory && `${STORY_TAG}`,
     pv.listen && !pv.draft && `${words(s.FEATURED_LABEL)}: ${(pv.listen.chosen ? 'picked: ' : '') + (pv.listen.chosen === 'none' ? 'none'
       : pv.listen.chosen ? pv.listen.chosen : pv.listen.auto ? `${pv.listen.auto.name}` : 'none')}`,
