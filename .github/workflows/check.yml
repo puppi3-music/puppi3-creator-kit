@@ -1,19 +1,21 @@
 # The kit's checks on every push and pull request: kit/check.sh, the ones that need no Docker (every path a file names
 # is there, the guides' build, the dashboards' checks and a render, the dashboard scripts' and the bridge's tests,
-# the Traefik plugins' tests, every shell script's syntax). Only in the kit's own repo; anywhere else it does nothing.
+# the Traefik plugins' tests, every shell script's syntax). main requires it before a pull request merges (branch
+# protection). Only in the owner's repos (the kit's, and the site it was made from); a fork's does nothing.
 name: Check
 
 on:
   push:
-    branches: ["**"]
-  pull_request:
+    branches: [main]
+  pull_request:  # every pull request: main requires this check before a merge
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   check:
-    if: github.repository == 'puppi3-music/puppi3-creator-kit'
+    if: github.repository_owner == 'puppi3-music'
     runs-on: ubuntu-24.04   # its Python 3 (3.12) runs the Python checks
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
