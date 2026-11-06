@@ -9,6 +9,7 @@ import { median, trackAccount, withWeekly, trackPosts, surgingRefs, postsPerPoll
   toCheck, historyKeys, withPostedMs, everyText, archive, archiveRead, askLearned, insightValue, insightBreakdown,
   audienceLists, zoneHour, keepLastOverZero } from './history.mjs';
 import { withPerformance } from './performance.mjs';
+import { withBoosts } from './ads.mjs';
 
 // ---------- Instagram numbers -> Grafana ----------
 // You post Instagram by hand (from the bridge's notification), so Postiz's own stats don't know those posts.
@@ -436,6 +437,7 @@ export async function pollInstagramStats() {
   withSaveRate(out);
   withWeekly('instagram', out);
   trackAccount(dataDir, 'instagram', out);
+  await withBoosts(dataDir, 'instagram', out);
   await withPerformance(dataDir, 'instagram', out);
   out.checkedEvery = everyText(IG_STATS_MINUTES);
   await fs.writeFile(`${IG_STATS_FILE}.tmp`, JSON.stringify(withPostedMs(out), null, 2));

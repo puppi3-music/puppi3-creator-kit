@@ -9,6 +9,19 @@ lines, since GitHub's release notes break wherever the text does.
 
 ## 1.5.1 (not released yet)
 
+### Boosts: what paid posts cost and bought
+
+The bridge now collects boosts. Instagram posts boosted in the app are read from your Meta ad account: what each
+cost, the people it reached, the follows and profile visits it brought, per day. TikTok has no way to read a
+Promote's numbers, so a new staff-only Boosts page (linked from Shared posts) takes them as you copy them from
+the app. A boosted TikTok's views include the paid ones, so it's no longer used as the "usual" for other videos.
+
+**Your site:** for Instagram, add `META_ADS_TOKEN` and `META_AD_ACCOUNT_ID` to the social module's secrets (the
+Networks guide's Boosts section says how to make the token), then `kit/kit.sh <folder> up -d` (on Kubernetes,
+`k8s/up.sh`). Without them only the Boosts page works.
+
+**Restarts:** the bridge, for a few seconds (a share in progress finishes first).
+
 ### "Back to the usual pfp" can bring the usual picture
 
 When a seasonal outfit ends, the "🐶 Back to the usual pfp" notification now has your everyday profile picture

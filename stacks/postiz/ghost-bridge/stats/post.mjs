@@ -144,7 +144,7 @@ export function postRoute({ dataDir, ghostPosts }) {
       permalink: '', account: '', page: '-', pageTitle: '', pageUrl: '', pageFrom: 'none', pageNote: '', pages: NO_PAGES,
       sources: n ? n.sourceRegex || exact(n.sources) : '^$', numbers: [], totals: [], gains: [], historyNote: '',
       compare: [], verdict: [], compareMetric: '', compareOptions: NO_COMPARE, compareNote: '',
-      performance: [], perfSignals: NO_SIGNALS, errors: [] };
+      performance: [], perfSignals: NO_SIGNALS, boost: [], errors: [] };
     if (!n) {
       doc.errors.push(`The bridge doesn't collect numbers for "${network}" (only ${Object.values(NETWORKS).map((x) => x.label).join(', ')}), so there's nothing to show for this post.`);
       return doc;
@@ -170,6 +170,7 @@ export function postRoute({ dataDir, ghostPosts }) {
     }
     Object.assign(doc, { found: true, title: p.caption || p.text || p.title || (story ? 'Story' : ''), type: p.type || '', time: p.time,
       date: p.date || '', permalink: p.permalink || '', account: p.account || '' });
+    if (p.boosted) doc.boost = [{ ...p.boosted, organicViews: p.organicViews ?? null }]; // its boosts' paid numbers (stats/ads.mjs)
     for (const k of postKeys(n)) if (p[k] != null) doc.numbers.push({ metric: LABELS[k], value: p[k] });
 
     const histFile = await readHistory(dataDir, histName);

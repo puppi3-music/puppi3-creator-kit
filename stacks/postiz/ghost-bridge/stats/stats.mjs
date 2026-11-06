@@ -24,6 +24,8 @@
 //  - timing.json      when posts do best on each network, by weekday and part of the day (Platforms dashboard)
 //  - postiz.json      every channel connected in Postiz and what Postiz's analytics have for it (the numbers
 //                     themselves go to the archive only)
+//  - ads.json         boosts: what paid posts cost and bought (Instagram's from Meta's Marketing API, TikTok's
+//                     Promote typed in on a staff page; stats/ads.mjs)
 //  - archive/<name>.json  everything each API gave, kept for good and never trimmed, for numbers nothing shows yet
 //                     (not served; see archive() below)
 // This file starts them (startStats: the collector() each runs on, Postiz's channels and their analytics) and
@@ -41,6 +43,7 @@ import { postRoute, pageRoute } from './post.mjs';
 import { bluesky, threads, tiktok, mixcloud } from './social.mjs';
 import { ghost, cloudflare, search } from './site.mjs';
 import { liveShows, siteClicks } from './live.mjs';
+import { ads, withBoosts } from './ads.mjs';
 
 export function startStats({ env, dataDir, log, postiz, pgQuery, PG, ghostPosts, ghostAdmin, ghostMembers }) {
   const file = (name) => path.join(dataDir, `${name}.json`);
@@ -85,6 +88,7 @@ export function startStats({ env, dataDir, log, postiz, pgQuery, PG, ghostPosts,
         try { await collect(out, await readJson(file(name))); } catch (e) { out.errors.push(e.message); }
         withWeekly(name, out);
         trackAccount(dataDir, name, out);
+        await withBoosts(dataDir, name, out);
         await withPerformance(dataDir, name, out);
         await writeJson(file(name), withPostedMs(out));
         if (out.totals && Object.values(out.totals).some((v) => v != null)) {
@@ -96,6 +100,7 @@ export function startStats({ env, dataDir, log, postiz, pgQuery, PG, ghostPosts,
     ticks[name] = tick;
     setTimeout(tick, delaySeconds * 1000).unref();
     setInterval(tick, mins * 60_000).unref();
+    return tick;
   }
 
   // ---------- Postiz channels (Threads, TikTok, Bluesky's handle) ----------
@@ -185,6 +190,7 @@ export function startStats({ env, dataDir, log, postiz, pgQuery, PG, ghostPosts,
   ghost(ctx);
   cloudflare(ctx);
   search(ctx);
+  ads(ctx);
   const live = liveShows(ctx);
   const clicks = siteClicks({ ...ctx, live: live.live });
   // A network's account totals at every check kept (trackAccount), oldest first, with what came in since the check

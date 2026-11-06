@@ -39,6 +39,8 @@ the settings it passes, and Postiz.
   image built from `ghost-bridge/Dockerfile`, USER node, couldn't write `data/`; staging's bridge too); healthcheck every 5 s (Traefik routes
   only to healthy); `stop_grace_period: 5m` (the bridge finishes a share in progress); registration defaults closed
   (`POSTIZ_DISABLE_REGISTRATION:-true`).
+- Boosts: `ADS_*`, `META_ADS_TOKEN`, `META_AD_ACCOUNT_ID` (`ghost-bridge/stats/CLAUDE.md`, Boosts); the two Meta ones are
+  secrets (`.env.example`), staging's compose passes the same.
 - On Kubernetes the bridge's whole environment is this compose.yaml's, rendered by `k8s/up.sh`
   (`k8s/components/social/CLAUDE.md`), so settings added here reach it.
 - Operating Postiz (the user-side steps: the Networks and Operations guides). Updating it: its release notes first

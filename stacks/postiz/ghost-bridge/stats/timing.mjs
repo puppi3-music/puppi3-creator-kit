@@ -276,7 +276,7 @@ async function timingData(dataDir) {
   if (timingCache.dir === dataDir && Date.now() - timingCache.at < 60_000) return timingCache.data;
   const data = {};
   for (const [network, n] of Object.entries(NETWORKS)) {
-    data[network] = { list: ((await readJson(path.join(dataDir, `${network}.json`)))[n.list] || []).filter((p) => p.time),
+    data[network] = { list: ((await readJson(path.join(dataDir, `${network}.json`)))[n.list] || []).filter((p) => p.time && !p.paidCounted), // boosted TikToks: views partly paid
       hist: storeFor(dataDir).history(network) };
   }
   timingCache = { at: Date.now(), dir: dataDir, data, spread: null };

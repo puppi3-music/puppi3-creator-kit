@@ -53,6 +53,40 @@ whole: `stacks/postiz/ghost-bridge/CLAUDE.md`; the settings compose passes: `sta
   uploads count in Social's top section (Published, per day, by network, Recently published). Staging collects too (same app, own
   history; staging-social routes `/soundcloud.json`).
 
+## Boosts (`stats/ads.mjs`, `ads.json`)
+- What paid posts cost and bought (user asked 2026-11-06; she boosts with the apps' own Boost/Promote buttons). The `ads`
+  collector (`ADS_STATS` [true], every `ADS_STATS_MINUTES` [180, min 60]; not a network: not in `NETWORKS`), `data/ads.json`,
+  `GET /ads.json` (Infinity `bridge-instagram`; Platforms' Boosts row, Post's Boost row):
+  - Instagram: an in-app boost is an ad in the Meta ad account `META_AD_ACCOUNT_ID` (`adAccount`: digits or `act_<digits>`),
+    read with `META_ADS_TOKEN` (a Business portfolio system-user token with `ads_read`, never expires; Postiz's
+    Instagram-Login token can't read ads). Four Graph calls (graph.facebook.com v25.0, the token in a Bearer header, never
+    an address): the account (name, currency), `/ads` (adset dates and budgets in cents, creative's
+    `effective_instagram_media_id`/`instagram_permalink_url`), insights per ad for all time, and per ad per day
+    (`time_increment=1`, the last 30 days, 90 the first time; older days kept in the file's `metaDays`, 400 days).
+    Matched to instagram.json's posts by media id, else the permalink without its query; neither = network `other`.
+    Actions by pattern (`video_view`, /follow/, /profile_visit/, post_reaction|like), the whole list in the archive.
+    A field Meta refuses (#100 naming it, at any depth) is dropped and asked again (`refusedField`/`withoutField`),
+    noted in `errors`; a failed poll keeps the last Meta rows. Instagram's post insights are organic only, so nothing
+    else changes for them.
+  - TikTok Promote has no API (TikTok's Marketing API reports only Ads Manager campaigns), so she types each in on
+    `/ghost/social-preview/boosts/` (`serveBoosts`, after `serveDraftPreview`'s staff sign-in check, so no new route
+    anywhere; `ADS_TYPED` [true], false = 404; linked from the Shared posts page): a plain form (POST urlencoded, same
+    origin as Ghost's, 16 KB) per Promote: video (tiktok.json's), start, end (empty = running), spent, budget, views,
+    likes, follows, profile visits, link clicks; "€12,50" and "1,250" read right; saved in `data/ads-typed.json`
+    `entries`, then the collector runs at once (`rerun`, awaited before the redirect). Typed numbers are spread evenly
+    over the days from start to its end or today.
+  - `ads[]` per boost (source meta|typed, network, ref, title, dates, status, budget, spend, reach, impressions, views,
+    likes, follows, profileVisits, clicks, linkClicks, `seen` = reach, TikTok's views, `cpm` = per 1000 seen,
+    `costPerFollow`, `posted_ms`), `daily` (from the first boost to today, wide: `<net>Spend`, `<net>Seen`,
+    `<net>Follows`, `<net>Spend7` = 7-day average with no-boost days as 0, `<net>Cpm7`; `spend`, `spend7`), `totals`
+    (30 days: spend30, `<net>Spend30/Seen30/Cpm30/Follows30`, follows30, costPerFollow30, boosts30, running, currency =
+    `ADS_CURRENCY`, else Meta's, else USD), `byNetwork` (the same per network, for a table).
+- `withBoosts(dataDir, network, out)` before Instagram's and TikTok's verdicts (`collector()`, instagram.mjs): each post
+  with a boost gets `boosted` (its boosts added up, `seen`, `cpm`, `running`; end '' while one runs), and on TikTok
+  `paidCounted` + `organicViews` (views - paid views): TikTok's view count includes the paid ones, so performance.mjs's
+  comparison groups and timing.mjs leave paidCounted posts out, and its own verdict tip says so. `/post.json`'s `boost`
+  = `[boosted]` (empty without one).
+
 ## "vs your usual" and "vs industry" verdicts
 - Two verdicts per post, "vs your usual" and "vs industry" (user asked: judged
   like social media researchers would, per network, and against industry standards too, shown as its own verdict): `withPerformance` (stats/performance.mjs) runs before every network file is written (collector(); IG/YT/SC writes in

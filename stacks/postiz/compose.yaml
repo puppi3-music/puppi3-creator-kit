@@ -211,6 +211,14 @@ services:
       MC_STATS: "true"               # "false" = no Mixcloud numbers
       MC_STATS_MINUTES: "${MC_STATS_MINUTES:-60}"
       MIXCLOUD_USER: "${MIXCLOUD_USER:-}"   # e.g. https://www.mixcloud.com/<name>/
+      # Boosts (paid posts): Instagram's from the Meta ad account (a system-user token with ads_read on it), TikTok
+      # Promote's typed in on /ghost/social-preview/boosts/ (ADS_TYPED). Read-only, so a DRY_RUN bridge reads them too.
+      ADS_STATS: "true"              # "false" = no boosts
+      ADS_STATS_MINUTES: "${ADS_STATS_MINUTES:-180}"
+      ADS_TYPED: "${ADS_TYPED:-true}"
+      ADS_CURRENCY: "${ADS_CURRENCY:-}"
+      META_ADS_TOKEN: "${META_ADS_TOKEN:-}"
+      META_AD_ACCOUNT_ID: "${META_AD_ACCOUNT_ID:-}"
       # The site itself, as one more network beside the social ones: members, visitors per day, and each published
       # post's visitors per day (Ghost's analytics in Tinybird, on the monitoring network), sign-ups and newsletter
       # numbers (the Admin API key above). Without TINYBIRD_TOKEN: posts, members and newsletter numbers only.
