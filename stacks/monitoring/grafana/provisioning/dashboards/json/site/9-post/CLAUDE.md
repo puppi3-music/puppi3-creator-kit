@@ -26,3 +26,7 @@ along with the Infinity/MySQL gotchas and the shared look; the colour variable: 
   note cut off on the right, which looked blank).
 - "Visitors to the page per day" (panel 15) has a panel link "Every post about this page" to the Page dashboard
   (`/d/puppi3-page?var-page=${page:percentencode}` + the time range; `stacks/monitoring/grafana/CLAUDE.md`).
+- "Boost" row (`03-boost/`, shown only when the post was boosted: hidden `post_boosted` from post.json's `boost`, and
+  `post_boost_currency` for the title): tiles 20 (Spent, Seen, Per 1000 seen, Follows, Per follow) and 21 (Started,
+  Ended = running while one is, Profile visits, Link clicks, Organic views: TikTok's views less the paid ones;
+  `reduceOptions.fields` `/.*/` for the dates). Its boosts added up (`withBoosts`, `stats/CLAUDE.md` Boosts).

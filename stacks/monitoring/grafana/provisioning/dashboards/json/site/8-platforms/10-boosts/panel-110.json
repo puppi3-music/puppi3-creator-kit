@@ -1,0 +1,33 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 110,
+    "title": "",
+    "description": "",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [],
+        "transformations": [],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "text",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "content": "What boosting posts cost and what it bought, read by the bridge ${boosts_every}: Instagram's from your Meta ad account (the app's Boost button makes an ad there), TikTok's Promote typed in by you on the [Boosts page](https://@SITE_HOST@/ghost/social-preview/boosts/) (TikTok has no way to read them). *Seen* = accounts reached on Instagram, paid views on TikTok. A boosted TikTok's own views include the paid ones, so it's left out of the usual its other posts are judged against.",
+          "mode": "markdown"
+        },
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": []
+        }
+      }
+    },
+    "transparent": true
+  }
+}

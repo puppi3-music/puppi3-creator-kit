@@ -63,6 +63,18 @@ along with the Infinity gotchas and the shared look). One row folder per section
   `linkClicks` from the archive's insights days, `linkClicks30`); YouTube "Where YouTube views come from" (barchart 34 beside
   the per-day chart, `sources28` from the archive's `trafficSources`, `YT_SOURCES` names); Bluesky Saves, Mixcloud Listeners,
   Ghost More/Less like this columns (+ sort options). Posts tables' columns `custom.minWidth` 70 so they fit.
+- Boosts row (`10-boosts/`, after the networks, before When to post; user asked 2026-11-06): what boosting posts cost
+  and bought, all from `GET /ads.json` (the model: Boosts in `stacks/postiz/ghost-bridge/stats/CLAUDE.md`). Text 110
+  (links the Boosts page `https://@SITE_HOST@/ghost/social-preview/boosts/`), tiles 111 (30 days: Spent, Seen, Per 1000
+  seen: Seen and its cost added up over `byNetwork` in the root_selector) and 112 (Follows, Per follow, Boosts, Running
+  now), status 113 (panel 24's, on ads.json), lines 114 "Spent per day" (each network's day dashed, 7-day bold; all
+  boosts' 7-day tooltip only) and 115 "Cost per 1000 seen, 7-day" (one scale; each day's seen and follows tooltip only),
+  table 116 "Every boost" (`ads[]`, the bridge's order, newest first, every one whatever the time range; rows open Post
+  via hidden `network`/`ref`/`posted_ms`). TikTok is cyan `#25F4EE` here (its red is too close to Instagram's pink),
+  Instagram its pink; money columns 2 decimals, the currency in the titles (`${boosts_currency}`). Hidden dashboard
+  variables `boosts_shown` (yes = any boost or error: the row's rule), `boosts_every`, `boosts_currency` (not `has_`/
+  `every_`: render.py drops those for networks a kit site leaves out). Rendered on Grafana 13.2.3 + Infinity against a
+  fake ads.json (and empty: row hidden) before it went in.
 - Platforms' "When to post" row (panels 90, 91, 92 "what kind of post": timing.json `kinds`, one row per network and
   kind, `vs average` + its `tip`/`style`, only networks with two kinds or more;
   before "Networks not shown", no rule) = `GET /timing.json` (the model: `stacks/postiz/ghost-bridge/stats/CLAUDE.md`). Low

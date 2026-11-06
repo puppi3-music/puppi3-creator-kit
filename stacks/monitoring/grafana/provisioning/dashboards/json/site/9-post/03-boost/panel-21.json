@@ -1,0 +1,149 @@
+{
+  "kind": "Panel",
+  "spec": {
+    "id": 21,
+    "title": "Its boost: when, and the rest",
+    "description": "When its boost ran (Ended = running while one still is), and what else it bought. Organic views (TikTok) = its views less the paid ones: the part its other posts are compared on.",
+    "links": [],
+    "data": {
+      "kind": "QueryGroup",
+      "spec": {
+        "queries": [
+          {
+            "kind": "PanelQuery",
+            "spec": {
+              "query": {
+                "kind": "DataQuery",
+                "group": "yesoreyeram-infinity-datasource",
+                "version": "v0",
+                "datasource": {
+                  "name": "bridge-instagram"
+                },
+                "spec": {
+                  "columns": [
+                    {
+                      "selector": "start",
+                      "text": "Started",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "endShown",
+                      "text": "Ended",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "profileVisits",
+                      "text": "Profile visits",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "linkClicks",
+                      "text": "Link clicks",
+                      "type": "number"
+                    },
+                    {
+                      "selector": "organicViews",
+                      "text": "Organic views",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "format": "table",
+                  "parser": "backend",
+                  "root_selector": "$map(boost, function($b) { $merge([$b, {\"endShown\": $b.end ? $b.end : \"running\"}]) })",
+                  "source": "url",
+                  "type": "json",
+                  "url": "http://postiz-ghost-bridge:8080/post.json",
+                  "url_options": {
+                    "data": "",
+                    "method": "GET",
+                    "params": [
+                      {
+                        "key": "network",
+                        "value": "${network}"
+                      },
+                      {
+                        "key": "id",
+                        "value": "${post}"
+                      },
+                      {
+                        "key": "time",
+                        "value": "${time}"
+                      }
+                    ]
+                  }
+                }
+              },
+              "refId": "A",
+              "hidden": false
+            }
+          }
+        ],
+        "transformations": [
+          {
+            "kind": "Transformation",
+            "group": "organize",
+            "spec": {
+              "options": {
+                "excludeByName": {},
+                "indexByName": {
+                  "Started": 0,
+                  "Ended": 1,
+                  "Profile visits": 2,
+                  "Link clicks": 3,
+                  "Organic views": 4
+                },
+                "renameByName": {}
+              }
+            }
+          }
+        ],
+        "queryOptions": {}
+      }
+    },
+    "vizConfig": {
+      "kind": "VizConfig",
+      "group": "stat",
+      "version": "13.0.2",
+      "spec": {
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "center",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "/.*/",
+            "values": false
+          },
+          "textMode": "value_and_name",
+          "orientation": "vertical",
+          "wideLayout": false,
+          "text": {
+            "titleSize": 12
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": 0,
+                  "color": "green"
+                }
+              ]
+            },
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "#B28CFF"
+            },
+            "noValue": "\u2013"
+          },
+          "overrides": []
+        }
+      }
+    }
+  }
+}

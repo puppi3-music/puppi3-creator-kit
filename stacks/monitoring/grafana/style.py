@@ -48,6 +48,7 @@ COLOURS = {  # fixed colour -> what it means, on every dashboard
     # each network's own colour; a second number of the same network is 'text'
     '#E1306C': 'Instagram', '#F58529': "Instagram's second line (link taps)", '#FF0000': 'YouTube',
     '#FF5500': 'SoundCloud', '#1185FE': 'Bluesky', '#8f8f8f': 'Threads', '#FE2C55': 'TikTok', '#5000FF': 'Mixcloud',
+    '#25F4EE': "TikTok beside Instagram (Platforms' Boosts charts: its red is too close to Instagram's pink)",
     '#4285F4': 'Google Search', '#F38020': 'Cloudflare',
 }
 # Each network's colour on Platforms (keys = the bridge's NETWORKS), which Post draws that network's post in: written
