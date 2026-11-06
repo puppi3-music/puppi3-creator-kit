@@ -15,6 +15,9 @@ The bridge now collects boosts. Instagram posts boosted in the app are read from
 cost, the people it reached, the follows and profile visits it brought, per day. TikTok has no way to read a
 Promote's numbers, so a new staff-only Boosts page (linked from Shared posts) takes them as you copy them from
 the app. A boosted TikTok's views include the paid ones, so it's no longer used as the "usual" for other videos.
+On the dashboards, Platforms has a Boosts row (30-day spend, seen, cost per 1000 seen and per follow, spend per
+day, every boost) and a boosted post's Post dashboard a Boost row; the Analytics guide's "Is boosting worth it?"
+says how to read them.
 
 **Your site:** for Instagram, add `META_ADS_TOKEN` and `META_AD_ACCOUNT_ID` to the social module's secrets (the
 Networks guide's Boosts section says how to make the token), then `kit/kit.sh <folder> up -d` (on Kubernetes,
