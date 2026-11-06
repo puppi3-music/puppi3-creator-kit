@@ -146,3 +146,21 @@ test('keepLastOverZero: a count back at 0 from 5 or more keeps its last; withHis
   assert.equal(totals.followers, 480);
   assert.deepEqual(daily.at(-1), { date: day(Date.now()), followers: 480, newFollowers: 0 });
 });
+
+test('accountGains: Instagram reach and engagement averaged over SMOOTH_HOURS, followers left as they came, profile views too averaged', async () => {
+  const { accountGains, SMOOTH_HOURS } = await import('../ghost-bridge/stats/history.mjs');
+  const H = 3_600_000;
+  const t0 = Date.UTC(2026, 10, 2, 1);
+  // reach today so far jumps by 12 in one hour after five flat ones; followers +1 each hour
+  const reach = [0, 0, 0, 0, 0, 0, 12];
+  const checks = reach.map((r, i) => [t0 + i * H, { followers: 100 + i, reachToday: r, postShares: i === 6 ? 6 : 0, profileViewsToday: r }]);
+  const rows = accountGains(checks, 'instagram');
+  assert.equal(SMOOTH_HOURS, 6);
+  assert.equal(rows[6].reach, 2); // 12 over the 6 hours ending there (checks 1-6)
+  assert.equal(rows[6].newPostShares, 1);
+  assert.equal(rows[6].engagement, 1);
+  assert.equal(rows[6].newFollowers, 1);
+  assert.equal(rows[6].profileViews, 2);
+  assert.equal(rows[0].reach, null); // no check before it
+  assert.equal(accountGains(checks, 'bluesky')[6].reachToday, 12); // other networks untouched
+});

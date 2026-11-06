@@ -26,8 +26,9 @@ is in the repo, every Traefik plugin a file loads is there: one missing turns th
 that's fine), the guides' build, the dashboards' checks and a render for the example profile, the dashboard scripts'
 tests (`stacks/monitoring/grafana/tests/`), the bridge's modules and its tests (`stacks/postiz/ghost-bridge-test/`),
 the Traefik plugins' tests with gofmt and go vet (when Go is there), every shell script's syntax.
-`.github/workflows/check.yml` runs it in the kit's repo on every push and pull request (the Node of the bridge's
-Dockerfile, the Go of the plugins' go.mod, the runner's Python 3; only there, like release.yml). A site repo that sends the kit runs it on the kit's copy with `--here` itself, so a path
+`.github/workflows/check.yml` runs it on every pull request and push to main, in the owner's repos only (the kit's,
+and the site it's made from; a fork's skips it), and main requires it before a merge (branch protection). The Node of the bridge's
+Dockerfile, the Go of the plugins' go.mod, the runner's Python 3. `.github/pull_request_template.md` is the PRs' outline. A site repo that sends the kit runs it on the kit's copy with `--here` itself, so a path
 only that site has counts as missing. A site's own notes for a folder may be in a `CLAUDE.site.md` beside its
 CLAUDE.md (never in the kit's repo).
 

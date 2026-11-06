@@ -7,6 +7,58 @@ From 1.2.2 on, each change has a `###` heading saying what it does, a short para
 (what to run, if anything) and **Restarts:** (what goes down, and for how long), each its own paragraph. The release workflow joins wrapped
 lines, since GitHub's release notes break wherever the text does.
 
+## 1.5.1 (not released yet)
+
+### Boosts: what paid posts cost and bought
+
+The bridge now collects boosts. Instagram posts boosted in the app are read from your Meta ad account: what each
+cost, the people it reached, the follows and profile visits it brought, per day. TikTok has no way to read a
+Promote's numbers, so a new staff-only Boosts page (linked from Shared posts) takes them as you copy them from
+the app. A boosted TikTok's views include the paid ones, so it's no longer used as the "usual" for other videos.
+On the dashboards, Platforms has a Boosts row (30-day spend, seen, cost per 1000 seen and per follow, spend per
+day, every boost) and a boosted post's Post dashboard a Boost row; the Analytics guide's "Is boosting worth it?"
+says how to read them.
+
+**Your site:** for Instagram, add `META_ADS_TOKEN` and `META_AD_ACCOUNT_ID` to the social module's secrets (the
+Networks guide's Boosts section says how to make the token), then `kit/kit.sh <folder> up -d` (on Kubernetes,
+`k8s/up.sh`). Without them only the Boosts page works.
+
+**Restarts:** the bridge, for a few seconds (a share in progress finishes first).
+
+### "Back to the usual pfp" can bring the usual picture
+
+When a seasonal outfit ends, the "🐶 Back to the usual pfp" notification now has your everyday profile picture
+attached, with a Save picture button, the same way the outfit's own reminder does, when the site's theme has one
+(`assets/images/pfp/usual.png`). A theme without it, like the kit's own, gets the reminder's text alone, as before.
+
+**Your site:** `kit/kit.sh <folder> up -d` after updating brings the new bridge (on Kubernetes, `k8s/up.sh`).
+
+**Restarts:** the bridge, for a few seconds (a share in progress finishes first).
+
+### Postiz shows as unhealthy when its server has died
+
+After a power cut, Postiz could start before its Redis: its page still loaded, but everything else answered 502
+for hours. Its health check now asks its API too, so that shows as unhealthy (on Kubernetes the pod restarts
+itself), and the bridge's numbers carry on meanwhile with the channels Postiz last listed (Operations guide,
+Troubleshooting).
+
+**Your site:** `kit/kit.sh <folder> up -d` after updating (on Kubernetes, `k8s/up.sh`). If it shows unhealthy:
+`kit/kit.sh <folder> restart postiz`.
+
+**Restarts:** Postiz, for about a minute, and the bridge, for a few seconds.
+
+### Instagram: a Save rate column, smoother hourly lines, fresher audience
+
+Instagram's posts table on Platforms has a **Save rate** (saves per 100 people reached), coloured against your
+own usual, and a Sort by choice for it; saves now count double in "Doing best". Hour by hour, Instagram's reach,
+profile views, link taps and reactions are a 6-hour average instead of spikes. Followers by age, gender, country
+and when they're online are asked every 20 minutes (`IG_AUDIENCE_MINUTES`) instead of once a day.
+
+**Your site:** `kit/kit.sh <folder> up -d` after updating brings the new bridge and dashboards (on Kubernetes,
+`k8s/up.sh`).
+
+**Restarts:** the bridge and the site's Grafana, for a few seconds each.
+
 ## 1.5.0
 
 **All of it at once:** `kit/kit.sh <folder> up -d` (Compose) or `k8s/up.sh <folder> <overlay>` (Kubernetes) brings

@@ -26,7 +26,9 @@ export async function postiz(method, path, body, timeoutMs = 60_000) {
   const text = await res.text();
   let data;
   try { data = JSON.parse(text); } catch { data = text; }
-  if (!res.ok) throw new Error(`${method} ${path} -> ${res.status}: ${typeof data === 'string' ? data : JSON.stringify(data)}`);
+  // a proxy's error page (Postiz's own, while its backend is down or starting) says only its title
+  const said = typeof data !== 'string' ? JSON.stringify(data) : /<html/i.test(data) ? (data.match(/<title>([^<]*)<\/title>/i)?.[1] || 'an HTML page').trim() : data;
+  if (!res.ok) throw new Error(`${method} ${path} -> ${res.status}: ${said}`);
   return data;
 }
 

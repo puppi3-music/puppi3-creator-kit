@@ -1,0 +1,57 @@
+{
+  "kind": "RowsLayoutRow",
+  "spec": {
+    "title": "Boost",
+    "collapse": false,
+    "conditionalRendering": {
+      "kind": "ConditionalRenderingGroup",
+      "spec": {
+        "visibility": "show",
+        "condition": "and",
+        "items": [
+          {
+            "kind": "ConditionalRenderingVariable",
+            "spec": {
+              "variable": "post_boosted",
+              "operator": "equals",
+              "value": "yes"
+            }
+          }
+        ]
+      }
+    },
+    "layout": {
+      "kind": "GridLayout",
+      "spec": {
+        "items": [
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-20"
+              }
+            }
+          },
+          {
+            "kind": "GridLayoutItem",
+            "spec": {
+              "x": 12,
+              "y": 0,
+              "width": 12,
+              "height": 4,
+              "element": {
+                "kind": "ElementReference",
+                "name": "panel-21"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

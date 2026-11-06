@@ -675,7 +675,7 @@ export function sharedPage(d) {
     .filter(Boolean).join(' · ');
   return previewPage('Shared posts', `<h1>Shared posts</h1>
     <div class="meta">What the bridge will post and what it posted on each network${d.dryRun ? ' (this bridge is a dry run: it posts nothing)' : ''}.
-    Open a post for its Social preview: what a scheduled post or a draft will post, or a published one, to share it again. <a href="/ghost/">Ghost Admin</a></div>
+    Open a post for its Social preview: what a scheduled post or a draft will post, or a published one, to share it again. <a href="boosts/">Boosts</a> (what paid posts cost) · <a href="/ghost/">Ghost Admin</a></div>
     ${ahead}${ahead ? '<h2>Published</h2>' : ''}
     ${items.length ? `<ul class="list">${items.join('')}</ul>` : '<p>No published posts yet.</p>'}
     ${pages ? `<div class="pages">${pages}</div>` : ''}`);

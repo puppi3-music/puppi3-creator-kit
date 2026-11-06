@@ -3,7 +3,7 @@
   "spec": {
     "id": 22,
     "title": "When followers are online",
-    "description": "How many of your followers were on Instagram in each hour of the day, averaged over the last days Instagram gave (it gives up to a week, checked once a day). Hours are in your time (18 = 6-7 pm; SITE_TIMEZONE, @SITE_TIMEZONE@): Instagram gives its hours in Pacific time, which the bridge turns into yours. The hours before the busiest ones are good times to post. Needs 100 followers. Not affected by the dashboard's time range.",
+    "description": "How many of your followers were on Instagram in each hour of the day, averaged over the last days Instagram gave (it gives up to a week; checked every 20 minutes, IG_AUDIENCE_MINUTES, though Instagram adds a day at a time). Hours are in your time (18 = 6-7 pm; SITE_TIMEZONE, @SITE_TIMEZONE@): Instagram gives its hours in Pacific time, which the bridge turns into yours. The hours before the busiest ones are good times to post. Needs 100 followers. Not affected by the dashboard's time range.",
     "links": [],
     "data": {
       "kind": "QueryGroup",

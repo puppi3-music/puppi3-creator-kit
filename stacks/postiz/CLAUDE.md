@@ -39,6 +39,8 @@ the settings it passes, and Postiz.
   image built from `ghost-bridge/Dockerfile`, USER node, couldn't write `data/`; staging's bridge too); healthcheck every 5 s (Traefik routes
   only to healthy); `stop_grace_period: 5m` (the bridge finishes a share in progress); registration defaults closed
   (`POSTIZ_DISABLE_REGISTRATION:-true`).
+- Boosts: `ADS_*`, `META_ADS_TOKEN`, `META_AD_ACCOUNT_ID` (`ghost-bridge/stats/CLAUDE.md`, Boosts); the two Meta ones are
+  secrets (`.env.example`), staging's compose passes the same.
 - On Kubernetes the bridge's whole environment is this compose.yaml's, rendered by `k8s/up.sh`
   (`k8s/components/social/CLAUDE.md`), so settings added here reach it.
 - Operating Postiz (the user-side steps: the Networks and Operations guides). Updating it: its release notes first
@@ -53,3 +55,8 @@ the settings it passes, and Postiz.
   Add Channel with an account Postiz already has upserts on `(organizationId, internalId)`, so its posts stay
   attached; "Reconnect channel" shows only when Postiz flags a token. `postiz-temporal-ui` listens on the host's
   127.0.0.1:8233, no sign-in (an ssh tunnel from elsewhere).
+- Postiz's healthcheck asks the page and the API (`/api/public/v1/integrations`, a 401 is up): Postiz runs its
+  backend, frontend and orchestrator under pm2 in one container, and after a power cut the server starts every
+  container at once (depends_on is only `compose up`'s), so the backend can die on Redis not being up yet
+  (2026-11-01: hours of 502s while the page loaded). Unhealthy doesn't restart it: `docker exec postiz pm2 restart
+  backend` (or restart postiz) does.

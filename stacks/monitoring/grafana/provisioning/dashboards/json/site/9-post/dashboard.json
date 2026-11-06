@@ -255,6 +255,138 @@
       {
         "kind": "QueryVariable",
         "spec": {
+          "name": "post_boosted",
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "label": "Boosted",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "description": "Hidden: yes when this post was boosted; shows the Boost section.",
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "infinityQuery": {
+                "columns": [],
+                "datasource": {
+                  "type": "yesoreyeram-infinity-datasource",
+                  "uid": "bridge-instagram"
+                },
+                "filters": [],
+                "format": "table",
+                "parser": "backend",
+                "refId": "post_boosted",
+                "root_selector": "$count(boost) > 0 ? \"yes\" : \"no\"",
+                "source": "url",
+                "type": "json",
+                "url": "http://postiz-ghost-bridge:8080/post.json",
+                "url_options": {
+                  "data": "",
+                  "method": "GET",
+                  "params": [
+                    {
+                      "key": "network",
+                      "value": "${network}"
+                    },
+                    {
+                      "key": "id",
+                      "value": "${post}"
+                    },
+                    {
+                      "key": "time",
+                      "value": "${time}"
+                    }
+                  ]
+                }
+              },
+              "query": "",
+              "queryType": "infinity"
+            }
+          },
+          "regex": "",
+          "sort": "disabled",
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "post_boost_currency",
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "label": "Boost's currency",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "description": "Hidden: the currency its boost is counted in, for the title.",
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "infinityQuery": {
+                "columns": [],
+                "datasource": {
+                  "type": "yesoreyeram-infinity-datasource",
+                  "uid": "bridge-instagram"
+                },
+                "filters": [],
+                "format": "table",
+                "parser": "backend",
+                "refId": "post_boost_currency",
+                "root_selector": "$count(boost) > 0 and $type(boost[0].currency) = \"string\" ? boost[0].currency : \"-\"",
+                "source": "url",
+                "type": "json",
+                "url": "http://postiz-ghost-bridge:8080/post.json",
+                "url_options": {
+                  "data": "",
+                  "method": "GET",
+                  "params": [
+                    {
+                      "key": "network",
+                      "value": "${network}"
+                    },
+                    {
+                      "key": "id",
+                      "value": "${post}"
+                    },
+                    {
+                      "key": "time",
+                      "value": "${time}"
+                    }
+                  ]
+                }
+              },
+              "query": "",
+              "queryType": "infinity"
+            }
+          },
+          "regex": "",
+          "sort": "disabled",
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
           "name": "colour",
           "current": {
             "text": "",

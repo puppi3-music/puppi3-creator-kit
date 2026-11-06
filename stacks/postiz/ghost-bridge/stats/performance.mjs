@@ -38,7 +38,7 @@ export const SIGNALS = {
     count('watch', 'Avg watch time', 'avgWatchMs', 3, { aged: false, scale: 0.001, unit: ' s' }),
     rate('sends', 'Sends per reach', ['shares'], 'reach', 3),
     rate('likes', 'Likes per reach', ['likes'], 'reach', 3),
-    rate('saves', 'Saves per reach', ['saved'], 'reach', 1),
+    rate('saves', 'Saves per reach', ['saved'], 'reach', 2),
     rate('comments', 'Comments per reach', ['comments'], 'reach', 1),
     rate('follows', 'Follows per reach', ['follows'], 'reach', 1),
     count('reach', 'Reach', 'reach', 2),
@@ -246,7 +246,8 @@ export function performance(ctx, p) {
   const kind = ctx.kindOf(p);
   // the others old enough, of the same kind when there are enough of it
   const othersFrom = (minAge) => {
-    const others = ctx.list.filter((o) => o !== p && o.time && (o.ref || postRef(o.id)) !== ref && ctx.now - o.time >= minAge);
+    // a boosted post whose numbers include the paid ones (TikTok's: stats/ads.mjs) is nobody's usual
+    const others = ctx.list.filter((o) => o !== p && o.time && !o.paidCounted && (o.ref || postRef(o.id)) !== ref && ctx.now - o.time >= minAge);
     const same = kind ? others.filter((o) => ctx.kindOf(o) === kind) : [];
     return same.length >= PERF_MIN ? same : others;
   };
@@ -359,7 +360,12 @@ export async function withPerformance(dataDir, network, out) {
       const list = out[key];
       if (!Array.isArray(list) || !list.length) continue;
       const ctx = perfContext(network, story, list, await readHistory(dataDir, histName), out);
-      for (const p of list) if (p) Object.assign(p, perfFields(performance(ctx, p)));
+      for (const p of list) {
+        if (!p) continue;
+        const v = performance(ctx, p);
+        if (p.paidCounted && v.why) v.why += ' Boosted: its numbers include the paid views, so it\'s compared as it is but never used as the usual.';
+        Object.assign(p, perfFields(v));
+      }
     }
   } catch (e) { (out.errors ||= []).push(`performance: ${e.message}`); }
   return out;

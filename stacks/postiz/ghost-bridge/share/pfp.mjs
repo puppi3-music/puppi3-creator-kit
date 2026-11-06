@@ -1,6 +1,6 @@
 // share/pfp.mjs: seasonal profile pictures. When one of the site's seasonal outfits starts (the theme's SEASONS), the
 // phone gets an ntfy reminder with the puppy in that outfit, to put on each network's profile by hand; when it ends,
-// a reminder to put the usual picture back. The theme draws the pictures and copies its SEASONS into seasons.json
+// a reminder to put the usual picture back (with it attached when the theme has usual.png). The theme draws the pictures and copies its SEASONS into seasons.json
 // (`npm run dev:pfp` there), so this reads both from the site: nothing to keep in step here.
 
 import path from 'node:path';
@@ -80,6 +80,17 @@ async function siteSeasons() {
   return list;
 }
 
+// Whether the theme has usual.png (the everyday picture "Back to the usual pfp" attaches); unreadable = no
+async function hasUsual() {
+  const res = await fetch(`${GHOST_API_URL}${ASSETS}usual.png`, {
+    method: 'HEAD',
+    headers: { 'X-Forwarded-Proto': 'https' },
+    redirect: 'manual',
+    signal: AbortSignal.timeout(30_000),
+  }).catch(() => null);
+  return !!res?.ok;
+}
+
 // ---------- the phone ----------
 async function tellPhone(state, seasons) {
   const names = PFP_NETWORKS.map((n) => n.name).join(', ');
@@ -100,11 +111,15 @@ async function tellPhone(state, seasons) {
       actions: [...(picture ? [{ action: 'view', label: 'Save picture', url: picture, clear: false }] : []), ...opens],
     };
   } else {
+    const origin = await hasUsual() && await ghostSiteOrigin().catch(() => '');
+    const picture = origin ? `${origin}${ASSETS}usual.png` : '';
     msg = {
       title: '🐶 Back to the usual pfp',
-      message: `${nameOf(state.from)}'s over. Put your usual profile picture back on: ${names}.`,
+      message: [`${nameOf(state.from)}'s over. Put your usual profile picture back on: ${names}.`,
+        ...(picture ? ['', '1. Save the attached picture: tap ⋯ → Save file (or "Save picture").\n2. Set it as your profile picture in each app.'] : [])].join('\n'),
       tags: ['dog'],
-      actions: opens,
+      ...(picture && { attach: picture, filename: `${ID_PREFIX}-usual.png` }),
+      actions: [...(picture ? [{ action: 'view', label: 'Save picture', url: picture, clear: false }] : []), ...opens],
     };
   }
   // Off (no NTFY_URL) or a dry run counts as done: notify() logged it, so it isn't tried again every hour

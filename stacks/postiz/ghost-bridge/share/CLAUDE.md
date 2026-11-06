@@ -127,7 +127,8 @@ change.
 - On a change (state `data/pfp.json`: season, since, from, notified; saved after each step, so restarts repeat nothing; an
   unsent reminder is retried hourly; no NTFY_URL or DRY_RUN without DRY_RUN_NTFY counts as sent): "🐶 <Season> puppy pfp"
   with the PNG (site's public URL from `ghostSiteOrigin`) attached + Save picture, or "🐶 Back to the usual pfp" when it
-  ends. Both list `PFP_NETWORKS` (comma list, default bluesky, instagram, threads, tiktok, youtube, soundcloud, mixcloud, discord; the
+  ends, with the theme's `usual.png` attached the same way when it has one (`hasUsual`: a HEAD via `GHOST_API_URL`;
+  so it's at hand to put back; none = the text alone, as with the kit's theme). Both list `PFP_NETWORKS` (comma list, default bluesky, instagram, threads, tiktok, youtube, soundcloud, mixcloud, discord; the
   user's per-network on/off: remove one to stop it), its first two known ones get "Open <network>" buttons (`NETWORKS`
   in pfp.mjs has the names and addresses; an unknown name is listed as written). Empty = off.
 

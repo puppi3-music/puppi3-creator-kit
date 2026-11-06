@@ -3,7 +3,7 @@
   "spec": {
     "id": 29,
     "title": "Followers by country",
-    "description": "Where your Instagram followers are, the top 10. From Instagram's audience numbers via the bridge, checked once a day (Instagram gives them only from 100 followers). Not affected by the dashboard's time range.",
+    "description": "Where your Instagram followers are, the top 10. From Instagram's audience numbers via the bridge, checked every 20 minutes (IG_AUDIENCE_MINUTES), though Instagram itself updates them about once a day; it gives them only from 100 followers. Not affected by the dashboard's time range.",
     "links": [],
     "data": {
       "kind": "QueryGroup",

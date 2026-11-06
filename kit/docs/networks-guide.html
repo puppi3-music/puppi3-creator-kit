@@ -483,12 +483,41 @@ header.top .pup svg{display:block;width:100%;height:auto}
   <p>Its status on the Traffic dashboard shows the first collection, or what went wrong: a 403 means the service account isn't a user of the property, or the API isn't on.</p>
 </section>
 
+<section id="boosts">
+  <h2>Boosts</h2>
+  <p>A boost is a post you pay to show to more people, with the app's own <em>Boost</em> (Instagram) or <em>Promote</em> (TikTok) button. The bridge collects what each one cost and bought, for the Boosts row on the Platforms dashboard and the Boost row on a boosted post's Post dashboard (the <a href="analytics-guide.html#questions-is-boosting-worth-it">Analytics guide</a> says how to read them). Instagram's come by themselves once the bridge can read your ad account; TikTok's you type in. Both are optional.</p>
+  <h3 id="boosts-instagram">Instagram: your ad account</h3>
+  <p>A boost made in the Instagram app is an ad in a Meta ad account, and the Instagram app's sign-in can't read ads, so the bridge needs a key of its own for it: a <em>system user</em> token from the Business portfolio that owns that ad account.</p>
+  <ol>
+    <li>Find the ad account: in <a href="https://adsmanager.facebook.com/" rel="noopener">Ads Manager</a>, the account menu at the top left shows its ID (<code>act_</code> and digits, or just the digits). Your boosts are listed there as campaigns. If the account isn't in a Business portfolio yet, add it to one (<a href="https://business.facebook.com/settings" rel="noopener">business.facebook.com/settings</a> → <em>Accounts → Ad accounts → Add</em>).</li>
+    <li>In the same settings: <em>Users → System users → Add</em>, a name like "site stats", role <em>Employee</em>.</li>
+    <li>With the system user selected: <em>Assign assets → Ad accounts</em>, your ad account, with <em>View performance</em> only. Nothing more is needed: the bridge only reads.</li>
+    <li><em>Generate token</em>: pick an app in the portfolio (the Instagram app from <a href="#instagram-on-meta-s-side">above</a> will do; if the list is empty, add it under <em>Accounts → Apps</em> first), expiry <em>Never</em>, and the permission <code>ads_read</code>. Copy the token: Meta shows it only once.</li>
+    <li>In the social module's secrets (<code>secrets/postiz.env</code>): <code>META_ADS_TOKEN</code> = the token, <code>META_AD_ACCOUNT_ID</code> = the ID, then start the site again.</li>
+  </ol>
+  <p>The bridge reads the ad account every 3 hours (<code>ADS_STATS_MINUTES</code>, at least 60): each boost's dates, budget, spend, people reached, follows, profile visits and link clicks, per day. The first time it reads the last 90 days, then keeps adding. A boost is matched to its post in Instagram's posts table; a boost of something the bridge doesn't know (an ad made in Ads Manager, say) is listed under <em>other</em>. Money is in the ad account's currency.</p>
+  <h3 id="boosts-tiktok">TikTok: type them in</h3>
+  <p>TikTok gives no way to read a Promote's numbers (its Marketing API covers only Ads Manager campaigns), so you copy them from the app onto the <strong>Boosts</strong> page: <code>https://&lt;your site&gt;/ghost/social-preview/boosts/</code>, also linked at the top of the Shared posts page (<a href="posting-guide.html#writing-sharing-a-post-again">Posting guide</a>). Like the Social preview, it works only where you're signed in to Ghost Admin.</p>
+  <ul>
+    <li><strong>Adding one:</strong> pick the video (the list is TikTok's posts table, so a new video shows up once its numbers have come in), the day it started, the day it ended (empty while it's still running), what it cost and its budget, and what TikTok's Promote page says it brought: views (the paid ones), likes, follows, profile visits, link clicks. "12,50" or "1,250" are read right. <strong>Add it</strong> saves it and updates the numbers at once.</li>
+    <li><strong>Keeping it current:</strong> while a Promote runs, click <strong>Edit</strong> on its row now and then and type the new totals; set the end day when it's over. Typed numbers are spread evenly over the days it ran, so the per-day charts are an even split, not TikTok's own days.</li>
+    <li><strong>The currency</strong> is <code>ADS_CURRENCY</code> (like <code>EUR</code>; empty = the Meta ad account's, else USD), the same for every boost. <code>ADS_TYPED=false</code> turns the page off.</li>
+  </ul>
+  <p>A boosted TikTok's views include the paid ones, so it isn't used as the usual for your other videos, and its own verdict says so. Instagram's post numbers are unpaid only, so nothing changes there.</p>
+  <h3 id="boosts-when-it-goes-wrong">When it goes wrong</h3>
+  <ul>
+    <li>The Boosts row's status panel on Platforms says when the numbers were last read and what went wrong. A Meta error that names a field means Meta stopped giving that number: the bridge leaves it out, keeps the rest and says so there. If Meta can't be read at all, the last numbers it had stay.</li>
+    <li><strong>"Invalid OAuth access token"</strong> or a permission error: the token was made without <code>ads_read</code>, or the system user wasn't given the ad account. Fix that and generate a new one.</li>
+    <li><strong>A boost missing from the row:</strong> the row shows the last 30 days in its tiles; the <strong>Every boost</strong> table lists them all. Not there either: <code>META_AD_ACCOUNT_ID</code> may be another ad account (a Business portfolio can have several).</li>
+  </ul>
+</section>
+
 <section id="checking">
   <h2>Checking the numbers</h2>
   <ul>
     <li><strong>Grafana → Platforms.</strong> A network's section shows once the bridge has numbers for it. Its status panel says when they were last collected, and what's wrong if anything is.</li>
     <li><strong>A network with no numbers yet has no section.</strong> <em>Networks not shown</em>, at the bottom of the dashboard, lists it with the bridge's reason (like "no TikTok channel in Postiz" or "needs POSTIZ_DB_PASSWORD").</li>
-    <li><strong>Straight from the bridge</strong>, for a closer look (or <code>instagram</code>, <code>threads</code>, <code>bluesky</code>, <code>youtube</code>, <code>soundcloud</code>, <code>mixcloud</code>, <code>ghost</code>, <code>cloudflare</code>, <code>search</code>): <code>updatedAt</code> says when, <code>errors</code> what went wrong. The bridge's log has the same errors.
+    <li><strong>Straight from the bridge</strong>, for a closer look (or <code>instagram</code>, <code>threads</code>, <code>bluesky</code>, <code>youtube</code>, <code>soundcloud</code>, <code>mixcloud</code>, <code>ghost</code>, <code>cloudflare</code>, <code>search</code>, <code>ads</code> for boosts): <code>updatedAt</code> says when, <code>errors</code> what went wrong. The bridge's log has the same errors.
 <div class="code"><pre>kit/kit.sh &lt;folder&gt; exec -T postiz-ghost-bridge wget -qO- http://localhost:8080/tiktok.json | head -c 600
 kit/kit.sh &lt;folder&gt; logs postiz-ghost-bridge | grep "stats:"</pre></div>
       On Kubernetes: <code>kubectl -n &lt;short name&gt; exec deploy/postiz-ghost-bridge -- wget -qO- http://localhost:8080/tiktok.json</code>.</li>
@@ -502,6 +531,7 @@ kit/kit.sh &lt;folder&gt; logs postiz-ghost-bridge | grep "stats:"</pre></div>
     <li><strong>The Ghost key</strong> (<code>GHOST_ADMIN_API_KEY</code>) could change the site's content (Ghost has no read-only keys); the bridge only reads with it. A new one (the integration in Ghost → <em>Admin API key → Regenerate</em>) goes in the file too.</li>
     <li><strong>The webhook's secret:</strong> change it in Ghost's integration and in <code>GHOST_WEBHOOK_SECRET</code> together. The bridge refuses every request that isn't signed with it, and every request when it has none.</li>
     <li><strong>The networks' app secrets:</strong> a new one goes in the file, then start the site again; channels may need connecting again.</li>
+    <li><strong>The ad account's token</strong> (<code>META_ADS_TOKEN</code>) can only read the ad account's numbers, if it was made as above (<em>View performance</em>, <code>ads_read</code>). It doesn't expire, so if it leaks, remove it: <em>System users</em> → the user → <em>Revoke tokens</em>, then generate a new one.</li>
     <li><strong>Postiz's own sign-in</strong> is on the internet: keep its sign-ups closed (<code>POSTIZ_DISABLE_REGISTRATION=true</code>) and its password strong.</li>
     <li><strong>Postiz's uploads must stay public:</strong> Instagram and Threads fetch each post's pictures and videos from <code>https://postiz.&lt;your site&gt;/uploads/…</code>. Don't put Postiz behind a sign-in or a home-only rule without leaving <code>/uploads</code> out.</li>
     <li><strong>The photo pages</strong> linked from your notifications need no sign-in (your phone may not be signed in to Ghost): a long random address is their key, sent only in your notification, and they show only photos that are public anyway. They stop working after 14 days (<code>PHOTO_PAGE_DAYS</code>). A draft's Social preview is only for staff signed in to Ghost Admin.</li>

@@ -21,7 +21,7 @@ export function bluesky({ env, dataDir, postiz, collector, channel, keepPosts, m
     Object.assign(out, { account: null, totals: {}, daily: [], posts: [], postsPerDay: [] });
     try {
       if (!env.BLUESKY_HANDLE && !postiz) throw new Error('needs BLUESKY_HANDLE (or POSTIZ_API_KEY, to use the Bluesky channel in Postiz)');
-      const handle = (env.BLUESKY_HANDLE || (await channel(['bluesky'], 'Bluesky')).profile || '').trim().replace(/^@/, '');
+      const handle = (env.BLUESKY_HANDLE || (await channel(['bluesky'], 'Bluesky', out)).profile || '').trim().replace(/^@/, '');
       if (!handle) throw new Error('needs BLUESKY_HANDLE (the Bluesky channel in Postiz has no handle)');
       const p = await bsky('app.bsky.actor.getProfile', { actor: handle });
       out.account = { handle: p.handle, name: p.displayName || p.handle, picture: p.avatar || '', url: `https://bsky.app/profile/${p.handle}` };
@@ -145,7 +145,7 @@ export function threads({ env, dataDir, PG, collector, channel, postizAnalytics,
     let postizDaily = [];
     let insDaily = [];
     try {
-      const ch = await channel(['threads'], 'Threads');
+      const ch = await channel(['threads'], 'Threads', out);
       out.account = { name: ch.name, username: ch.profile || '', picture: ch.picture || '', url: ch.profile ? `https://www.threads.com/@${ch.profile}` : '' };
       if (ch.refreshNeeded) out.errors.push('Postiz says the Threads channel needs reconnecting');
       out.metricsOk = prev.metricsOk || {};
@@ -254,7 +254,7 @@ export function tiktok({ env, dataDir, PG, collector, channel, postizAnalytics, 
   collector('tiktok', 'TikTok', enabled(env.TIKTOK_STATS), minutes(env.TIKTOK_STATS_MINUTES), 45, async (out, prev) => {
     Object.assign(out, { account: null, totals: {}, daily: [], posts: [], postsPerDay: [] });
     try {
-      const ch = await channel(['tiktok', 'tiktok-business'], 'TikTok');
+      const ch = await channel(['tiktok', 'tiktok-business'], 'TikTok', out);
       out.account = { name: ch.name, username: ch.profile || '', picture: ch.picture || '' };
       if (ch.refreshNeeded) out.errors.push('Postiz says the TikTok channel needs reconnecting');
       try {

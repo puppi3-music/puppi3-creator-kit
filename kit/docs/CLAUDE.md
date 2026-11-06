@@ -22,7 +22,8 @@ of the kit: `kit/CLAUDE.md`.
 - `networks-guide.html` (by hand, for whoever runs a site): how sharing and the numbers fit together, Postiz
   (connecting, the redirect address `https://postiz.<site>/integrations/social/<name>`, reconnecting), each network's
   app step by step (Instagram, Threads, TikTok, Bluesky, YouTube, SoundCloud, Mixcloud, the site itself, Cloudflare,
-  Google Search: permissions, which box each address goes in, the keys, what goes wrong), checking the numbers
+  Google Search: permissions, which box each address goes in, the keys, what goes wrong), Boosts (`#boosts`: the Meta
+  ad account's system-user token, the TikTok Promotes typed in on the Boosts page), checking the numbers
   arrive, what each key can do (`#safety`). Its steps were done on real accounts in 2026, from
   a running site's notes; the networks' portals move their menus, so check a step against the portal when one changes.
   Keep it current with the collectors (`stacks/postiz/ghost-bridge/stats/CLAUDE.md`), `stacks/postiz/.env.example`
@@ -56,7 +57,7 @@ of the kit: `kit/CLAUDE.md`.
   pictures in `assets/images/pfp/` with `seasons.json`, the pets route). Keep it current with `kit/theme/` and
   `kit/redirects.yaml`.
 - `posting-guide.html` (for whoever posts: the bridge's tags, captions, media, notifications, finishing Instagram and
-  TikTok) and `analytics-guide.html` (each dashboard, the verdicts, When to post) are by hand too: keep them current
+  TikTok) and `analytics-guide.html` (each dashboard, the verdicts, boosts, When to post) are by hand too: keep them current
   with the bridge (`stacks/postiz/ghost-bridge/share/CLAUDE.md` for posting,
   `stacks/postiz/ghost-bridge/stats/CLAUDE.md` for the numbers) and the dashboards. The Posting guide's notifications
   include the seasonal profile picture reminder (a theme with outfits only), the Analytics guide the pets panels

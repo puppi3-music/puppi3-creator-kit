@@ -921,6 +921,153 @@
       {
         "kind": "QueryVariable",
         "spec": {
+          "name": "boosts_shown",
+          "label": "Boosts are shown",
+          "description": "yes when the bridge's ads.json has a boost or a problem to show; no shows the Boosts section only to editors. Hidden: it only drives the section's show/hide rule (not has_boosts: render.py drops has_<x> for networks a site leaves out).",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "boosts_shown",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "boosts_shown",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/ads.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "($count(ads) > 0 or $count(errors) > 0) ? \"yes\" : \"no\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "boosts_every",
+          "label": "Boosts: how often the bridge checks",
+          "description": "Hidden: the Boosts text's \"read by the bridge\".",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "boosts_every",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "boosts_every",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/ads.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "$type(checkedEvery) = \"string\" ? checkedEvery : \"regularly\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "boosts_currency",
+          "label": "Boosts' currency",
+          "description": "Hidden: the currency boosts are counted in (ADS_CURRENCY, else the Meta ad account's), for titles.",
+          "hide": "hideVariable",
+          "refresh": "onDashboardLoad",
+          "skipUrlSync": true,
+          "current": {
+            "text": "",
+            "value": ""
+          },
+          "options": [],
+          "query": {
+            "kind": "DataQuery",
+            "group": "yesoreyeram-infinity-datasource",
+            "version": "v0",
+            "datasource": {
+              "name": "bridge-instagram"
+            },
+            "spec": {
+              "refId": "boosts_currency",
+              "queryType": "infinity",
+              "infinityQuery": {
+                "refId": "boosts_currency",
+                "type": "json",
+                "source": "url",
+                "parser": "backend",
+                "format": "table",
+                "url": "http://postiz-ghost-bridge:8080/ads.json",
+                "url_options": {
+                  "method": "GET",
+                  "data": ""
+                },
+                "root_selector": "$type(totals.currency) = \"string\" ? totals.currency : \"-\"",
+                "columns": [],
+                "filters": []
+              }
+            }
+          },
+          "definition": "",
+          "regex": "",
+          "sort": "disabled",
+          "multi": false,
+          "includeAll": false,
+          "allowCustomValue": false
+        }
+      },
+      {
+        "kind": "QueryVariable",
+        "spec": {
           "name": "chart",
           "label": "Charts",
           "description": "hour by hour when the time range is 7 days or less (every check the bridge makes, the last 90 days), else per day (with 7-day averages). Hidden: it follows the time range and fills the charts' titles and queries.",

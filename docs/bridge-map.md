@@ -34,6 +34,7 @@ The tests are beside the folder, in `stacks/postiz/ghost-bridge-test/` (`stacks/
 | Instagram / YouTube / SoundCloud numbers (each starts itself) | `stats/instagram.mjs`, `stats/youtube.mjs`, `stats/soundcloud.mjs` |
 | Bluesky, Threads, TikTok, Mixcloud numbers | `stats/social.mjs` |
 | The site as a network (Ghost + Tinybird, `ghostPostDays`), Cloudflare, Search Console | `stats/site.mjs` |
+| Boosts: Instagram's from Meta's Marketing API, TikTok Promote typed in on `/ghost/social-preview/boosts/`, `boosted` on posts (`withBoosts`) | `stats/ads.mjs` |
 | Live shows (TinyIce), link clicks / LIVE NOW plays (`/.puppy/click`, or the kit's `/.site/click`), puppy pets (`/.puppy/pets`) | `stats/live.mjs` |
 
 ## Import rules (no cycles that break loading)
@@ -119,7 +120,7 @@ Dry-run previews written to `data/previews/` and served; photo pages (photos.jso
 Social preview (`staffSignedIn` via Ghost's session cookie, cached per a hash of the post Ghost sends) and its saves (custom text,
 featured link, frames, the Story's sticker, time and caption).
 - Exports: `writePreview`, `servePreview`, `serveFile`, `PREVIEW_SETTINGS`, `draftPage`, `photoPage`, `servePhotos`, `serveDraftPreview`, `cleanDraftMedia`, `sendJson`, `zonedTime`
-- Imports: config, services, pages/preview, share/content, share/share (`handlePost`, run fully dry; `moveStory`)
+- Imports: config, services, pages/preview, share/content, share/share (`handlePost`, run fully dry; `moveStory`), stats/ads (`serveBoosts`)
 - Routes (called from ghost-bridge.mjs): `/previews/...`, `<PHOTOS_BASE>/<id>/[n]`, `/ghost/social-preview/` (Shared posts),
   `/ghost/social-preview/<uuid>/` + `POST .../custom`, `.../listen`, `.../frame`, `.../sticker`, `.../story-at`, `.../story-caption`, `.../share`
   (with ghost-bridge.mjs's `sharing` and its share, passed in: no import of it)
@@ -129,7 +130,7 @@ featured link, frames, the Story's sticker, time and caption).
 collectors, and answers the stats routes; `/metrics` lines; `/account.json` itself. Its `run(name)` and `live` poll one
 collector now (the tests).
 - Exports: `startStats`
-- Imports: config (`METRIC_PREFIX`, `networkOn`), stats/history, stats/performance, stats/timing, stats/post, stats/social, stats/site, stats/live
+- Imports: config (`METRIC_PREFIX`, `networkOn`), stats/history, stats/performance, stats/timing, stats/post, stats/social, stats/site, stats/live, stats/ads
 
 ### `stats/history.mjs`
 Helpers (dates, JSON files, Tinybird, `archive()`, insights, per-day records) and each post over time in stats.db: `NETWORKS`,
@@ -165,8 +166,8 @@ All SQL lives here.
 
 ### `stats/instagram.mjs`
 Instagram account + posts + Stories + profile days, straight from Graph with Postiz's token; writes instagram.json.
-- Exports: `IG_STATS`, `IG_STATS_FILE`, `startInstagramStats`, `pollInstagramStats` (one poll: the tests)
-- Imports: config, services (`PG`, `pgQuery`, `postiz`), stats/history, stats/performance
+- Exports: `IG_STATS`, `IG_STATS_FILE`, `startInstagramStats`, `pollInstagramStats` (one poll: the tests), `pollInstagramAudience` (one audience check: the tests)
+- Imports: config, services (`PG`, `pgQuery`, `postiz`), stats/history, stats/performance, stats/ads (`withBoosts`)
 
 ### `stats/youtube.mjs`
 YouTube Data + Analytics APIs (token swapped from Postiz's refresh token), per-video days (`ytVideoDays`).
@@ -187,6 +188,13 @@ Collectors run by stats/stats.mjs, one function each.
 Collectors for the site: Ghost (Admin API + Tinybird, per-post days), Cloudflare (GraphQL), Search Console (JWT).
 - Exports: `ghost`, `cloudflare`, `search`
 - Imports: config (`SITE_HOST`), stats/history
+
+### `stats/ads.mjs`
+Boosts (paid posts): the `ads` collector (Meta's Marketing API with `META_ADS_TOKEN`, ads matched to Instagram posts;
+typed TikTok Promotes from ads-typed.json) -> ads.json; `withBoosts` marks boosted posts in instagram/tiktok.json before
+their verdicts; `serveBoosts` is the staff page that types them in (preview-routes calls it after the sign-in check).
+- Exports: `ads`, `adAccount`, `withBoosts`, `serveBoosts`
+- Imports: config (`STATE_FILE`, `DRAFT_BASE`), stats/history, pages/preview-render
 
 ### `stats/live.mjs`
 Live shows from TinyIce's status (and the relays', with LIVE_RELAYS: k8s), theme click beacons (clicks.json, counters; also the LIVE NOW bar's hiccups), puppy pets (pets.json).

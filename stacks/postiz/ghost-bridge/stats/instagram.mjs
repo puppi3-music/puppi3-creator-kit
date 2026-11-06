@@ -5,10 +5,11 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { env, STATE_FILE, log, networkOn, POSTIZ_KEY, INSTAGRAM_IDS, SITE_TIMEZONE } from '../config.mjs';
 import { PG, pgQuery, postiz } from '../services.mjs';
-import { trackAccount, withWeekly, trackPosts, surgingRefs, postsPerPoll, META_CALLS_PER_HOUR, siteLinks, postRef, withOlder,
+import { median, trackAccount, withWeekly, trackPosts, surgingRefs, postsPerPoll, META_CALLS_PER_HOUR, siteLinks, postRef, withOlder,
   toCheck, historyKeys, withPostedMs, everyText, archive, archiveRead, askLearned, insightValue, insightBreakdown,
   audienceLists, zoneHour, keepLastOverZero } from './history.mjs';
 import { withPerformance } from './performance.mjs';
+import { withBoosts } from './ads.mjs';
 
 // ---------- Instagram numbers -> Grafana ----------
 // You post Instagram by hand (from the bridge's notification), so Postiz's own stats don't know those posts.
@@ -21,6 +22,8 @@ import { withPerformance } from './performance.mjs';
 //  - stories: every Story seen while it was up, with its last numbers (Instagram has none once it's gone)
 //  - the archive (data/archive/instagram.json): all that, plus each post's whole object and every number Instagram
 //    gives for it, and once a day the audience (age, gender, country, city) and followers online by hour
+//  - the followers' age, gender, country and city and when they're online, for the dashboards, every
+//    IG_AUDIENCE_MINUTES on a timer of its own (pollInstagramAudience), only from 100 followers (Instagram has none before)
 //  - posts: with POSTIZ_DB_PASSWORD set, every post on the account and its numbers, straight from Instagram with the
 //    token Postiz keeps for the channel (read from Postiz's database, never saved or logged). So they include what you
 //    posted in the app. Likes and comments come with the list; the rest is a call per post, so each poll asks for the
@@ -36,6 +39,18 @@ const IG_GRAPH = 'https://graph.instagram.com/v25.0';
 const IG_FOLLOWER_DAYS = 400;
 const IG_POSTS = Math.min(50, Math.max(1, Number(env.IG_STATS_POSTS) || 25));
 const IG_PAGES = 50; // of 100 posts
+// Save rate (saveRate: saves per 100 reached): none under SAVE_RATE_MIN_REACH people, where 1 save reads as a big rate;
+// coloured against the account's usual (median of its newest SAVE_RATE_BASE posts with one) once SAVE_RATE_MIN have one
+export const SAVE_RATE_MIN_REACH = 30;
+const SAVE_RATE_BASE = 20;
+const SAVE_RATE_MIN = 5;
+const SAVE_RATE_BANDS = [ // [from x the usual, what, cell CSS]
+  [1.5, 'well above your usual', { background: 'rgba(55, 135, 45, 0.9)', color: '#fff' }],
+  [1.1, 'above your usual', { background: 'rgba(115, 191, 105, 0.45)' }],
+  [0.9, 'about your usual', {}],
+  [0.5, 'below your usual', { background: 'rgba(242, 73, 92, 0.3)' }],
+  [0, 'well below your usual', { background: 'rgba(242, 73, 92, 0.6)' }],
+];
 // Each post's numbers, [Instagram's name, ours]: as many as Instagram gives for that kind of post (askLearned:
 // it refuses a whole call when one doesn't apply, e.g. watch time on a photo, replies on anything but a Story)
 const IG_MEDIA_METRICS = [['views', 'views'], ['reach', 'reach'], ['likes', 'likes'], ['comments', 'comments'], ['saved', 'saved'],
@@ -55,6 +70,9 @@ const IG_DAY_METRICS = [['profile_views', 'profileViews'], ['profile_links_taps'
 const IG_DAY_BREAKDOWNS = [['follows_and_unfollows', 'follow_type'], ['profile_links_taps', 'contact_button_type'], ['reach', 'follow_type'],
   ['reach', 'media_product_type'], ['views', 'follow_type'], ['views', 'media_product_type'], ['total_interactions', 'media_product_type']];
 const IG_PROFILE_KEYS = ['profileViews', 'linkTaps', 'likes', 'comments', 'shares', 'saves']; // the ones the dashboards show
+const IG_AUDIENCE_MINUTES = Math.max(10, Number(env.IG_AUDIENCE_MINUTES) || 20);
+const IG_AUDIENCE_FROM = 100; // followers Instagram wants before it gives an account's audience
+let audienceCalls = 0; // the last audience check's calls, counted in each poll's share of META_CALLS_PER_HOUR
 const IG_DAY_BACKFILL_CALLS = 24; // calls a poll for earlier days of the last 30 (8 a day), until they're all kept
 
 let igCalls = 0; // this poll's calls to Instagram, for postsPerPoll
@@ -130,12 +148,13 @@ async function igProfileDays(token, prevHistory, learned, errors) {
   return { history: Object.fromEntries(keep.map((d) => [d, history[d]])), fetched };
 }
 
-// Who the account reaches, once a UTC day (Instagram gives it from 100 followers): followers, accounts engaged and
-// accounts reached this month by age, gender, country and city, and followers online by hour on each recent day
-async function igAudience(token) {
+// Who the account reaches (Instagram gives it from 100 followers): followers, accounts engaged and accounts reached
+// this month by age, gender, country and city (or only `metrics`), and followers online by hour on each recent day
+const IG_AUDIENCE_METRICS = ['follower_demographics', 'engaged_audience_demographics', 'reached_audience_demographics'];
+async function igAudience(token, metrics = IG_AUDIENCE_METRICS) {
   const audience = {};
   const online = {};
-  for (const metric of ['follower_demographics', 'engaged_audience_demographics', 'reached_audience_demographics']) {
+  for (const metric of metrics) {
     for (const by of ['age', 'gender', 'country', 'city']) {
       let m = null;
       for (const timeframe of ['&timeframe=this_month', '']) {
@@ -170,7 +189,65 @@ function igOnlineByHour(online) {
   return sums.map((s, h) => ({ hour: String(h).padStart(2, '0'), followers: s.days ? Math.round(s.total / s.days) : null }));
 }
 
+// Fewer followers than Instagram wants before it gives the audience (unknown = ask anyway)
+const tooFewForAudience = (followers) => followers != null && followers < IG_AUDIENCE_FROM;
+
+// The channel's token, from Postiz's database (never saved or logged)
+async function igToken(ch) {
+  const rows = await pgQuery(PG, `SELECT token FROM "Integration" WHERE id = '${String(ch.id).replace(/'/g, "''")}' AND "deletedAt" IS NULL`);
+  const token = String(rows[0]?.token || '').split('___')[0];
+  if (!token) throw new Error('no token for the channel in Postiz\'s database');
+  return token;
+}
+
+// Followers by age, gender, country and city and when they're online, every IG_AUDIENCE_MINUTES (startInstagramStats
+// runs it, never during a poll; the tests call it): only into instagram.json's audience and onlineByHour, which the
+// last poll wrote (none yet = nothing to do). Instagram has them from 100 followers: under that, no calls.
+// The engaged and reached accounts and the archive's copy stay once a day, in the poll.
+export async function pollInstagramAudience() {
+  audienceCalls = 0;
+  let out;
+  try { out = JSON.parse(await fs.readFile(IG_STATS_FILE, 'utf8')); } catch { return; }
+  if (!PG.password || tooFewForAudience(out.totals?.followers)) return;
+  const ch = (await postiz('GET', '/integrations')).find((c) => INSTAGRAM_IDS.includes(c.identifier) && !c.disabled);
+  if (!ch) return;
+  igCalls = 0;
+  try {
+    const { audience, online } = await igAudience(await igToken(ch), ['follower_demographics']);
+    const today = new Date().toISOString().slice(0, 10);
+    if (audience.follower_demographics) out.audience = audienceLists(audience.follower_demographics, today);
+    if (Object.keys(online).length) out.onlineByHour = igOnlineByHour(online);
+    out.audienceAt = new Date().toISOString();
+  } finally { audienceCalls = igCalls; }
+  await fs.writeFile(`${IG_STATS_FILE}.tmp`, JSON.stringify(out, null, 2));
+  await fs.rename(`${IG_STATS_FILE}.tmp`, IG_STATS_FILE);
+}
+
 // One poll now: startInstagramStats runs it on its timer; the tests call it
+// Each post's saveRate, saveRateTip (the dashboard's hover) and saveRateStyle (its cell's CSS), and totals.saveRateUsual
+export function withSaveRate(out) {
+  const posts = (out.posts || []).filter(Boolean);
+  for (const p of posts) p.saveRate = p.saved != null && p.reach >= SAVE_RATE_MIN_REACH ? Math.round((p.saved / p.reach) * 1000) / 10 : null;
+  const rated = posts.filter((p) => p.saveRate != null).sort((a, b) => (b.time ?? 0) - (a.time ?? 0)).slice(0, SAVE_RATE_BASE);
+  const usual = rated.length >= SAVE_RATE_MIN ? median(rated.map((p) => p.saveRate)) : null;
+  out.totals = { ...out.totals, saveRateUsual: usual == null ? null : Math.round(usual * 10) / 10 };
+  const pct = (v) => `${v.toFixed(1)}%`;
+  for (const p of posts) {
+    p.saveRateStyle = {};
+    if (p.saveRate == null) {
+      p.saveRateTip = p.saved == null ? 'No saves from Instagram yet' : `Reached ${p.reach ?? 0}: under ${SAVE_RATE_MIN_REACH}, too few for a rate`;
+    } else if (!usual) {
+      p.saveRateTip = `${p.saved} saves from ${p.reach} reached. Coloured against your usual once ${SAVE_RATE_MIN} posts have a save rate${usual === 0 ? ' above 0' : ''}`;
+    } else {
+      const x = p.saveRate / usual;
+      const [, what, style] = SAVE_RATE_BANDS.find(([from]) => x >= from);
+      p.saveRateStyle = style;
+      p.saveRateTip = `${p.saved} saves from ${p.reach} reached: ${x.toFixed(1)}× your usual ${pct(usual)}, ${what} (the median of your ${rated.length} newest posts with a save rate)`;
+    }
+  }
+  return out;
+}
+
 export async function pollInstagramStats() {
   igCalls = 0;
   const out = { updatedAt: new Date().toISOString(), account: null, daily: [], totals: {}, posts: [], postsPerDay: [], stories: [], errors: [] };
@@ -216,14 +293,14 @@ export async function pollInstagramStats() {
   out.stories = prev.stories || [];
   out.audience = prev.audience || null;
   out.onlineByHour = prev.onlineByHour || [];
+  out.audienceAt = prev.audienceAt || null;
+  out.audienceEvery = everyText(IG_AUDIENCE_MINUTES);
   // said in the status tile, so a dashboard with half its Instagram panels empty explains itself (staging has none)
   if (ch && !PG.password) out.errors.push('followers and posts need POSTIZ_DB_PASSWORD set');
   if (PG.password && ch) {
     let token = '';
     try {
-      const rows = await pgQuery(PG, `SELECT token FROM "Integration" WHERE id = '${String(ch.id).replace(/'/g, "''")}' AND "deletedAt" IS NULL`);
-      token = String(rows[0]?.token || '').split('___')[0];
-      if (!token) throw new Error('no token for the channel in Postiz\'s database');
+      token = await igToken(ch);
       const basic = 'username,followers_count,media_count';
       const me = await igGraph(`/me?fields=user_id,${basic},name,follows_count,account_type`, token)
         .catch(() => igGraph(`/me?fields=${basic}`, token)); // the extra fields are newer: without them if refused
@@ -241,13 +318,14 @@ export async function pollInstagramStats() {
         out.profileFetched = Date.now();
       }
       try {
-        if (!(await archiveRead(dataDir, 'instagram')).days?.[today]?.audience) {
+        if (!tooFewForAudience(me.followers_count) && !(await archiveRead(dataDir, 'instagram')).days?.[today]?.audience) {
           const { audience, online } = await igAudience(token);
           if (Object.keys(audience).length) (kept.days[today] ||= {}).audience = audience;
           for (const [d, hours] of Object.entries(online)) (kept.days[d] ||= {}).onlineFollowers = hours;
           // for the dashboard: who follows, and when they're online
           if (audience.follower_demographics) out.audience = audienceLists(audience.follower_demographics, today);
           if (Object.keys(online).length) out.onlineByHour = igOnlineByHour(online);
+          out.audienceAt = new Date().toISOString();
         }
       } catch (e) { out.errors.push(`audience: ${e.message}`); }
       const listed = [];
@@ -272,7 +350,7 @@ export async function pollInstagramStats() {
       const surging = await surgingRefs(dataDir, 'instagram');
       // Stories still to come this poll: a call for the list and one each (as many as last time)
       const storyCalls = 1 + (prev.stories || []).filter((x) => x.time > Date.now() - 86_400_000).length;
-      const newest = postsPerPoll({ minutes: IG_STATS_MINUTES, used: igCalls + storyCalls, also: surging.size, cap: IG_POSTS });
+      const newest = postsPerPoll({ minutes: IG_STATS_MINUTES, used: igCalls + storyCalls + Math.ceil(audienceCalls * IG_STATS_MINUTES / IG_AUDIENCE_MINUTES), also: surging.size, cap: IG_POSTS });
       const check = toCheck(posts, was, newest, surging);
       out.checking = { posts: check.size, newest, minutes: IG_STATS_MINUTES, callsPerHour: META_CALLS_PER_HOUR };
       const fresh = [];
@@ -356,8 +434,10 @@ export async function pollInstagramStats() {
   const reachToday = out.profileHistory[new Date().toISOString().slice(0, 10)]?.reach;
   if (Number.isFinite(reachToday)) out.totals.reachToday = reachToday;
 
+  withSaveRate(out);
   withWeekly('instagram', out);
   trackAccount(dataDir, 'instagram', out);
+  await withBoosts(dataDir, 'instagram', out);
   await withPerformance(dataDir, 'instagram', out);
   out.checkedEvery = everyText(IG_STATS_MINUTES);
   await fs.writeFile(`${IG_STATS_FILE}.tmp`, JSON.stringify(withPostedMs(out), null, 2));
@@ -369,12 +449,18 @@ export async function pollInstagramStats() {
 
 export function startInstagramStats() {
   if (!IG_STATS || !POSTIZ_KEY) return;
-  let polling = false;
-  const tick = () => {
-    if (polling) return;
-    polling = true;
-    pollInstagramStats().catch((e) => log(`Instagram stats: ${e.message}`)).finally(() => { polling = false; });
+  // the poll and the audience check both write instagram.json: one at a time, each skipped while it's still waiting
+  let queue = Promise.resolve();
+  const serial = (run, what) => {
+    let waiting = false;
+    return () => {
+      if (waiting) return;
+      waiting = true;
+      queue = queue.then(run).catch((e) => log(`${what}: ${e.message}`)).finally(() => { waiting = false; });
+    };
   };
+  const tick = serial(pollInstagramStats, 'Instagram stats');
   setTimeout(tick, 20_000);
   setInterval(tick, IG_STATS_MINUTES * 60_000);
+  if (PG.password) setInterval(serial(pollInstagramAudience, 'Instagram audience'), IG_AUDIENCE_MINUTES * 60_000);
 }

@@ -3,8 +3,8 @@
 Postiz and the bridge on Kubernetes. The other components: `k8s/components/CLAUDE.md`; `up.sh` and the rest: `k8s/CLAUDE.md`.
 
 Module `social`: Postiz (Deployment, Recreate, uploads and config on PVC `postiz`; an init
-container waits for Postgres, Redis and Temporal, Compose's depends_on; probes are Compose's node check, any answer
-under 500), its Postgres and Redis (`databases.yaml`), Temporal (`temporal.yaml`: auto-setup and its Postgres, which also holds its searchable records
+container waits for Postgres, Redis and Temporal, Compose's depends_on; probes are Compose's node check, `/` and
+`/api/public/v1/integrations` each under 500, so a dead backend fails liveness), its Postgres and Redis (`databases.yaml`), Temporal (`temporal.yaml`: auto-setup and its Postgres, which also holds its searchable records
 (`ENABLE_ES=false`, as the postiz stack), the dynamic config from `kit/postiz/dynamicconfig/`; no Temporal UI; its health check asks the pod's
 address, it doesn't listen on localhost), and the bridge (`bridge.yaml`: the kit's image, `stacks/postiz/ghost-bridge/Dockerfile`, with
 the code inside, node user, 1 replica, Recreate, 300 s to stop, `data/` on PVC `postiz-ghost-bridge`, readiness

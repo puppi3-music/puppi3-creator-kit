@@ -14,6 +14,7 @@ import { LIMITS, IMAGE_LIMITS, INSTAGRAM_IDS, TIKTOK_IDS, NO_LINK_IDS, CUSTOM_CH
 import { ghostPostByUuid, ghostSiteOrigin, ghostAdmin, GHOST_KEY_FIX } from '../services.mjs';
 import { cleanLink } from '../share/content.mjs';
 import { handlePost, moveStory } from '../share/share.mjs';
+import { serveBoosts } from '../stats/ads.mjs';
 
 // ---------- dry-run previews ----------
 // Dry-run previews (staging): a page per post shared, written to data/previews/ and served at
@@ -471,6 +472,10 @@ export async function serveDraftPreview(req, res, p, sharer = { sharing: new Set
     if (req.method === 'POST') return sendJson(res, 401, { error: 'sign in to Ghost Admin in this browser, then reload' });
     return res.writeHead(401, headers).end(previewPage('Sign in to Ghost Admin', '<h1>Sign in to Ghost Admin</h1>'
       + '<p>Social previews are only for the site\'s staff. <a href="/ghost/">Sign in to Ghost Admin</a> in this browser, then reload this page.</p>'));
+  }
+  // typed boosts (TikTok Promote's numbers): stats/ads.mjs
+  if (new RegExp(`^${DRAFT_BASE}/boosts/?$`).test(p)) {
+    return serveBoosts(req, res, headers, { originOk: async () => req.headers.origin === await ghostSiteOrigin() });
   }
   const media = new RegExp(`^${DRAFT_BASE}/(media/[\\w-][\\w.-]*\\.mp4)$`).exec(p);
   if (media) return serveFile(req, res, path.join(PREVIEW_DIR, media[1]));

@@ -22,7 +22,12 @@ whole: `stacks/postiz/ghost-bridge/CLAUDE.md`; the settings compose passes: `sta
 
 ## Instagram, YouTube, SoundCloud numbers
 - Instagram numbers (posts are made by hand, so Postiz doesn't know them): `IG_STATS` [true] polls every `IG_STATS_MINUTES`
-  [60, min 10] (needs `POSTIZ_KEY`; read-only, runs in DRY_RUN too): account new followers/reach per day + 30-day totals from
+  [60, min 10] (needs `POSTIZ_KEY`; read-only, runs in DRY_RUN too). The followers' audience (age, gender, country, city: `audience`
+  = `audienceLists`) and when they're online (`onlineByHour`) every `IG_AUDIENCE_MINUTES` [20, min 10] on a timer of its own
+  (`pollInstagramAudience`, user asked 2026-11-02: 5 calls, only into instagram.json's `audience`/`onlineByHour`/`audienceAt`;
+  serialised with the poll, both write the file; counted in `postsPerPoll`'s budget, scaled to the poll's interval; needs the db
+  token). Under 100 followers (Instagram has none) neither it nor the poll asks. The poll still asks all three demographics
+  (followers, engaged, reached) once a UTC day for the archive. Instagram itself updates them about daily. Account new followers/reach per day + 30-day totals from
   Postiz's analytics (Instagram's `follower_count` = new follows per day, absent under 100 followers: stored as `newFollowers`),
   the follower total per day (`followerHistory`, kept from poll to poll in instagram.json, 400 days; needs the db token below,
   so staging has none), profile views + profile link taps per day (`igProfileDays`: Graph `/me/insights?metric=profile_views,
@@ -48,12 +53,46 @@ whole: `stacks/postiz/ghost-bridge/CLAUDE.md`; the settings compose passes: `sta
   uploads count in Social's top section (Published, per day, by network, Recently published). Staging collects too (same app, own
   history; staging-social routes `/soundcloud.json`).
 
+## Boosts (`stats/ads.mjs`, `ads.json`)
+- What paid posts cost and bought (user asked 2026-11-06; she boosts with the apps' own Boost/Promote buttons). The `ads`
+  collector (`ADS_STATS` [true], every `ADS_STATS_MINUTES` [180, min 60]; not a network: not in `NETWORKS`), `data/ads.json`,
+  `GET /ads.json` (Infinity `bridge-instagram`; Platforms' Boosts row, Post's Boost row):
+  - Instagram: an in-app boost is an ad in the Meta ad account `META_AD_ACCOUNT_ID` (`adAccount`: digits or `act_<digits>`),
+    read with `META_ADS_TOKEN` (a Business portfolio system-user token with `ads_read`, never expires; Postiz's
+    Instagram-Login token can't read ads). Four Graph calls (graph.facebook.com v25.0, the token in a Bearer header, never
+    an address): the account (name, currency), `/ads` (adset dates and budgets in cents, creative's
+    `effective_instagram_media_id`/`instagram_permalink_url`), insights per ad for all time, and per ad per day
+    (`time_increment=1`, the last 30 days, 90 the first time; older days kept in the file's `metaDays`, 400 days).
+    Matched to instagram.json's posts by media id, else the permalink without its query; neither = network `other`.
+    Actions by pattern (`video_view`, /follow/, /profile_visit/, post_reaction|like), the whole list in the archive.
+    A field Meta refuses (#100 naming it, at any depth) is dropped and asked again (`refusedField`/`withoutField`),
+    noted in `errors`; a failed poll keeps the last Meta rows. Instagram's post insights are organic only, so nothing
+    else changes for them.
+  - TikTok Promote has no API (TikTok's Marketing API reports only Ads Manager campaigns), so she types each in on
+    `/ghost/social-preview/boosts/` (`serveBoosts`, after `serveDraftPreview`'s staff sign-in check, so no new route
+    anywhere; `ADS_TYPED` [true], false = 404; linked from the Shared posts page): a plain form (POST urlencoded, same
+    origin as Ghost's, 16 KB) per Promote: video (tiktok.json's), start, end (empty = running), spent, budget, views,
+    likes, follows, profile visits, link clicks; "€12,50" and "1,250" read right; saved in `data/ads-typed.json`
+    `entries`, then the collector runs at once (`rerun`, awaited before the redirect). Typed numbers are spread evenly
+    over the days from start to its end or today.
+  - `ads[]` per boost (source meta|typed, network, ref, title, dates, status, budget, spend, reach, impressions, views,
+    likes, follows, profileVisits, clicks, linkClicks, `seen` = reach, TikTok's views, `cpm` = per 1000 seen,
+    `costPerFollow`, `posted_ms`), `daily` (from the first boost to today, wide: `<net>Spend`, `<net>Seen`,
+    `<net>Follows`, `<net>Spend7` = 7-day average with no-boost days as 0, `<net>Cpm7`; `spend`, `spend7`), `totals`
+    (30 days: spend30, `<net>Spend30/Seen30/Cpm30/Follows30`, follows30, costPerFollow30, boosts30, running, currency =
+    `ADS_CURRENCY`, else Meta's, else USD), `byNetwork` (the same per network, for a table).
+- `withBoosts(dataDir, network, out)` before Instagram's and TikTok's verdicts (`collector()`, instagram.mjs): each post
+  with a boost gets `boosted` (its boosts added up, `seen`, `cpm`, `running`; end '' while one runs), and on TikTok
+  `paidCounted` + `organicViews` (views - paid views): TikTok's view count includes the paid ones, so performance.mjs's
+  comparison groups and timing.mjs leave paidCounted posts out, and its own verdict tip says so. `/post.json`'s `boost`
+  = `[boosted]` (empty without one).
+
 ## "vs your usual" and "vs industry" verdicts
 - Two verdicts per post, "vs your usual" and "vs industry" (user asked: judged
   like social media researchers would, per network, and against industry standards too, shown as its own verdict): `withPerformance` (stats/performance.mjs) runs before every network file is written (collector(); IG/YT/SC writes in
   stats/instagram, youtube, soundcloud.mjs), reads that poll's history file and adds `perf` (0-100/null), `perf_label`, `perf_why` (= `perf_tip`),
   `perf_industry_label` (Well above/Above/About/Below/Well below typical + "· 7.4% vs 3.2%", or Too few to tell, Too soon, No numbers yet,
-  No benchmark, Not a newsletter: `industryVerdict`, never blank, the reason in `perf_industry`; Post's tiles say why when there's no verdict at all; `perf_label` = level + "· better than k in 10"), `perf_industry` to each post (IG `stories` among Stories). `SIGNALS[network]` = what the network ranks on, weighted: rates per
+  No benchmark, Not a newsletter: `industryVerdict`, never blank, the reason in `perf_industry`; Post's tiles say why when there's no verdict at all; `perf_label` = level + "· better than k in 10"), `perf_industry` to each post (IG `stories` among Stories). `SIGNALS[network]` = what the network ranks on, weighted (Instagram's saves per reach 2, user asked: save rate matters to her; its posts also get a plain `saveRate`, saves per 100 reached, rounded to 0.1, null under `SAVE_RATE_MIN_REACH` 30, written by `withSaveRate` in instagram.mjs for Platforms' Save rate column, with `saveRateTip` and `saveRateStyle` (CSS) from `SAVE_RATE_BANDS`, × the account's usual = `totals.saveRateUsual`, the median of the newest 20 posts with a rate, once 5 have; user asked to make a good number obvious, so against her own usual, not an industry figure): rates per
   reach/view/play/follower (`rate()`, follower count at posting time interpolated from the file's history) and counts at the
   same age (`count()`, `numbersAt` ±1-3 days; all "as now" past `PERF_SETTLED` 28 d); vs the `PERF_BASE` 20 posts nearest in
   time (same `POST_KIND` if `PERF_MIN` 5), rates shrunk by `prior` exposures toward the group's pooled rate, percentile per
@@ -205,6 +244,13 @@ whole: `stacks/postiz/ghost-bridge/CLAUDE.md`; the settings compose passes: `sta
   get 400), all-time only, in clicks.json `totals.hiccups` (key kind\twhy\ttab\tdevice\tbrowser) and as counters
   `puppi3_live_stalls_total` / `puppi3_live_reconnects_total{why,tab=shown|hidden,device,browser}` (Health's live stream panels);
   staging: label `puppi3-staging-clicks`).
+- Postiz's channel list (`channel()`/`channels()` in stats/stats.mjs, Bluesky's handle, Threads, TikTok) is kept in
+  `data/channels.json`: while Postiz answers an error (a 502 for minutes after the server starts, as after a power cut,
+  2026-11-01) they use the last list, so the numbers straight from the network still come in, and the file's `errors`
+  say "Postiz: ... (used the channels it last listed)". `postiz()` (services.mjs) gives a proxy's HTML error page as its title.
+- `accountGains` smooths what comes in lumps (`WEEKLY[network].smooth`, only Instagram: reach, profile views, link taps, the posts' likes/comments/shares/saves
+  gains and their engagement; user asked 2026-11-02, the hour-by-hour lines were spikes between 0s): each check's value = the average of
+  the checks in the `SMOOTH_HOURS` [6] ending there. Followers stay as they came.
 - Every network file's `daily` also gets, just before it's written (`withWeekly(network, out)` beside each
   `trackAccount`), what Platforms' charts draw (`WEEKLY` in stats/history.mjs): `<key>7` = the 7-day average of each
   `avg` key (the days kept among the 7 ending that day, by date; null under 4 of them), `engagement` = the network's

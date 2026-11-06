@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import { collectors, web, NOW, DAY, date, POSTIZ } from './collectors.mjs';
 
 const c = await collectors({ POSTIZ_DB_PASSWORD: 'secret' });
-const { pollInstagramStats } = await import('../ghost-bridge/stats/instagram.mjs');
+const { pollInstagramStats, pollInstagramAudience, withSaveRate } = await import('../ghost-bridge/stats/instagram.mjs');
 const ago = (ms) => new Date(NOW - ms).toISOString().replace('Z', '+0000');
 async function poll(prev) {
   if (prev) await import('node:fs').then((fs) => fs.writeFileSync(`${c.dataDir}/instagram.json`, JSON.stringify(prev)));
@@ -27,6 +27,7 @@ const POSTS = {
 const breakdown = (results) => ({ total_value: { breakdowns: [{ results: results.map(([v, n]) => ({ dimension_values: [v], value: n })) }] } });
 const refuse = (message) => ({ status: 400, body: { error: { code: 100, message } } });
 
+let followers = 1200;
 function instagram() {
   web.on(`${POSTIZ}/integrations`, [{ id: 'c-ig', identifier: 'instagram-standalone', name: 'DJ', profile: 'old_name', picture: 'ig.jpg', disabled: false }]);
   web.on(`${POSTIZ}/analytics/c-ig`, [
@@ -40,7 +41,7 @@ function instagram() {
     if (q.get('access_token') !== 'ig-token') return { status: 400, body: { error: { code: 190, message: 'Error validating access token' } } };
     const metric = q.get('metric') || '';
     const list = metric.split(',');
-    if (p === '/me') return { user_id: '17', username: 'djname', followers_count: 1200, follows_count: 80, media_count: 3 };
+    if (p === '/me') return { user_id: '17', username: 'djname', followers_count: followers, follows_count: 80, media_count: 3 };
     if (p === '/me/media') return { data: Object.values(POSTS) };
     if (p === '/me/stories') return { data: [{ id: 's1', caption: 'tonight', media_type: 'IMAGE', media_product_type: 'STORY', timestamp: ago(7_200_000), permalink: 'https://www.instagram.com/stories/s1/' }] };
     if (p === '/me/insights' && metric === 'online_followers') {
@@ -61,12 +62,12 @@ function instagram() {
       const kind = m[1] === 's1' ? 'STORY' : POSTS[m[1]].media_product_type;
       if (kind !== 'REELS' && list.some((x) => REELS_ONLY.includes(x))) return refuse('reels only');
       if (kind !== 'STORY' && list.some((x) => STORY_ONLY.includes(x))) return refuse('stories only');
-      return { data: list.map((name) => ({ name, values: [{ value: { likes: m[1] === 'm1' ? 11 : 4, views: 90, saved: 2 }[name] ?? 1 }] })) };
+      return { data: list.map((name) => ({ name, values: [{ value: { likes: m[1] === 'm1' ? 11 : 4, views: 90, saved: 2, reach: m[1] === 'm1' ? 80 : 1 }[name] ?? 1 }] })) };
     }
     return { status: 404, body: { error: { message: `the fake Instagram has no ${p}` } } };
   });
 }
-beforeEach(() => { web.reset(); c.tokens['c-ig'] = 'ig-token___xyz'; });
+beforeEach(() => { web.reset(); c.tokens['c-ig'] = 'ig-token___xyz'; followers = 1200; });
 
 test('the account, its numbers per day, every post with the numbers its kind has, Stories and the audience', async () => {
   instagram();
@@ -78,6 +79,8 @@ test('the account, its numbers per day, every post with the numbers its kind has
   assert.equal(out.totals.views, undefined);
   // posts: the kind each is, the numbers its kind has, the likes from the insights (newer than the list's)
   assert.deepEqual(out.posts.map((p) => [p.id, p.type, p.likes, p.views, p.saved]), [['m1', 'Reel', 11, 90, 2], ['m2', 'Carousel', 4, 90, 2], ['m3', 'Photo', 4, 90, 2]]);
+  // save rate: saves per 100 reached, none under SAVE_RATE_MIN_REACH (30) people
+  assert.deepEqual(out.posts.map((p) => p.saveRate), [2.5, null, null]);
   assert.equal(out.posts[0].avgWatchMs, 1, 'a Reel\'s watch time');
   assert.equal(out.posts[1].avgWatchMs, null, 'none for a photo');
   assert.deepEqual(out.posts[0].links, ['/new-mix/']);
@@ -118,6 +121,36 @@ test('the next poll asks only what it must: the numbers learned, the account per
   assert.deepEqual(out.profileHistory, first.profileHistory, 'kept');
 });
 
+test('the followers\' audience on its own timer: only the followers\' four breakdowns and when they\'re online', async () => {
+  instagram();
+  const first = await poll();
+  const fs = await import('node:fs');
+  const was = { ...first, audience: null, onlineByHour: [], audienceAt: null };
+  fs.writeFileSync(`${c.dataDir}/instagram.json`, JSON.stringify(was));
+  web.asked = [];
+  await pollInstagramAudience();
+  const out = c.read('instagram');
+  assert.deepEqual(out.audience.gender, [{ name: 'Women', people: 70 }, { name: 'Men', people: 30 }]);
+  assert.deepEqual(out.audience.country, [{ name: 'Germany', people: 50 }]);
+  assert.equal(out.onlineByHour.find((h) => h.hour === '19').followers, 30);
+  assert.ok(out.audienceAt);
+  const asked = web.calls(IG).map((a) => new URL(a.url).searchParams.get('metric'));
+  assert.deepEqual(asked, ['follower_demographics', 'follower_demographics', 'follower_demographics', 'follower_demographics', 'online_followers']);
+  assert.deepEqual(out.posts, was.posts, 'the rest of the file as the poll left it');
+  assert.equal(out.audienceEvery, 'every 20 minutes');
+});
+
+test('under 100 followers Instagram has no audience: not asked, by the poll or the audience check', async () => {
+  instagram();
+  followers = 99;
+  const first = await poll();
+  assert.equal(web.calls(IG).filter((a) => /_demographics|online_followers/.test(a.url)).length, 0);
+  web.asked = [];
+  await pollInstagramAudience();
+  assert.equal(web.calls(IG).length, 0);
+  assert.equal(c.read('instagram').audienceAt, first.audienceAt);
+});
+
 test('a token Instagram turned down says to reconnect; Postiz\'s numbers and the last posts stay', async () => {
   instagram();
   c.tokens['c-ig'] = 'expired';
@@ -135,4 +168,20 @@ test('no Instagram channel in Postiz', async () => {
   const out = await poll();
   assert.deepEqual(out.errors, ['no Instagram channel in Postiz']);
   assert.equal(web.calls(IG).length, 0);
+});
+
+test('save rate: per 100 reached, coloured against the usual (median of the newest posts with one)', () => {
+  const post = (i, saved, reach) => ({ id: `p${i}`, time: 1000 - i, saved, reach });
+  const out = withSaveRate({ totals: {}, posts: [post(0, 8, 200), post(1, 1, 20), post(2, 2, 100), post(3, 2, 100), post(4, 2, 100), post(5, 2, 100), post(6, 1, 100)] });
+  assert.deepEqual(out.posts.map((p) => p.saveRate), [4, null, 2, 2, 2, 2, 1]);
+  assert.equal(out.totals.saveRateUsual, 2);
+  assert.match(out.posts[0].saveRateTip, /2\.0× your usual 2\.0%, well above your usual/);
+  assert.ok(out.posts[0].saveRateStyle.background, 'well above: coloured');
+  assert.deepEqual(out.posts[2].saveRateStyle, {}, 'about the usual: plain');
+  assert.match(out.posts[6].saveRateTip, /below your usual/);
+  assert.match(out.posts[1].saveRateTip, /under 30/);
+  // too few posts with a rate: no colour yet
+  const few = withSaveRate({ totals: {}, posts: [post(0, 8, 200)] });
+  assert.equal(few.totals.saveRateUsual, null);
+  assert.deepEqual(few.posts[0].saveRateStyle, {});
 });
