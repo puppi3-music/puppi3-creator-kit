@@ -39,7 +39,9 @@ next to what you change, and keep it true in the same change.
      the kit lists its own in a `private-words.txt` at its repo's top, which the kit never carries.
 3. Update the guide that describes what you changed (`kit/docs/`), in the same plain style: for someone setting up
    or running a site, not for someone reading the code.
-4. Run the checks that fit (below), and say in the pull request which ones you ran.
+4. Run the checks that fit (below), and say in the pull request which ones you ran. Its template asks for what,
+   why, the change, the checks and anything to do after merging. GitHub runs `kit/check.sh` on it, and it can only
+   be merged once that check passes.
 
 ## The checks
 

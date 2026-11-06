@@ -305,6 +305,7 @@ header.top .pup svg{display:block;width:100%;height:auto}
       <tr><td><a href="#site">Your site</a></td><td>-</td><td>The Ghost integration from the Setup guide</td><td><code>GHOST_ADMIN_API_KEY</code></td></tr>
       <tr><td><a href="#cloudflare">Cloudflare</a></td><td>-</td><td>A read-only API token</td><td><code>CLOUDFLARE_API_TOKEN</code>, <code>CLOUDFLARE_ZONE_ID</code></td></tr>
       <tr><td><a href="#search">Google Search</a></td><td>-</td><td>A service account added to Search Console</td><td><code>SEARCH_CONSOLE_KEY</code></td></tr>
+      <tr><td><a href="#boosts">Boosts</a> (optional)</td><td>-</td><td>A token for your Meta ad account (TikTok's are typed in)</td><td><code>META_ADS_TOKEN</code>, <code>META_AD_ACCOUNT_ID</code></td></tr>
     </tbody>
   </table></div>
   <p>Which networks the dashboards expect is <code>NETWORKS</code> in <code>site.env</code>: one listed there but not set up shows as an alert error until you set it up or take it out. Cloudflare and Google Search aren't in that list; their numbers appear once their keys are there. Every key is in the <a href="settings-reference.html#secrets-postiz">Settings reference</a>.</p>
