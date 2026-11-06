@@ -9,6 +9,10 @@ lines, since GitHub's release notes break wherever the text does.
 
 ## 1.5.1 (not released yet)
 
+**All of it at once:** for boosts, add the ad account's settings first (Boosts, below), then
+`kit/kit.sh <folder> up -d` (Compose) or `k8s/up.sh <folder> <overlay>` (Kubernetes) brings all four changes below:
+Postiz restarts for about a minute, the bridge and the site's Grafana for a few seconds each.
+
 ### Boosts: what paid posts cost and bought
 
 The bridge now collects boosts. Instagram posts boosted in the app are read from your Meta ad account: what each

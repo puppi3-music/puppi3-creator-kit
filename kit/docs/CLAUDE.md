@@ -54,7 +54,7 @@ of the kit: `kit/CLAUDE.md`.
   bar, the Social preview button, the platforms `kit.js` gives icons ("Links to your other platforms", `#platforms`),
   the short links (`kit/redirects.yaml`), another theme (what it lacks, adding the kit's parts from
   `kit/theme/KIT.md`), and a mascot's extras a theme of one's own can feed (`#own-a-mascot-s-extras`: seasonal
-  pictures in `assets/images/pfp/` with `seasons.json`, the pets route). Keep it current with `kit/theme/` and
+  pictures in `assets/images/pfp/` with `seasons.json` and the everyday `usual.png`, the pets route). Keep it current with `kit/theme/` and
   `kit/redirects.yaml`.
 - `posting-guide.html` (for whoever posts: the bridge's tags, captions, media, notifications, finishing Instagram and
   TikTok) and `analytics-guide.html` (each dashboard, the verdicts, boosts, When to post) are by hand too: keep them current
