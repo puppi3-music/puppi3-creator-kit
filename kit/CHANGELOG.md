@@ -7,6 +7,20 @@ From 1.2.2 on, each change has a `###` heading saying what it does, a short para
 (what to run, if anything) and **Restarts:** (what goes down, and for how long), each its own paragraph. The release workflow joins wrapped
 lines, since GitHub's release notes break wherever the text does.
 
+## 1.6.2 (not released yet)
+
+### Instagram's hour-by-hour charts no longer go blank for the first hours of the day
+
+Instagram counts its days in Pacific time, but the bridge read its reach, profile views and link taps so far today by
+the UTC date, so Platforms' hour-by-hour lines for them (time ranges of 7 days or less) were empty from midnight UTC
+until Instagram's own day began, 7 or 8 hours later, every day, and jumped when it did. They're now read by Instagram's
+own day: the lines run through the night, and start again from nothing at Pacific midnight. Profile views and link taps
+now come from Instagram itself too, as reach already did. The per-day charts don't change.
+
+**Your site:** `kit/kit.sh <folder> up -d` after updating brings the new bridge (on Kubernetes, `k8s/up.sh`).
+
+**Restarts:** the bridge, for a few seconds (a share in progress finishes first).
+
 ## 1.6.1
 
 **All of it at once:** `kit/kit.sh <folder> up -d` (Compose) or `k8s/up.sh <folder> <overlay>` (Kubernetes) brings
