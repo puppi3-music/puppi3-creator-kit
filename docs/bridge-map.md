@@ -135,7 +135,7 @@ collector now (the tests).
 ### `stats/history.mjs`
 Helpers (dates, JSON files, Tinybird, `archive()`, insights, per-day records) and each post over time in stats.db: `NETWORKS`,
 `LABELS`, `POST_KIND`, tracking, account checks, first-days checks, take-offs, site links.
-- Exports: `DAY`, `day`, `num`, `text`, `readJson`, `writeJson`, `writeJsonSync`, `fetchJson`, `TB`, `tbPipe`, `archive`, `archiveFile`, `archiveRead`, `askLearned`, `insightValue`, `insightBreakdown`, `audienceLists`, `zoneHour`, `withHistory`, `last30`, `posts30`, `perDay`, `gainsByDay`, `mergeDaily`
+- Exports: `DAY`, `day`, `num`, `text`, `readJson`, `writeJson`, `writeJsonSync`, `fetchJson`, `TB`, `tbPipe`, `archive`, `archiveFile`, `archiveRead`, `askLearned`, `insightValue`, `insightBreakdown`, `audienceLists`, `IG_DAY_ZONE`, `zoneDay`, `zoneHour`, `withHistory`, `last30`, `posts30`, `perDay`, `gainsByDay`, `mergeDaily`
 - Exports: `storeFor`, `setStoreLog`, `NETWORKS`, `NETWORK_ALIASES`, `LABELS`, `POST_KIND`, `historyKeys`, `postKeys`, `postRef`, `withPostedMs`, `everyText`, `trackPosts`, `keepLastOverZero`, `trackAccount`, `importAccountDays`, `ACCOUNT_KEYS`, `ACCOUNT_DAYS`, `accountGains`, `WEEKLY`, `withWeekly`, `EARLY_HOURS`, `trackEarly`, `setTakeOffNotice`, `takeOffWords`, `surgingRefs`, `earlyAt`, `readHistory`, `thin`, `hoursOld`, `withOlder`, `toCheck`, `META_CALLS_PER_HOUR`, `postsPerPoll`, `totalsByDate`, `median`, `addSiteHosts`, `sitePath`, `siteLinks`
 - Imports: config (`SITE_HOSTS`), stats/store
 

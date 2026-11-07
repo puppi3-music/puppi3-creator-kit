@@ -164,3 +164,19 @@ test('accountGains: Instagram reach and engagement averaged over SMOOTH_HOURS, f
   assert.equal(rows[0].reach, null); // no check before it
   assert.equal(accountGains(checks, 'bluesky')[6].reachToday, 12); // other networks untouched
 });
+
+test('accountGains: Instagram\'s day starts at Pacific midnight, not UTC (no reset at 00:00 UTC; one at 08:00 UTC in PST)', async () => {
+  const { accountGains, zoneDay } = await import('../ghost-bridge/stats/history.mjs');
+  const H = 3_600_000;
+  const t0 = Date.UTC(2026, 10, 6, 22); // 14:00 Pacific (PST)
+  // profile views so far today: 10, 14 at 23:00 UTC, 20 at 00:00 UTC (still the Pacific day), ... then 3 at 08:00 UTC
+  const views = [[0, 10], [1, 14], [2, 20], [9, 25], [10, 3], [11, 5]];
+  const checks = views.map(([h, v]) => [t0 + h * H, { profileViewsToday: v }]);
+  const rows = accountGains(checks, 'tiktok'); // no smoothing: tiktok has no dayZone either, so UTC
+  assert.equal(rows[2].profileViews, 20); // UTC: a new day at 00:00
+  const ig = accountGains(checks.map(([t, v]) => [t, { linkTapsToday: v.profileViewsToday }]), 'instagram');
+  // gains 4, 6 (not 20: same Pacific day), 5, then 3 (a new Pacific day at 08:00 UTC), 2; drawn as 6-hour averages
+  assert.deepEqual(ig.map((r) => r.linkTaps), [null, 4, 5, 5, 4, 3.3]);
+  assert.equal(zoneDay(t0 + 2 * H, 'America/Los_Angeles'), '2026-11-06');
+  assert.equal(zoneDay(t0 + 10 * H, 'America/Los_Angeles'), '2026-11-07');
+});

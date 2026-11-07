@@ -7,7 +7,7 @@ import { env, STATE_FILE, log, networkOn, POSTIZ_KEY, INSTAGRAM_IDS, SITE_TIMEZO
 import { PG, pgQuery, postiz } from '../services.mjs';
 import { median, trackAccount, withWeekly, trackPosts, surgingRefs, postsPerPoll, META_CALLS_PER_HOUR, siteLinks, postRef, withOlder,
   toCheck, historyKeys, withPostedMs, everyText, archive, archiveRead, askLearned, insightValue, insightBreakdown,
-  audienceLists, zoneHour, keepLastOverZero } from './history.mjs';
+  audienceLists, zoneHour, zoneDay, IG_DAY_ZONE, keepLastOverZero } from './history.mjs';
 import { withPerformance } from './performance.mjs';
 import { withBoosts } from './ads.mjs';
 
@@ -181,7 +181,7 @@ function igOnlineByHour(online) {
   const sums = Array.from({ length: 24 }, () => ({ total: 0, days: 0 }));
   for (const [date, hours] of Object.entries(online)) {
     for (const [h, n] of Object.entries(hours)) {
-      const s = sums[zoneHour(date, Number(h), 'America/Los_Angeles', SITE_TIMEZONE)];
+      const s = sums[zoneHour(date, Number(h), IG_DAY_ZONE, SITE_TIMEZONE)];
       s.total += Number(n) || 0;
       s.days++;
     }
@@ -430,9 +430,11 @@ export async function pollInstagramStats() {
     out.totals[`${k}30`] = recent.length ? recent.reduce((a, [, d]) => a + d[k], 0) : null;
   }
   out.daily = Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
-  // today's reach so far from Instagram itself (fresher than Postiz's), for the hour-by-hour chart
-  const reachToday = out.profileHistory[new Date().toISOString().slice(0, 10)]?.reach;
-  if (Number.isFinite(reachToday)) out.totals.reachToday = reachToday;
+  // reach, profile views and link taps so far today, for the hour-by-hour charts: Instagram's day is Pacific (IG_DAY_ZONE),
+  // and the UTC day D asked for gives its Pacific day D (the one starting in it: nothing until Pacific midnight), so
+  // today's is under the Pacific date: yesterday's UTC one until 07:00/08:00 UTC (both are asked for every poll)
+  const igToday = out.profileHistory[zoneDay(Date.now(), IG_DAY_ZONE)] || {};
+  for (const k of ['reach', 'profileViews', 'linkTaps']) if (Number.isFinite(igToday[k])) out.totals[`${k}Today`] = igToday[k];
 
   withSaveRate(out);
   withWeekly('instagram', out);

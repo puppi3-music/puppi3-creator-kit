@@ -127,6 +127,10 @@ export function audienceLists(byDim, date) {
   return { date, age: list(byDim.age), gender: list(byDim.gender, (g) => GENDERS[g] || g), country: list(byDim.country, region),
     city: list(byDim.city) };
 }
+// Meta's own time zone: Instagram's days and its "followers online" hours are Pacific
+export const IG_DAY_ZONE = 'America/Los_Angeles';
+// The date (YYYY-MM-DD) of time t in time zone `zone` (UTC without one)
+export const zoneDay = (t, zone) => (zone ? new Intl.DateTimeFormat('en-CA', { timeZone: zone }).format(t) : day(t));
 // The hour (0-23) in time zone `to` of hour `hour` on `date` (YYYY-MM-DD) in time zone `from`
 export function zoneHour(date, hour, from, to) {
   const guess = Date.parse(`${date}T${String(hour).padStart(2, '0')}:00:00Z`);
@@ -332,7 +336,7 @@ export const POST_KIND = {
 // Followers and other running totals change through the day too, so each network's are kept at every check (the
 // stats database's account table, ACCOUNT_CHECK_DAYS [90] days; the network files keep one per UTC day for longer),
 // for the Platforms dashboard's "hour by hour" charts (GET /account.json?network=). Totals that only ever climb or
-// drift, not 30-day sums; and `<key>Today`: what a network gives only per day, so far today (UTC), from the file's
+// drift, not 30-day sums; and `<key>Today`: what a network gives only per day, so far today (UTC; Instagram: its Pacific day, set by the collector), from the file's
 // daily[] entry for today unless the collector sets it in totals, so the gain between checks is the hour's share.
 // Every collector calls it before writing its file; a failure is that file's error.
 export const ACCOUNT_KEYS = {
@@ -359,20 +363,22 @@ export function trackAccount(dataDir, network, out) {
 
 // What came in between checks, for the "hour by hour" charts to show what the per-day ones do: each total's gain on
 // the check before as new<Key> (newFollowers, newPlays...), and each `<key>Today` as <key> (the gain on the check
-// before that UTC day, or all of it at the day's first check after one the day before). null when there's no check
+// before that day, or all of it at the day's first check after one the day before; the network's day: UTC, Instagram's
+// Pacific, `dayZone` in WEEKLY). null when there's no check
 // before with it (not one huge first bar), or it went
 // down (a deleted post, Instagram's reach being unique accounts so far...). With a network, each check also gets
 // `engagement`: its WEEKLY hourly keys added up (null when none is there).
 export function accountGains(checks, network) {
   const last = {};
   const sum = WEEKLY[network]?.hourly;
+  const dayOf = (t) => zoneDay(t, WEEKLY[network]?.dayZone);
   const rows = checks.map(([t, vals]) => {
     const row = { time: t, ...vals };
     for (const [k, v] of Object.entries(vals)) {
       if (!Number.isFinite(v)) continue;
       const before = last[k];
       if (k.endsWith('Today')) {
-        const gain = !before ? null : day(before[0]) === day(t) ? v - before[1] : v;
+        const gain = !before ? null : dayOf(before[0]) === dayOf(t) ? v - before[1] : v;
         row[k.slice(0, -5)] = gain >= 0 ? gain : null;
       } else row[`new${k[0].toUpperCase()}${k.slice(1)}`] = before && v >= before[1] ? v - before[1] : null;
       last[k] = [t, v];
@@ -417,7 +423,8 @@ export const WEEKLY = {
     hourly: ['newMembers', 'newComments', 'newLinkClicks', 'newLivePlays'] },
   instagram: { avg: ['reach', 'profileViews', 'linkTaps'], engagement: ['likes', 'comments', 'shares', 'saves'], per: 'reach',
     hourly: ['newPostLikes', 'newPostComments', 'newPostShares', 'newPostSaves'],
-    smooth: ['reach', 'profileViews', 'linkTaps', 'newPostLikes', 'newPostComments', 'newPostShares', 'newPostSaves', 'engagement'] },
+    smooth: ['reach', 'profileViews', 'linkTaps', 'newPostLikes', 'newPostComments', 'newPostShares', 'newPostSaves', 'engagement'],
+    dayZone: IG_DAY_ZONE },
   tiktok: { avg: ['views'], engagement: ['newLikes', 'comments', 'shares'], per: 'views', hourly: ['newLikes', 'newComments', 'newShares'] },
   threads: { avg: ['views', 'linkClicks'], engagement: ['likes', 'replies', 'reposts', 'quotes'], per: 'views',
     hourly: ['newPostLikes', 'newPostReplies', 'newPostReposts', 'newPostQuotes'] },

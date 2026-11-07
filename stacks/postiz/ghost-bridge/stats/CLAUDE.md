@@ -118,7 +118,7 @@ whole: `stacks/postiz/ghost-bridge/CLAUDE.md`; the settings compose passes: `sta
   `followerHistory`/YT `daily` subscribers, archive `days[d].totals` winning, not today or days with checks; `GET /account.json?network=` (not routed; `accountGains` adds each check's
   `new<Key>` gain on the check before and, for the `<key>Today` keys (what networks give only per day, so far today:
   Ghost visitors, IG reach/profile views/link taps, Threads views/clicks/likes...; from totals or the file's `daily`
-  today), `<key>` = the difference within the UTC day; null on the first check or a drop) -> Platforms' charts' "hour by
+  today), `<key>` = the difference within the network's day (UTC; Instagram's is Pacific, `WEEKLY.instagram.dayZone` = `IG_DAY_ZONE`: the UTC day D asked of Graph gives Pacific day D, empty until Pacific midnight, so the collector sets `reachToday`/`profileViewsToday`/`linkTapsToday` from `profileHistory` at the Pacific date; before 2026-11-07 the hourly chart was blank 00:00-07:00/08:00 UTC every day); null on the first check or a drop) -> Platforms' charts' "hour by
   hour" view (time ranges of 7 days or less); with the network, each check's `engagement` = its `WEEKLY[n].hourly` gains
   added up; Bluesky's totals `likes`/`reposts`/`replies`/`quotes`, TikTok's `views`/`comments`/`shares` and YouTube's
   `likesAllTime`/`commentsAllTime` Instagram's `postLikes`/`postComments`/`postShares`/`postSaves` and Threads' `postLikes`/`postReplies`/`postReposts`/`postQuotes` = all posts' sums for it;
