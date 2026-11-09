@@ -7,6 +7,40 @@ From 1.2.2 on, each change has a `###` heading saying what it does, a short para
 (what to run, if anything) and **Restarts:** (what goes down, and for how long), each its own paragraph. The release workflow joins wrapped
 lines, since GitHub's release notes break wherever the text does.
 
+## 1.6.3 (not released yet)
+
+**All of it at once:** `kit/kit.sh <folder> up -d` (Compose) or `k8s/up.sh <folder> <overlay>` (Kubernetes) brings
+all three changes below: the bridge restarts, for a few seconds (a share in progress finishes first).
+
+### Instagram Stories know which post they came from
+
+Instagram gives a Story no caption and nothing that ties it to the post it was shared for, so the bridge now matches
+them by time. A Story shared through the site shows the caption written for it on the Social preview, or else its
+post's title, and the Post and Page dashboards count it for that post's page, marked as a guess. Stories already
+collected are matched too.
+
+**Your site:** the usual update, nothing else to do.
+
+**Restarts:** the bridge, for a few seconds.
+
+### An easier Boosts page
+
+Typing in a TikTok Promote is now four steps: pick the video by its cover (and play it to be sure), the dates with a
+Still running box, what it cost, what it brought. The list shows every number, and clicking a row opens it to change.
+
+**Your site:** the usual update, nothing else to do. A cover shows once TikTok's numbers have been read again.
+
+**Restarts:** the bridge, for a few seconds.
+
+### Clearer notes in Social's Up next, and Past shows with nothing in range
+
+Up next's notes are now one to a line, with shorter links and the Story's time in the site's own time zone. Content's
+Past shows no longer fails when no show falls in the time range.
+
+**Your site:** the usual update, nothing else to do.
+
+**Restarts:** the bridge, for a few seconds; Grafana doesn't.
+
 ## 1.6.2
 
 ### Instagram's hour-by-hour charts no longer go blank for the first hours of the day
