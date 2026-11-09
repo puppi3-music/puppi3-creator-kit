@@ -282,6 +282,7 @@ export function tiktok({ env, dataDir, PG, collector, channel, postizAnalytics, 
                 id: v.id, ref: postRef(v.id), links: siteLinks([v.title, v.video_description]), date: time && new Date(time).toISOString(), time, network: 'TikTok', account: out.account.name,
                 text: text(v.title || v.video_description), duration: num(v.duration), views: num(v.view_count), likes: num(v.like_count),
                 comments: num(v.comment_count), shares: num(v.share_count), permalink: v.share_url || '',
+                cover: v.cover_image_url || '', // the Boosts page's video picker (TikTok's address, signed: it lapses in days)
               });
             }
             more = !!r.has_more;
