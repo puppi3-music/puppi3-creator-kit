@@ -790,7 +790,7 @@
           {
             "matcher": {
               "id": "byRegexp",
-              "options": "/^instagram/i"
+              "options": "/^(?:[A-Z] )?instagram/i"
             },
             "properties": [
               {
@@ -799,6 +799,10 @@
                   "mode": "fixed",
                   "fixedColor": "#E1306C"
                 }
+              },
+              {
+                "id": "displayName",
+                "value": "Instagram"
               }
             ]
           },
@@ -820,7 +824,7 @@
           {
             "matcher": {
               "id": "byRegexp",
-              "options": "/^soundcloud/i"
+              "options": "/^(?:[A-Z] )?soundcloud/i"
             },
             "properties": [
               {
@@ -829,6 +833,10 @@
                   "mode": "fixed",
                   "fixedColor": "#FF5500"
                 }
+              },
+              {
+                "id": "displayName",
+                "value": "SoundCloud"
               }
             ]
           },
@@ -880,7 +888,7 @@
           {
             "matcher": {
               "id": "byRegexp",
-              "options": "/^mixcloud/i"
+              "options": "/^(?:[A-Z] )?mixcloud/i"
             },
             "properties": [
               {
@@ -889,6 +897,10 @@
                   "mode": "fixed",
                   "fixedColor": "#5000FF"
                 }
+              },
+              {
+                "id": "displayName",
+                "value": "Mixcloud"
               }
             ]
           }
@@ -1070,7 +1082,113 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Bluesky"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#1185FE"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Threads"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#8f8f8f"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Instagram"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#E1306C"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tiktok"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FE2C55"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Youtube"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF0000"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SoundCloud"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#FF5500"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Mixcloud"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5000FF"
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "reduceOptions": {
@@ -1115,7 +1233,7 @@
         "x": 0,
         "y": 14,
         "w": 24,
-        "h": 9
+        "h": 12
       },
       "targets": [
         {
@@ -1294,6 +1412,34 @@
                   "type": "auto",
                   "wrapText": true
                 }
+              },
+              {
+                "id": "custom.minWidth",
+                "value": 340
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Media"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Left out"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
               }
             ]
           }
@@ -1334,7 +1480,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 23,
+        "y": 26,
         "w": 24,
         "h": 9
       },
@@ -2235,7 +2381,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 32,
+        "y": 35,
         "w": 12,
         "h": 6
       },
@@ -2288,7 +2434,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 32,
+        "y": 35,
         "w": 12,
         "h": 6
       },
@@ -2374,7 +2520,7 @@
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 38,
+        "y": 41,
         "w": 24,
         "h": 1
       },
@@ -2387,7 +2533,7 @@
       "description": "",
       "gridPos": {
         "x": 0,
-        "y": 39,
+        "y": 42,
         "w": 24,
         "h": 2
       },
@@ -2409,7 +2555,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 41,
+        "y": 44,
         "w": 4,
         "h": 4
       },
@@ -2472,7 +2618,7 @@
       },
       "gridPos": {
         "x": 4,
-        "y": 41,
+        "y": 44,
         "w": 20,
         "h": 10
       },
@@ -2525,7 +2671,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 45,
+        "y": 48,
         "w": 4,
         "h": 6
       },
@@ -2586,7 +2732,7 @@
       "collapsed": true,
       "gridPos": {
         "x": 0,
-        "y": 51,
+        "y": 54,
         "w": 24,
         "h": 1
       },
@@ -2602,7 +2748,7 @@
           },
           "gridPos": {
             "x": 0,
-            "y": 52,
+            "y": 55,
             "w": 12,
             "h": 8
           },
@@ -2668,7 +2814,7 @@
           },
           "gridPos": {
             "x": 12,
-            "y": 52,
+            "y": 55,
             "w": 12,
             "h": 8
           },

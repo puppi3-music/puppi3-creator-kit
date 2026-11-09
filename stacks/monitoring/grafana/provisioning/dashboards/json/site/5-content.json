@@ -2163,7 +2163,7 @@
             "method": "GET",
             "data": ""
           },
-          "root_selector": "shows[start >= ${__from} and start <= ${__to}]",
+          "root_selector": "$append([], shows[start >= ${__from} and start <= ${__to}])",
           "filters": [],
           "columns": [
             {
