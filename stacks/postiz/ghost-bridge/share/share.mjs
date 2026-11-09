@@ -6,7 +6,7 @@ import { CHANNELS, SKIP_TAG, BIG_DROP_TAG, BIG_DROP_AUTO_STORY, MUSIC_MODE, AUTO
   MANUAL_DRAFTS, DRAFT_TAG, ONLY_PUBLIC, TEXT_SOURCE, INCLUDE_TITLE, EXCERPT_TAG, CUSTOM_CHANNELS, SHARE_VIDEO, GALLERY,
   MAX_IMAGES, TIKTOK_METHOD, TIKTOK_PRIVACY, NTFY_URL, NOTIFY_ERRORS, AUDIOGRAM, INSTAGRAM_IDS, TIKTOK_IDS,
   IMAGE_LIMITS, previewStore, log, isDry, loadState, recordShared, loadCustom, channelKey, DRAFT_BASE, DRAFT_PREVIEWS,
-  GHOST_API_URL } from '../config.mjs';
+  GHOST_API_URL, SITE_TIMEZONE } from '../config.mjs';
 import { postiz, postizChannels, uploadMedia, ghostToken, ghostSiteOrigin } from '../services.mjs';
 import { notify, notifyBigDrop, notifyManual, notifyCover, moveLater, STORY_GAP_MS } from './ntfy.mjs';
 import { bodyText, findVideo, findAudio, findGalleryImages, postLinks, findListenLink, chosenListen, splitHashtags,
@@ -43,9 +43,42 @@ export function musicRouting(tags, kind, audiogram) {
     : MUSIC_MODE === 'manual' ? false
     : hasSound;
   const why = forceManual ? MANUALPOST_TAG : forceAuto ? AUTOPOST_TAG
-    : MUSIC_MODE !== 'audio' ? `IG_TIKTOK_MODE=${MUSIC_MODE}`
+    : MUSIC_MODE !== 'audio' ? 'the IG_TIKTOK_MODE setting'
     : hasSound ? (audiogram ? 'post has an audio card' : 'post has a video') : 'post has no sound';
   return { auto, why };
+}
+
+// Up next's notes: a link without https:// and www. (query kept: a YouTube link is its ?v=), cut short if very long;
+// a time in the site's own zone; a network's own name
+const shortLink = (u) => {
+  const s = String(u).replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+  return s.length > 48 ? `${s.slice(0, 47)}…` : s;
+};
+const localTime = (t) => {
+  const d = new Date(t);
+  return Number.isNaN(d.getTime()) ? t : d.toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short',
+    hour: '2-digit', minute: '2-digit', timeZone: SITE_TIMEZONE });
+};
+const NET_NAMES = { bluesky: 'Bluesky', threads: 'Threads', instagram: 'Instagram', tiktok: 'TikTok', x: 'X',
+  facebook: 'Facebook', linkedin: 'LinkedIn', mastodon: 'Mastodon', youtube: 'YouTube' };
+const netName = (c) => NET_NAMES[c] || c[0].toUpperCase() + c.slice(1);
+
+// Up next's Notes: one per line, each with a dot, so they stay apart even where a viewer folds the line breaks
+export function upNextNotes({ channels, routing, campaign, custom }) {
+  const notes = [];
+  if (channels.some((i) => INSTAGRAM_IDS.includes(i.identifier) || TIKTOK_IDS.includes(i.identifier))) {
+    notes.push(`Instagram/TikTok: ${routing.auto ? 'post themselves' : 'you post in the app'} (${routing.why})`);
+  }
+  if (campaign) notes.push(`Campaign: ${campaign}`);
+  const own = CUSTOM_CHANNELS.filter((c) => custom[c]);
+  if (own.length) notes.push(`Own text for ${own.map(netName).join(', ')}`);
+  if (custom.listen) notes.push(`Listen link: ${custom.listen === 'none' ? 'none' : shortLink(custom.listen)}`);
+  if (typeof custom.storyLink === 'boolean') notes.push(`Story sticker ${custom.storyLink ? 'on' : 'off'}`);
+  if (custom.stickerLink) notes.push(`Sticker link: ${custom.stickerLink === 'none' ? 'none' : shortLink(custom.stickerLink)}`);
+  if (custom.sticker) notes.push(`Sticker text: "${custom.sticker}"`);
+  if (custom.storyAt) notes.push(`Instagram Story: ${localTime(custom.storyAt)}`);
+  if (custom.storyCaption) notes.push('Story caption set');
+  return notes.map((n) => `• ${n}`).join('\n');
 }
 
 // ---------- main handler ----------
@@ -426,8 +459,11 @@ export async function handlePost(post, { again = false, only = null } = {}) {
     const storyShared = Object.keys(results).some((label) => label.endsWith(':story'));
     const storyLater = storyShared ? (storyAt ? new Date(storyAt).toISOString() : undefined) : before?.storyAt;
     const jobLater = storyShared ? storyJob : before?.storyJob;
+    // what the Story said, for the numbers (story-match.mjs): the preview can change after this
+    const captionKept = storyShared ? storyCaption : before?.storyCaption;
     await recordShared(id, { title, url, at: new Date().toISOString(), media: audiogram ? 'audio-clip' : kind, results: { ...kept, ...results },
-      ...(storyLater && { storyAt: storyLater }), ...(storyLater && jobLater && { storyJob: jobLater }), earlier });
+      ...(storyLater && { storyAt: storyLater }), ...(storyLater && jobLater && { storyJob: jobLater }),
+      ...(captionKept !== undefined && { storyCaption: captionKept }), earlier });
   }
 }
 
@@ -540,22 +576,7 @@ export async function upNextDoc() {
     }
     if (bigDrop && kind && !asStory && channels.some((i) => INSTAGRAM_IDS.includes(i.identifier))) inApp.push(`Instagram link Story (${BIG_DROP_TAG})`);
     Object.assign(row, { auto: names(auto), inApp: names(inApp), leftOut: names(out) });
-    const notes = [];
-    if (channels.some((i) => INSTAGRAM_IDS.includes(i.identifier) || TIKTOK_IDS.includes(i.identifier))) {
-      notes.push(`Instagram/TikTok ${routing.auto ? 'post themselves' : 'in the app'}: ${routing.why}`);
-    }
-    const campaign = campaignOf(tags);
-    if (campaign) notes.push(`campaign ${campaign}`);
-    const custom = customs[post.id] || {};
-    const own = CUSTOM_CHANNELS.filter((c) => custom[c]);
-    if (own.length) notes.push(`own text for ${own.join(', ')}`);
-    if (custom.listen) notes.push(`listen link picked: ${custom.listen === 'none' ? 'none' : custom.listen}`);
-    if (typeof custom.storyLink === 'boolean') notes.push(`Story sticker ${custom.storyLink ? 'on' : 'off'}`);
-    if (custom.stickerLink) notes.push(`sticker link ${custom.stickerLink === 'none' ? 'none' : custom.stickerLink}`);
-    if (custom.sticker) notes.push(`sticker text "${custom.sticker}"`);
-    if (custom.storyAt) notes.push(`Instagram Story at ${custom.storyAt}`);
-    if (custom.storyCaption) notes.push('Story caption set');
-    row.notes = notes.join('; ');
+    row.notes = upNextNotes({ channels, routing, campaign: campaignOf(tags), custom: customs[post.id] || {} });
   }
   upNext = { at: Date.now(), doc };
   return doc;

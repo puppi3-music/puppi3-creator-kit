@@ -110,6 +110,17 @@ test('the account, its numbers per day, every post with the numbers its kind has
   assert.ok(c.pg.queries.some((sql) => sql.includes("WHERE id = 'c-ig'")));
 });
 
+test('a poll matches a Story to its share in posted.json', async () => {
+  const fs = await import('node:fs');
+  instagram();
+  fs.writeFileSync(`${c.dataDir}/posted.json`, JSON.stringify({ p1: { title: 'Tune', url: 'https://example.com/tune/',
+    at: new Date(NOW - 7_260_000).toISOString(), results: { 'instagram:story': 'manual' }, storyCaption: 'Out now' } }));
+  try {
+    const [s] = (await poll({})).stories;
+    assert.deepEqual([s.share.postId, s.share.caption, s.caption], ['p1', 'Out now', 'tonight'], "Instagram's own caption stays first");
+  } finally { fs.rmSync(`${c.dataDir}/posted.json`, { force: true }); }
+});
+
 test('the next poll asks only what it must: the numbers learned, the account per day at most hourly', async () => {
   instagram();
   const first = await poll();

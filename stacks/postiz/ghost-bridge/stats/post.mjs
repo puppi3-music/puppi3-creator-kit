@@ -26,7 +26,7 @@ function guessPage(post, ghost) {
 // The site page a post leads to: a site post is its own page; else the Ghost post it links to (or its first site
 // link), else guessPage's guess. { page ("-" = none), pageTitle, pageUrl, pageFrom (link, title, time or none), pageNote }.
 // /post.json and /page.json both use it, so a post counts for the same page in both.
-function pageFor(network, p, ghost, canGuess) {
+export function pageFor(network, p, ghost, canGuess) {
   const bySlug = (page) => ghost.find((g) => `/${g.slug}/` === page);
   const links = p.links || [];
   if (network === 'ghost' && links.length) {
@@ -37,6 +37,13 @@ function pageFor(network, p, ghost, canGuess) {
     const g = bySlug(page);
     return { page, pageTitle: g?.title || (page === '/' ? 'Home page' : page), pageUrl: g?.url || '', pageFrom: 'link',
       pageNote: 'The post links to it.' };
+  }
+  // an Instagram Story matched to its share (story-match.mjs)
+  const shared = p.share?.url && sitePath(p.share.url.replace(/^https?:\/\/[^/]+/, ''));
+  if (shared) {
+    const g = bySlug(shared);
+    return { page: shared, pageTitle: g?.title || p.share.title || shared, pageUrl: g?.url || p.share.url, pageFrom: 'share',
+      pageNote: 'A guess: this Story was posted around when the bridge shared this post with one.' };
   }
   const guess = guessPage(p, ghost);
   if (guess) {
@@ -293,7 +300,7 @@ function networkOfSource(source) {
 }
 export function pageRoute({ dataDir, ghostPosts }) {
   const file = (name) => path.join(dataDir, `${name}.json`);
-  const HOW = { link: 'Links here', title: 'A guess: names the post', time: 'A guess: posted in the week after it' };
+  const HOW = { link: 'Links here', title: 'A guess: names the post', time: 'A guess: posted in the week after it', share: 'A guess: posted when this post was shared' };
   async function pageDoc(q) {
     const doc = { updatedAt: new Date().toISOString(), path: '', title: '', url: '', published: null, found: false,
       posts: [], visitors: [], rules: JSON.stringify(SOURCE_RULES), pages: [{ path: '/', title: 'Home page' }], errors: [] };

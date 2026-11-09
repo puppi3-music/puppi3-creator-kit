@@ -53,6 +53,13 @@ whole: `stacks/postiz/ghost-bridge/CLAUDE.md`; the settings compose passes: `sta
   uploads count in Social's top section (Published, per day, by network, Recently published). Staging collects too (same app, own
   history; staging-social routes `/soundcloud.json`).
 
+## A Story and its share (`stats/story-match.mjs`)
+Instagram ties a Story to nothing of ours and (as far as seen) returns no caption for it, so each poll matches Stories by time to
+the shares in `posted.json` that had a `:story` result (`matchStories`; user asked 2026-11-09). Due at `storyAt` or the share's time, from 15 min before to 1 h after
+(Postiz, `ok`) or 6 h after (by hand, `manual`); the latest due by then wins, a share takes one Story, a match stays (`share` on the Story).
+The Story's `caption`, while Instagram gives none: the saved `storyCaption` (older shares: `custom.json`), else the post's title. `pageFor` uses `share.url` (`pageFrom: 'share'`, labelled a guess)
+after a real link and before `guessPage`. Stories already kept get matched by the first poll. A Story posted by hand with no share behind it, in a window, can be matched wrongly. Postiz's own published id isn't used: nothing here reads it yet.
+
 ## Boosts (`stats/ads.mjs`, `ads.json`)
 - What paid posts cost and bought (user asked 2026-11-06; she boosts with the apps' own Boost/Promote buttons). The `ads`
   collector (`ADS_STATS` [true], every `ADS_STATS_MINUTES` [180, min 60]; not a network: not in `NETWORKS`), `data/ads.json`,
