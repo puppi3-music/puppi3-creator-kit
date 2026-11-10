@@ -90,7 +90,8 @@ other seven (Page included), and everything the dashboards share (files, gotchas
   object literal isn't a plain map): wrap it, `$merge([{...}])` (the status panels do), or use a bare `$count(...)` with no
   columns, or filterExpression + summarizeExpression/summarizeBy; computed columns and filter
   expressions name columns by their `text`, not the JSON selector; JSONata that comes out undefined (`$max([])`, a missing key) fails the whole query with "no results found" (pad: `$max([0, ...])`;
-  an empty array is fine, 0 rows); Grafana
+  an empty array is fine, 0 rows; a table's time filter `x[time >= ${__from} ...]` is undefined when nothing's in the
+  range, so wrap it: `$append([], x[...])`, as every table does); Grafana
   math expressions don't fill in variables at all (`${x}` is read as a query refId). A variable in a transformation's options is filled in as
   JSON text (stringify, replace, parse), so a value with a backslash (`\.`) is a bad escape that crashes the whole
   dashboard ("JSON.parse: bad escaped character"): regexes there go without backslashes (`[.]`, as the bridge's `sources`).
@@ -155,7 +156,7 @@ other seven (Page included), and everything the dashboards share (files, gotchas
   sending side) and bytes skipped for slow listeners (120). Content's Past shows has the per-show Pauses/Reconnects.
 - Social = Postiz queue + drafts;
   its "Up next" (panel 9) = Ghost's scheduled posts from the bridge's `GET /upnext.json`
-  merged with Postiz-only scheduled posts; "Scheduled" (panel 2) = both, a math expression
+  merged with Postiz-only scheduled posts (12 high; Notes wraps, min width 340, Media and Left out narrow); "Scheduled" (panel 2) = both, a math expression
   (+ collapsed Postiz containers row); Social's Postiz containers section is a collapsed row.
 - Social dashboard: "Drafts to
   post in the app" section (Postiz drafts tagged "Post in app" via postiz-pg, whose `grafana_ro` needs SELECT on "Tags" + "TagsPosts" too).

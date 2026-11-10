@@ -31,6 +31,7 @@ The tests are beside the folder, in `stacks/postiz/ghost-bridge-test/` (`stacks/
 | One post up close: `/post.json`, `guessPage`, `pageFor`, `compareWithOthers`, `compareOptions` | `stats/post.mjs` |
 | Every post about one site page: `/page.json`, visitors by network (`SOURCE_RULES`) | `stats/post.mjs` |
 | SQL / tables of stats.db, backups | `stats/store.mjs` |
+| Which share an Instagram Story came from, by time (`matchStories`) | `stats/story-match.mjs` |
 | Instagram / YouTube / SoundCloud numbers (each starts itself) | `stats/instagram.mjs`, `stats/youtube.mjs`, `stats/soundcloud.mjs` |
 | Bluesky, Threads, TikTok, Mixcloud numbers | `stats/social.mjs` |
 | The site as a network (Ghost + Tinybird, `ghostPostDays`), Cloudflare, Search Console | `stats/site.mjs` |
@@ -43,7 +44,7 @@ The tests are beside the folder, in `stacks/postiz/ghost-bridge-test/` (`stacks/
 - `stats/history.mjs` holds the helpers every stats module uses; no stats module imports `stats/stats.mjs`
   (it imports them all), so helpers never go there.
 - `share/ntfy.mjs` must not import `services.mjs` (services' Postiz alerts import ntfy).
-- `pages/preview-render.mjs` and `stats/store.mjs` import nothing of the bridge's.
+- `pages/preview-render.mjs`, `stats/store.mjs` and `stats/story-match.mjs` import nothing of the bridge's.
 - ESM allows the remaining cycle (ntfy -> pages/previews -> share/share -> ntfy) because none of them uses an
   import while loading; keep top-level code free of imported calls. The pre-commit load check catches a break.
 
@@ -76,7 +77,7 @@ Admin API (JWT from `GHOST_ADMIN_API_KEY`).
 ### `share/share.mjs`
 `handlePost`: channels, media, captions, auto-post vs draft + ntfy, recording (`again`: past posted.json, earlier shares kept; `only`: just those cards, a Story apart from its feed post); `musicRouting` (IG/TikTok mode);
 `upNextDoc` for `/upnext.json` (same rules, nothing uploaded); `moveStory`: a shared post's Story still to come, at a new time.
-- Exports: `handlePost`, `musicRouting`, `upNextDoc`, `storyToCome`, `moveStory`
+- Exports: `handlePost`, `musicRouting`, `upNextDoc`, `upNextNotes`, `storyToCome`, `moveStory`
 - Imports: config, services, share/content, share/media, share/ntfy
 
 ### `share/content.mjs`
@@ -155,7 +156,7 @@ One post up close for the Post dashboard: numbers over time, vs typical at the s
 (`pageFor`). And `/page.json` for the Page dashboard: every post whose `pageFor` page is the one asked for, and the
 page's visitors by network (Tinybird `api_top_sources`, grouped with `SOURCE_RULES`, which it also hands the
 dashboard's members query as `rules`).
-- Exports: `postRoute`, `pageRoute`
+- Exports: `pageFor`, `postRoute`, `pageRoute`
 - Imports: stats/history, stats/performance
 
 ### `stats/store.mjs`
@@ -167,7 +168,12 @@ All SQL lives here.
 ### `stats/instagram.mjs`
 Instagram account + posts + Stories + profile days, straight from Graph with Postiz's token; writes instagram.json.
 - Exports: `IG_STATS`, `IG_STATS_FILE`, `startInstagramStats`, `pollInstagramStats` (one poll: the tests), `pollInstagramAudience` (one audience check: the tests)
-- Imports: config, services (`PG`, `pgQuery`, `postiz`), stats/history, stats/performance, stats/ads (`withBoosts`)
+- Imports: config, services (`PG`, `pgQuery`, `postiz`), stats/history, stats/performance, stats/ads (`withBoosts`), stats/story-match
+
+### `stats/story-match.mjs`
+Matches Instagram Stories to the shares in posted.json by time; sets each one's `share` and, when Instagram has none, its caption.
+- Exports: `matchStories`
+- Imports: nothing of the bridge's
 
 ### `stats/youtube.mjs`
 YouTube Data + Analytics APIs (token swapped from Postiz's refresh token), per-video days (`ytVideoDays`).

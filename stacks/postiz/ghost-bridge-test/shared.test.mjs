@@ -140,6 +140,20 @@ async function ask(method, url, { cookie = 'ghost-admin-api-session=s1', origin 
 }
 const sharer = () => { const s = { sharing: new Set(), shared: [] }; s.share = async (post, only) => { s.shared.push([post.id, only]); }; return s; };
 
+test("a Story's caption is kept with its share, whatever the preview says later", async () => {
+  web.on(`${POSTIZ}/integrations`, [{ id: 'c3', identifier: 'instagram-standalone', name: 'Instagram', disabled: false }]);
+  web.on(`${POSTIZ}/upload-from-url`, { id: 'm1', path: 'https://uploads.example.com/pic.jpg' });
+  await editCustom('p1', (m) => { m.storyCaption = 'First words'; });
+  try {
+    await handlePost({ ...POST, feature_image: 'https://example.com/content/images/pic.jpg', tags: [{ name: '#story' }] });
+    assert.equal((await loadState()).p1.storyCaption, 'First words');
+    await editCustom('p1', (m) => { m.storyCaption = 'Changed later'; });
+    assert.equal((await loadState()).p1.storyCaption, 'First words');
+  } finally {
+    await editCustom('p1', (m) => { delete m.storyCaption; });
+  }
+});
+
 test('the Shared posts page: each published post, what each network got, a link to its preview', async () => {
   await recordShared('p1', { title: 'New mix', at: '2026-10-20T18:01:00.000Z', results: { bluesky: 'ok', 'instagram-standalone': 'manual', tiktok: 'error' },
     earlier: [{ at: '2026-10-19T10:00:00.000Z', results: {} }] });

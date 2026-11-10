@@ -26,7 +26,7 @@ after(() => { postiz.closeAllConnections(); postiz.close(); });
 process.env.POSTIZ_API_URL = `http://127.0.0.1:${postiz.address().port}`;
 
 // the bridge reads its settings when it loads: after the fake's address is set
-const { handlePost, musicRouting } = await import('../ghost-bridge/share/share.mjs');
+const { handlePost, musicRouting, upNextNotes } = await import('../ghost-bridge/share/share.mjs');
 // the tests' videos aren't real: ffprobe gets a made-up answer (a video that fits, unless a test says otherwise)
 const { videoTools } = await import('../ghost-bridge/share/media.mjs');
 const fitsAsItIs = async () => ({ streams: [{ index: 0, codec_type: 'video', codec_name: 'h264', width: 1080, height: 1920,
@@ -56,7 +56,7 @@ test('a text post: Bluesky and Threads post themselves; Instagram and TikTok wai
   assert.equal(byLabel.bluesky.caption, 'Out now.\n\nhttps://example.com/b/new-mix\n\n#house');
   assert.equal(byLabel.threads.caption, 'Out now.\n\nhttps://example.com/t/new-mix\n\n#house');
   assert.equal(byLabel['instagram-standalone'].status, 'manual');
-  assert.equal(byLabel['instagram-standalone'].why, 'IG_TIKTOK_MODE=manual');
+  assert.equal(byLabel['instagram-standalone'].why, 'the IG_TIKTOK_MODE setting');
   assert.equal(byLabel['instagram-standalone'].caption, 'Out now.\n\nFull post: link in bio 🔗\n\n#house');
   assert.equal(byLabel.tiktok.status, 'manual');
   assert.equal(notes.length, 2, 'a "post it in the app" notification each for Instagram and TikTok');
@@ -244,7 +244,7 @@ test('posts that aren\'t shared', async () => {
 });
 
 test('musicRouting: Instagram and TikTok post themselves only when a tag says so (IG_TIKTOK_MODE=manual)', () => {
-  assert.deepEqual(musicRouting([], 'video', false), { auto: false, why: 'IG_TIKTOK_MODE=manual' });
+  assert.deepEqual(musicRouting([], 'video', false), { auto: false, why: 'the IG_TIKTOK_MODE setting' });
   assert.deepEqual(musicRouting(['#autopost'], 'image', false), { auto: true, why: '#autopost' });
   assert.deepEqual(musicRouting(['#autopost', '#manualpost'], 'video', false), { auto: false, why: '#manualpost' });
 });
@@ -282,4 +282,17 @@ test('the Instagram Story at a time of its own: Postiz schedules one it posts, a
   } finally {
     await editCustom('p1', (m) => { delete m.storyAt; });
   }
+});
+
+test('Up next\'s notes: one per line, a short link, the Story time in the site\'s own zone, networks by name', () => {
+  const notes = upNextNotes({ channels: CHANNELS.slice(0, 3), routing: { auto: false, why: 'the IG_TIKTOK_MODE setting' },
+    campaign: 'summer', custom: { bluesky: 'x', tiktok: 'y', stickerLink: 'https://www.youtube.com/watch?v=s4j55YBSmD0',
+      sticker: 'Cozy', storyAt: '2026-11-08T23:00:00.000Z', storyCaption: 'z' } }).split('\n');
+  assert.deepEqual(notes.slice(0, 3), ['• Instagram/TikTok: you post in the app (the IG_TIKTOK_MODE setting)',
+    '• Campaign: summer', '• Own text for Bluesky, TikTok']);
+  assert.equal(notes[3], '• Sticker link: youtube.com/watch?v=s4j55YBSmD0', 'the whole link, less https://www.');
+  assert.equal(notes[4], '• Sticker text: "Cozy"');
+  assert.match(notes[5], /^• Instagram Story: Sun 8 Nov, \d\d:00$/, 'a day and time, not an ISO string');
+  assert.equal(notes[6], '• Story caption set');
+  assert.equal(upNextNotes({ channels: CHANNELS.slice(0, 2), routing: {}, custom: {} }), '', 'nothing to say: empty');
 });

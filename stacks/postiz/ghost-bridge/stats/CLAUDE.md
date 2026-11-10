@@ -53,6 +53,13 @@ whole: `stacks/postiz/ghost-bridge/CLAUDE.md`; the settings compose passes: `sta
   uploads count in Social's top section (Published, per day, by network, Recently published). Staging collects too (same app, own
   history; staging-social routes `/soundcloud.json`).
 
+## A Story and its share (`stats/story-match.mjs`)
+Instagram ties a Story to nothing of ours and (as far as seen) returns no caption for it, so each poll matches Stories by time to
+the shares in `posted.json` that had a `:story` result (`matchStories`; user asked 2026-11-09). Due at `storyAt` or the share's time, from 15 min before to 1 h after
+(Postiz, `ok`) or 6 h after (by hand, `manual`); the latest due by then wins, a share takes one Story, a match stays (`share` on the Story).
+The Story's `caption`, while Instagram gives none: the saved `storyCaption` (older shares: `custom.json`), else the post's title. `pageFor` uses `share.url` (`pageFrom: 'share'`, labelled a guess)
+after a real link and before `guessPage`. Stories already kept get matched by the first poll. A Story posted by hand with no share behind it, in a window, can be matched wrongly. Postiz's own published id isn't used: nothing here reads it yet.
+
 ## Boosts (`stats/ads.mjs`, `ads.json`)
 - What paid posts cost and bought (user asked 2026-11-06; she boosts with the apps' own Boost/Promote buttons). The `ads`
   collector (`ADS_STATS` [true], every `ADS_STATS_MINUTES` [180, min 60]; not a network: not in `NETWORKS`), `data/ads.json`,
@@ -71,8 +78,15 @@ whole: `stacks/postiz/ghost-bridge/CLAUDE.md`; the settings compose passes: `sta
   - TikTok Promote has no API (TikTok's Marketing API reports only Ads Manager campaigns), so she types each in on
     `/ghost/social-preview/boosts/` (`serveBoosts`, after `serveDraftPreview`'s staff sign-in check, so no new route
     anywhere; `ADS_TYPED` [true], false = 404; linked from the Shared posts page): a plain form (POST urlencoded, same
-    origin as Ghost's, 16 KB) per Promote: video (tiktok.json's), start, end (empty = running), spent, budget, views,
-    likes, follows, profile visits, link clicks; "€12,50" and "1,250" read right; saved in `data/ads-typed.json`
+    origin as Ghost's, 16 KB) per Promote: video (tiktok.json's, picked by its cover: TikTok's `cover_image_url`, kept as
+    the posts' `cover`, signed so it lapses in days; ▶ when it won't load), start (today by default), end, `running`
+    (the "Still running" box: end = ''; unticked with no end = not saved), spent, budget, views, likes, follows,
+    profile visits, link clicks; "€12,50" and "1,250" read right. Its own CSS and script (`BOOSTS_CSS`/`BOOSTS_JS`:
+    steps 1-4, numbers two a row, one on a phone; the table lists every number + per 1000, a row's click opens it in
+    the form above, Delete asks first; a card's ▶ opens a `<dialog>` with TikTok's embed `tiktok.com/player/v1/<id>`
+    (origin-only referrer; "Pick this video" ticks it, closing empties it; "Open on TikTok" for when a blocker stops
+    the player; user asked to play them, 2026-11-08; a tracker blocker can stop the player and the covers: hers was Privacy Badger,
+    fixed by its "Disable for this site" or allowing www.tiktok.com and *.tiktokcdn.com); the intro links Promote's web dashboard (`tiktok.com/promote/web/main`) and Meta's Ads Manager; user found the unstyled form too hard, 2026-11-08); saved in `data/ads-typed.json`
     `entries`, then the collector runs at once (`rerun`, awaited before the redirect). Typed numbers are spread evenly
     over the days from start to its end or today.
   - `ads[]` per boost (source meta|typed, network, ref, title, dates, status, budget, spend, reach, impressions, views,

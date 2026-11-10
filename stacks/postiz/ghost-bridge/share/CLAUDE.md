@@ -35,6 +35,7 @@ change.
   off (`stickerOn`). Off: a plain Story (`notifyBigDrop` without the sticker steps; `notifyManual` without the line).
   Text: shown on the card, and since the API can't set it, the reminders give it with "Copy sticker text" (in place of
   `notifyBigDrop`'s Open link button; first with no link). Stories the bridge posts itself can't have one.
+- `posted.json` also keeps the Story's caption (`storyCaption`, as it was when shared) for the numbers (`stats/story-match.mjs`).
 - An Instagram Story's caption (user asked: set a caption for the Story): every Story card on the Social preview has a
   "Story caption" box (`POST .../story-caption` {text}, saved on leaving it; `storyCaption` in `custom.json`, '' removes it,
   `STORY_CAPTION_MAX` [2200]). Instagram's Graph API takes no text with a Story (no caption on STORIES media), so it's for a
@@ -134,7 +135,8 @@ change.
   hand, where the IG Story notification carries the sticker link (as it does for any #story by hand with the sticker on).
 - `GET /upnext.json` (`upNextDoc`: Admin API `status:scheduled`, then handlePost's rules without uploading: `musicRouting` shared with handlePost, media kind, channels
   -> Posts itself to / You post in the app / Left out, link to the Social preview; 1-min cache; not routed by Traefik):
-  Ghost's scheduled posts, for Social's "Up next".
+  Ghost's scheduled posts, for Social's "Up next". Its Notes (`upNextNotes`): one per line, each starting "• " (kept
+  apart even where Grafana folds the breaks), links less `https://www.`, query kept, cut at 48 (`shortLink`), the Story time in `SITE_TIMEZONE`.
 
 ## Seasonal profile pictures
 - `share/pfp.mjs` (`startSeasonalPfp`, `PFP_SEASONS` [true]; user asked: the site's seasonal outfits on the social

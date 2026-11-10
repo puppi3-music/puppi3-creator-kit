@@ -20,7 +20,7 @@ const IG_POSTS = [
   { id: '1789', ref: '1789', caption: 'New mix out', permalink: 'https://www.instagram.com/p/AAA/', time: NOW - 10 * DAY },
   { id: '1790', ref: '1790', caption: 'Live tonight', permalink: 'https://www.instagram.com/reel/BBB/', time: NOW - 5 * DAY },
 ];
-const TT_POSTS = [{ id: '7001', ref: '7001', text: 'Drop at 1:30', permalink: 'https://www.tiktok.com/@dj/video/7001', time: NOW - 8 * DAY, views: 5000 }];
+const TT_POSTS = [{ id: '7001', ref: '7001', text: 'Drop at 1:30', cover: 'https://p16.tiktokcdn.example/7001.jpg', permalink: 'https://www.tiktok.com/@dj/video/7001', time: NOW - 8 * DAY, views: 5000 }];
 const ADS = [
   { id: 'ad1', name: 'Boost: New mix', effective_status: 'COMPLETED', created_time: `${date(9)}T10:00:00+0000`,
     adset: { start_time: `${date(9)}T10:00:00+0000`, end_time: `${date(6)}T10:00:00+0000`, lifetime_budget: '2000' },
@@ -130,6 +130,10 @@ test('the Boosts page: staff only, from the page itself, numbers checked, then t
   const page = await ask('GET', PAGE);
   assert.equal(page.status, 200);
   assert.match(page.body, /Drop at 1:30/, 'the TikTok videos to pick from');
+  assert.match(page.body, /<input type="radio" name="ref" value="7001" checked/, 'picked by its cover, the newest already');
+  assert.match(page.body, /src="https:\/\/p16\.tiktokcdn\.example\/7001\.jpg"/);
+  assert.match(page.body, /name="running" value="1" checked/, 'a new one is still running');
+  assert.match(page.body, /data-play="7001" data-ref="7001" data-link="https:\/\/www\.tiktok\.com\/@dj\/video\/7001"/, 'played in TikTok\'s player');
   const form = { action: 'save', ref: '7001', start: date(5), end: date(1), spend: '€12,50', views: '2000', follows: '8' };
   assert.equal((await ask('POST', PAGE, { origin: 'https://elsewhere.example', form })).status, 403);
   let r = await ask('POST', PAGE, { form: { ...form, views: 'lots' } });
@@ -142,10 +146,19 @@ test('the Boosts page: staff only, from the page itself, numbers checked, then t
   const [e] = typed();
   assert.equal(e.spend, 12.5, 'a currency sign and a decimal comma are fine');
   assert.equal(e.views, 2000);
-  // changed: same id
-  await ask('POST', PAGE, { form: { ...form, id: e.id, spend: '15' } });
+  // changed: same id; Still running empties the end day, and neither is asked again
+  await ask('POST', PAGE, { form: { ...form, id: e.id, spend: '15', running: '1' } });
   assert.equal(typed().length, 1);
   assert.equal(typed()[0].spend, 15);
+  assert.equal(typed()[0].end, '');
+  r = await ask('POST', PAGE, { form: { ...form, id: e.id, spend: '15', end: '' } });
+  assert.match(decodeURIComponent(r.headers.Location), /Not saved: check the end date \(or tick Still running\)/);
+  await ask('POST', PAGE, { form: { ...form, id: e.id, spend: '15' } });
+  assert.equal(typed()[0].end, date(1));
+  const editing = await ask('GET', `${PAGE}?edit=${e.id}`);
+  assert.match(editing.body, /Change: Drop at 1:30/);
+  assert.match(editing.body, /name="running" value="1">/, 'an ended one: not ticked');
+  assert.match(editing.body, /<td>15\.00<\/td>/, 'every number in the table');
 
   const out = await c.poll('ads');
   const boost = out.ads.find((a) => a.source === 'typed');

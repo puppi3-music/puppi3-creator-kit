@@ -3,13 +3,14 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { env, STATE_FILE, log, networkOn, POSTIZ_KEY, INSTAGRAM_IDS, SITE_TIMEZONE } from '../config.mjs';
+import { env, STATE_FILE, log, networkOn, POSTIZ_KEY, INSTAGRAM_IDS, SITE_TIMEZONE, loadState, loadCustom } from '../config.mjs';
 import { PG, pgQuery, postiz } from '../services.mjs';
 import { median, trackAccount, withWeekly, trackPosts, surgingRefs, postsPerPoll, META_CALLS_PER_HOUR, siteLinks, postRef, withOlder,
   toCheck, historyKeys, withPostedMs, everyText, archive, archiveRead, askLearned, insightValue, insightBreakdown,
   audienceLists, zoneHour, zoneDay, IG_DAY_ZONE, keepLastOverZero } from './history.mjs';
 import { withPerformance } from './performance.mjs';
 import { withBoosts } from './ads.mjs';
+import { matchStories } from './story-match.mjs';
 
 // ---------- Instagram numbers -> Grafana ----------
 // You post Instagram by hand (from the bridge's notification), so Postiz's own stats don't know those posts.
@@ -389,6 +390,7 @@ export async function pollInstagramStats() {
         kept.posts.push({ ref, data: { ...m, insights: ins } });
       }
     } catch (e) { out.errors.push(`stories: ${e.message}`); }
+    matchStories(Object.values(stories), await loadState(), await loadCustom());
     await trackPosts(dataDir, 'instagram-stories', seen, historyKeys('instagram'))
       .catch((e) => out.errors.push(`stories history: ${e.message}`));
     out.stories = Object.values(stories).sort((a, b) => (b.time || 0) - (a.time || 0));
